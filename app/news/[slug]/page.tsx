@@ -65,16 +65,23 @@ export default async function NewsArticlePage({
 
   const summary = await summarizeArticle(slug, item.title, item.contentSnippet, item.source);
 
+  const isoDate = (() => { try { return new Date(item.pubDate).toISOString(); } catch { return item.pubDate; } })();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: item.title,
-    url: item.link,
-    datePublished: item.pubDate,
-    publisher: { "@type": "Organization", name: item.source },
+    url: `${SITE_URL}/news/${slug}`,
+    datePublished: isoDate,
+    author: { "@type": "Organization", name: item.source },
+    publisher: {
+      "@type": "Organization",
+      name: item.source,
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/icon.svg` },
+    },
     description: summary ?? item.contentSnippet,
     mainEntityOfPage: `${SITE_URL}/news/${slug}`,
-    ...(item.imageUrl ? { image: item.imageUrl } : {}),
+    image: item.imageUrl ?? `${SITE_URL}/opengraph-image`,
   };
 
   return (

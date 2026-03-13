@@ -22,21 +22,26 @@ export default async function JobsPage() {
       "@context": "https://schema.org",
       "@type": "ItemList",
       "name": "Jobs in Qatar",
-      "itemListElement": jobs.slice(0, 10).map((job, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "item": {
-          "@type": "JobPosting",
-          "title": job.title,
-          "url": job.link,
-          "hiringOrganization": { "@type": "Organization", "name": job.company || "Unknown" },
-          "jobLocation": {
-            "@type": "Place",
-            "address": { "@type": "PostalAddress", "addressLocality": job.location || "Qatar", "addressCountry": "QA" }
-          },
-          "datePosted": job.pubDate || new Date().toISOString().split("T")[0],
-        }
-      }))
+      "itemListElement": jobs.slice(0, 10).map((job, i) => {
+        const isoDate = (() => { try { return new Date(job.pubDate).toISOString().split("T")[0]; } catch { return new Date().toISOString().split("T")[0]; } })();
+        return {
+          "@type": "ListItem",
+          "position": i + 1,
+          "url": `https://qatar-portal.vercel.app/jobs/${job.slug}`,
+          "item": {
+            "@type": "JobPosting",
+            "title": job.title,
+            "url": `https://qatar-portal.vercel.app/jobs/${job.slug}`,
+            "description": `${job.title} — job opportunity in Qatar at ${job.company || "Qatar Employer"}.`,
+            "hiringOrganization": { "@type": "Organization", "name": job.company || "Qatar Employer" },
+            "jobLocation": {
+              "@type": "Place",
+              "address": { "@type": "PostalAddress", "addressLocality": "Doha", "addressCountry": "QA" }
+            },
+            "datePosted": isoDate,
+          }
+        };
+      })
     };
   } catch { /* ignore */ }
 

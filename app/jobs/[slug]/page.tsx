@@ -61,21 +61,24 @@ export default async function JobDetailPage({
     notFound();
   }
 
+  const isoDate = (() => { try { return new Date(job.pubDate).toISOString().split("T")[0]; } catch { return new Date().toISOString().split("T")[0]; } })();
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: job.title,
-    url: job.link,
-    hiringOrganization: { "@type": "Organization", name: job.company },
+    url: `${SITE_URL}/jobs/${slug}`,
+    description: `${job.title} — job opportunity in Qatar at ${job.company || "Qatar Employer"}.`,
+    hiringOrganization: { "@type": "Organization", name: job.company || "Qatar Employer" },
     jobLocation: {
       "@type": "Place",
       address: {
         "@type": "PostalAddress",
-        addressLocality: job.location,
+        addressLocality: "Doha",
         addressCountry: "QA",
       },
     },
-    datePosted: job.pubDate || new Date().toISOString().split("T")[0],
+    datePosted: isoDate,
     mainEntityOfPage: `${SITE_URL}/jobs/${slug}`,
   };
 

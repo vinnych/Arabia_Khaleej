@@ -20,17 +20,23 @@ export default async function NewsPage() {
       "@context": "https://schema.org",
       "@type": "ItemList",
       "name": "Qatar & Gulf News",
-      "itemListElement": news.slice(0, 10).map((item, i) => ({
-        "@type": "ListItem",
-        "position": i + 1,
-        "item": {
-          "@type": "NewsArticle",
-          "headline": item.title,
-          "url": item.link,
-          "datePublished": item.pubDate,
-          "publisher": { "@type": "Organization", "name": item.source },
-        }
-      }))
+      "itemListElement": news.slice(0, 10).map((item, i) => {
+        const isoDate = (() => { try { return new Date(item.pubDate).toISOString(); } catch { return item.pubDate; } })();
+        return {
+          "@type": "ListItem",
+          "position": i + 1,
+          "url": `https://qatar-portal.vercel.app/news/${item.slug}`,
+          "item": {
+            "@type": "NewsArticle",
+            "headline": item.title,
+            "url": `https://qatar-portal.vercel.app/news/${item.slug}`,
+            "datePublished": isoDate,
+            "author": { "@type": "Organization", "name": item.source },
+            "publisher": { "@type": "Organization", "name": item.source, "logo": { "@type": "ImageObject", "url": "https://qatar-portal.vercel.app/icon.svg" } },
+            "image": item.imageUrl ?? "https://qatar-portal.vercel.app/opengraph-image",
+          }
+        };
+      })
     };
   } catch { /* ignore */ }
 
