@@ -61,8 +61,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
         <SpeedInsights />
         <FooterScenery />
-        <footer className="bg-amber-50 border-t border-amber-200 py-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Qatar Portal. All rights reserved.
+        <footer className="bg-amber-50 border-t border-amber-200 py-8 text-sm text-gray-500">
+          <div className="max-w-6xl mx-auto px-4 space-y-4">
+            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
+              <a href="/" className="hover:text-rose-800 transition-colors">Home</a>
+              <a href="/prayer" className="hover:text-rose-800 transition-colors">Prayer Times</a>
+              <a href="/weather" className="hover:text-rose-800 transition-colors">Doha Weather</a>
+              <a href="/currency" className="hover:text-rose-800 transition-colors">QAR Rates</a>
+              <a href="/news" className="hover:text-rose-800 transition-colors">News</a>
+              <a href="/jobs" className="hover:text-rose-800 transition-colors">Jobs in Qatar</a>
+              <a href="/about" className="hover:text-rose-800 transition-colors">About</a>
+              <a href="/privacy" className="hover:text-rose-800 transition-colors">Privacy Policy</a>
+            </div>
+            <p className="text-center text-xs text-gray-400">
+              Data sources: Aladhan API · Open-Meteo · Al Jazeera · BBC · Google News · ExchangeRate-API
+            </p>
+            <p className="text-center">© {new Date().getFullYear()} Qatar Portal. All rights reserved.</p>
+          </div>
         </footer>
       </body>
     </html>
