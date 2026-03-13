@@ -15,6 +15,7 @@ Qatar Portal — a Next.js 14 website aggregating prayer times, news, and job li
 - **Prayer times:** Aladhan API (free, no auth)
 - **News:** RSS feeds (Al Jazeera, Google News Qatar, BBC Middle East) parsed with regex in `lib/rss.ts`
 - **Jobs:** Google News RSS (qatar jobs/careers queries) parsed in `lib/jobs.ts`
+- **AI Summaries:** Groq API (llama-3.1-8b-instant) via `lib/groq.ts` — summaries cached in Redis
 - **Database:** None — all data fetched live with Next.js `fetch` caching
 
 ## Project Structure
@@ -47,8 +48,10 @@ components/
 └── FooterScenery.tsx         # Pure SVG date palm scene — renders above footer on all pages
 lib/
 ├── prayer.ts                 # Aladhan API helper (revalidates 3600s)
-├── rss.ts                    # RSS parser — regex, URL validation, 5s timeout, 5MB cap
-└── jobs.ts                   # Jobs RSS fetcher — same safety measures
+├── rss.ts                    # RSS parser — regex, OG image scraping, URL validation, 5s timeout, 5MB cap
+├── jobs.ts                   # Jobs RSS fetcher — same safety measures
+├── groq.ts                   # Groq AI summarizer (llama-3.1-8b-instant), Redis-cached 7 days
+└── redis.ts                  # Upstash Redis client — graceful null if env vars missing
 public/                       # Static assets (currently empty)
 next.config.ts                # Security headers (CSP, X-Frame-Options, etc.)
 ```
@@ -97,7 +100,7 @@ npm run lint      # ESLint
 
 ## Deployment
 - Push to GitHub, connect repo to Vercel — auto-deploys on every push
-- Env vars required: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (set in Vercel dashboard)
+- Env vars required: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `GROQ_API_KEY` (set in Vercel dashboard)
 
 ## External Services & Websites Used
 
@@ -116,6 +119,7 @@ npm run lint      # ESLint
 | Google News RSS | https://news.google.com/rss/search?q=qatar | Qatar news aggregator (✅ working) |
 | BBC Middle East RSS | https://feeds.bbci.co.uk/news/world/middle_east/rss.xml | Middle East news (✅ working) |
 | Google News Jobs RSS | https://news.google.com/rss/search?q=qatar+jobs+hiring | Qatar job news (✅ working) |
+| Groq API | https://console.groq.com | AI news summaries — llama-3.1-8b-instant (free, 14,400 req/day) |
 
 ### Dev Tools & Frameworks
 | Tool | URL | Purpose |

@@ -1,7 +1,7 @@
 import { getNews, type NewsItem } from "@/lib/rss";
 import { safeJsonLd, isValidHttpUrl } from "@/lib/utils";
 import { redis } from "@/lib/redis";
-import { summarizeArticle } from "@/lib/gemini";
+import { summarizeArticle } from "@/lib/groq";
 import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
