@@ -4,7 +4,6 @@ import NewsFeed from "@/components/NewsFeed";
 import JobList from "@/components/JobList";
 import WeatherWidget from "@/components/WeatherWidget";
 import CurrencyWidget from "@/components/CurrencyWidget";
-import { getPrayerTimes } from "@/lib/prayer";
 import { safeJsonLd } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -14,24 +13,20 @@ export const metadata: Metadata = {
   alternates: { canonical: "https://qatar-portal.vercel.app" },
 };
 
-export default async function Home() {
-  let prayerJsonLd = null;
-  try {
-    const times = await getPrayerTimes();
-    prayerJsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Event",
-      "name": `Doha Prayer Times — ${times.date}`,
-      "location": { "@type": "Place", "name": "Doha, Qatar", "address": "Doha, Qatar" },
-      "description": `Fajr: ${times.Fajr}, Dhuhr: ${times.Dhuhr}, Asr: ${times.Asr}, Maghrib: ${times.Maghrib}, Isha: ${times.Isha}`,
-    };
-  } catch { /* ignore */ }
+const homeJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Doha Prayer Times Today — Qatar News & Jobs | Qatar Portal",
+  "url": "https://qatar-portal.vercel.app",
+  "description": "Accurate Doha prayer times for today. Plus latest Qatar news and job listings.",
+  "inLanguage": "en",
+  "isPartOf": { "@type": "WebSite", "name": "Qatar Portal", "url": "https://qatar-portal.vercel.app" },
+};
 
+export default async function Home() {
   return (
     <div className="space-y-6 sm:space-y-10">
-      {prayerJsonLd && (
-        <script type="application/ld+json" dangerouslySetInnerHTML={{__html: safeJsonLd(prayerJsonLd)}} />
-      )}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: safeJsonLd(homeJsonLd)}} />
       {/* Prayer Times */}
       <section>
         <Suspense fallback={<div className="bg-white rounded-2xl p-6 animate-pulse h-32" />}>
