@@ -6,6 +6,15 @@ const CACHE_KEY = (slug: string) => `news:summary:${slug}`;
 const CACHE_TTL = 60 * 60 * 24 * 7; // 7 days
 const TIMEOUT_MS = 8000;
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error("Gemini request timed out")), ms)
+    ),
+  ]);
+}
+
 export async function summarizeArticle(
   slug: string,
   title: string,
@@ -28,7 +37,7 @@ export async function summarizeArticle(
   // 3. Require enough context to produce a meaningful summary
   if (!snippet || snippet.trim().length < 30) return null;
 
-  // 4. Generate with Gemini (with timeout)
+  // 4. Generate with Gemini
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -41,20 +50,8 @@ Snippet: ${snippet}
 
 Summary:`;
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    let summary: string;
-    try {
-      const result = await model.generateContent(
-        { contents: [{ role: "user", parts: [{ text: prompt }] }] },
-        { signal: controller.signal } as Parameters<typeof model.generateContent>[1]
-      );
-      summary = result.response.text().trim();
-    } finally {
-      clearTimeout(timer);
-    }
-
+    const result = await withTimeout(model.generateContent(prompt), TIMEOUT_MS);
+    const summary = result.response.text().trim();
     if (!summary) return null;
 
     // 5. Cache result in Redis
@@ -68,13 +65,10 @@ Summary:`;
 
     return summary;
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") {
-      console.warn("[gemini] Request timed out for slug:", slug);
-    } else if (err instanceof GoogleGenerativeAIError) {
-      // Log API-level errors (quota exceeded, invalid key, blocked content, etc.)
+    if (err instanceof GoogleGenerativeAIError) {
       console.error("[gemini] API error:", err.message);
     } else {
-      console.error("[gemini] Unexpected error:", err instanceof Error ? err.message : err);
+      console.error("[gemini] Error:", err instanceof Error ? err.message : err);
     }
     return null;
   }
