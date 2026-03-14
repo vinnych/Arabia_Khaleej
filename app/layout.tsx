@@ -4,6 +4,7 @@ import Script from "next/script";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import FooterScenery from "@/components/FooterScenery";
 import MobileNav from "@/components/MobileNav";
+import DonateDialog from "@/components/DonateDialog";
 import { safeJsonLd } from "@/lib/utils";
 import "./globals.css";
 
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
         <SpeedInsights />
+        <DonateDialog />
         <FooterScenery />
         <footer className="bg-amber-50 border-t border-amber-200 py-8 text-sm text-gray-500">
           <div className="max-w-6xl mx-auto px-4 space-y-4">
