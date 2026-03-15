@@ -120,7 +120,7 @@ export default async function WeatherPage() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-4">7-Day Forecast — Doha, Qatar</h2>
             <div className="rounded-2xl border border-stone-200 overflow-x-auto">
-              <table className="w-full text-sm min-w-[340px]">
+              <table className="w-full text-sm min-w-[280px]">
                 <thead>
                   <tr className="bg-amber-700 text-white">
                     <th className="px-4 py-3 text-left font-semibold">Day</th>

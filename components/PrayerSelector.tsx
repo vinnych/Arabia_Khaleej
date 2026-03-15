@@ -149,7 +149,7 @@ export default function PrayerSelector({
         </h2>
         {calendar.length > 0 ? (
           <div className={`overflow-x-auto rounded-2xl border border-stone-200 shadow-sm transition-opacity ${loading ? "opacity-40" : "opacity-100"}`}>
-            <table className="w-full text-sm min-w-[480px]">
+            <table className="w-full text-sm min-w-[320px]">
               <thead>
                 <tr className="bg-violet-900 text-white">
                   <th className="px-3 py-3 text-left font-semibold">Date</th>

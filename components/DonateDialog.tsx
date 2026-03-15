@@ -25,7 +25,7 @@ export default function DonateDialog() {
   }
 
   return (
-    <div className="fixed bottom-6 right-4 z-40 w-64 bg-white rounded-2xl shadow-2xl border border-amber-100 p-4 space-y-3">
+    <div className="fixed bottom-6 right-4 z-40 w-[min(256px,calc(100vw-2rem))] bg-white rounded-2xl shadow-2xl border border-amber-100 p-4 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function DonateDialog() {
           <button
             key={amt}
             onClick={() => { setSelected(amt); setCustom(""); }}
-            className={`py-1.5 rounded-lg text-xs font-bold border-2 transition-colors ${
+            className={`py-2 rounded-lg text-xs font-bold border-2 transition-colors ${
               !custom && selected === amt
                 ? "bg-amber-400 border-amber-400 text-rose-900"
                 : "bg-white border-gray-200 text-gray-700 hover:border-amber-300"
@@ -72,7 +72,7 @@ export default function DonateDialog() {
           placeholder="Custom amount"
           value={custom}
           onChange={(e) => { setCustom(e.target.value); setSelected(0); }}
-          className="w-full pl-6 pr-3 py-1.5 border-2 border-gray-200 rounded-lg text-xs focus:outline-none focus:border-amber-400 text-center"
+          className="w-full pl-6 pr-3 py-2 border-2 border-gray-200 rounded-lg text-xs focus:outline-none focus:border-amber-400 text-center"
         />
       </div>
 

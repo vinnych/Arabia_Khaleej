@@ -135,7 +135,7 @@ export default async function NewsArticlePage({
         href={item.link}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block bg-sky-700 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-sky-800 transition-colors"
+        className="inline-block bg-sky-700 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-sky-800 transition-colors"
       >
         Read Full Article on {item.source} →
       </a>

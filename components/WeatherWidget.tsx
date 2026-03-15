@@ -33,7 +33,7 @@ export default async function WeatherWidget() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-1 sm:gap-2">
         <span className="flex flex-col items-center bg-white/70 border border-amber-100 rounded-xl px-2 py-2 text-xs text-gray-600 text-center">
           <span className="text-base mb-0.5">🌡️</span>
           <span className="font-semibold text-gray-800">{weather.feelsLike}°C</span>

@@ -152,12 +152,12 @@ export default function SkyScene({ prayers, date, currentHour }: {
 
       {/* Prayer cards */}
       <div className="bg-rose-900 p-4">
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-2">
           {prayers.map((p) => {
             const isCurrent = p.name === currentPrayer;
             return (
               <div key={p.name}
-                className={`flex flex-col items-center rounded-xl py-2 px-1.5 sm:py-3 sm:px-2 transition-all ${
+                className={`flex flex-col items-center rounded-xl py-2.5 px-2 sm:py-3 sm:px-2.5 transition-all ${
                   isCurrent
                     ? "bg-amber-400 shadow-lg scale-105 border-2 border-amber-200"
                     : "bg-rose-800 border border-rose-700"
