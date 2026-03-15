@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: "Privacy Policy | Qatar Portal",
   description: "Privacy Policy for Qatar Portal. Learn how we handle data, use analytics, and display advertising on qatar-portal.vercel.app.",
   alternates: { canonical: `${SITE_URL}/privacy` },
+  openGraph: {
+    title: "Privacy Policy | Qatar Portal",
+    description: "Privacy Policy for Qatar Portal — how we handle data, analytics, and advertising.",
+    url: `${SITE_URL}/privacy`,
+    siteName: "Qatar Portal",
+    type: "website",
+    images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630 }],
+  },
+  twitter: { card: "summary_large_image", title: "Privacy Policy | Qatar Portal", description: "Privacy Policy for Qatar Portal." },
 };
 
 const LAST_UPDATED = "March 2026";

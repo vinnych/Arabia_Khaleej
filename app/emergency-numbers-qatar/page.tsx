@@ -15,7 +15,9 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/emergency-numbers-qatar`,
     siteName: "Qatar Portal",
     type: "website",
+    images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630 }],
   },
+  twitter: { card: "summary_large_image", title: "Emergency Numbers Qatar & Embassies in Doha", description: "Qatar emergency contacts and embassy phone numbers for major nationalities in Doha." },
 };
 
 export default function EmergencyNumbersQatarPage() {

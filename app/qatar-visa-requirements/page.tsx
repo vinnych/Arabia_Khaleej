@@ -15,7 +15,9 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/qatar-visa-requirements`,
     siteName: "Qatar Portal",
     type: "website",
+    images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630 }],
   },
+  twitter: { card: "summary_large_image", title: "Qatar Visa Requirements 2025 — Complete Guide", description: "Everything you need to know about Qatar visas: tourist, work, family, fees, and how to apply." },
 };
 
 export default function QatarVisaRequirementsPage() {

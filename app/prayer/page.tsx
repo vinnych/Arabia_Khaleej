@@ -73,6 +73,7 @@ export default async function PrayerPage() {
           dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
         />
       )}
+      <h1 className="sr-only">Prayer Times for Muslim Countries — Doha, Mecca, Dubai &amp; More</h1>
       <PrayerSelector defaultTimes={today} defaultCalendar={calendar} />
     </div>
   );

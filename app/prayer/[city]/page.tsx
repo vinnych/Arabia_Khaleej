@@ -35,7 +35,9 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
       url: `${SITE_URL}/prayer/${slug}`,
       siteName: "Qatar Portal",
       type: "website",
+      images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630 }],
     },
+    twitter: { card: "summary_large_image" as const, title: `Prayer Times in ${entry.city} Today | Qatar Portal`, description: `Accurate Fajr, Dhuhr, Asr, Maghrib and Isha prayer times for ${entry.city}.` },
   };
 }
 

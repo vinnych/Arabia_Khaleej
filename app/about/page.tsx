@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "About Qatar Portal — Prayer Times, Weather, News & Jobs for Qatar",
   description:
     "Qatar Portal is a free daily resource for residents, expats, and visitors in Qatar. Accurate Doha prayer times, live weather, Gulf news, QAR exchange rates, and Qatar job listings.",
+  keywords: ["Qatar Portal", "about Qatar Portal", "Qatar expat resource", "Doha daily guide"],
   alternates: { canonical: `${SITE_URL}/about` },
   openGraph: {
     title: "About Qatar Portal",
@@ -14,13 +15,15 @@ export const metadata: Metadata = {
     url: `${SITE_URL}/about`,
     siteName: "Qatar Portal",
     type: "website",
+    images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630 }],
   },
+  twitter: { card: "summary_large_image", title: "About Qatar Portal", description: "Free daily resource for Qatar: prayer times, weather, news, currency rates, and jobs." },
 };
 
 export default function AboutPage() {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "AboutPage",
+    "@type": "WebPage",
     name: "About Qatar Portal",
     url: `${SITE_URL}/about`,
     description:

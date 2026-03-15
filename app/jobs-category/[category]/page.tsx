@@ -33,7 +33,9 @@ export async function generateMetadata({ params }: { params: Promise<{ category:
       url: `${SITE_URL}/jobs-category/${slug}`,
       siteName: "Qatar Portal",
       type: "website",
+      images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630 }],
     },
+    twitter: { card: "summary_large_image" as const, title: `${entry.label} Jobs in Qatar ${new Date().getFullYear()} | Qatar Portal`, description: `Latest ${entry.label.toLowerCase()} job vacancies in Qatar.` },
   };
 }
 

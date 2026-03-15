@@ -39,6 +39,7 @@ export default async function Home() {
   return (
     <div className="space-y-6 sm:space-y-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: safeJsonLd(homeJsonLd)}} />
+      <h1 className="sr-only">Qatar Portal — Doha Prayer Times, Qatar News &amp; Jobs</h1>
       {/* Prayer Times */}
       <section>
         <Suspense fallback={<div className="bg-white rounded-2xl p-6 animate-pulse h-32" />}>
