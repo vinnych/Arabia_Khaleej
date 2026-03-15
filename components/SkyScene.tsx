@@ -73,16 +73,49 @@ export default function SkyScene({ prayers, date, currentHour }: {
 
         {/* Sun (day) */}
         {sky.isSun && (
-          <div className="absolute" style={{left:`${sunX}%`, top:`${sky.horizonY - 20}%`, transform:"translateX(-50%)"}}>
-            {/* Rays */}
-            <div className="rays-spin absolute inset-0 w-16 h-16 -m-4">
-              {[0,30,60,90,120,150,180,210,240,270,300,330].map((deg)=>(
-                <div key={deg} className="absolute w-0.5 h-4 bg-yellow-200 opacity-60 origin-bottom"
-                  style={{left:"50%",top:"0%",transform:`rotate(${deg}deg) translateX(-50%)`}} />
+          <div className="absolute" style={{left:`${sunX}%`, top:`${sky.horizonY - 20}%`, transform:"translate(-50%, -50%)"}}>
+            {/* Soft outer glow */}
+            <div className="absolute rounded-full opacity-25 blur-xl pointer-events-none"
+              style={{width:80, height:80, top:"50%", left:"50%", transform:"translate(-50%,-50%)",
+                background: sky.sunColor.includes("orange") ? "#fb923c" : "#fde68a"}} />
+            {/* Rays — pivot at sun center (0×0 anchor), rays radiate outward */}
+            <div className="rays-spin absolute" style={{width:0, height:0, top:"50%", left:"50%"}}>
+              {[
+                {deg:0,   len:13, w:2,   op:0.55},
+                {deg:25,  len:7,  w:1.5, op:0.28},
+                {deg:45,  len:14, w:2,   op:0.50},
+                {deg:70,  len:7,  w:1.5, op:0.28},
+                {deg:90,  len:13, w:2,   op:0.55},
+                {deg:115, len:7,  w:1.5, op:0.28},
+                {deg:135, len:14, w:2,   op:0.50},
+                {deg:160, len:7,  w:1.5, op:0.28},
+                {deg:180, len:13, w:2,   op:0.55},
+                {deg:205, len:7,  w:1.5, op:0.28},
+                {deg:225, len:14, w:2,   op:0.50},
+                {deg:250, len:7,  w:1.5, op:0.28},
+                {deg:270, len:13, w:2,   op:0.55},
+                {deg:295, len:7,  w:1.5, op:0.28},
+                {deg:315, len:14, w:2,   op:0.50},
+                {deg:340, len:7,  w:1.5, op:0.28},
+              ].map(({deg, len, w, op}) => (
+                <div key={deg}
+                  className="absolute rounded-full bg-yellow-100"
+                  style={{
+                    width: w,
+                    height: len,
+                    /* top of ray starts at gap (5px) beyond sun radius (16px) */
+                    top: -(16 + 5 + len),
+                    left: -w / 2,
+                    opacity: op,
+                    transformOrigin: `${w / 2}px ${16 + 5 + len}px`,
+                    transform: `rotate(${deg}deg)`,
+                  }}
+                />
               ))}
             </div>
             {/* Core */}
-            <div className={`sun-glow w-8 h-8 rounded-full ${sky.sunColor} border-2 border-yellow-100`} />
+            <div className={`sun-glow relative w-8 h-8 rounded-full ${sky.sunColor}`}
+              style={{boxShadow:"0 0 10px 3px rgba(253,230,138,0.45)"}} />
           </div>
         )}
 
