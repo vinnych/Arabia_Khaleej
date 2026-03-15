@@ -1,4 +1,4 @@
-import { isValidHttpUrl } from "./utils";
+import { isValidHttpUrl, toSlug } from "./utils";
 import { redis, KV_TTL } from "./redis";
 
 export interface Job {
@@ -64,7 +64,7 @@ export async function getJobs(limit = 12): Promise<Job[]> {
               company: company.trim(),
               location,
               link: cleanLink,
-              slug: Buffer.from(cleanLink).toString("base64url"),
+              slug: toSlug(cleanTitle.trim(), cleanLink),
               pubDate: pubDate.trim(),
               source,
             });

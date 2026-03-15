@@ -1,4 +1,4 @@
-import { isValidHttpUrl } from "./utils";
+import { isValidHttpUrl, toSlug } from "./utils";
 import { redis, KV_TTL } from "./redis";
 
 export interface NewsItem {
@@ -101,7 +101,7 @@ export async function getNews(limit = 12): Promise<NewsItem[]> {
             feedItems.push({
               title: title.trim(),
               link: cleanLink,
-              slug: Buffer.from(cleanLink).toString("base64url"),
+              slug: toSlug(title.trim(), cleanLink),
               pubDate: pubDate.trim(),
               contentSnippet: snippet.replace(/<[^>]+>/g, "").slice(0, 150),
               source,
