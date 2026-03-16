@@ -1,20 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <!-- Background: Qatar maroon -->
+  <!-- Background: white/light strip on left -->
   <rect width="32" height="32" rx="6" fill="#7c1c2e"/>
-  <!-- Ground -->
-  <ellipse cx="16" cy="29" rx="12" ry="3" fill="#c9a84c" opacity="0.6"/>
-  <!-- Trunk -->
-  <path d="M16 28 Q17 22 15.5 14" stroke="#f5d78e" stroke-width="2.2" fill="none" stroke-linecap="round"/>
-  <!-- Left fronds -->
-  <path d="M15.5 14 Q10 10 6 12" stroke="#f5d78e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  <path d="M15.5 14 Q11 8 9 4" stroke="#f5d78e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  <!-- Center frond -->
-  <path d="M15.5 14 Q15 8 14.5 3" stroke="#f5d78e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  <!-- Right fronds -->
-  <path d="M15.5 14 Q19 8 22 4" stroke="#f5d78e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  <path d="M15.5 14 Q20 10 25 12" stroke="#f5d78e" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  <!-- Dates cluster -->
-  <circle cx="15.5" cy="15.5" r="1.5" fill="#c9a84c"/>
-  <circle cx="13.5" cy="17" r="1.2" fill="#b8923a"/>
-  <circle cx="17.5" cy="16.5" r="1.2" fill="#c9a84c"/>
+  <!-- White serrated band on left (Qatar flag style) -->
+  <path d="M0 0 L8 0 L11 3.2 L8 6.4 L11 9.6 L8 12.8 L11 16 L8 19.2 L11 22.4 L8 25.6 L11 28.8 L8 32 L0 32 Z" fill="#f0f0f0" rx="6"/>
+  <!-- Round left corners of white band to match rect rx -->
+  <path d="M0 6 Q0 0 6 0 L8 0 L11 3.2 L8 6.4 L11 9.6 L8 12.8 L11 16 L8 19.2 L11 22.4 L8 25.6 L11 28.8 L8 32 L6 32 Q0 32 0 26 Z" fill="#f0f0f0"/>
 </svg>
