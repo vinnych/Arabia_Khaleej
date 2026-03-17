@@ -21,6 +21,8 @@ export default function AdUnit({ slot, format = "auto", className = "" }: Props)
     } catch { /* AdSense not loaded yet */ }
   }, []);
 
+  if (!slot || slot === "REPLACE_WITH_SLOT_ID") return null;
+
   return (
     <div className={`overflow-hidden ${className}`}>
       <ins
