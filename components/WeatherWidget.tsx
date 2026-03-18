@@ -12,7 +12,7 @@ export default async function WeatherWidget() {
   }
 
   return (
-    <div className="bg-white border border-stone-200 rounded-xl p-4 flex items-center gap-4">
+    <div className="bg-white border border-stone-100 shadow-sm rounded-xl p-4 flex items-center gap-4">
       <span className="text-4xl shrink-0 leading-none">{weather.icon}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2.5">

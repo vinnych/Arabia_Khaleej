@@ -94,7 +94,7 @@ export default function AboutPage() {
               desc: "Hijri (Islamic) date shown alongside Gregorian dates on the prayer times page.",
             },
           ].map((item) => (
-            <div key={item.title} className="bg-stone-50 border border-stone-200 rounded-lg p-3">
+            <div key={item.title} className="bg-stone-50 border border-stone-200 rounded-xl p-4">
               <p className="text-xl mb-1">{item.icon}</p>
               <h3 className="text-xs font-semibold text-gray-900 mb-0.5">{item.title}</h3>
               <p className="text-xs text-gray-600">{item.desc}</p>

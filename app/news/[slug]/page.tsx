@@ -120,7 +120,7 @@ export default async function NewsArticlePage({
         <img
           src={item.imageUrl}
           alt={item.title}
-          className="w-full rounded-lg object-cover max-h-48 mb-5"
+          className="w-full rounded-xl object-cover max-h-56 mb-5"
         />
       ) : (
         <div className="w-full rounded-lg h-40 bg-gradient-to-br from-sky-100 to-sky-200 flex items-center justify-center mb-5">
@@ -151,7 +151,7 @@ export default async function NewsArticlePage({
           href={item.link}
           target="_blank"
           rel="noopener noreferrer nofollow"
-          className="block w-full sm:w-auto text-center bg-sky-700 text-white px-4 py-2 sm:px-6 rounded-md text-sm font-medium hover:bg-sky-800 transition-colors"
+          className="bg-rose-800 text-white rounded-xl px-5 py-2.5 text-sm font-semibold hover:bg-rose-700 transition-colors w-full sm:w-auto text-center"
         >
           Read Full Article on {item.source} →
         </a>
@@ -171,7 +171,7 @@ export default async function NewsArticlePage({
         if (related.length === 0) return null;
         return (
           <div className="mt-6 pt-6 border-t border-stone-200">
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">Related News</h2>
+            <h2 className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Related News</h2>
             <div className="grid gap-3 sm:grid-cols-3">
               {related.map((r) => (
                 <a key={r.slug} href={`/news/${r.slug}`}

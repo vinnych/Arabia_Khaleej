@@ -144,7 +144,7 @@ export default async function JobDetailPage({
             { href: "/qatar-visa-requirements", icon: "🛂", title: "Qatar Visa Guide", desc: "Work visa and residency requirements" },
           ].map(({ href, icon, title, desc }) => (
             <a key={href} href={href}
-              className="bg-white border border-stone-200 rounded-lg p-3 hover:shadow-md hover:border-emerald-300 transition-all">
+              className="bg-white border border-stone-100 shadow-sm rounded-lg p-3 hover:shadow-md hover:border-emerald-300 transition-all">
               <span className="text-lg">{icon}</span>
               <p className="text-xs font-semibold text-gray-800 mt-1.5">{title}</p>
               <p className="text-[10px] text-gray-500 mt-0.5">{desc}</p>

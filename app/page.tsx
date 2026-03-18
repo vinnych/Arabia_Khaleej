@@ -49,28 +49,29 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default async function Home() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-8">
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: safeJsonLd(homeJsonLd)}} />
 
       {/* Title row */}
-      <div className="flex items-center justify-between border-b border-stone-200 pb-2.5">
-        <h1 className="text-[11px] font-bold text-gray-400 tracking-widest uppercase">Prayer · News · Jobs · Doha</h1>
+      <div className="flex items-center justify-between pb-4 border-b border-stone-200">
+        <h1 className="text-sm font-semibold text-gray-500 tracking-wide">Qatar Portal — Doha</h1>
         <DohaTime />
       </div>
 
       {/* Prayer Times */}
       <section>
-        <Suspense fallback={<div className="bg-rose-900/10 rounded-xl h-28 animate-pulse" />}>
+        <SectionLabel>Prayer Times · Doha</SectionLabel>
+        <Suspense fallback={<div className="bg-rose-900/10 rounded-2xl h-40 animate-pulse" />}>
           <PrayerTimes />
         </Suspense>
       </section>
 
       {/* Weather + Currency */}
-      <div className="grid md:grid-cols-2 gap-2.5">
+      <div className="grid md:grid-cols-2 gap-4">
         <section>
           <a href="/weather" className="block hover:opacity-90 transition-opacity">
             <SectionLabel>Weather · Doha</SectionLabel>
-            <Suspense fallback={<div className="bg-stone-100 rounded-xl h-24 animate-pulse" />}>
+            <Suspense fallback={<div className="bg-stone-100 rounded-2xl h-24 animate-pulse" />}>
               <WeatherWidget />
             </Suspense>
           </a>
@@ -78,34 +79,34 @@ export default async function Home() {
         <section>
           <a href="/currency" className="block hover:opacity-90 transition-opacity">
             <SectionLabel>QAR Exchange Rates</SectionLabel>
-            <Suspense fallback={<div className="bg-stone-100 rounded-xl h-24 animate-pulse" />}>
+            <Suspense fallback={<div className="bg-stone-100 rounded-2xl h-24 animate-pulse" />}>
               <CurrencyWidget />
             </Suspense>
           </a>
         </section>
       </div>
 
-      <AdUnit slot="REPLACE_WITH_SLOT_ID" className="my-0.5" />
+      <AdUnit slot="REPLACE_WITH_SLOT_ID" />
 
       {/* News + Jobs */}
-      <div className="grid lg:grid-cols-3 gap-2.5 lg:gap-4">
+      <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
         <section className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center justify-between mb-4">
             <SectionLabel>Latest News</SectionLabel>
-            <a href="/news" className="text-xs text-gray-400 hover:text-rose-800 transition-colors">View all →</a>
+            <a href="/news" className="text-xs font-medium text-gray-400 hover:text-rose-800 transition-colors">View all →</a>
           </div>
-          <Suspense fallback={<div className="grid gap-2 sm:grid-cols-2"><div className="bg-stone-100 rounded-lg h-28 animate-pulse" /><div className="bg-stone-100 rounded-lg h-28 animate-pulse" /></div>}>
+          <Suspense fallback={<div className="grid gap-4 sm:grid-cols-2"><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /></div>}>
             <NewsFeed limit={12} />
           </Suspense>
         </section>
 
         <section>
-          <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center justify-between mb-4">
             <SectionLabel>Jobs in Qatar</SectionLabel>
-            <a href="/jobs" className="text-xs text-gray-400 hover:text-rose-800 transition-colors">View all →</a>
+            <a href="/jobs" className="text-xs font-medium text-gray-400 hover:text-rose-800 transition-colors">View all →</a>
           </div>
-          <Suspense fallback={<div className="space-y-1.5"><div className="bg-stone-100 rounded-lg h-12 animate-pulse" /><div className="bg-stone-100 rounded-lg h-12 animate-pulse" /></div>}>
-            <JobList limit={6} />
+          <Suspense fallback={<div className="space-y-2"><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /></div>}>
+            <JobList limit={8} />
           </Suspense>
         </section>
       </div>
@@ -121,11 +122,11 @@ export default async function Home() {
             { q: "Where can I find jobs in Qatar?", a: "Browse the latest job vacancies in Doha and Qatar in the Jobs section above, updated daily from top Gulf job boards." },
           ].map(({ q, a }) => (
             <details key={q} className="group">
-              <summary className="cursor-pointer list-none flex items-center justify-between text-xs font-medium text-gray-600 hover:text-rose-800 transition-colors py-3 min-h-[44px]">
+              <summary className="cursor-pointer list-none flex items-center justify-between text-sm font-medium text-gray-700 hover:text-rose-800 transition-colors py-3.5 min-h-[44px]">
                 <span>{q}</span>
-                <span className="text-gray-300 group-open:rotate-180 transition-transform text-[10px] ml-3 shrink-0">▼</span>
+                <span className="text-gray-300 group-open:rotate-180 transition-transform text-xs ml-3 shrink-0">▼</span>
               </summary>
-              <p className="text-xs text-gray-400 pb-3 leading-relaxed">{a}</p>
+              <p className="text-sm text-gray-500 pb-4 leading-relaxed">{a}</p>
             </details>
           ))}
         </div>

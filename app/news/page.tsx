@@ -56,7 +56,7 @@ export default async function NewsPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={{__html: safeJsonLd(jsonLd)}} />
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar News", item: "https://qatar-portal.vercel.app/news" }] }) }} />
-      <h1 className="text-xl font-bold text-gray-900 mb-3">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">
         Qatar &amp; Gulf News
       </h1>
       <NewsletterCTA />

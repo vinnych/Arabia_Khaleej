@@ -61,19 +61,19 @@ export default function CostOfLivingDohaPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-10">
+    <div className="max-w-2xl mx-auto space-y-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Cost of Living in Doha", item: `${SITE_URL}/cost-of-living-doha` }] }) }} />
 
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">Cost of Living in Doha, Qatar 2026</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Cost of Living in Doha, Qatar 2026</h1>
         <p className="text-gray-600 text-base leading-relaxed">
           A practical breakdown of monthly expenses for expats and new arrivals in Doha. All prices in Qatari Riyal (QAR). 1 USD ≈ 3.64 QAR.
         </p>
       </div>
 
       {/* Summary table */}
-      <section className="bg-amber-50 border border-amber-100 rounded-2xl p-6">
+      <section className="bg-amber-50 border border-amber-100 rounded-xl p-4">
         <h2 className="text-lg font-bold text-amber-900 mb-4">Monthly Cost Summary</h2>
         <div className="rounded-xl border border-amber-200 overflow-x-auto">
           <table className="w-full text-sm">
@@ -106,7 +106,7 @@ export default function CostOfLivingDohaPage() {
 
       {/* Housing */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🏠 Housing</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">🏠 Housing</h2>
         <div className="space-y-3 text-sm text-gray-700">
           {[
             { area: "The Pearl / West Bay", price: "QAR 7,000–15,000/mo", note: "Premium, near business district" },
@@ -127,7 +127,7 @@ export default function CostOfLivingDohaPage() {
 
       {/* Food */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🍽️ Food & Groceries</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">🍽️ Food & Groceries</h2>
         <div className="rounded-xl border border-stone-200 overflow-x-auto">
           <table className="w-full text-sm">
             <tbody>
@@ -152,7 +152,7 @@ export default function CostOfLivingDohaPage() {
 
       {/* Transport */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🚗 Transport</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">🚗 Transport</h2>
         <div className="space-y-2 text-sm text-gray-700">
           <p><strong>Fuel:</strong> QAR 1.85/litre (petrol is very cheap in Qatar)</p>
           <p><strong>Taxi (Karwa):</strong> QAR 4 flag fall + QAR 1.6/km</p>
@@ -164,7 +164,7 @@ export default function CostOfLivingDohaPage() {
 
       {/* Utilities */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">💡 Utilities</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">💡 Utilities</h2>
         <p className="text-sm text-gray-700 mb-2">
           Electricity and water are subsidised for residents. Average monthly bill for a 1-bedroom: <strong>QAR 150–400</strong>.
         </p>
@@ -175,7 +175,7 @@ export default function CostOfLivingDohaPage() {
 
       {/* FAQ */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Frequently Asked Questions</h2>
         <div className="space-y-3">
           {[
             { q: "Is there income tax in Qatar?", a: "No. Qatar has zero personal income tax, making it financially attractive for expats." },
@@ -191,7 +191,7 @@ export default function CostOfLivingDohaPage() {
       </section>
 
       {/* Internal links */}
-      <section className="bg-rose-50 border border-rose-100 rounded-2xl p-6 text-sm">
+      <section className="bg-rose-50 border border-rose-100 rounded-xl p-4 text-sm">
         <p className="font-semibold text-rose-900 mb-2">Useful resources</p>
         <div className="flex flex-wrap gap-3">
           <a href="/jobs" className="text-rose-700 hover:underline">→ Jobs in Qatar</a>

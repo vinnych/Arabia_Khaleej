@@ -60,7 +60,7 @@ export default async function JobsPage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={{__html: safeJsonLd(jsonLd)}} />
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Jobs in Qatar", item: "https://qatar-portal.vercel.app/jobs" }] }) }} />
-      <h1 className="text-xl font-bold text-gray-900 mb-3">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">
         Jobs in Qatar
       </h1>
       <JobSearch jobs={jobs} />

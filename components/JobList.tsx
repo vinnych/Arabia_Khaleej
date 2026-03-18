@@ -13,20 +13,20 @@ export default async function JobList({ limit = 6 }: { limit?: number }) {
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       {jobs.map((job) => (
         <a
           key={job.link}
           href={`/jobs/${job.slug}`}
-          className="bg-white rounded-xl border border-stone-200 hover:border-stone-300 hover:shadow-md transition-all duration-200 p-3 flex items-center justify-between gap-3 group"
+          className="bg-white rounded-xl border border-stone-100 shadow-sm hover:shadow-md transition-shadow duration-200 p-3.5 flex items-start justify-between gap-3 group"
         >
           <div className="flex-1 min-w-0">
-            <h3 className="text-xs font-semibold text-gray-800 leading-snug truncate group-hover:text-gray-900">{job.title}</h3>
-            <p className="text-[10px] text-gray-400 mt-0.5 truncate">
+            <h3 className="text-sm font-semibold text-gray-800 leading-snug line-clamp-2 group-hover:text-gray-900">{job.title}</h3>
+            <p className="text-xs text-gray-400 mt-1">
               {job.company}{job.location ? ` · ${job.location}` : ""}
             </p>
           </div>
-          <span className="shrink-0 text-[9px] font-bold text-emerald-700 uppercase tracking-wide">
+          <span className="shrink-0 text-[10px] font-bold text-emerald-700 uppercase tracking-wide mt-0.5">
             {job.source}
           </span>
         </a>

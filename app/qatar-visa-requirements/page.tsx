@@ -61,19 +61,19 @@ export default function QatarVisaRequirementsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-10">
+    <div className="max-w-2xl mx-auto space-y-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar Visa Requirements", item: "https://qatar-portal.vercel.app/qatar-visa-requirements" }] }) }} />
 
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">Qatar Visa Requirements 2026</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Qatar Visa Requirements 2026</h1>
         <p className="text-gray-600 text-base leading-relaxed">
           A complete guide to entering Qatar — whether you&apos;re visiting, working, or joining family.
         </p>
       </div>
 
       {/* Visa-free */}
-      <section className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
+      <section className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
         <h2 className="text-lg font-bold text-emerald-900 mb-3">✅ Visa-Free Entry</h2>
         <p className="text-sm text-gray-700 mb-3">
           Citizens of <strong>GCC countries</strong> (Saudi Arabia, UAE, Kuwait, Bahrain, Oman) can enter Qatar without any visa.
@@ -86,7 +86,7 @@ export default function QatarVisaRequirementsPage() {
 
       {/* Tourist Visa */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🏖️ Tourist Visa</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">🏖️ Tourist Visa</h2>
         <div className="space-y-3 text-sm text-gray-700">
           <div className="bg-sky-50 border border-sky-100 rounded-xl p-4">
             <p className="font-semibold text-gray-900 mb-1">Visa on Arrival</p>
@@ -105,7 +105,7 @@ export default function QatarVisaRequirementsPage() {
 
       {/* Work Visa */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">💼 Work Visa</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">💼 Work Visa</h2>
         <ol className="list-decimal list-inside space-y-2 text-sm text-gray-700">
           <li>Receive a job offer from a Qatar-based employer</li>
           <li>Employer applies for a work permit via Ministry of Labour portal</li>
@@ -118,7 +118,7 @@ export default function QatarVisaRequirementsPage() {
 
       {/* Family Visa */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">👨‍👩‍👧 Family Residence Visa</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">👨‍👩‍👧 Family Residence Visa</h2>
         <p className="text-sm text-gray-700 mb-3">
           Qatar residents earning <strong>QAR 10,000/month or more</strong> (or QAR 15,000 for a 3-bedroom apartment) can sponsor their spouse and children.
         </p>
@@ -149,7 +149,7 @@ export default function QatarVisaRequirementsPage() {
 
       {/* FAQ */}
       <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Frequently Asked Questions</h2>
         <div className="space-y-3">
           {[
             { q: "Can I extend my tourist visa?", a: "Yes. Tourist visas can be extended once for an additional 30 days via the MOI portal or at an immigration office. Fee: QAR 200." },
@@ -165,7 +165,7 @@ export default function QatarVisaRequirementsPage() {
       </section>
 
       {/* Internal links */}
-      <section className="bg-rose-50 border border-rose-100 rounded-2xl p-6 text-sm">
+      <section className="bg-rose-50 border border-rose-100 rounded-xl p-4 text-sm">
         <p className="font-semibold text-rose-900 mb-2">Planning to move to Qatar?</p>
         <div className="flex flex-wrap gap-3">
           <a href="/jobs" className="text-rose-700 hover:underline">→ Browse Qatar Jobs</a>

@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }
           })}}
         />
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">{children}</main>
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">{children}</main>
         <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7212871157824722"
           strategy="afterInteractive"

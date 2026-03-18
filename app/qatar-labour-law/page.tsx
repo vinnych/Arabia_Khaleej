@@ -146,11 +146,11 @@ export default function QatarLabourLawPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="max-w-3xl mx-auto space-y-6">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar Labour Law 2026", item: "https://qatar-portal.vercel.app/qatar-labour-law" }] }) }} />
 
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">Qatar Labour Law 2026</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Qatar Labour Law 2026</h1>
       <p className="text-gray-500 mb-2 text-sm">
         Key rights and rules under Qatar&apos;s Labour Law (Law No. 14 of 2004) as amended — for private sector employees and expatriate workers.
       </p>
@@ -161,7 +161,7 @@ export default function QatarLabourLawPage() {
       {/* Law sections */}
       <div className="space-y-5">
         {SECTIONS.map(({ icon, title, rows }) => (
-          <div key={title} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div key={title} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="bg-gray-50 border-b border-gray-100 px-5 py-3 flex items-center gap-2">
               <span className="text-xl">{icon}</span>
               <h2 className="font-bold text-gray-900">{title}</h2>
@@ -181,8 +181,8 @@ export default function QatarLabourLawPage() {
       </div>
 
       {/* FAQ */}
-      <div className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+      <div className="mt-8 bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">Frequently Asked Questions</h2>
         <div className="space-y-3">
           {[
             { q: "What is the minimum wage in Qatar?", a: "Qatar's minimum wage is QAR 1,000/month basic + QAR 300 food allowance + QAR 500 housing allowance = QAR 1,800/month total if those are not provided by the employer." },

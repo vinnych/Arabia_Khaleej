@@ -12,7 +12,7 @@ export default async function CurrencyWidget() {
   }
 
   return (
-    <div className="bg-white border border-stone-200 rounded-xl p-4">
+    <div className="bg-white border border-stone-100 shadow-sm rounded-xl p-4">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">1 QAR equals</span>
         <span className="text-sm">🇶🇦</span>

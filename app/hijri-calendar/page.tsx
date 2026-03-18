@@ -160,7 +160,7 @@ export default async function HijriCalendarPage({
 
       {/* Calendar grid */}
       {days.length > 0 ? (
-        <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           {/* Day headers */}
           <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-100">
             {DAYS.map((d) => (
