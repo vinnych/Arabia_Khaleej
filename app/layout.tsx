@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={newsreader.variable}>
       <head />
       <body className={`${inter.className} bg-[#faf9f6] text-on-surface min-h-screen`}>
-        <header className="bg-gradient-to-br from-[#640023] to-rose-900 sticky top-0 z-10">
+        <header className="bg-gradient-to-br from-[#640023]/85 to-rose-900/85 backdrop-blur-md sticky top-0 z-10">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-11 flex items-center justify-between">
             <a href="/" className={`${playfair.className} text-lg tracking-widest text-amber-300 uppercase leading-none`}>
               Qatar

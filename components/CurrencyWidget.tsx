@@ -1,4 +1,5 @@
 import { getQARRates } from "@/lib/currency";
+import { TrendingUp } from "lucide-react";
 
 export default async function CurrencyWidget() {
   const data = await getQARRates();
@@ -14,7 +15,7 @@ export default async function CurrencyWidget() {
   return (
     <div className="bg-white ring-1 ring-stone-900/5 shadow-ambient rounded-xl p-4">
       <div className="mb-3">
-        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Exchange Rates · QAR</span>
+        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1"><TrendingUp size={10} /> Exchange Rates · QAR</span>
       </div>
       <div className="grid grid-cols-2 gap-1">
         {data.rates.map((rate) => (

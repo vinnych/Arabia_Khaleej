@@ -1,4 +1,5 @@
 import { getDohaWeather } from "@/lib/weather";
+import { Thermometer, Wind, Droplets } from "lucide-react";
 
 export default async function WeatherWidget() {
   const weather = await getDohaWeather();
@@ -20,9 +21,9 @@ export default async function WeatherWidget() {
           <span className="text-xs text-gray-400 font-medium">{weather.condition}</span>
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2">
-          <span className="text-[10px] text-gray-400">Feels <span className="text-gray-600 font-medium">{weather.feelsLike}°C</span></span>
-          <span className="text-[10px] text-gray-400"><span className="text-gray-600 font-medium">{weather.humidity}%</span> humidity</span>
-          <span className="text-[10px] text-gray-400"><span className="text-gray-600 font-medium">{weather.windSpeed}</span> km/h</span>
+          <span className="text-[10px] text-gray-400 flex items-center gap-0.5"><Thermometer size={10} /><span className="text-gray-600 font-medium">{weather.feelsLike}°C</span> feels like</span>
+          <span className="text-[10px] text-gray-400 flex items-center gap-0.5"><Droplets size={10} /><span className="text-gray-600 font-medium">{weather.humidity}%</span></span>
+          <span className="text-[10px] text-gray-400 flex items-center gap-0.5"><Wind size={10} /><span className="text-gray-600 font-medium">{weather.windSpeed}</span> km/h</span>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENT.md
 
 ## Project
 Qatar Portal — Next.js 16 App Router site for Qatar/Gulf audiences: prayer times, news, jobs, weather, currency, Hijri calendar.
@@ -28,6 +28,7 @@ npm run dev && npm run build && npm run lint
 | `lib/rateLimit.ts` | Per-IP rate limit 30 req/min via Redis INCR |
 | `lib/utils.ts` | `toSlug()`, `safeJsonLd()`, `isValidHttpUrl()` |
 | `components/PrayerSelector.tsx` | `"use client"` — city dropdown + geolocation detect, fetches `/api/prayer` |
+| `components/HeaderPrayer.tsx` | `"use client"` — next prayer name + time shown in header nav |
 | `components/SkyScene.tsx` | `"use client"` — animated sky (sun/moon/stars/clouds) |
 | `components/NewsFeed.tsx` | Server component — `rounded-xl` white cards, `h-28` images, scale hover, `text-[13px]` title |
 | `components/JobList.tsx` | Server component — `rounded-xl` white cards, `p-3`, plain-text source |
@@ -41,15 +42,26 @@ npm run dev && npm run build && npm run lint
 - Old base64 slugs still work via fallback decode (backward compat)
 - React `cache()` deduplicates fetch between `generateMetadata` and page
 
-## Design System
-- **Body font:** Inter (next/font/google) · Playfair Display for "QATAR" wordmark only
+## Design System — The Modern Diplomat
+- **Body font:** Inter (next/font/google) · Playfair Display for "QATAR" wordmark · Newsreader italic 700 for all page H1s
 - **Font smoothing:** antialiased + optimizeLegibility in globals.css
-- **Colors:** `rose-900` header/brand · `amber-300` gold accent · `stone-50` bg · neutral grays for text
-- **Cards:** `bg-white border border-stone-200 rounded-xl` — hover: `border-stone-300 shadow-md` · duration-200 transition
-- **Section labels:** `<div className="flex items-center gap-3 mb-2">` with thin `h-px bg-stone-200` separator line
+- **Colors (custom tokens):**
+  - `primary` `#640023` — CTAs, hover links, active states
+  - `surface-low` `#f4f3f1` — section backgrounds, inputs
+  - `on-surface` `#1a1c1a` — body text
+  - `secondary-accent` `#fcd34d` — amber gold highlights
+  - `utility-chip` `#acf2c7` — mint green expat source badges
+- **Surface hierarchy (no-border system):** page bg `#faf9f6` → section bg `surface-low` → cards `bg-white`
+- **Cards:** `bg-white rounded-xl ring-1 ring-stone-900/5 shadow-ambient` — hover: `shadow-ambient-hover transition-shadow duration-200`
+- **Shadows:** `.shadow-ambient` = `0 20px 40px rgba(87,65,68,0.06)` · `.shadow-ambient-hover` = `0 24px 48px rgba(87,65,68,0.10)`
+- **Header:** `h-11` fixed · gradient `from-[#640023] to-rose-900` at 135° · nav `text-[11px] font-semibold gap-5`
+- **Footer:** `bg-surface-low text-[11px]` · `grid grid-cols-2 sm:flex` on mobile
+- **Primary CTAs:** `bg-primary text-white hover:scale-[1.02] transition-transform`
+- **Inputs:** `bg-surface-low border-0 focus:ring-2 focus:ring-primary/30`
+- **Job source badges:** `bg-utility-chip text-[#1a5c38] rounded-full` (Expat Utility Chip)
+- **Prayer cards (SkyScene):** glassmorphism — `bg-white/20 backdrop-blur-sm border border-white/30`
+- **Section labels:** `<div className="flex items-center gap-3 mb-2">` with thin `h-px bg-stone-200` separator
 - **Typography scale:** body `text-xs`/`text-[11px]` · titles `text-[13px] font-semibold` · labels `text-[10px] font-bold uppercase tracking-widest`
-- **Header:** `h-11` fixed height · `bg-rose-900` solid · nav `text-[11px] font-semibold gap-5` · hover `text-white` from `text-white/70`
-- **Footer:** `text-[11px]` · `grid grid-cols-2 sm:flex` on mobile · neutral `hover:text-gray-600`
 - **DohaTime:** inline monospace `text-[11px] font-mono text-gray-400 tabular-nums` — no card wrapper
 - **Interactions:** all transitions `duration-150`–`duration-200` · news images scale on hover · FAQ chevron rotates
 - **Touch targets:** FAQ `<summary>` min-h-[44px] · job cards min-h via p-3
@@ -76,6 +88,8 @@ After every significant UI change, audit for:
 | `news:{slug}`, `job:{slug}` | 7 days (nx:true) |
 | `news:summary:{slug}` | 7 days |
 | `news:ogimage:{slug}` | 7 days |
+| `prayer:today:{city}:{country}` | 1h |
+| `prayer:monthly:{city}:{country}:{year}:{month}` | 24h |
 | `ratelimit:{ip}:{minute}` | 90s |
 
 ## Env Vars
@@ -99,3 +113,5 @@ After every significant UI change, audit for:
 - Next.js 16: `params` is a Promise — must `await params` before accessing `slug`
 - All RSS parsing uses regex — no rss-parser library
 - Gemini geo-restricted in Qatar — use Groq
+- Prayer page failed on Vercel (not locally) — fixed by Redis cache in `lib/prayer.ts`
+- Geolocation "no permission box": browser may have cached a previous deny — reset via Site Settings → Location → Ask

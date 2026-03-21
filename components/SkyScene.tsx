@@ -1,5 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Sunrise, Sun, CloudSun, Sunset, Moon, Clock } from "lucide-react";
+
 interface Prayer { name: string; time: string; icon: string; }
 
 function getSkyConfig(hour: number) {
@@ -17,9 +21,21 @@ function getSkyConfig(hour: number) {
 }
 
 function getSunX(hour: number): number {
-  // Map 6am–18:30 to 5%–95% across sky
   const pct = Math.max(0, Math.min(1, (hour - 6) / 12.5));
   return 5 + pct * 90;
+}
+
+function getPrayerIcon(name: string) {
+  const props = { size: 14, strokeWidth: 1.5 };
+  switch (name) {
+    case "Fajr":    return <Sunrise {...props} />;
+    case "Sunrise": return <Sun {...props} />;
+    case "Dhuhr":   return <Sun {...props} />;
+    case "Asr":     return <CloudSun {...props} />;
+    case "Maghrib": return <Sunset {...props} />;
+    case "Isha":    return <Moon {...props} />;
+    default:        return <Sun {...props} />;
+  }
 }
 
 export default function SkyScene({ prayers, date, currentHour }: {
@@ -31,13 +47,12 @@ export default function SkyScene({ prayers, date, currentHour }: {
   const sunX = getSunX(currentHour);
   const isNight = !sky.isSun;
 
-  // Find current prayer — Aladhan returns 24-hour format (e.g. "05:14")
   const toMin = (t: string) => {
-    const clean = t.replace(/\s*\([^)]*\)/, "").trim(); // strip timezone suffix e.g. " (AST)"
+    const clean = t.replace(/\s*\([^)]*\)/, "").trim();
     const [h, m] = clean.split(":").map(Number);
     return h * 60 + (m || 0);
   };
-  // Use Doha local time (UTC+3) to match prayer times
+
   const dohaOffset = 3 * 60;
   const nowMin = (new Date().getUTCHours() * 60 + new Date().getUTCMinutes() + dohaOffset) % (24 * 60);
   let currentPrayer = prayers[prayers.length - 1].name;
@@ -48,8 +63,47 @@ export default function SkyScene({ prayers, date, currentHour }: {
     }
   }
 
+  const [countdown, setCountdown] = useState("");
+  const [nextPrayerName, setNextPrayerName] = useState("");
+
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      const dohaMin = (now.getUTCHours() * 60 + now.getUTCMinutes() + 3 * 60) % (24 * 60);
+      const dohaSec = now.getUTCSeconds();
+
+      let nextIdx = prayers.findIndex((p) => toMin(p.time) > dohaMin);
+      if (nextIdx === -1) nextIdx = 0;
+
+      const nextPrayer = prayers[nextIdx];
+      const nextPrayerMin = toMin(nextPrayer.time);
+
+      let totalSec: number;
+      if (nextPrayerMin > dohaMin) {
+        totalSec = (nextPrayerMin - dohaMin) * 60 - dohaSec;
+      } else {
+        totalSec = (24 * 60 - dohaMin + nextPrayerMin) * 60 - dohaSec;
+      }
+      if (totalSec < 0) totalSec = 0;
+
+      const h = Math.floor(totalSec / 3600);
+      const m = Math.floor((totalSec % 3600) / 60);
+      const s = totalSec % 60;
+
+      setNextPrayerName(nextPrayer.name);
+      setCountdown(
+        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      );
+    };
+
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="rounded-2xl overflow-hidden shadow-xl">
+    <div className="overflow-hidden shadow-xl">
       {/* Sky */}
       <div className={`relative bg-gradient-to-b ${sky.bg} h-24 sm:h-36 overflow-hidden`}>
 
@@ -74,11 +128,9 @@ export default function SkyScene({ prayers, date, currentHour }: {
         {/* Sun (day) */}
         {sky.isSun && (
           <div className="absolute" style={{left:`${sunX}%`, top:`${sky.horizonY - 20}%`, transform:"translate(-50%, -50%)"}}>
-            {/* Soft outer glow */}
             <div className="absolute rounded-full opacity-25 blur-xl pointer-events-none"
               style={{width:80, height:80, top:"50%", left:"50%", transform:"translate(-50%,-50%)",
                 background: sky.sunColor.includes("orange") ? "#fb923c" : "#fde68a"}} />
-            {/* Rays — pivot at sun center (0×0 anchor), rays radiate outward */}
             <div className="rays-spin absolute" style={{width:0, height:0, top:"50%", left:"50%"}}>
               {[
                 {deg:0,   len:13, w:2,   op:0.55},
@@ -103,7 +155,6 @@ export default function SkyScene({ prayers, date, currentHour }: {
                   style={{
                     width: w,
                     height: len,
-                    /* top of ray starts at gap (5px) beyond sun radius (16px) */
                     top: -(16 + 5 + len),
                     left: -w / 2,
                     opacity: op,
@@ -113,7 +164,6 @@ export default function SkyScene({ prayers, date, currentHour }: {
                 />
               ))}
             </div>
-            {/* Core */}
             <div className={`sun-glow relative w-8 h-8 rounded-full ${sky.sunColor}`}
               style={{boxShadow:"0 0 10px 3px rgba(253,230,138,0.45)"}} />
           </div>
@@ -146,23 +196,48 @@ export default function SkyScene({ prayers, date, currentHour }: {
 
       {/* Prayer cards */}
       <div className="bg-rose-900 px-3 py-3 sm:px-4">
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+        {/* Countdown */}
+        {countdown && (
+          <motion.div
+            className="flex items-center justify-center gap-1.5 mb-2.5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}
+          >
+            <Clock size={11} className="text-white/50" />
+            <span className="text-white/60 text-[10px]">Next: {nextPrayerName} in</span>
+            <span className="text-amber-300 text-[10px] font-mono tabular-nums font-bold">{countdown}</span>
+          </motion.div>
+        )}
+
+        <motion.div
+          className="grid grid-cols-3 sm:grid-cols-6 gap-2"
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+        >
           {prayers.map((p) => {
             const isCurrent = p.name === currentPrayer;
             return (
-              <div key={p.name}
+              <motion.div
+                key={p.name}
+                variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
+                transition={{ duration: 0.3 }}
                 className={`flex flex-col items-center rounded-xl py-2.5 px-1.5 backdrop-blur-sm transition-all ${
                   isCurrent
                     ? "bg-white/20 border border-white/30 text-white shadow-lg ring-2 ring-secondary-accent/70"
                     : "bg-white/10 border border-white/20"
-                }`}>
-                <span className="text-base leading-none mb-1">{p.icon}</span>
+                }`}
+              >
+                <span className={`mb-1 ${isCurrent ? "text-white" : "text-rose-200"}`}>
+                  {getPrayerIcon(p.name)}
+                </span>
                 <span className={`text-[11px] font-semibold ${isCurrent ? "text-white" : "text-rose-100"}`}>{p.name}</span>
                 <span className={`text-xs font-bold mt-0.5 tabular-nums ${isCurrent ? "text-secondary-accent" : "text-amber-300"}`}>{p.time}</span>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

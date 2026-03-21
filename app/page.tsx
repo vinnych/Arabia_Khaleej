@@ -5,7 +5,7 @@ import JobList from "@/components/JobList";
 import WeatherWidget from "@/components/WeatherWidget";
 import CurrencyWidget from "@/components/CurrencyWidget";
 import DohaTime from "@/components/DohaTime";
-import AdUnit from "@/components/AdUnit";
+import FadeIn from "@/components/FadeIn";
 import { safeJsonLd } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -49,88 +49,93 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default async function Home() {
   return (
-    <div className="space-y-5">
+    <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{__html: safeJsonLd(homeJsonLd)}} />
 
-      {/* Title row */}
-      <div className="flex items-center justify-between pb-3 border-b border-stone-200/60">
-        <h1 className="font-newsreader text-sm font-bold text-gray-500 tracking-wide">Qatar Portal — Doha</h1>
-        <DohaTime />
-      </div>
-
-      {/* Prayer Times */}
-      <section>
-        <SectionLabel>Prayer Times</SectionLabel>
-        <Suspense fallback={<div className="bg-rose-900/10 rounded-2xl h-40 animate-pulse" />}>
+      {/* Prayer Times Hero — full-bleed, flush to header */}
+      <section className="-mx-4 sm:-mx-6 -mt-4 sm:-mt-5">
+        <Suspense fallback={<div className="bg-rose-900/10 h-52 animate-pulse" />}>
           <PrayerTimes />
         </Suspense>
       </section>
 
-      {/* Weather + Currency */}
-      <div className="grid md:grid-cols-2 gap-3">
-        <section>
-          <a href="/weather" className="block hover:opacity-90 transition-opacity">
-            <SectionLabel>Weather</SectionLabel>
-            <Suspense fallback={<div className="bg-stone-100 rounded-2xl h-24 animate-pulse" />}>
-              <WeatherWidget />
-            </Suspense>
-          </a>
-        </section>
-        <section>
-          <a href="/currency" className="block hover:opacity-90 transition-opacity">
-            <SectionLabel>QAR Exchange Rates</SectionLabel>
-            <Suspense fallback={<div className="bg-stone-100 rounded-2xl h-24 animate-pulse" />}>
-              <CurrencyWidget />
-            </Suspense>
-          </a>
-        </section>
-      </div>
-
-      {/* AdUnit — add real slot ID when AdSense is approved */}
-
-      {/* News + Jobs */}
-      <div className="grid lg:grid-cols-3 gap-4 lg:gap-5">
-        <section className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-2">
-            <SectionLabel>Latest News</SectionLabel>
-            <a href="/news" className="text-xs font-medium text-gray-400 hover:text-primary transition-colors">View all →</a>
-          </div>
-          <Suspense fallback={<div className="grid gap-4 sm:grid-cols-2"><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /></div>}>
-            <NewsFeed limit={12} />
-          </Suspense>
-        </section>
-
-        <section>
-          <div className="flex items-center justify-between mb-2">
-            <SectionLabel>Jobs in Qatar</SectionLabel>
-            <a href="/jobs" className="text-xs font-medium text-gray-400 hover:text-primary transition-colors">View all →</a>
-          </div>
-          <Suspense fallback={<div className="space-y-2"><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /></div>}>
-            <JobList limit={8} />
-          </Suspense>
-        </section>
-      </div>
-
-      {/* FAQ */}
-      <section className="-mx-4 sm:-mx-6 px-4 sm:px-6 py-5 bg-surface-low">
-        <SectionLabel>FAQ</SectionLabel>
-        <div className="divide-y divide-stone-200/60">
-          {[
-            { q: "What time is Fajr in Doha today?", a: "Fajr prayer time in Doha is updated daily using the Muslim World League calculation method via Aladhan." },
-            { q: "What time is Maghrib in Doha today?", a: "Maghrib prayer time in Doha is calculated based on sunset time for Qatar, updated daily." },
-            { q: "What are today's prayer times in Qatar?", a: "All five daily prayer times for Qatar (Fajr, Dhuhr, Asr, Maghrib, Isha) are updated daily." },
-            { q: "Where can I find jobs in Qatar?", a: "Qatar Portal lists the latest job vacancies in Doha and Qatar, updated daily from top Gulf job boards." },
-          ].map(({ q, a }) => (
-            <details key={q} className="group">
-              <summary className="cursor-pointer list-none flex items-center justify-between text-sm font-medium text-gray-700 hover:text-primary transition-colors py-3.5 min-h-[44px]">
-                <span>{q}</span>
-                <span className="text-gray-300 group-open:rotate-180 transition-transform text-xs ml-3 shrink-0">▼</span>
-              </summary>
-              <p className="text-sm text-gray-500 pb-4 leading-relaxed">{a}</p>
-            </details>
-          ))}
+      <div className="space-y-5 mt-5">
+        {/* Title row */}
+        <div className="flex items-center justify-between pb-3 border-b border-stone-200/60">
+          <h1 className="font-newsreader text-sm font-bold text-gray-500 tracking-wide">Qatar Portal — Doha</h1>
+          <DohaTime />
         </div>
-      </section>
+
+        {/* Weather + Currency */}
+        <FadeIn delay={0.1}>
+          <div className="grid md:grid-cols-2 gap-3">
+            <section>
+              <a href="/weather" className="block hover:opacity-90 transition-opacity">
+                <SectionLabel>Weather</SectionLabel>
+                <Suspense fallback={<div className="bg-stone-100 rounded-2xl h-24 animate-pulse" />}>
+                  <WeatherWidget />
+                </Suspense>
+              </a>
+            </section>
+            <section>
+              <a href="/currency" className="block hover:opacity-90 transition-opacity">
+                <SectionLabel>QAR Exchange Rates</SectionLabel>
+                <Suspense fallback={<div className="bg-stone-100 rounded-2xl h-24 animate-pulse" />}>
+                  <CurrencyWidget />
+                </Suspense>
+              </a>
+            </section>
+          </div>
+        </FadeIn>
+
+        {/* News + Jobs */}
+        <FadeIn delay={0.2}>
+          <div className="grid lg:grid-cols-3 gap-4 lg:gap-5">
+            <section className="lg:col-span-2">
+              <div className="flex items-center justify-between mb-2">
+                <SectionLabel>Latest News</SectionLabel>
+                <a href="/news" className="text-xs font-medium text-gray-400 hover:text-primary transition-colors">View all →</a>
+              </div>
+              <Suspense fallback={<div className="grid gap-4 sm:grid-cols-2"><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /></div>}>
+                <NewsFeed limit={12} />
+              </Suspense>
+            </section>
+
+            <section>
+              <div className="flex items-center justify-between mb-2">
+                <SectionLabel>Jobs in Qatar</SectionLabel>
+                <a href="/jobs" className="text-xs font-medium text-gray-400 hover:text-primary transition-colors">View all →</a>
+              </div>
+              <Suspense fallback={<div className="space-y-2"><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /></div>}>
+                <JobList limit={8} />
+              </Suspense>
+            </section>
+          </div>
+        </FadeIn>
+
+        {/* FAQ */}
+        <FadeIn delay={0.3}>
+          <section className="-mx-4 sm:-mx-6 px-4 sm:px-6 py-5 bg-surface-low">
+            <SectionLabel>FAQ</SectionLabel>
+            <div className="divide-y divide-stone-200/60">
+              {[
+                { q: "What time is Fajr in Doha today?", a: "Fajr prayer time in Doha is updated daily using the Muslim World League calculation method via Aladhan." },
+                { q: "What time is Maghrib in Doha today?", a: "Maghrib prayer time in Doha is calculated based on sunset time for Qatar, updated daily." },
+                { q: "What are today's prayer times in Qatar?", a: "All five daily prayer times for Qatar (Fajr, Dhuhr, Asr, Maghrib, Isha) are updated daily." },
+                { q: "Where can I find jobs in Qatar?", a: "Qatar Portal lists the latest job vacancies in Doha and Qatar, updated daily from top Gulf job boards." },
+              ].map(({ q, a }) => (
+                <details key={q} className="group">
+                  <summary className="cursor-pointer list-none flex items-center justify-between text-sm font-medium text-gray-700 hover:text-primary transition-colors py-3.5 min-h-[44px]">
+                    <span>{q}</span>
+                    <span className="text-gray-300 group-open:rotate-180 transition-transform text-xs ml-3 shrink-0">▼</span>
+                  </summary>
+                  <p className="text-sm text-gray-500 pb-4 leading-relaxed">{a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        </FadeIn>
+      </div>
     </div>
   );
 }
