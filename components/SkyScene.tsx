@@ -59,6 +59,42 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
   const [countdown, setCountdown] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Sky state — updates every minute to keep sun/moon synced
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const timeInHours = hours + minutes / 60;
+  const timeStr = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  // At 12:00 sun is at top (0°), at 00:00 moon is at top (±180°)
+  const rotationAngle = (timeInHours - 12) * 15;
+
+  const getPrayerTime = (name: string) =>
+    prayers.find((p) => p.name === name)?.time.replace(/\s*\([^)]*\)/, "").trim() ?? null;
+
+  const fajrTime    = getPrayerTime("Fajr")    ?? "04:30";
+  const sunriseTime = getPrayerTime("Sunrise") ?? "05:45";
+  const maghribTime = getPrayerTime("Maghrib") ?? "17:45";
+  const ishaTime    = getPrayerTime("Isha")    ?? "19:15";
+
+  let bgGradient = "linear-gradient(135deg, #1E0A14 0%, #2D0E1C 45%, #180820 100%)"; // Night
+  let isNight = true;
+
+  if (timeStr >= fajrTime && timeStr < sunriseTime) {
+    bgGradient = "linear-gradient(to bottom right, #1e3a8a, #9d174d, #f59e0b)"; // Dawn
+    isNight = false;
+  } else if (timeStr >= sunriseTime && timeStr < maghribTime) {
+    bgGradient = "linear-gradient(to bottom right, #0ea5e9, #2563eb, #0284c7)"; // Day
+    isNight = false;
+  } else if (timeStr >= maghribTime && timeStr < ishaTime) {
+    bgGradient = "linear-gradient(to bottom right, #4c1d95, #be123c, #ea580c)"; // Dusk
+    isNight = false;
+  }
+
   // Recalculate countdown whenever prayers change (default or location-based)
   useEffect(() => {
     const tick = () => {
@@ -153,11 +189,46 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
   };
 
   return (
-    <div
+    <motion.div
       className="relative w-full overflow-hidden text-white"
-      style={{ background: "linear-gradient(135deg, #1E0A14 0%, #2D0E1C 45%, #180820 100%)" }}
+      animate={{ background: bgGradient }}
+      transition={{ duration: 2, ease: "easeInOut" }}
       id="prayer"
     >
+      {/* Stars — fade out during the day */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{ opacity: isNight ? 1 : 0.08 }}
+        transition={{ duration: 2 }}
+      >
+        <div className="absolute top-[8%]  left-[10%] w-1   h-1   bg-white rounded-full shadow-[0_0_5px_white]" />
+        <div className="absolute top-[15%] right-[18%] w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_5px_white]" />
+        <div className="absolute top-[22%] left-[32%] w-1   h-1   bg-white rounded-full shadow-[0_0_5px_white]" />
+        <div className="absolute top-[28%] right-[28%] w-2   h-2   bg-white rounded-full shadow-[0_0_8px_white] opacity-80" />
+        <div className="absolute top-[45%] left-[22%] w-1   h-1   bg-white rounded-full shadow-[0_0_5px_white]" />
+        <div className="absolute top-[12%] left-[62%] w-1.5 h-1.5 bg-white rounded-full shadow-[0_0_6px_white] opacity-60" />
+        <div className="absolute top-[35%] left-[50%] w-1   h-1   bg-white rounded-full shadow-[0_0_4px_white] opacity-70" />
+        <div className="absolute top-[5%]  right-[40%] w-1  h-1   bg-white rounded-full shadow-[0_0_4px_white]" />
+      </motion.div>
+
+      {/* Sun / Moon orbit */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-70">
+        <motion.div
+          className="absolute top-[30%] left-1/2 w-[800px] h-[800px] -ml-[400px] rounded-full border border-white/5"
+          animate={{ rotate: rotationAngle }}
+          transition={{ type: "spring", stiffness: 20, damping: 15 }}
+        >
+          {/* Sun */}
+          <div className="absolute -top-8 left-1/2 -ml-8 w-16 h-16 bg-gradient-to-br from-yellow-100 via-yellow-300 to-orange-500 rounded-full shadow-[0_0_80px_rgba(253,224,71,1)]" />
+          {/* Moon */}
+          <div className="absolute -bottom-8 left-1/2 -ml-8 w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-400 rounded-full shadow-[0_0_60px_rgba(241,245,249,0.6)]">
+            <div className="absolute top-3 right-4 w-4 h-4 bg-black/10 rounded-full" />
+            <div className="absolute bottom-4 left-3 w-3 h-3 bg-black/10 rounded-full" />
+            <div className="absolute top-7 left-4 w-2 h-2 bg-black/10 rounded-full" />
+          </div>
+        </motion.div>
+      </div>
+
       {/* Atmospheric orbs */}
       <motion.div
         className="absolute -top-40 -right-32 w-[500px] h-[500px] rounded-full pointer-events-none"
@@ -373,6 +444,6 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
           </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
