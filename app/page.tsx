@@ -4,7 +4,6 @@ import NewsFeed from "@/components/NewsFeed";
 import JobList from "@/components/JobList";
 import WeatherWidget from "@/components/WeatherWidget";
 import CurrencyWidget from "@/components/CurrencyWidget";
-import DohaTime from "@/components/DohaTime";
 import FadeIn from "@/components/FadeIn";
 import { safeJsonLd } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -60,12 +59,6 @@ export default async function Home() {
       </section>
 
       <div className="space-y-5 mt-5">
-        {/* Title row */}
-        <div className="flex items-center justify-between pb-3 border-b border-stone-200/60">
-          <h1 className="font-newsreader text-sm font-bold text-gray-500 tracking-wide">Qatar Portal — Doha</h1>
-          <DohaTime />
-        </div>
-
         {/* Weather + Currency */}
         <FadeIn delay={0.1}>
           <div className="grid md:grid-cols-2 gap-3">

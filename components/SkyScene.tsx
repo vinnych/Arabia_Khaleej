@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Clock, Moon, Sunrise, Sun, CloudSun, Sunset, Menu, X, LocateFixed, Loader2 } from "lucide-react";
+import { MapPin, Menu, X, LocateFixed, Loader2 } from "lucide-react";
 import { Playfair_Display } from "next/font/google";
 
 const playfair = Playfair_Display({
@@ -28,35 +28,22 @@ interface Prayer { name: string; time: string; icon: string; }
 
 type LocationStatus = "idle" | "loading" | "granted" | "denied";
 
-function getPrayerIcon(name: string) {
-  const props = { size: 16, strokeWidth: 1.5 };
-  switch (name) {
-    case "Fajr":    return <Sunrise {...props} />;
-    case "Sunrise": return <Sun {...props} />;
-    case "Dhuhr":   return <Sun {...props} />;
-    case "Asr":     return <CloudSun {...props} />;
-    case "Maghrib": return <Sunset {...props} />;
-    case "Isha":    return <Moon {...props} />;
-    default:        return <Sun {...props} />;
-  }
+function toMin(t: string) {
+  const [h, m] = t.replace(/\s*\([^)]*\)/, "").trim().split(":").map(Number);
+  return h * 60 + (m || 0);
 }
 
-export default function SkyScene({ prayers: defaultPrayers, date }: {
+export default function SkyScene({ prayers: defaultPrayers }: {
   prayers: Prayer[];
   date: string;
   currentHour: number;
 }) {
-  const toMin = (t: string) => {
-    const [h, m] = t.replace(/\s*\([^)]*\)/, "").trim().split(":").map(Number);
-    return h * 60 + (m || 0);
-  };
 
   const [prayers, setPrayers] = useState<Prayer[]>(defaultPrayers);
   const [locationName, setLocationName] = useState("Doha, Qatar");
   const [locationStatus, setLocationStatus] = useState<LocationStatus>("idle");
 
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time: string } | null>(null);
-  const [countdown, setCountdown] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Sky state — updates every minute to keep sun/moon synced
@@ -70,7 +57,6 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
   const minutes = now.getMinutes();
   const timeInHours = hours + minutes / 60;
   const timeStr = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-  // At 12:00 sun is at top (0°), at 00:00 moon is at top (±180°)
   const rotationAngle = (timeInHours - 12) * 15;
 
   const getPrayerTime = (name: string) =>
@@ -81,7 +67,7 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
   const maghribTime = getPrayerTime("Maghrib") ?? "17:45";
   const ishaTime    = getPrayerTime("Isha")    ?? "19:15";
 
-  let bgGradient = "linear-gradient(135deg, #1E0A14 0%, #2D0E1C 45%, #180820 100%)"; // Night
+  let bgGradient = "linear-gradient(to bottom right, #0f172a, #1e1b4b, #020617)"; // Night
   let isNight = true;
 
   if (timeStr >= fajrTime && timeStr < sunriseTime) {
@@ -95,35 +81,18 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
     isNight = false;
   }
 
-  // Recalculate countdown whenever prayers change (default or location-based)
+  // Recalculate next prayer whenever prayers change
   useEffect(() => {
     const tick = () => {
-      const now = new Date();
-      // Use local device time offset for countdown — works for any timezone
-      const localMin = now.getHours() * 60 + now.getMinutes();
-      const localSec = now.getSeconds();
-
+      const n = new Date();
+      const localMin = n.getHours() * 60 + n.getMinutes();
       let nextIdx = prayers.findIndex((p) => toMin(p.time) > localMin);
       if (nextIdx === -1) nextIdx = 0;
-
       const next = prayers[nextIdx];
-      const nextMin = toMin(next.time);
-
-      let totalSec = nextMin > localMin
-        ? (nextMin - localMin) * 60 - localSec
-        : (24 * 60 - localMin + nextMin) * 60 - localSec;
-      if (totalSec < 0) totalSec = 0;
-
-      const h = Math.floor(totalSec / 3600);
-      const m = Math.floor((totalSec % 3600) / 60);
-      const s = totalSec % 60;
-
       setNextPrayer({ name: next.name, time: next.time });
-      setCountdown(`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`);
     };
-
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 60000);
     return () => clearInterval(id);
   }, [prayers]);
 
@@ -139,9 +108,7 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-
         try {
-          // Fetch prayer times for the detected coordinates
           const prayerRes = await fetch(
             `https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=8`,
             { signal: AbortSignal.timeout(8000) }
@@ -159,7 +126,6 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
           setPrayers(newPrayers);
           setLocationStatus("granted");
 
-          // Reverse geocode city name via Nominatim (free, no key)
           try {
             const geoRes = await fetch(
               `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
@@ -190,15 +156,15 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
 
   return (
     <motion.div
-      className="relative w-full overflow-hidden text-white"
+      className="relative w-full overflow-hidden text-white shadow-2xl"
       animate={{ background: bgGradient }}
       transition={{ duration: 2, ease: "easeInOut" }}
       id="prayer"
     >
-      {/* Stars — twinkle at night, fade at dawn */}
+      {/* Stars */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
-        animate={{ opacity: isNight ? 1 : 0.06 }}
+        animate={{ opacity: isNight ? 1 : 0.1 }}
         transition={{ duration: 2 }}
       >
         {[
@@ -208,12 +174,6 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
           { top: "28%", right: "28%", size: "w-2 h-2",     delay: "0.3s", dur: "1.9s" },
           { top: "45%", left: "22%",  size: "w-1 h-1",     delay: "2.1s", dur: "3.5s" },
           { top: "12%", left: "62%",  size: "w-1.5 h-1.5", delay: "1.1s", dur: "2.4s" },
-          { top: "35%", left: "50%",  size: "w-1 h-1",     delay: "1.8s", dur: "3.0s" },
-          { top: "5%",  right: "40%", size: "w-1 h-1",     delay: "0.5s", dur: "2.6s" },
-          { top: "18%", left: "78%",  size: "w-1 h-1",     delay: "1.3s", dur: "2.2s" },
-          { top: "40%", right: "10%", size: "w-1.5 h-1.5", delay: "2.5s", dur: "3.8s" },
-          { top: "10%", left: "45%",  size: "w-1 h-1",     delay: "0.9s", dur: "2.9s" },
-          { top: "32%", left: "88%",  size: "w-1 h-1",     delay: "1.6s", dur: "2.3s" },
         ].map((s, i) => (
           <div
             key={i}
@@ -223,26 +183,8 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
         ))}
       </motion.div>
 
-      {/* Clouds — drift in during day/dawn/dusk */}
-      <div
-        className="absolute inset-0 pointer-events-none transition-opacity duration-[2000ms]"
-        style={{ opacity: isNight ? 0 : 1 }}
-      >
-        <div className="absolute top-[16%] left-[6%] cloud-float" style={{ animationDuration: "9s", animationDelay: "0s" }}>
-          <div className="w-36 h-10 bg-white/25 rounded-full blur-md" />
-          <div className="w-22 h-7 bg-white/20 rounded-full blur-md -mt-5 ml-8" />
-        </div>
-        <div className="absolute top-[10%] right-[10%] cloud-float" style={{ animationDuration: "13s", animationDelay: "3s" }}>
-          <div className="w-28 h-8 bg-white/18 rounded-full blur-md" />
-          <div className="w-18 h-6 bg-white/15 rounded-full blur-md -mt-4 ml-4" />
-        </div>
-        <div className="absolute top-[30%] left-[42%] cloud-float" style={{ animationDuration: "11s", animationDelay: "6s" }}>
-          <div className="w-24 h-7 bg-white/12 rounded-full blur-md" />
-        </div>
-      </div>
-
       {/* Sun / Moon orbit */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-70">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-80">
         <motion.div
           className="absolute top-[30%] left-1/2 w-[800px] h-[800px] -ml-[400px] rounded-full border border-white/5"
           animate={{ rotate: rotationAngle }}
@@ -261,48 +203,40 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
 
       {/* Atmospheric orbs */}
       <motion.div
-        className="absolute -top-40 -right-32 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(139,26,60,0.45) 0%, transparent 70%)", filter: "blur(60px)" }}
-        animate={{ scale: [1, 1.12, 1], opacity: [0.35, 0.55, 0.35] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full blur-[120px] opacity-40 pointer-events-none"
+        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute -bottom-32 -left-32 w-[420px] h-[420px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(200,168,75,0.15) 0%, transparent 70%)", filter: "blur(60px)" }}
-        animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.28, 0.15] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
-      />
-      <motion.div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(ellipse, rgba(107,14,42,0.18) 0%, transparent 70%)", filter: "blur(50px)" }}
-        animate={{ scaleX: [1, 1.08, 1] }}
-        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary-accent rounded-full blur-[120px] opacity-20 pointer-events-none"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
       />
 
       <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8">
 
         {/* Top navigation */}
-        <div
-          className="h-16 flex items-center justify-between"
-          style={{ borderBottom: "1px solid rgba(139,26,60,0.30)" }}
-        >
+        <div className="h-16 flex items-center justify-between border-b border-white/10">
           {/* Logo */}
-          <a
-            href="/"
-            className={`${playfair.className} text-2xl font-bold leading-none tracking-widest`}
-            style={{ color: "#C8A84B" }}
-          >
-            QATAR
-          </a>
+          <div className="flex items-center gap-3">
+            <a
+              href="/"
+              className={`${playfair.className} text-2xl font-bold leading-none tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-white to-sky-200`}
+            >
+              QATAR
+            </a>
+            <span className="text-[9px] font-medium opacity-70 uppercase tracking-[0.2em] mt-1 hidden sm:inline-block border border-white/20 rounded-full px-2 py-0.5">
+              Portal
+            </span>
+          </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-5 text-[10px] font-semibold tracking-widest uppercase text-qatar-sand">
             {NAV_LINKS.map(({ href, label }) => (
               <a
                 key={href}
                 href={href}
-                className="text-[10px] font-bold tracking-widest uppercase transition-colors duration-150 hover:text-[#C8A84B]"
-                style={{ color: "rgba(248,236,210,0.40)" }}
+                className="hover:text-white transition-colors"
               >
                 {label}
               </a>
@@ -311,8 +245,7 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 -mr-2 transition-colors"
-            style={{ color: "rgba(200,168,75,0.65)" }}
+            className="md:hidden p-2 -mr-2 transition-colors text-qatar-sand"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileMenuOpen}
@@ -333,7 +266,7 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
               className="absolute left-0 right-0 z-20 md:hidden"
               style={{
                 background: "rgba(20,6,14,0.97)",
-                borderBottom: "1px solid rgba(139,26,60,0.35)",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
                 backdropFilter: "blur(12px)",
               }}
             >
@@ -343,11 +276,8 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
                     key={href}
                     href={href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="text-[11px] font-bold tracking-widest uppercase py-3.5 transition-colors hover:text-[#C8A84B]"
-                    style={{
-                      color: "rgba(248,236,210,0.55)",
-                      borderBottom: "1px solid rgba(139,26,60,0.18)",
-                    }}
+                    className="text-[11px] font-bold tracking-widest uppercase py-3.5 text-qatar-sand hover:text-white transition-colors"
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
                   >
                     {label}
                   </a>
@@ -357,125 +287,94 @@ export default function SkyScene({ prayers: defaultPrayers, date }: {
           )}
         </AnimatePresence>
 
-        {/* Hero — compact */}
-        <div className="pt-4 pb-5">
-
-          {/* Row: location pill + countdown */}
-          <motion.div
-            className="flex items-center justify-between mb-3"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Location pill */}
-            <button
-              onClick={handleLocationClick}
-              disabled={locationStatus === "loading"}
-              className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase px-2.5 py-1 rounded-full transition-all duration-200"
-              style={{
-                color: locationStatus === "denied" ? "rgba(248,100,100,0.8)" : "#C8A84B",
-                border: `1px solid ${locationStatus === "denied" ? "rgba(248,100,100,0.3)" : "rgba(200,168,75,0.22)"}`,
-                background: locationStatus === "granted" ? "rgba(200,168,75,0.10)" : "rgba(200,168,75,0.04)",
-              }}
-              title="Click to use your location"
-            >
-              {locationStatus === "loading" ? <Loader2 size={10} className="animate-spin" /> :
-               locationStatus === "granted" ? <LocateFixed size={10} /> : <MapPin size={10} />}
-              <AnimatePresence mode="wait">
-                <motion.span key={locationName}
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {locationStatus === "loading" ? "Detecting…" :
-                   locationStatus === "denied" ? "Location denied" : locationName}
-                </motion.span>
-              </AnimatePresence>
-            </button>
-
-            {/* Countdown — inline, no badge box */}
-            {countdown && (
-              <motion.div
-                className="flex items-center gap-1.5"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
+        {/* Hero content */}
+        <div className="pb-8 pt-4">
+          {/* Row: location button + date/time */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
+            <div>
+              <button
+                onClick={handleLocationClick}
+                disabled={locationStatus === "loading"}
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 px-4 py-2 rounded-full text-white transition-all text-xs md:text-sm font-medium uppercase tracking-wider group active:scale-95 shadow-sm"
+                title="Click to update location"
               >
-                <Clock size={11} style={{ color: "rgba(200,168,75,0.5)" }} />
-                <span className="text-[10px] font-mono tabular-nums font-bold" style={{ color: "rgba(200,168,75,0.6)" }}>
-                  {countdown}
-                </span>
-              </motion.div>
-            )}
-          </motion.div>
+                {locationStatus === "loading" ? (
+                  <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
+                ) : locationStatus === "granted" ? (
+                  <LocateFixed className="w-4 h-4 md:w-5 md:h-5 group-hover:scale-110 transition-transform" />
+                ) : (
+                  <MapPin className="w-4 h-4 md:w-5 md:h-5 group-hover:scale-110 transition-transform" />
+                )}
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={locationName + locationStatus}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {locationStatus === "loading"
+                      ? "Locating..."
+                      : locationStatus === "denied"
+                      ? "Location denied"
+                      : locationName}
+                  </motion.span>
+                </AnimatePresence>
+              </button>
+            </div>
+            <div className="sm:text-right">
+              <div className="text-sm md:text-base font-medium text-white/90">
+                {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+              </div>
+              <div className="text-xs text-white/60 font-mono mt-0.5 tracking-widest">{timeStr}</div>
+            </div>
+          </div>
 
-          {/* Next prayer — elegant inline row */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={nextPrayer?.name}
-              className="flex items-baseline gap-3 mb-4"
-              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-            >
-              <h2 className={`${playfair.className} text-4xl sm:text-5xl font-bold italic leading-none`}
-                style={{ color: "#F8ECD2" }}>
-                {nextPrayer?.name ?? "Prayer Times"}
-              </h2>
-              {nextPrayer && (
-                <span className="font-mono text-xl font-bold tabular-nums" style={{ color: "#C8A84B" }}>
-                  {nextPrayer.time}
-                </span>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Prayer grid — compact cards */}
-          <motion.div
-            className="grid grid-cols-3 sm:grid-cols-6 gap-2"
-            initial="hidden" animate="visible"
-            variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
-          >
+          {/* Prayer cards — horizontal scroll on mobile, 6-col grid on sm+ */}
+          <div className="flex overflow-x-auto sm:grid sm:grid-cols-6 gap-2 md:gap-3 pb-2 snap-x snap-mandatory hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
             {prayers.map((p) => {
               const isNext = nextPrayer?.name === p.name;
               return (
-                <motion.div
+                <div
                   key={p.name}
-                  variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
-                  transition={{ duration: 0.3 }}
-                  className="relative overflow-hidden flex flex-col items-center justify-center py-2.5 px-2 rounded-xl transition-all duration-300"
-                  style={isNext ? {
-                    background: "rgba(139,26,60,0.22)",
-                    border: "1px solid rgba(200,168,75,0.45)",
-                    boxShadow: "0 0 20px rgba(200,168,75,0.15)",
-                    transform: "scale(1.05)",
-                  } : {
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(139,26,60,0.20)",
-                  }}
+                  className={`relative overflow-hidden p-3 rounded-xl flex flex-col items-center justify-center transition-all duration-300 min-w-[110px] sm:min-w-0 snap-center active:scale-95 border ${
+                    isNext
+                      ? "bg-primary/40 border-primary shadow-[0_0_20px_rgba(138,21,56,0.4)] scale-105 active:scale-100"
+                      : "bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10"
+                  }`}
                 >
-                  <span className="mb-1" style={{ color: isNext ? "#C8A84B" : "rgba(248,200,160,0.28)" }}>
-                    {getPrayerIcon(p.name)}
-                  </span>
-                  <span className="text-[9px] font-bold tracking-widest uppercase mb-1"
-                    style={{ color: isNext ? "rgba(248,236,210,0.85)" : "rgba(248,210,185,0.35)" }}>
+                  {isNext && (
+                    <div className="absolute inset-0 bg-gradient-to-b from-primary/20 to-transparent pointer-events-none" />
+                  )}
+                  <span
+                    className={`text-[10px] font-semibold uppercase tracking-widest mb-1 ${
+                      isNext ? "text-qatar-sand" : "text-qatar-sand/70"
+                    }`}
+                  >
                     {p.name}
                   </span>
                   <AnimatePresence mode="wait">
-                    <motion.span key={p.time}
-                      className="font-mono text-sm font-semibold tabular-nums"
-                      style={{ color: isNext ? "#C8A84B" : "rgba(200,168,75,0.50)" }}
-                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                    <motion.span
+                      key={p.time}
+                      className={`font-mono text-base md:text-lg ${
+                        isNext ? "font-bold text-white" : "font-medium text-white/90"
+                      }`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       transition={{ duration: 0.15 }}
                     >
                       {p.time}
                     </motion.span>
                   </AnimatePresence>
-                </motion.div>
+                </div>
               );
             })}
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* City silhouette — absolute bottom of hero */}
+      {/* City silhouette */}
       <div className="absolute bottom-0 left-0 right-0 pointer-events-none" aria-hidden="true">
         <svg
           viewBox="0 0 1440 72"
