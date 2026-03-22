@@ -225,13 +225,13 @@ export default function SkyScene({ prayers: defaultPrayers }: {
             >
               QATAR
             </a>
-            <span className="text-[9px] font-medium opacity-70 uppercase tracking-[0.2em] mt-1 hidden sm:inline-block border border-white/20 rounded-full px-2 py-0.5">
+            <span className="text-[9px] font-medium text-white/55 uppercase tracking-[0.2em] mt-1 hidden sm:inline-block border border-white/25 rounded-full px-2 py-0.5">
               Portal
             </span>
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-5 text-[10px] font-semibold tracking-widest uppercase text-qatar-sand">
+          <nav className="hidden md:flex items-center gap-5 text-[10px] font-semibold tracking-widest uppercase text-white/80">
             {NAV_LINKS.map(({ href, label }) => (
               <a
                 key={href}
@@ -245,7 +245,7 @@ export default function SkyScene({ prayers: defaultPrayers }: {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden p-2 -mr-2 transition-colors text-qatar-sand"
+            className="md:hidden p-2 -mr-2 transition-colors text-white/80"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={mobileMenuOpen}
@@ -289,7 +289,7 @@ export default function SkyScene({ prayers: defaultPrayers }: {
                       key={href}
                       href={href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className="px-5 py-2.5 text-[11px] font-bold tracking-widest uppercase text-qatar-sand hover:text-white hover:bg-white/5 transition-colors"
+                      className="px-5 py-2.5 text-[11px] font-bold tracking-widest uppercase text-white/80 hover:text-white hover:bg-white/5 transition-colors"
                     >
                       {label}
                     </a>
@@ -339,7 +339,7 @@ export default function SkyScene({ prayers: defaultPrayers }: {
               <div className="text-sm md:text-base font-medium text-white/90">
                 {now.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
               </div>
-              <div className="text-xs text-white/60 font-mono mt-0.5 tracking-widest">{timeStr}</div>
+              <div className="text-xs text-white/75 font-mono mt-0.5 tracking-widest">{timeStr}</div>
             </div>
           </div>
 
@@ -361,7 +361,7 @@ export default function SkyScene({ prayers: defaultPrayers }: {
                   )}
                   <span
                     className={`text-[10px] font-semibold uppercase tracking-widest mb-1 ${
-                      isNext ? "text-qatar-sand" : "text-qatar-sand/70"
+                      isNext ? "text-white" : "text-white/70"
                     }`}
                   >
                     {p.name}

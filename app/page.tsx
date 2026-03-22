@@ -40,7 +40,7 @@ const homeJsonLd = {
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-2">
-      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">{children}</span>
+      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">{children}</span>
       <div className="flex-1 h-px bg-stone-200" />
     </div>
   );
@@ -108,7 +108,7 @@ export default async function Home() {
           <section>
             <div className="flex items-center justify-between mb-2">
               <SectionLabel>Latest News</SectionLabel>
-              <a href="/news" className="text-xs font-medium text-gray-400 hover:text-primary transition-colors">View all →</a>
+              <a href="/news" className="text-xs font-medium text-gray-500 hover:text-primary transition-colors">View all →</a>
             </div>
             <Suspense fallback={<div className="grid gap-4 sm:grid-cols-2"><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /><div className="bg-stone-100 rounded-2xl h-40 animate-pulse" /></div>}>
               <NewsFeed limit={6} />
@@ -121,7 +121,7 @@ export default async function Home() {
           <section>
             <div className="flex items-center justify-between mb-2">
               <SectionLabel>Jobs in Qatar</SectionLabel>
-              <a href="/jobs" className="text-xs font-medium text-gray-400 hover:text-primary transition-colors">View all →</a>
+              <a href="/jobs" className="text-xs font-medium text-gray-500 hover:text-primary transition-colors">View all →</a>
             </div>
             <Suspense fallback={<div className="space-y-2"><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /><div className="bg-stone-100 rounded-xl h-16 animate-pulse" /></div>}>
               <JobList limit={5} />
