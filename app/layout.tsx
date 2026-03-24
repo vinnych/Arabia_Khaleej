@@ -3,7 +3,6 @@ import { Inter, Newsreader } from "next/font/google";
 import Script from "next/script";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MapPin, Mail, Phone } from "lucide-react";
-import DonateDialog from "@/components/DonateDialog";
 import Header from "@/components/Header";
 import ConditionalHeader from "@/components/ConditionalHeader";
 import BottomNav from "@/components/BottomNav";
@@ -94,8 +93,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           `}
         </Script>
         <SpeedInsights />
-        <DonateDialog />
-
         {/* Rich footer */}
         <footer className="relative mt-auto bg-primary-dark text-white overflow-hidden pb-20 md:pb-0">
           {/* Background image with overlay */}
