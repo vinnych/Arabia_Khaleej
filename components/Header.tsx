@@ -1,6 +1,7 @@
 import { Playfair_Display } from "next/font/google";
 import { Moon } from "lucide-react";
 import { getPrayerTimes } from "@/lib/prayer";
+import MobileMenu from "./MobileMenu";
 
 const playfair = Playfair_Display({ subsets: ["latin"], weight: ["700"], style: ["normal"] });
 
@@ -76,6 +77,9 @@ export default async function Header() {
             </>
           )}
         </nav>
+
+        {/* Mobile hamburger */}
+        <MobileMenu />
 
       </div>
     </header>
