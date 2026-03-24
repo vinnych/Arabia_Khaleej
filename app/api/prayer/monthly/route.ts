@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
   const city = (req.nextUrl.searchParams.get("city") || "Doha").replace(/[^a-zA-Z\s\-]/g, "").slice(0, 60);
   const country = (req.nextUrl.searchParams.get("country") || "Qatar").replace(/[^a-zA-Z\s\-]/g, "").slice(0, 60);
   const now = new Date();
-  const year = parseInt(req.nextUrl.searchParams.get("year") || String(now.getFullYear()));
-  const month = parseInt(req.nextUrl.searchParams.get("month") || String(now.getMonth() + 1));
+  const year = parseInt(req.nextUrl.searchParams.get("year") || String(now.getFullYear()), 10);
+  const month = parseInt(req.nextUrl.searchParams.get("month") || String(now.getMonth() + 1), 10);
   if (isNaN(year) || isNaN(month) || year < 1900 || year > 2100 || month < 1 || month > 12) {
     return NextResponse.json({ error: "Invalid year or month" }, { status: 400 });
   }

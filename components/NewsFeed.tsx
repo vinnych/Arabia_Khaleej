@@ -1,5 +1,6 @@
 import { getNews } from "@/lib/rss";
 import { ExternalLink } from "lucide-react";
+import Image from "next/image";
 
 export default async function NewsFeed({ limit = 6 }: { limit?: number }) {
   let news;
@@ -21,17 +22,19 @@ export default async function NewsFeed({ limit = 6 }: { limit?: number }) {
           href={`/news/${item.slug}`}
           className="card-base overflow-hidden group block min-w-[280px] sm:min-w-0 snap-center transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0"
         >
-          <div className="h-28 overflow-hidden relative">
+          <div className="h-28 overflow-hidden relative rounded-t-[0.875rem]">
             {item.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={item.imageUrl}
                 alt={item.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
+                fill
+                sizes="(max-width: 640px) 280px, (max-width: 768px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
-              <div className="w-full h-full bg-stone-100" />
+              <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200 flex items-end p-2">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-stone-400">{item.source}</span>
+              </div>
             )}
             <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm text-white text-[9px] px-2 py-1 rounded-full font-medium">
               {item.source}

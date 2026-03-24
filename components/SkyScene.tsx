@@ -47,12 +47,25 @@ export default function SkyScene({ prayers: defaultPrayers }: {
   const [countdown, setCountdown] = useState<string>("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  // Sky state — updates every minute to keep sun/moon synced
+  // Single interval drives both the clock and the prayer countdown
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(id);
   }, []);
+  // Sync prayer countdown with the same `now` value
+  useEffect(() => {
+    const localMin = now.getHours() * 60 + now.getMinutes();
+    let nextIdx = prayers.findIndex((p) => toMin(p.time) > localMin);
+    if (nextIdx === -1) nextIdx = 0;
+    const next = prayers[nextIdx];
+    setNextPrayer({ name: next.name, time: next.time });
+    let diffMin = toMin(next.time) - localMin;
+    if (diffMin < 0) diffMin += 24 * 60;
+    const h = Math.floor(diffMin / 60);
+    const m = diffMin % 60;
+    setCountdown(h > 0 ? `${h}h ${m}m` : `${m}m`);
+  }, [now, prayers]);
 
   const hours = now.getHours();
   const minutes = now.getMinutes();
@@ -82,25 +95,6 @@ export default function SkyScene({ prayers: defaultPrayers }: {
     isNight = false;
   }
 
-  // Recalculate next prayer + countdown whenever prayers change
-  useEffect(() => {
-    const tick = () => {
-      const n = new Date();
-      const localMin = n.getHours() * 60 + n.getMinutes();
-      let nextIdx = prayers.findIndex((p) => toMin(p.time) > localMin);
-      if (nextIdx === -1) nextIdx = 0;
-      const next = prayers[nextIdx];
-      setNextPrayer({ name: next.name, time: next.time });
-      let diffMin = toMin(next.time) - localMin;
-      if (diffMin < 0) diffMin += 24 * 60;
-      const h = Math.floor(diffMin / 60);
-      const m = diffMin % 60;
-      setCountdown(h > 0 ? `${h}h ${m}m` : `${m}m`);
-    };
-    tick();
-    const id = setInterval(tick, 60000);
-    return () => clearInterval(id);
-  }, [prayers]);
 
   const handleLocationClick = () => {
     if (locationStatus === "loading") return;
@@ -207,17 +201,9 @@ export default function SkyScene({ prayers: defaultPrayers }: {
         </motion.div>
       </div>
 
-      {/* Atmospheric orbs */}
-      <motion.div
-        className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full blur-[120px] opacity-40 pointer-events-none"
-        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <motion.div
-        className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary-accent rounded-full blur-[120px] opacity-20 pointer-events-none"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-      />
+      {/* Atmospheric orbs — CSS animations, no JS overhead */}
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full blur-[120px] pointer-events-none orb-pulse-a" />
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary-accent rounded-full blur-[120px] pointer-events-none orb-pulse-b" />
 
       <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8">
 

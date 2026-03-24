@@ -57,7 +57,7 @@ export default async function Header() {
               key={href}
               href={href}
               className="text-[10px] font-bold tracking-widest uppercase transition-colors duration-150"
-              style={{ color: "rgba(248,236,210,0.45)" }}
+              style={{ color: "rgba(248,236,210,0.80)" }}
             >
               {label}
             </a>

@@ -61,18 +61,18 @@ export default async function Home() {
       {/* Quick-link shortcuts — horizontal scroll on mobile */}
       <div className="flex gap-2 overflow-x-auto hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap mt-4 pb-1">
         {[
-          { href: "/prayer",         label: "Prayer",   icon: "🕌" },
-          { href: "/news",           label: "News",     icon: "📰" },
-          { href: "/jobs",           label: "Jobs",     icon: "💼" },
-          { href: "/weather",        label: "Weather",  icon: "🌤️" },
-          { href: "/currency",       label: "Currency", icon: "💱" },
-          { href: "/hijri-calendar", label: "Hijri",    icon: "🗓️" },
-          { href: "/qatar-metro",    label: "Metro",    icon: "🚇" },
-        ].map(({ href, label, icon }) => (
+          { href: "/prayer",         label: "Prayer",   icon: "🕌", cls: "bg-purple-50 border-purple-200 text-purple-800 hover:bg-purple-100" },
+          { href: "/news",           label: "News",     icon: "📰", cls: "bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100" },
+          { href: "/jobs",           label: "Jobs",     icon: "💼", cls: "bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100" },
+          { href: "/weather",        label: "Weather",  icon: "🌤️", cls: "bg-sky-50 border-sky-200 text-sky-800 hover:bg-sky-100" },
+          { href: "/currency",       label: "Currency", icon: "💱", cls: "bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100" },
+          { href: "/hijri-calendar", label: "Hijri",    icon: "🗓️", cls: "bg-rose-50 border-rose-200 text-rose-800 hover:bg-rose-100" },
+          { href: "/qatar-metro",    label: "Metro",    icon: "🚇", cls: "bg-red-50 border-red-200 text-red-800 hover:bg-red-100" },
+        ].map(({ href, label, icon, cls }) => (
           <a
             key={href}
             href={href}
-            className="flex items-center gap-1.5 shrink-0 px-3 py-1.5 bg-white rounded-full border border-stone-200 text-xs font-semibold text-gray-700 hover:border-primary hover:text-primary transition-colors shadow-sm active:scale-95"
+            className={`flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full border text-xs font-semibold transition-colors shadow-sm active:scale-95 ${cls}`}
           >
             <span>{icon}</span>
             <span>{label}</span>

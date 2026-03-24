@@ -133,13 +133,13 @@ export async function getNews(limit = 12): Promise<NewsItem[]> {
 
   const items: NewsItem[] = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
 
-  // For items without images, fetch from Pexels (awaited so images are included in response)
+  // For items without images, fetch from Pexels in the background and cache in Redis.
+  // Images will appear on the next request once cached — avoids blocking page render.
   const itemsWithoutImage = items.filter((item) => !item.imageUrl);
   if (itemsWithoutImage.length > 0) {
-    await Promise.allSettled(
+    Promise.allSettled(
       itemsWithoutImage.map(async (item) => {
-        const img = await fetchPexelsImage(item.slug, item.title, item.link);
-        if (img) item.imageUrl = img;
+        await fetchPexelsImage(item.slug, item.title, item.link);
       })
     );
   }

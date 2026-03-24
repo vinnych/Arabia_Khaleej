@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Newsreader } from "next/font/google";
 import Script from "next/script";
+import Image from "next/image";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { MapPin, Mail, Phone } from "lucide-react";
 import Header from "@/components/Header";
@@ -97,12 +98,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <footer className="relative mt-auto bg-primary-dark text-white overflow-hidden pb-20 md:pb-0">
           {/* Background image with overlay */}
           <div className="absolute inset-0 z-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="https://images.unsplash.com/photo-1599839619722-39751411ea63?auto=format&fit=crop&q=80&w=2000"
               alt="Doha Skyline"
-              className="w-full h-full object-cover opacity-20"
-              referrerPolicy="no-referrer"
+              fill
+              sizes="100vw"
+              className="object-cover opacity-20"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent" />
           </div>
