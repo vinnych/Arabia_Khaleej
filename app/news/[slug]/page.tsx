@@ -32,14 +32,16 @@ export async function generateMetadata({
   const { slug } = await params;
   const item = await getNewsItem(slug);
   if (!item) return {};
+  const rawSnippet = item.contentSnippet || `Read the latest news from ${item.source} on Qatar Portal.`;
+  const description = rawSnippet.length > 160 ? rawSnippet.slice(0, 157) + "…" : rawSnippet;
   return {
     title: `${item.title} | Qatar Portal`,
-    description: item.contentSnippet || `Read the latest news from ${item.source} on Qatar Portal.`,
+    description,
     keywords: [item.source, "Qatar news", "Gulf news", "Doha news", ...item.title.split(" ").filter(w => w.length > 4).slice(0, 4)],
     alternates: { canonical: `${SITE_URL}/news/${slug}` },
     openGraph: {
       title: item.title,
-      description: item.contentSnippet || `Read the latest news from ${item.source} on Qatar Portal.`,
+      description,
       url: `${SITE_URL}/news/${slug}`,
       siteName: "Qatar Portal",
       type: "article",
@@ -48,7 +50,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: item.title,
-      description: item.contentSnippet || `Read the latest news from ${item.source} on Qatar Portal.`,
+      description,
     },
   };
 }
@@ -89,7 +91,7 @@ export default async function NewsArticlePage({
     author: { "@type": "Organization", name: item.source },
     publisher: {
       "@type": "Organization",
-      name: item.source,
+      name: "Qatar Portal",
       logo: { "@type": "ImageObject", url: `${SITE_URL}/icon.svg` },
     },
     description: summary ?? item.contentSnippet,

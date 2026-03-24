@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     siteName: "Qatar Portal",
     locale: "en_US",
     type: "website",
+    images: [{ url: "https://qatar-portal.vercel.app/opengraph-image", width: 1200, height: 630 }],
   },
 };
 
@@ -49,6 +50,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "@type": "SearchAction",
               "target": { "@type": "EntryPoint", "urlTemplate": "https://qatar-portal.vercel.app/news?q={search_term_string}" },
               "query-input": "required name=search_term_string"
+            }
+          })}}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{__html: safeJsonLd({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Qatar Portal",
+            "url": "https://qatar-portal.vercel.app",
+            "logo": "https://qatar-portal.vercel.app/icon.svg",
+            "description": "Your daily Qatar resource: accurate prayer times for Doha, latest job listings in Qatar, and top Gulf news headlines.",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "West Bay",
+              "addressRegion": "Doha",
+              "addressCountry": "QA"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "email": "info@qatarportal.qa",
+              "contactType": "customer support"
             }
           })}}
         />
