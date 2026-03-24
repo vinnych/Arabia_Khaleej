@@ -33,7 +33,7 @@ const homeJsonLd = {
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-2">
-      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest whitespace-nowrap">{children}</span>
+      <span className="text-[10px] font-bold text-gray-600 uppercase tracking-widest whitespace-nowrap">{children}</span>
       <div className="flex-1 h-px bg-stone-200" />
     </div>
   );
@@ -111,7 +111,7 @@ export default async function Home() {
                 { q: "What are today's prayer times in Qatar?", a: "All five daily prayer times for Qatar (Fajr, Dhuhr, Asr, Maghrib, Isha) are updated daily." },
                 { q: "Where can I find jobs in Qatar?", a: "Qatar Portal lists the latest job vacancies in Doha and Qatar, updated daily from top Gulf job boards." },
               ].map(({ q, a }) => (
-                <details key={q} className="group">
+                <details key={q} className="group" suppressHydrationWarning>
                   <summary className="cursor-pointer list-none flex items-center justify-between text-sm font-medium text-gray-700 hover:text-primary transition-colors py-3.5 min-h-[44px]">
                     <span>{q}</span>
                     <span className="text-gray-300 group-open:rotate-180 transition-transform text-xs ml-3 shrink-0">▼</span>
