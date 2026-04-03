@@ -27,9 +27,9 @@ export interface NewsItem {
 }
 
 const FEEDS = [
-  //{ url: "https://www.aljazeera.com/xml/rss/all.xml", source: "Al Jazeera" },
-  //{ url: "https://news.google.com/rss/search?q=qatar&hl=en-US&gl=US&ceid=US:en", source: "Google News" },
-  //{ url: "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml", source: "BBC Middle East" },
+  { url: "https://www.aljazeera.com/xml/rss/all.xml", source: "Al Jazeera" },
+  { url: "https://news.google.com/rss/search?q=qatar&hl=en-US&gl=US&ceid=US:en", source: "Google News" },
+  { url: "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml", source: "BBC Middle East" },
 ];
 
 /** Fetch a relevant image from Pexels based on article title keywords. Cached in Redis. */
