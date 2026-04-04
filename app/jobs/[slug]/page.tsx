@@ -76,8 +76,9 @@ export default async function JobDetailPage({
     "@context": "https://schema.org",
     "@type": "JobPosting",
     title: job.title,
-    url: `${SITE_URL}/jobs/${slug}`,
-    description: `${job.title} — job opportunity in Qatar at ${job.company || "Qatar Employer"}.`,
+    description: job.description
+      ? job.description
+      : `${job.title} position available at ${job.company || "Qatar Employer"} in ${job.location || "Qatar"}. This is a job opportunity based in Qatar. Apply via the link below.`,
     hiringOrganization: { "@type": "Organization", name: job.company || "Qatar Employer" },
     jobLocation: {
       "@type": "Place",

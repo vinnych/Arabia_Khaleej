@@ -83,7 +83,7 @@ export default async function NewsArticlePage({
 
   const summary = await summarizeArticle(slug, item.title, item.contentSnippet, item.source);
 
-  const isoDate = (() => { try { return new Date(item.pubDate).toISOString(); } catch { return item.pubDate; } })();
+  const isoDate = (() => { try { const d = new Date(item.pubDate); return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString(); } catch { return new Date().toISOString(); } })();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -96,11 +96,11 @@ export default async function NewsArticlePage({
     publisher: {
       "@type": "Organization",
       name: "Qatar Portal",
-      logo: { "@type": "ImageObject", url: `${SITE_URL}/icon.svg` },
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.png`, width: 200, height: 60 },
     },
     description: summary ?? item.contentSnippet,
     mainEntityOfPage: `${SITE_URL}/news/${slug}`,
-    image: item.imageUrl ?? `${SITE_URL}/opengraph-image`,
+    image: { "@type": "ImageObject", url: item.imageUrl ?? `${SITE_URL}/opengraph-image`, width: 1200, height: 630 },
   };
 
   const breadcrumbLd = {

@@ -23,6 +23,7 @@ export interface Job {
   slug: string;
   pubDate: string;
   source: string;
+  description?: string;
 }
 
 const JOB_FEEDS = [
@@ -71,6 +72,7 @@ export async function getJobs(limit = 12): Promise<Job[]> {
             plainDesc.match(/([A-Za-z\s]+),\s*Qatar/i);
           const location = locationMatch ? locationMatch[1].trim().replace(/[^a-zA-Z\s,]/g, "").slice(0, 60) : "Qatar";
 
+          const description = plainDesc.slice(0, 500).trim() || undefined;
           const cleanLink = link.trim();
           if (cleanTitle && cleanLink && isSafeExternalUrl(cleanLink)) {
             jobs.push({
@@ -81,6 +83,7 @@ export async function getJobs(limit = 12): Promise<Job[]> {
               slug: toSlug(cleanTitle.trim(), cleanLink),
               pubDate: pubDate.trim(),
               source,
+              description,
             });
           }
         }
