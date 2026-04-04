@@ -14,7 +14,7 @@ function isSafeExternalUrl(str: string): boolean {
 }
 
 const HARD_LIMIT = 48;
-import { redis, KV_TTL } from "./redis";
+import { redis, KV_TTL, isMaintenance } from "./redis";
 
 export interface NewsItem {
   title: string;
@@ -82,6 +82,7 @@ export async function fetchPexelsImage(slug: string, title: string, articleUrl?:
 }
 
 export async function getNews(limit = 12): Promise<NewsItem[]> {
+  if (isMaintenance()) return [];
   const results = await Promise.allSettled(
     FEEDS.map(async ({ url, source }): Promise<NewsItem[]> => {
       const feedItems: NewsItem[] = [];

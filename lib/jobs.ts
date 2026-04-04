@@ -13,7 +13,7 @@ function isSafeExternalUrl(str: string): boolean {
 }
 
 const HARD_LIMIT = 48;
-import { redis, KV_TTL } from "./redis";
+import { redis, KV_TTL, isMaintenance } from "./redis";
 
 export interface Job {
   title: string;
@@ -38,6 +38,7 @@ const JOB_FEEDS = [
 ];
 
 export async function getJobs(limit = 12): Promise<Job[]> {
+  if (isMaintenance()) return [];
   const jobs: Job[] = [];
 
   await Promise.allSettled(

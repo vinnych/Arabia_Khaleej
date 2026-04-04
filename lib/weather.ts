@@ -56,6 +56,7 @@ const DOHA_LAT = 25.2854;
 const DOHA_LON = 51.531;
 
 export async function getDohaWeather(): Promise<WeatherData | null> {
+  if (process.env.MAINTENANCE_MODE === "true") return null;
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);
@@ -84,6 +85,7 @@ export async function getDohaWeather(): Promise<WeatherData | null> {
 }
 
 export async function getFullWeather(): Promise<FullWeather | null> {
+  if (process.env.MAINTENANCE_MODE === "true") return null;
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);

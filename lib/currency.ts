@@ -22,6 +22,7 @@ const DISPLAY_CURRENCIES: { code: string; flag: string; name: string }[] = [
 ];
 
 export async function getQARRates(): Promise<CurrencyData | null> {
+  if (process.env.MAINTENANCE_MODE === "true") return null;
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);

@@ -1,5 +1,5 @@
 import Groq from "groq-sdk";
-import { redis } from "./redis";
+import { redis, isMaintenance } from "./redis";
 
 const apiKey = process.env.GROQ_API_KEY;
 const CACHE_KEY = (slug: string) => `news:summary:${slug}`;
@@ -11,6 +11,7 @@ export async function summarizeArticle(
   snippet: string | undefined,
   source: string
 ): Promise<string | null> {
+  if (isMaintenance()) return null;
   // 1. Check Redis cache first
   if (redis) {
     try {

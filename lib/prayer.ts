@@ -1,4 +1,4 @@
-import { redis } from "@/lib/redis";
+import { redis, isMaintenance } from "@/lib/redis";
 
 export interface PrayerTimes {
   Fajr: string;
@@ -26,6 +26,7 @@ export interface PrayerDay {
 }
 
 export async function getPrayerTimes(city = "Doha", country = "Qatar"): Promise<PrayerTimes> {
+  if (isMaintenance()) throw new Error("Maintenance mode");
   const cacheKey = `prayer:today:${city}:${country}`;
   if (redis) {
     try {
