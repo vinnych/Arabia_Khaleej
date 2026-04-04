@@ -34,7 +34,7 @@ export async function summarizeArticle(
       messages: [
         {
           role: "system",
-          content: "You are a neutral news summarizer. Write concise 2–3 sentence summaries in your own words. Never copy the original text. Be factual and objective.",
+          content: "You are a neutral news summarizer. Write a concise 4-5 sentence summary in your own words. Never copy the original text. Be factual and objective.",
         },
         {
           role: "user",
@@ -42,7 +42,7 @@ export async function summarizeArticle(
           content: `Summarize this news article:\n\nTitle: ${title.replace(/[\x00-\x1f\x7f]/g, " ").slice(0, 200)}\nSource: ${source.replace(/[\x00-\x1f\x7f]/g, " ").slice(0, 80)}\nSnippet: ${(snippet ?? "").replace(/[\x00-\x1f\x7f]/g, " ").slice(0, 500)}`,
         },
       ],
-      max_tokens: 150,
+      max_tokens: 300,
       temperature: 0.3,
     });
 
