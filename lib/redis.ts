@@ -18,7 +18,7 @@ function getRedis(): Redis | null {
 
 export const redis = getRedis();
 
-export const KV_TTL = 60 * 60 * 24 * 7; // 7 days in seconds
+export const KV_TTL = 60 * 60 * 24 * 30; // 30 days in seconds
 
 /**
  * Returns true when MAINTENANCE_MODE=true is set in env vars.

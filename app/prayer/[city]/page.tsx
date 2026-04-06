@@ -81,6 +81,16 @@ export default async function CityPrayerPage({ params }: { params: Promise<{ cit
         description: `Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}`,
         inLanguage: "en",
         isPartOf: { "@type": "WebSite", name: "Qatar Portal", url: SITE_URL },
+        mainEntity: {
+          "@type": "ItemList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Fajr", description: today.Fajr },
+            { "@type": "ListItem", position: 2, name: "Dhuhr", description: today.Dhuhr },
+            { "@type": "ListItem", position: 3, name: "Asr", description: today.Asr },
+            { "@type": "ListItem", position: 4, name: "Maghrib", description: today.Maghrib },
+            { "@type": "ListItem", position: 5, name: "Isha", description: today.Isha },
+          ],
+        },
         spatialCoverage: {
           "@type": "Place",
           name: `${entry.city}, ${entry.country}`,

@@ -1,4 +1,4 @@
-import { getJobs, type Job } from "@/lib/jobs";
+import { getJobs, getJobTombstone, type Job } from "@/lib/jobs";
 import { safeJsonLd, isValidHttpUrl } from "@/lib/utils";
 import CalendarDate from "@/components/CalendarDate";
 import ShareButton from "@/components/ShareButton";
@@ -61,12 +61,39 @@ export default async function JobDetailPage({
   const { slug } = await params;
   const job = await getJobItem(slug);
   if (!job) {
-    let link: string | null = null;
+    // Legacy: some old slugs were base64url-encoded external links
     try {
       const decoded = Buffer.from(slug, "base64url").toString();
-      if (isValidHttpUrl(decoded)) link = decoded;
-    } catch { /* invalid slug */ }
-    if (link) redirect(link);
+      if (isValidHttpUrl(decoded)) redirect(decoded);
+    } catch { /* not a legacy slug */ }
+
+    // Check tombstone — job existed but has expired from the feed
+    const tombstone = await getJobTombstone(slug);
+    if (tombstone) {
+      return (
+        <div className="w-full">
+          <div className="mb-3">
+            <a href="/jobs" className="inline-block text-xs text-gray-400 hover:text-primary py-2">
+              ← Back to Jobs
+            </a>
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+            <p className="text-sm font-semibold text-amber-800 mb-1">This job listing has expired</p>
+            <p className="text-sm text-amber-700">
+              <span className="font-medium">{tombstone.title}</span>
+              {tombstone.company ? ` at ${tombstone.company}` : ""} is no longer active.
+            </p>
+          </div>
+          <a
+            href="/jobs"
+            className="inline-block bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:scale-[1.02] transition-transform"
+          >
+            Browse current jobs in Qatar →
+          </a>
+        </div>
+      );
+    }
+
     notFound();
   }
 
