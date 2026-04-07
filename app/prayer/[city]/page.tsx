@@ -76,9 +76,9 @@ export default async function CityPrayerPage({ params }: { params: Promise<{ cit
     ? {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        name: `${entry.city} Prayer Times — ${today.date}`,
+        name: `${entry.city} Prayer Times — Qatar Portal`,
         url: `${SITE_URL}/prayer/${slug}`,
-        description: `Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}`,
+        description: `Daily prayer times for ${entry.city}. Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}.`,
         inLanguage: "en",
         isPartOf: { "@type": "WebSite", name: "Qatar Portal", url: SITE_URL },
         mainEntity: {
@@ -91,7 +91,7 @@ export default async function CityPrayerPage({ params }: { params: Promise<{ cit
             { "@type": "ListItem", position: 5, name: "Isha", description: today.Isha },
           ],
         },
-        spatialCoverage: {
+        about: {
           "@type": "Place",
           name: `${entry.city}, ${entry.country}`,
           geo: { "@type": "GeoCoordinates", latitude: entry.lat, longitude: entry.lng },
