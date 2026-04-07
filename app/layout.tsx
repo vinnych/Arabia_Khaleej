@@ -92,7 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }
           })}}
         />
-        <main id="main-content" className="flex-grow w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-5 pb-20 md:pb-5">{children}</main>
+        <main id="main-content" className="flex-grow w-full px-4 sm:px-5 md:px-8 lg:px-12 py-5 sm:py-6 pb-20 md:pb-6">{children}</main>
         <CookieConsent />
         <SpeedInsights />
         {/* Footer */}

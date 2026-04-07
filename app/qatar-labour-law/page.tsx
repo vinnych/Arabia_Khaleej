@@ -6,6 +6,7 @@ export const metadata = pageMeta({
   description: "Complete guide to Qatar Labour Law 2026: working hours, minimum wage, annual leave, end of service, overtime, notice period, and worker rights.",
   path: "/qatar-labour-law",
   keywords: ["Qatar labour law 2026", "Qatar employment law", "Qatar working hours", "Qatar minimum wage", "Qatar end of service", "Qatar overtime pay", "Qatar annual leave"],
+  ogTitle: "Qatar Labour Law 2026 — Employee Rights & Work Rules",
   ogDescription: "Qatar Labour Law guide: working hours, minimum wage, annual leave, end of service, and worker rights for expats.",
 });
 
@@ -136,7 +137,7 @@ export default function QatarLabourLawPage() {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="page-sections">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar Labour Law 2026", item: "https://qatar-portal.vercel.app/qatar-labour-law" }] }) }} />
 

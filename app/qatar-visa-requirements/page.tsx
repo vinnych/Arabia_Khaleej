@@ -6,6 +6,7 @@ export const metadata = pageMeta({
   description: "Qatar visa requirements for 2026: visa-free countries, tourist visa, work visa, family visa, fees, and how to apply online via Hayya platform.",
   path: "/qatar-visa-requirements",
   keywords: ["Qatar visa requirements", "Qatar tourist visa 2026", "Qatar work visa", "Hayya visa Qatar", "Qatar visa on arrival"],
+  ogTitle: "Qatar Visa Requirements 2026 — Complete Guide",
   ogDescription: "Everything you need to know about Qatar visas: tourist, work, family, fees, and how to apply.",
 });
 
@@ -50,7 +51,7 @@ export default function QatarVisaRequirementsPage() {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="page-sections">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar Visa Requirements", item: "https://qatar-portal.vercel.app/qatar-visa-requirements" }] }) }} />
 

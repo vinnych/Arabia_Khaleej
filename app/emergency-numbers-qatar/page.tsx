@@ -52,7 +52,7 @@ export default function EmergencyNumbersQatarPage() {
   };
 
   return (
-    <div className="w-full space-y-10">
+    <div className="page-sections">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 

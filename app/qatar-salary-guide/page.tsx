@@ -6,7 +6,8 @@ export const metadata = pageMeta({
   description: "Average salaries in Qatar by job category and experience level. Tax-free income guide for expats in Doha 2026.",
   path: "/qatar-salary-guide",
   keywords: ["Qatar salary guide 2026", "average salary Qatar", "Doha salary", "Qatar salary by job", "expat salary Qatar", "IT salary Qatar", "engineering salary Qatar"],
-  ogDescription: "Average salaries in Qatar by job category, experience level, and sector. Tax-free income guide for expats.",
+  ogTitle: "Qatar Salary Guide 2026 — Average Salaries in Doha",
+  ogDescription: "Average salaries in Qatar by job category, experience level, and sector. Tax-free income guide for expats in Doha.",
 });
 
 const SALARY_CATEGORIES = [
@@ -109,7 +110,7 @@ export default function QatarSalaryGuidePage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="page-sections">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar Salary Guide 2026", item: "https://qatar-portal.vercel.app/qatar-salary-guide" }] }) }} />
 

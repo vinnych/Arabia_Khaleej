@@ -26,7 +26,7 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="w-full space-y-5">
+    <div className="page-sections">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}

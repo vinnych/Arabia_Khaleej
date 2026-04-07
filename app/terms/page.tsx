@@ -2,13 +2,15 @@ import { pageMeta } from "@/lib/seo";
 
 export const metadata = pageMeta({
   title: "Terms of Service | Qatar Portal",
-  description: "Terms of service governing your use of Qatar Portal, including content, liability, and intellectual property.",
+  description: "Terms of service governing your use of Qatar Portal, including content usage, liability, intellectual property, and user obligations.",
   path: "/terms",
+  ogTitle: "Terms of Service | Qatar Portal",
+  ogDescription: "Read the terms governing your use of Qatar Portal — content, liability, and intellectual property.",
 });
 
 export default function TermsPage() {
   return (
-    <div className="max-w-2xl mx-auto py-8">
+    <div className="page-sections max-w-2xl mx-auto">
       <h1 className="font-newsreader text-3xl font-bold text-on-surface mb-2">Terms of Service</h1>
       <p className="text-xs text-gray-400 mb-8">Last updated: 24 March 2026</p>
 

@@ -51,7 +51,7 @@ export default function CostOfLivingDohaPage() {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="page-sections">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Cost of Living in Doha", item: `${SITE_URL}/cost-of-living-doha` }] }) }} />
 

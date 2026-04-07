@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Spacing system ───────────────────────────────────────────
+   Desktop-first cheat sheet:
+     Page side padding  →  16px (mobile) · 20px (sm) · 32px (md) · 48px (lg)
+     Section gap        →  32px (mobile) · 48px (sm+)
+     Card inner padding →  16px (mobile) · 20px (sm) · 24px (lg)
+     Grid / flex gap    →  16px (mobile) · 24px (sm) · 32px (lg)
+   ─────────────────────────────────────────────────────────── */
+
 /* ── Zip design utilities ─────────────────────────────────── */
 .glass-panel {
   background: rgba(255, 255, 255, 0.2);
@@ -64,6 +72,76 @@
     background:
       radial-gradient(ellipse 90% 40% at 50% -5%, rgba(245, 235, 215, 0.55) 0%, transparent 65%),
       #faf9f6;
+  }
+}
+
+@layer components {
+  /* ── Guide page hero glassmorphic stat chip ───────────────── */
+  .guide-stat-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* ── Guide section header (gold accent rule) ─────────────── */
+  .guide-section-label {
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #78716c;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+  }
+  .guide-section-label::before {
+    content: "";
+    display: block;
+    width: 12px;
+    height: 2px;
+    background: #D4AF37; /* gold accent */
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── Top-level page section wrapper — replaces w-full space-y-X on every page */
+  .page-sections {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem; /* 32px mobile */
+  }
+  @media (min-width: 640px) {
+    .page-sections { gap: 3rem; } /* 48px sm+ */
+  }
+
+  /* Responsive card padding — use alongside rounded-xl border */
+  .card-pad {
+    padding: 1rem; /* 16px mobile */
+  }
+  @media (min-width: 640px) {
+    .card-pad { padding: 1.25rem; } /* 20px sm */
+  }
+  @media (min-width: 1024px) {
+    .card-pad { padding: 1.5rem; } /* 24px lg */
+  }
+
+  /* Responsive grid gap */
+  .grid-gap {
+    gap: 1rem; /* 16px mobile */
+  }
+  @media (min-width: 640px) {
+    .grid-gap { gap: 1.5rem; } /* 24px sm */
+  }
+  @media (min-width: 1024px) {
+    .grid-gap { gap: 2rem; } /* 32px lg */
   }
 }
 

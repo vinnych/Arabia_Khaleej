@@ -55,7 +55,7 @@ export default async function CurrencyPage() {
   };
 
   return (
-    <div className="w-full space-y-5">
+    <div className="page-sections">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "QAR Exchange Rates", item: "https://qatar-portal.vercel.app/currency" }] }) }} />
 

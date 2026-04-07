@@ -5,6 +5,7 @@ export const metadata = pageMeta({
   description: "Privacy Policy for Qatar Portal — how we collect data, use analytics (Vercel), display ads (AdSense), and protect your privacy.",
   path: "/privacy",
   keywords: ["Qatar Portal privacy policy", "data privacy Qatar Portal", "cookies Qatar Portal"],
+  ogTitle: "Privacy Policy | Qatar Portal",
   ogDescription: "Privacy Policy for Qatar Portal — how we handle data, analytics, and advertising.",
 });
 
@@ -12,7 +13,7 @@ const LAST_UPDATED = "18 March 2026";
 
 export default function PrivacyPage() {
   return (
-    <div className="w-full space-y-8">
+    <div className="page-sections">
       <div>
         <h1 className="font-newsreader text-3xl font-bold text-on-surface mb-2">Privacy Policy</h1>
         <p className="text-sm text-gray-400">Last updated: {LAST_UPDATED}</p>

@@ -106,7 +106,7 @@ export default function WorkInQatarPage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="page-sections">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
 

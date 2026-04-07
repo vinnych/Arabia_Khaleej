@@ -66,7 +66,7 @@ export default async function NewsCategoryHubPage() {
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="page-sections">
         {categoryCounts.map((cat) => (
           <div key={cat.slug} className="bg-sky-50 border border-sky-100 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-sky-100">

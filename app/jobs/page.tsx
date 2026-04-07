@@ -10,6 +10,8 @@ export const metadata = pageMeta({
   description: "Browse the latest job vacancies in Qatar, updated daily from Google News. Find jobs in Doha and across Qatar.",
   path: "/jobs",
   keywords: ["Qatar jobs", "jobs in Qatar", "Doha jobs", `Qatar vacancies ${year}`, "Gulf jobs", "Qatar hiring", "Qatar careers"],
+  ogTitle: `Latest Jobs in Qatar ${year} | Qatar Portal`,
+  ogDescription: "Browse the latest job vacancies in Qatar, updated daily. Find jobs in Doha and across the Gulf.",
 });
 
 export default async function JobsPage() {

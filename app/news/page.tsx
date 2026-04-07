@@ -9,6 +9,7 @@ export const metadata = pageMeta({
   description: "Latest breaking news from Qatar and the Gulf — updated every 15 minutes from Al Jazeera, BBC Middle East, and Google News.",
   path: "/news",
   keywords: ["Qatar news today", "Gulf news", "Al Jazeera Qatar", "BBC Middle East", "Qatar breaking news", "Doha news"],
+  ogTitle: "Qatar & Gulf Breaking News Today | Qatar Portal",
   ogDescription: "Latest breaking news from Qatar and the Gulf — updated every 15 minutes from Al Jazeera, BBC and Google News.",
 });
 
