@@ -5,7 +5,7 @@ import ShareButton from "@/components/ShareButton";
 import { redis } from "@/lib/redis";
 import { cache } from "react";
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 const getCachedJobs = cache(() => getJobs(48));
 
@@ -31,7 +31,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJobItem(slug);
-  if (!job) return {};
+  if (!job) {
+    // Expired job — tell crawlers not to index this URL
+    return {
+      title: "Job No Longer Available | Qatar Portal",
+      robots: { index: false, follow: false },
+    };
+  }
   return {
     title: `${job.title} at ${job.company} — Qatar Jobs | Qatar Portal`,
     description: `${job.title} position at ${job.company} in ${job.location}. Apply now via Qatar Portal.`,
@@ -69,32 +75,38 @@ export default async function JobDetailPage({
 
     // Check tombstone — job existed but has expired from the feed
     const tombstone = await getJobTombstone(slug);
-    if (tombstone) {
-      return (
-        <div className="w-full">
+
+    // Whether we have a tombstone or not, always show an expired page (never 404).
+    // Returning 404 on old job URLs harms SEO — Google keeps recrawling them.
+    // noindex tells Google to deindex without a 404 signal.
+    return (
+      <div className="w-full">
           <div className="mb-3">
-            <a href="/jobs" className="inline-block text-xs text-gray-400 hover:text-primary py-2">
-              ← Back to Jobs
-            </a>
-          </div>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
-            <p className="text-sm font-semibold text-amber-800 mb-1">This job listing has expired</p>
-            <p className="text-sm text-amber-700">
-              <span className="font-medium">{tombstone.title}</span>
-              {tombstone.company ? ` at ${tombstone.company}` : ""} is no longer active.
-            </p>
-          </div>
-          <a
-            href="/jobs"
-            className="inline-block bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:scale-[1.02] transition-transform"
-          >
-            Browse current jobs in Qatar →
+          <a href="/jobs" className="inline-block text-xs text-gray-400 hover:text-primary py-2">
+            ← Back to Jobs
           </a>
         </div>
-      );
-    }
-
-    notFound();
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+          <p className="text-sm font-semibold text-amber-800 mb-1">This job listing has expired</p>
+          <p className="text-sm text-amber-700">
+            {tombstone ? (
+              <>
+                <span className="font-medium">{tombstone.title}</span>
+                {tombstone.company ? ` at ${tombstone.company}` : ""} is no longer active.
+              </>
+            ) : (
+              "This job listing is no longer available. It may have been filled or removed."
+            )}
+          </p>
+        </div>
+        <a
+          href="/jobs"
+          className="inline-block bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:scale-[1.02] transition-transform"
+        >
+          Browse current jobs in Qatar →
+        </a>
+      </div>
+    );
   }
 
   const isoDate = (() => { try { return new Date(job.pubDate).toISOString().split("T")[0]; } catch { return new Date().toISOString().split("T")[0]; } })();
