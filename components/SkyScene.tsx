@@ -145,15 +145,17 @@ export default function SkyScene({ prayers: defaultPrayers }: {
   };
 
   return (
-    <motion.div
+    <motion.section
       className="relative w-full overflow-hidden text-white shadow-2xl"
       animate={{ background: bgGradient }}
       transition={{ duration: 2, ease: "easeInOut" }}
       id="prayer"
+      aria-label="Prayer times"
     >
       {/* Stars */}
       <motion.div
         className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
         animate={{ opacity: isNight ? 1 : 0.1 }}
         transition={{ duration: 2 }}
       >
@@ -174,7 +176,7 @@ export default function SkyScene({ prayers: defaultPrayers }: {
       </motion.div>
 
       {/* Sun / Moon orbit */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-80">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-80" aria-hidden="true">
         <motion.div
           className="absolute top-[30%] left-1/2 w-[800px] h-[800px] -ml-[400px] rounded-full border border-white/5"
           animate={{ rotate: rotationAngle }}
@@ -191,9 +193,19 @@ export default function SkyScene({ prayers: defaultPrayers }: {
         </motion.div>
       </div>
 
-      {/* Atmospheric orbs — CSS animations, no JS overhead */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full blur-[120px] pointer-events-none orb-pulse-a" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary-accent rounded-full blur-[120px] pointer-events-none orb-pulse-b" />
+      {/* Atmospheric orbs — consolidated into one node to reduce overdraw.
+          will-change: transform promotes to its own compositor layer so the
+          scale/opacity animation doesn't repaint the rest of the scene. */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        aria-hidden="true"
+        style={{
+          background:
+            "radial-gradient(circle at top right, rgba(103,0,36,0.45) 0%, transparent 55%), " +
+            "radial-gradient(circle at bottom left, rgba(212,175,55,0.30) 0%, transparent 55%)",
+          willChange: "transform",
+        }}
+      />
 
       <div className="relative z-10 w-full px-4 sm:px-6 lg:px-8">
 
@@ -398,6 +410,6 @@ export default function SkyScene({ prayers: defaultPrayers }: {
           />
         </svg>
       </div>
-    </motion.div>
+    </motion.section>
   );
 }
