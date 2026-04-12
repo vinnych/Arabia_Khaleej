@@ -64,19 +64,19 @@ export default async function CurrencyPage() {
         <h1 className="font-newsreader text-xl font-bold text-on-surface mb-1">
           QAR Exchange Rates Today
         </h1>
-        <p className="text-xs text-gray-400 mb-3">{today} · Updated hourly</p>
+        <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">{today} · Updated hourly</p>
       </div>
 
       {!data ? (
-        <p className="text-gray-400">Exchange rate data is currently unavailable. Please try again shortly.</p>
+        <p className="text-gray-400 dark:text-slate-500">Exchange rate data is currently unavailable. Please try again shortly.</p>
       ) : (
         <>
           {/* USD peg highlight */}
-          <div className="bg-rose-50 border border-rose-100 rounded-lg p-3 mb-4 flex items-center gap-4">
+          <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-100 dark:border-rose-800/30 rounded-lg p-3 mb-4 flex items-center gap-4">
             <span className="text-4xl">🇶🇦</span>
             <div>
-              <p className="text-sm text-rose-700 font-semibold uppercase tracking-wide mb-1">Qatari Riyal (QAR)</p>
-              <p className="text-gray-700 text-sm">The QAR is <strong>pegged to the US Dollar</strong> at a fixed rate of <strong>1 USD = 3.64 QAR</strong>. This peg has been maintained since 1980.</p>
+              <p className="text-sm text-rose-700 dark:text-rose-400 font-semibold uppercase tracking-wide mb-1">Qatari Riyal (QAR)</p>
+              <p className="text-gray-700 dark:text-slate-300 text-sm">The QAR is <strong>pegged to the US Dollar</strong> at a fixed rate of <strong>1 USD = 3.64 QAR</strong>. This peg has been maintained since 1980.</p>
             </div>
           </div>
 
@@ -85,20 +85,20 @@ export default async function CurrencyPage() {
 
           {/* SEO info section */}
           <section className="space-y-3">
-            <h2 className="text-sm font-semibold text-gray-700 mb-2">About the Qatari Riyal</h2>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">About the Qatari Riyal</h2>
             <div className="grid sm:grid-cols-2 gap-3">
-              <div className="bg-stone-50 rounded-lg border border-stone-200 p-3">
-                <h3 className="font-semibold text-gray-800 mb-2">Currency Facts</h3>
-                <ul className="text-sm text-gray-600 space-y-1">
+              <div className="bg-stone-50 dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 p-3">
+                <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Currency Facts</h3>
+                <ul className="text-sm text-gray-600 dark:text-slate-400 space-y-1">
                   <li>· Symbol: QAR (﷼)</li>
                   <li>· Subdivisions: 100 dirhams</li>
                   <li>· Issued by: Qatar Central Bank</li>
                   <li>· Peg: Fixed at 3.64 QAR/USD since 1980</li>
                 </ul>
               </div>
-              <div className="bg-stone-50 rounded-lg border border-stone-200 p-3">
-                <h3 className="font-semibold text-gray-800 mb-2">Sending Money to Qatar?</h3>
-                <p className="text-sm text-gray-600">
+              <div className="bg-stone-50 dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 p-3">
+                <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Sending Money to Qatar?</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">
                   Most major remittance services (Western Union, Wise, MoneyGram) support QAR. Compare rates before sending — service fees can vary significantly between providers.
                 </p>
               </div>
@@ -107,7 +107,7 @@ export default async function CurrencyPage() {
         </>
       )}
 
-      <p className="text-xs text-gray-400">Exchange rate source: ExchangeRate-API (open.er-api.com) · Updated hourly · Rates are for informational purposes only.</p>
+      <p className="text-xs text-gray-400 dark:text-slate-500">Exchange rate source: ExchangeRate-API (open.er-api.com) · Updated hourly · Rates are for informational purposes only.</p>
     </div>
   );
 }

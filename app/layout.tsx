@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Newsreader } from "next/font/google";
-import Image from "next/image";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { MapPin } from "lucide-react";
-import Header from "@/components/Header";
-import ConditionalHeader from "@/components/ConditionalHeader";
+import HomeNav from "@/components/HomeNav";
 import BottomNav from "@/components/BottomNav";
 import CookieConsent from "@/components/CookieConsent";
 import { safeJsonLd } from "@/lib/utils";
@@ -35,12 +32,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={newsreader.variable}>
-      <head />
-      <body className={`${inter.className} bg-[#faf9f6] text-on-surface min-h-screen flex flex-col`}>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className={`${inter.className} bg-[#faf9f6] dark:bg-slate-950 text-on-surface dark:text-slate-100 min-h-screen flex flex-col`}>
         <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg focus:shadow-lg">
           Skip to main content
         </a>
-        <ConditionalHeader><Header /></ConditionalHeader>
+        <HomeNav />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{__html: safeJsonLd({
@@ -96,85 +102,68 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main id="main-content" className="flex-grow w-full px-4 sm:px-5 md:px-8 lg:px-12 py-5 sm:py-6 pb-20 md:pb-6">{children}</main>
         <CookieConsent />
         <SpeedInsights />
-        {/* Footer */}
-        <footer className="relative mt-auto bg-primary-dark text-white overflow-hidden pb-20 md:pb-0">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="https://images.unsplash.com/photo-1599839619722-39751411ea63?auto=format&fit=crop&q=80&w=2000"
-              alt="Doha Skyline"
-              fill
-              sizes="100vw"
-              className="object-cover opacity-20"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-primary-dark via-primary-dark/80 to-transparent" />
-          </div>
 
-          <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Brand row — always full width on mobile */}
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-bold text-xl tracking-wide text-qatar-sand">QATAR</span>
-                  <span className="text-[9px] font-medium opacity-60 uppercase tracking-[0.2em] border border-white/20 rounded-full px-2 py-0.5">Portal</span>
+        <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-auto pb-20 md:pb-0">
+          <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
+              <div className="max-w-xs">
+                <span className="text-2xl font-black block mb-4 tracking-tight text-blue-600 dark:text-blue-400">
+                  <span className="lang-en">Qatar Insider</span>
+                  <span className="lang-ar">قطر إنسايدر</span>
+                </span>
+                <p className="text-sm leading-relaxed mb-6 text-slate-600 dark:text-slate-400">
+                  <span className="lang-en">Your comprehensive digital companion for Qatar.</span>
+                  <span className="lang-ar">رفيقك الرقمي الشامل في دولة قطر.</span>
+                </p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
+                <div>
+                  <span className="font-black text-xs uppercase tracking-[0.2em] block mb-6 text-slate-900 dark:text-slate-100">
+                    <span className="lang-en">Services</span>
+                    <span className="lang-ar">الخدمات</span>
+                  </span>
+                  <ul className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <li><a href="/prayer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Prayer Times</span><span className="lang-ar">مواقيت الصلاة</span></a></li>
+                    <li><a href="/weather" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Weather</span><span className="lang-ar">الطقس</span></a></li>
+                    <li><a href="/currency" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Currency</span><span className="lang-ar">العملات</span></a></li>
+                    <li><a href="/news" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">News</span><span className="lang-ar">الأخبار</span></a></li>
+                    <li><a href="/jobs" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Jobs</span><span className="lang-ar">الوظائف</span></a></li>
+                  </ul>
                 </div>
-                <p className="text-xs text-qatar-sand/70 max-w-xs">Prayer times, news, jobs and Gulf resources — all in one place.</p>
-              </div>
-              <div className="flex items-center gap-1.5 text-xs text-white/50">
-                <MapPin size={12} className="text-secondary-accent shrink-0" />
-                <span>Doha, Qatar</span>
-              </div>
-            </div>
-
-            {/* Links — 2-col on mobile, 3-col on md */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              {/* Quick Links */}
-              <div>
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-qatar-sand mb-3">Quick Links</h3>
-                <ul className="space-y-1.5 text-xs text-white/75">
-                  <li><a href="/prayer" className="hover:text-secondary-accent transition-colors">Prayer Times</a></li>
-                  <li><a href="/news" className="hover:text-secondary-accent transition-colors">News</a></li>
-                  <li><a href="/jobs" className="hover:text-secondary-accent transition-colors">Jobs</a></li>
-                  <li><a href="/weather" className="hover:text-secondary-accent transition-colors">Weather</a></li>
-                  <li><a href="/currency" className="hover:text-secondary-accent transition-colors">QAR Rates</a></li>
-                  <li><a href="/hijri-calendar" className="hover:text-secondary-accent transition-colors">Hijri Calendar</a></li>
-                  <li><a href="/qatar-metro" className="hover:text-secondary-accent transition-colors">Qatar Metro</a></li>
-                  <li><a href="/qatar-services" className="hover:text-secondary-accent transition-colors">Gov Services</a></li>
-                  <li><a href="/about" className="hover:text-secondary-accent transition-colors">About Us</a></li>
-                </ul>
-              </div>
-
-              {/* Resources */}
-              <div>
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-qatar-sand mb-3">Resources</h3>
-                <ul className="space-y-1.5 text-xs text-white/75">
-                  <li><a href="/work-in-qatar" className="hover:text-secondary-accent transition-colors">Work in Qatar</a></li>
-                  <li><a href="/qatar-visa-requirements" className="hover:text-secondary-accent transition-colors">Qatar Visa</a></li>
-                  <li><a href="/cost-of-living-doha" className="hover:text-secondary-accent transition-colors">Cost of Living</a></li>
-                  <li><a href="/qatar-salary-guide" className="hover:text-secondary-accent transition-colors">Salary Guide</a></li>
-                  <li><a href="/qatar-public-holidays" className="hover:text-secondary-accent transition-colors">Public Holidays</a></li>
-                  <li><a href="/emergency-numbers-qatar" className="hover:text-secondary-accent transition-colors">Emergency Numbers</a></li>
-                  <li><a href="/privacy" className="hover:text-secondary-accent transition-colors">Privacy</a></li>
-                  <li><a href="/terms" className="hover:text-secondary-accent transition-colors">Terms</a></li>
-                </ul>
-              </div>
-
-              {/* Guides — hidden on mobile (2-col), visible from md */}
-              <div className="hidden md:block">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-qatar-sand mb-3">Gov Guides</h3>
-                <ul className="space-y-1.5 text-xs text-white/75">
-                  <li><a href="/qatar-services/qid" className="hover:text-secondary-accent transition-colors">QID Application</a></li>
-                  <li><a href="/qatar-services/work-visa" className="hover:text-secondary-accent transition-colors">Work Visa</a></li>
-                  <li><a href="/qatar-services/family-visa" className="hover:text-secondary-accent transition-colors">Family Visa</a></li>
-                  <li><a href="/qatar-services/business-registration" className="hover:text-secondary-accent transition-colors">Business Registration</a></li>
-                  <li><a href="/qatar-services/driving-licence" className="hover:text-secondary-accent transition-colors">Driving Licence</a></li>
-                  <li><a href="/qatar-services/exit-permit" className="hover:text-secondary-accent transition-colors">Exit Permit</a></li>
-                </ul>
+                <div>
+                  <span className="font-black text-xs uppercase tracking-[0.2em] block mb-6 text-slate-900 dark:text-slate-100">
+                    <span className="lang-en">Resources</span>
+                    <span className="lang-ar">الموارد</span>
+                  </span>
+                  <ul className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <li><a href="/qatar-visa-requirements" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Visa Requirements</span><span className="lang-ar">متطلبات التأشيرة</span></a></li>
+                    <li><a href="/cost-of-living-doha" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Cost of Living</span><span className="lang-ar">تكلفة المعيشة</span></a></li>
+                    <li><a href="/qatar-salary-guide" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Salary Guide</span><span className="lang-ar">دليل الرواتب</span></a></li>
+                    <li><a href="/qatar-public-holidays" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Public Holidays</span><span className="lang-ar">الإجازات الرسمية</span></a></li>
+                    <li><a href="/qatar-labour-law" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Labour Law</span><span className="lang-ar">قانون العمل</span></a></li>
+                  </ul>
+                </div>
+                <div className="hidden sm:block">
+                  <span className="font-black text-xs uppercase tracking-[0.2em] block mb-6 text-slate-900 dark:text-slate-100">
+                    <span className="lang-en">Gov Guides</span>
+                    <span className="lang-ar">الأدلة الحكومية</span>
+                  </span>
+                  <ul className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <li><a href="/qatar-services/qid" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">QID Application</span><span className="lang-ar">طلب البطاقة</span></a></li>
+                    <li><a href="/qatar-services/work-visa" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Work Visa</span><span className="lang-ar">تأشيرة العمل</span></a></li>
+                    <li><a href="/qatar-services/family-visa" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Family Visa</span><span className="lang-ar">تأشيرة العائلة</span></a></li>
+                    <li><a href="/qatar-services/driving-licence" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Driving Licence</span><span className="lang-ar">رخصة القيادة</span></a></li>
+                  </ul>
+                </div>
               </div>
             </div>
-
-            <div className="mt-6 pt-5 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center text-[11px] text-qatar-sand/50">
-              <p>© {new Date().getFullYear()} Qatar Portal · Aladhan · Open-Meteo · ExchangeRate-API</p>
-              <p className="mt-1.5 sm:mt-0">Made with ❤️ in Doha</p>
+            <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+              <p>© {new Date().getFullYear()} The Digital Concierge Qatar.</p>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500" />
+                <span className="lang-en">All Systems Operational</span>
+                <span className="lang-ar">جميع الأنظمة تعمل</span>
+              </div>
             </div>
           </div>
         </footer>

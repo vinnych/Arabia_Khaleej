@@ -125,7 +125,7 @@ export default async function CityPrayerPage({ params }: { params: Promise<{ cit
             ))}
         </p>
         <p className="text-sm text-gray-500 mt-1">
-          <a href="/hijri-calendar" className="text-rose-700 hover:underline">Hijri Calendar</a>
+          <a href="/prayer" className="text-rose-700 hover:underline">Prayer Times & Hijri</a>
           {" · "}
           <a href="/qatar-public-holidays" className="text-rose-700 hover:underline">Ramadan 2026 Dates</a>
         </p>

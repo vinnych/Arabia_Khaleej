@@ -115,17 +115,17 @@ export default function WorkInQatarPage() {
         <h1 className="font-newsreader text-xl font-bold text-on-surface mb-1">
           Working in Qatar — Complete Guide 2026
         </h1>
-        <p className="text-xs text-gray-400">
+        <p className="text-xs text-gray-400 dark:text-slate-500">
           Everything you need to know before moving to Qatar for work: visas, salaries, labour rights, cost of living, and how to find a job. All information is verified and updated for 2026.
         </p>
       </div>
 
       {/* Tax-free highlight */}
-      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 mb-4 flex items-start gap-2">
+      <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/30 rounded-lg p-3 mb-4 flex items-start gap-2">
         <span className="text-xl">💡</span>
         <div>
-          <p className="text-sm font-bold text-emerald-800">Qatar is 100% tax-free</p>
-          <p className="text-xs text-emerald-700">No income tax, no VAT on most goods. Your entire salary is yours to keep — making Qatar one of the highest-paying expat destinations in the world.</p>
+          <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">Qatar is 100% tax-free</p>
+          <p className="text-xs text-emerald-700 dark:text-emerald-400">No income tax, no VAT on most goods. Your entire salary is yours to keep — making Qatar one of the highest-paying expat destinations in the world.</p>
         </div>
       </div>
 
@@ -135,12 +135,12 @@ export default function WorkInQatarPage() {
           <a
             key={href}
             href={href}
-            className="bg-white rounded-lg border border-stone-200 shadow-none p-3 hover:shadow-md hover:border-rose-200 transition-all flex gap-3 items-start"
+            className="bg-white dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 shadow-none p-3 hover:shadow-md hover:border-rose-200 dark:hover:border-rose-800/50 transition-all flex gap-3 items-start"
           >
             <span className="text-2xl flex-shrink-0">{icon}</span>
             <div>
-              <h2 className="text-sm font-bold text-gray-900 mb-0.5">{title}</h2>
-              <p className="text-xs text-gray-500 leading-relaxed">{desc}</p>
+              <h2 className="text-sm font-bold text-gray-900 dark:text-slate-100 mb-0.5">{title}</h2>
+              <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">{desc}</p>
             </div>
           </a>
         ))}
@@ -167,16 +167,16 @@ export default function WorkInQatarPage() {
       </div>
 
       {/* FAQ */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-3 mb-5">
-        <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">FAQ</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700 shadow-sm p-3 mb-5">
+        <h2 className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-2">FAQ</h2>
         <div className="space-y-1">
           {FAQS.map(({ q, a }) => (
             <details key={q} className="group border-b border-gray-50 last:border-0">
-              <summary className="cursor-pointer text-xs font-medium text-gray-800 py-2 list-none flex justify-between items-center gap-2">
+              <summary className="cursor-pointer text-xs font-medium text-gray-800 dark:text-slate-200 py-2 list-none flex justify-between items-center gap-2">
                 <span>{q}</span>
-                <span className="text-gray-400 flex-shrink-0 group-open:rotate-180 transition-transform text-xs">▼</span>
+                <span className="text-gray-400 dark:text-slate-500 flex-shrink-0 group-open:rotate-180 transition-transform text-xs">▼</span>
               </summary>
-              <p className="text-xs text-gray-500 pb-3 leading-relaxed">{a}</p>
+              <p className="text-xs text-gray-500 dark:text-slate-400 pb-3 leading-relaxed">{a}</p>
             </details>
           ))}
         </div>
@@ -186,7 +186,7 @@ export default function WorkInQatarPage() {
       <div className="flex flex-wrap gap-3 text-xs">
         <a href="/jobs" className="text-rose-700 hover:underline">→ Browse jobs in Qatar</a>
         <a href="/qatar-labour-law" className="text-rose-700 hover:underline">→ Qatar Labour Law</a>
-        <a href="/hijri-calendar" className="text-rose-700 hover:underline">→ Hijri Calendar</a>
+        <a href="/prayer" className="text-rose-700 hover:underline">→ Prayer Times & Hijri</a>
         <a href="/qatar-public-holidays" className="text-rose-700 hover:underline">→ Public holidays</a>
       </div>
     </div>

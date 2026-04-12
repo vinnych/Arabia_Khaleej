@@ -21,7 +21,7 @@ export default function CalendarDate({
 
   if (!parsed) {
     return (
-      <span className={`text-[11px] text-gray-400 tabular-nums ${className}`}>
+      <span className={`text-[11px] text-gray-400 dark:text-slate-500 tabular-nums ${className}`}>
         {dateStr ?? ""}
       </span>
     );
@@ -42,14 +42,13 @@ export default function CalendarDate({
       </span>
       {/* Day */}
       <span
-        className="text-base font-bold leading-tight py-0.5"
-        style={{ color: "#1a1c1a" }}
+        className="text-base font-bold leading-tight py-0.5 text-on-surface"
       >
         {parsed.day}
       </span>
       {/* Year */}
       <span
-        className="text-[8px] text-gray-400 pb-0.5 leading-tight tabular-nums"
+        className="text-[8px] text-gray-400 dark:text-slate-500 pb-0.5 leading-tight tabular-nums"
       >
         {parsed.year}
       </span>

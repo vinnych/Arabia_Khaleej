@@ -16,7 +16,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
     // Content pages
     { url: `${SITE_URL}/prayer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
-    { url: `${SITE_URL}/hijri-calendar`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
     { url: `${SITE_URL}/qatar-metro`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/qatar-labour-law`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${SITE_URL}/qatar-salary-guide`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },

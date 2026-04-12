@@ -1,15 +1,15 @@
 import { getPrayerTimes, getMonthlyPrayerTimes } from "@/lib/prayer";
-import PrayerSelector from "@/components/PrayerSelector";
+import PrayerPageClient from "@/components/PrayerPageClient";
 import { safeJsonLd } from "@/lib/utils";
 import { pageMeta, SITE_URL } from "@/lib/seo";
 
 export const metadata = pageMeta({
-  title: "Prayer Times — Doha, Mecca, Dubai & 35 Cities | Qatar Portal",
-  description: "Accurate Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha prayer times for Doha and 35+ Muslim cities worldwide — today and full monthly calendar.",
+  title: "Prayer Times & Hijri Calendar — Doha, Qatar | Qatar Portal",
+  description: "Accurate Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha prayer times for Doha and 35+ Muslim cities. Full monthly prayer calendar with Hijri dates.",
   path: "/prayer",
-  keywords: ["Doha prayer times", "Qatar prayer times today", "Fajr time Doha", "Isha time Qatar", `prayer times ${new Date().getFullYear()} Qatar`, "salah times Doha", "Mecca prayer times", "Dubai prayer times", "Muslim prayer times"],
-  ogTitle: "Prayer Times for Muslim Countries — Doha, Mecca, Dubai | Qatar Portal",
-  ogDescription: "Accurate Fajr, Dhuhr, Asr, Maghrib and Isha prayer times for Doha and 35+ Muslim cities worldwide.",
+  keywords: ["Doha prayer times", "Qatar prayer times today", "Fajr time Doha", "Isha time Qatar", `prayer times ${new Date().getFullYear()} Qatar`, "Hijri calendar", "Islamic date today", "salah times Doha"],
+  ogTitle: "Prayer Times & Hijri Calendar — Doha, Qatar | Qatar Portal",
+  ogDescription: "Accurate prayer times for Doha and 35+ Muslim cities. Monthly calendar with Hijri dates.",
 });
 
 export default async function PrayerPage() {
@@ -33,9 +33,9 @@ export default async function PrayerPage() {
     ? {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        name: "Prayer Times for Doha and Muslim Cities — Qatar Portal",
+        name: "Prayer Times & Hijri Calendar — Qatar Portal",
         url: `${SITE_URL}/prayer`,
-        description: `Today's prayer times in Doha, Qatar. Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}.`,
+        description: `Today's prayer times in Doha, Qatar. Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}. Hijri: ${today.hijriDate} ${today.hijriMonth} ${today.hijriYear} AH.`,
         inLanguage: "en",
         isPartOf: { "@type": "WebSite", name: "Qatar Portal", url: SITE_URL },
         about: {
@@ -47,18 +47,46 @@ export default async function PrayerPage() {
       }
     : null;
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "What time is Fajr in Doha today?",
+        acceptedAnswer: { "@type": "Answer", text: today ? `Fajr prayer time in Doha today is ${today.Fajr}.` : "Fajr prayer time in Doha is updated daily." },
+      },
+      {
+        "@type": "Question",
+        name: "What is today's Hijri date?",
+        acceptedAnswer: { "@type": "Answer", text: today ? `Today's Hijri date is ${today.hijriDate} ${today.hijriMonth} ${today.hijriYear} AH.` : "The Hijri date is updated daily." },
+      },
+      {
+        "@type": "Question",
+        name: "How does the Hijri calendar work?",
+        acceptedAnswer: { "@type": "Answer", text: "The Hijri (Islamic) calendar is a lunar calendar with 12 months of 29 or 30 days. The year is about 354 days, making it 11 days shorter than the Gregorian year." },
+      },
+    ],
+  };
+
   if (!today) {
-    return <p className="text-red-500">Could not load prayer times. Please try again later.</p>;
+    return (
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-6 py-4 rounded-xl text-sm font-medium">
+          Could not load prayer times. Please try again later.
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto px-6 py-12">
       {jsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       )}
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Prayer Times", item: `${SITE_URL}/prayer` }] }) }} />
-      <h1 className="font-newsreader text-xl font-bold text-on-surface mb-2">Prayer Times — Doha, Mecca, Dubai &amp; More</h1>
-      <PrayerSelector defaultTimes={today} defaultCalendar={calendar} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Prayer Times & Hijri Calendar", item: `${SITE_URL}/prayer` }] }) }} />
+      <PrayerPageClient defaultTimes={today} defaultCalendar={calendar} />
     </div>
   );
 }
