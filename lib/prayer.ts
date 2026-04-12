@@ -25,6 +25,37 @@ export interface PrayerDay {
   Isha: string;
 }
 
+interface AladhanTimings {
+  Fajr: string;
+  Sunrise: string;
+  Dhuhr: string;
+  Asr: string;
+  Maghrib: string;
+  Isha: string;
+  [key: string]: string;
+}
+
+interface AladhanDate {
+  readable: string;
+  hijri: {
+    day: string;
+    month: { en: string };
+    year: string;
+  };
+  gregorian: {
+    weekday: { en: string };
+  };
+}
+
+interface AladhanDayData {
+  timings: AladhanTimings;
+  date: AladhanDate;
+}
+
+interface AladhanResponse<T> {
+  data: T;
+}
+
 export async function getPrayerTimes(city = "Doha", country = "Qatar"): Promise<PrayerTimes> {
   if (isMaintenance()) throw new Error("Maintenance mode");
   const cacheKey = `prayer:today:${city}:${country}`;
@@ -39,7 +70,7 @@ export async function getPrayerTimes(city = "Doha", country = "Qatar"): Promise<
     { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) }
   );
   if (!res.ok) throw new Error("Failed to fetch prayer times");
-  const data = await res.json();
+  const data: AladhanResponse<AladhanDayData> = await res.json();
   if (!data?.data?.timings || !data?.data?.date?.hijri) {
     throw new Error("Unexpected prayer times API response shape");
   }
@@ -67,7 +98,7 @@ export async function getPrayerTimesByCoords(lat: number, lng: number): Promise<
     { next: { revalidate: 3600 }, signal: AbortSignal.timeout(8000) }
   );
   if (!res.ok) throw new Error("Failed to fetch prayer times by coordinates");
-  const data = await res.json();
+  const data: AladhanResponse<AladhanDayData> = await res.json();
   if (!data?.data?.timings || !data?.data?.date?.hijri) {
     throw new Error("Unexpected prayer times API response shape");
   }
@@ -93,12 +124,11 @@ export async function getMonthlyPrayerTimesByCoords(year: number, month: number,
     { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8000) }
   );
   if (!res.ok) throw new Error("Failed to fetch monthly prayer times by coordinates");
-  const data = await res.json();
+  const data: AladhanResponse<AladhanDayData[]> = await res.json();
   if (!Array.isArray(data?.data)) {
     throw new Error("Unexpected monthly prayer API response shape");
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return data.data.map((day: any) => {
+  return data.data.map((day: AladhanDayData) => {
     const strip = (s: string) => s.replace(/ \([^)]*\)$/, "");
     return {
       date: day.date.readable,
@@ -127,12 +157,11 @@ export async function getMonthlyPrayerTimes(year: number, month: number, city = 
     { next: { revalidate: 86400 }, signal: AbortSignal.timeout(8000) }
   );
   if (!res.ok) throw new Error("Failed to fetch monthly prayer times");
-  const data = await res.json();
+  const data: AladhanResponse<AladhanDayData[]> = await res.json();
   if (!Array.isArray(data?.data)) {
     throw new Error("Unexpected monthly prayer API response shape");
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = data.data.map((day: any) => {
+  const result = data.data.map((day: AladhanDayData) => {
     const strip = (s: string) => s.replace(/ \([^)]*\)$/, "");
     return {
       date: day.date.readable,
