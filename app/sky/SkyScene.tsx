@@ -400,6 +400,7 @@ export default function SkyScene() {
       renderer.dispose();
       if (mountRef.current) mountRef.current.innerHTML = "";
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

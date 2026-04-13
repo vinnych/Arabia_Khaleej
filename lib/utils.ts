@@ -43,5 +43,10 @@ export function parseDate(raw: string | undefined | null): { day: string; mon: s
 
 /** Escapes </script> in JSON-LD strings to prevent XSS */
 export function safeJsonLd(data: unknown): string {
-  return JSON.stringify(data).replace(/</g, "\\u003c").replace(/>/g, "\\u003e");
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 }

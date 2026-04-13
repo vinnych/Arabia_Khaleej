@@ -97,7 +97,7 @@ export async function getMonthlyPrayerTimesByCoords(year: number, month: number,
   if (!Array.isArray(data?.data)) {
     throw new Error("Unexpected monthly prayer API response shape");
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line
   return data.data.map((day: any) => {
     const strip = (s: string) => s.replace(/ \([^)]*\)$/, "");
     return {
@@ -131,7 +131,7 @@ export async function getMonthlyPrayerTimes(year: number, month: number, city = 
   if (!Array.isArray(data?.data)) {
     throw new Error("Unexpected monthly prayer API response shape");
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line
   const result = data.data.map((day: any) => {
     const strip = (s: string) => s.replace(/ \([^)]*\)$/, "");
     return {
