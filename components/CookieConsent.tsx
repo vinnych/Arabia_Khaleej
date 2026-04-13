@@ -50,26 +50,35 @@ export default function CookieConsent() {
         </>
       )}
       {visible && (
-        <div className="fixed bottom-[72px] left-0 right-0 z-[60] md:bottom-4 md:left-4 md:right-auto md:max-w-sm bg-primary-dark text-white shadow-2xl md:rounded-xl px-4 py-3 flex flex-col gap-3">
-          <p className="text-sm leading-relaxed text-qatar-sand/90">
-            We use cookies for analytics and personalised ads. See our{" "}
-            <Link href="/privacy" className="underline hover:text-white transition-colors">
-              Privacy Policy
-            </Link>
-            .
+        <div className="fixed bottom-[72px] left-0 right-0 z-[60] md:bottom-4 md:left-4 md:right-auto md:max-w-sm bg-slate-900 dark:bg-slate-950 text-white shadow-2xl md:rounded-2xl px-5 py-4 flex flex-col gap-4 border border-slate-800">
+          <p className="text-sm leading-relaxed text-slate-300">
+            <span className="lang-en block mb-1">
+              We use cookies for analytics and personalised ads. See our{" "}
+              <Link href="/privacy" className="underline hover:text-white transition-colors font-semibold">
+                Privacy Policy
+              </Link>.
+            </span>
+            <span className="lang-ar block">
+              نحن نستخدم ملفات تعريف الارتباط للتحليلات والإعلانات المخصصة. راجع{" "}
+              <Link href="/privacy" className="underline hover:text-white transition-colors font-semibold">
+                سياسة الخصوصية
+              </Link>.
+            </span>
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               onClick={accept}
-              className="flex-1 bg-qatar-maroon hover:bg-primary text-white text-sm font-semibold py-2 rounded-lg transition-colors"
+              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold py-2.5 rounded-xl transition-colors shadow-lg shadow-blue-500/20"
             >
-              Accept
+              <span className="lang-en">Accept</span>
+              <span className="lang-ar">قبول</span>
             </button>
             <button
               onClick={decline}
-              className="flex-1 border border-white/30 hover:border-white/60 text-sm py-2 rounded-lg transition-colors"
+              className="flex-1 border border-slate-700 hover:border-slate-500 hover:bg-slate-800 text-sm font-bold py-2.5 rounded-xl transition-colors"
             >
-              Decline
+              <span className="lang-en">Decline</span>
+              <span className="lang-ar">رفض</span>
             </button>
           </div>
         </div>
