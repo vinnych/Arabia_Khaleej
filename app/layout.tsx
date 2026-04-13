@@ -18,6 +18,7 @@ export const metadata: Metadata = {
     "Your daily Qatar resource: accurate prayer times for Doha, latest job listings in Qatar, and top Gulf news headlines.",
   keywords: ["Qatar prayer times", "Doha prayer times today", `Qatar jobs ${new Date().getFullYear()}`, "Qatar news", "Gulf jobs", "Fajr time Doha"],
   alternates: { canonical: "https://qatar-portal.vercel.app" },
+  applicationName: "Qatar Portal",
   openGraph: {
     title: "Qatar Portal",
     description: "Prayer times, jobs, and news for Qatar",
@@ -54,12 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "@type": "WebSite",
             "name": "Qatar Portal",
             "url": "https://qatar-portal.vercel.app",
-            "description": "Prayer times, jobs, and news for Qatar",
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": { "@type": "EntryPoint", "urlTemplate": "https://qatar-portal.vercel.app/news?q={search_term_string}" },
-              "query-input": "required name=search_term_string"
-            }
+            "description": "Prayer times, jobs, and news for Qatar"
           })}}
         />
         <script

@@ -66,6 +66,7 @@ export function pageMeta({
       description: ogDesc,
       url: canonical,
       siteName: "Qatar Portal",
+      locale: "en_US",
       type,
       images: [{ url: img, width: 1200, height: 630 }],
     },

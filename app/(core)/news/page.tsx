@@ -35,7 +35,7 @@ export default async function NewsPage() {
             "url": `https://qatar-portal.vercel.app/news/${item.slug}`,
             "datePublished": isoDate,
             "author": { "@type": "Organization", "name": item.source },
-            "publisher": { "@type": "Organization", "name": item.source, "logo": { "@type": "ImageObject", "url": "https://qatar-portal.vercel.app/icon.svg" } },
+            "publisher": { "@type": "Organization", "name": item.source, "logo": { "@type": "ImageObject", "url": "https://qatar-portal.vercel.app/icon" } },
             "image": item.imageUrl ?? "https://qatar-portal.vercel.app/opengraph-image",
           }
         };

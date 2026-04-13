@@ -57,9 +57,6 @@ export async function generateMetadata({
       title: item.title,
       description,
     },
-    other: {
-      news_keywords: [item.source, "Qatar", "Doha", "Gulf", ...item.title.split(" ").filter((w) => w.length > 4).slice(0, 5)].join(", "),
-    },
   };
 }
 

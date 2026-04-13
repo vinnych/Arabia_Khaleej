@@ -4,6 +4,9 @@ import { getJobs } from "@/lib/jobs";
 
 const SITE_URL = "https://qatar-portal.vercel.app";
 
+// Fixed date for static/evergreen pages — update this when content actually changes
+const STATIC_LAST_MODIFIED = new Date("2026-04-13");
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: "hourly", priority: 1 },
@@ -11,19 +14,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/jobs`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/weather`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
     { url: `${SITE_URL}/currency`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
-    { url: `${SITE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/privacy`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
-    { url: `${SITE_URL}/terms`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.3 },
+    { url: `${SITE_URL}/about`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${SITE_URL}/privacy`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${SITE_URL}/terms`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.3 },
     // Content pages
     { url: `${SITE_URL}/prayer`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
-    { url: `${SITE_URL}/qatar-metro`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${SITE_URL}/qatar-labour-law`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${SITE_URL}/qatar-salary-guide`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${SITE_URL}/qatar-visa-requirements`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${SITE_URL}/cost-of-living-doha`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${SITE_URL}/qatar-public-holidays`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${SITE_URL}/emergency-numbers-qatar`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${SITE_URL}/work-in-qatar`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE_URL}/qatar-metro`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/qatar-labour-law`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/qatar-salary-guide`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.7 },
+    { url: `${SITE_URL}/qatar-visa-requirements`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/cost-of-living-doha`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/qatar-public-holidays`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/emergency-numbers-qatar`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/work-in-qatar`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.8 },
     { url: `${SITE_URL}/news-category`, lastModified: new Date(), changeFrequency: "daily", priority: 0.6 },
     // News category pages
     ...["qatar", "business", "sports", "world", "gulf"].map((cat) => ({
@@ -49,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Qatar services guide pages
     ...["qid", "work-visa", "family-visa", "business-registration", "driving-licence", "exit-permit", "document-attestation"].map((slug) => ({
       url: `${SITE_URL}/qatar-services/${slug}`,
-      lastModified: new Date(),
+      lastModified: STATIC_LAST_MODIFIED,
       changeFrequency: "monthly" as const,
       priority: 0.7,
     })),

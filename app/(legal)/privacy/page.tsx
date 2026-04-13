@@ -1,4 +1,5 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
+import { safeJsonLd } from "@/lib/utils";
 
 export const metadata = pageMeta({
   title: "Privacy Policy | Qatar Portal",
@@ -14,6 +15,7 @@ const LAST_UPDATED = "18 March 2026";
 export default function PrivacyPage() {
   return (
     <div className="page-sections">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Privacy Policy", item: `${SITE_URL}/privacy` }] }) }} />
       <div>
         <h1 className="font-newsreader text-3xl font-bold text-on-surface mb-2">Privacy Policy</h1>
         <p className="text-sm text-gray-400">Last updated: {LAST_UPDATED}</p>

@@ -24,9 +24,15 @@ export default function HomeHero() {
         </div>
 
         {/* Title */}
-        <h1 className="text-white text-4xl sm:text-6xl md:text-8xl font-black tracking-tighter mb-4 leading-[0.9]">
-          <span className="lang-en">Doha, Qatar</span>
-          <span className="lang-ar">الدوحة، قطر</span>
+        <h1 className="text-white font-black tracking-tighter mb-4 leading-[0.9]">
+          <span className="text-4xl sm:text-6xl md:text-8xl block">
+            <span className="lang-en">Doha, Qatar</span>
+            <span className="lang-ar">الدوحة، قطر</span>
+          </span>
+          <span className="text-base sm:text-lg md:text-xl font-semibold tracking-normal text-blue-100/70 block mt-2">
+            <span className="lang-en">Prayer Times · Jobs · News · Services</span>
+            <span className="lang-ar">مواقيت الصلاة · وظائف · أخبار · خدمات</span>
+          </span>
         </h1>
 
         {/* Clock */}

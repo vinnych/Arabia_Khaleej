@@ -10,31 +10,42 @@ export default function OgImage() {
     (
       <div
         style={{
-          background: "linear-gradient(135deg, #881337 0%, #4c0519 100%)",
+          background: "linear-gradient(135deg, #003fa4 0%, #0056d2 50%, #0078f0 100%)",
           width: "100%",
           height: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "serif",
+          fontFamily: "sans-serif",
         }}
       >
-        <div style={{ fontSize: 80, fontWeight: 700, color: "#fcd34d", letterSpacing: 12, marginBottom: 24 }}>
+        {/* Subtle grid overlay */}
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        <div style={{ fontSize: 80, fontWeight: 900, color: "#ffffff", letterSpacing: -2, marginBottom: 16 }}>
           QATAR PORTAL
         </div>
-        <div style={{ fontSize: 30, color: "#fde68a", marginBottom: 48 }}>
+        <div style={{ fontSize: 28, color: "rgba(255,255,255,0.8)", marginBottom: 48, letterSpacing: 6, fontWeight: 500 }}>
           Prayer Times · Jobs · News
         </div>
         <div
           style={{
             display: "flex",
             gap: 32,
-            fontSize: 22,
+            fontSize: 20,
             color: "#fff",
-            background: "rgba(255,255,255,0.1)",
+            background: "rgba(255,255,255,0.12)",
             borderRadius: 16,
-            padding: "18px 40px",
+            padding: "16px 36px",
+            border: "1px solid rgba(255,255,255,0.15)",
           }}
         >
           <span>🕌 Doha Prayer Times</span>

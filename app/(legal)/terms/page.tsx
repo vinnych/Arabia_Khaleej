@@ -1,4 +1,5 @@
-import { pageMeta } from "@/lib/seo";
+import { pageMeta, SITE_URL } from "@/lib/seo";
+import { safeJsonLd } from "@/lib/utils";
 
 export const metadata = pageMeta({
   title: "Terms of Service | Qatar Portal",
@@ -11,6 +12,7 @@ export const metadata = pageMeta({
 export default function TermsPage() {
   return (
     <div className="page-sections max-w-2xl mx-auto">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Terms of Service", item: `${SITE_URL}/terms` }] }) }} />
       <h1 className="font-newsreader text-3xl font-bold text-on-surface mb-2">Terms of Service</h1>
       <p className="text-xs text-gray-400 mb-8">Last updated: 24 March 2026</p>
 
