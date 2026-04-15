@@ -4,21 +4,18 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { getFullWeather } from "@/lib/weather";
 import { getQARRates } from "@/lib/currency";
-import { getNews } from "@/lib/rss";
 import { getJobs } from "@/lib/jobs";
 
 export default async function MobileHome() {
-  const [weather, currency, news, jobs] = await Promise.allSettled([
+  const [weather, currency, jobs] = await Promise.allSettled([
     getFullWeather(),
     getQARRates(),
-    getNews(3),
     getJobs(5),
   ]);
 
   const fullWeather = weather.status === "fulfilled" ? weather.value : null;
   const weatherData = fullWeather?.current ?? null;
   const currencyData = currency.status === "fulfilled" ? currency.value : null;
-  const newsData = news.status === "fulfilled" ? news.value : [];
   const jobsData = jobs.status === "fulfilled" ? jobs.value : [];
   const topRates = currencyData?.rates?.slice(0, 3) ?? [];
 
@@ -115,34 +112,6 @@ export default async function MobileHome() {
           </div>
         </section>
 
-        <section className="space-y-4">
-          <div className="flex justify-between items-end">
-            <h3 className="text-xl font-black tracking-tight text-[#161c27] dark:text-[#ffffff]">Latest Updates</h3>
-            <a className="text-xs font-bold text-[#0e63eb] dark:text-[#b2c5ff] tracking-wider uppercase" href="/news">View All</a>
-          </div>
-          <div className="flex overflow-x-auto gap-4 pb-2">
-            {newsData.slice(0, 5).map((item, i) => (
-              <a key={item.link} href={`/news/${item.slug}`} className="flex-shrink-0 w-72 group cursor-pointer">
-                <div className="h-40 w-full bg-slate-200 dark:bg-[#2a303d] rounded-2xl overflow-hidden mb-4">
-                  {item.imageUrl ? (
-                    <Image src={item.imageUrl} alt={item.title} fill sizes="288px" className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700" />
-                  )}
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-[#004cbc] dark:text-[#b2c5ff] bg-[#004cbc]/10 px-2 py-1 rounded">
-                  {item.source}
-                </span>
-                <h4 className="font-bold text-[#161c27] dark:text-[#ecf0ff] leading-snug mt-2 group-hover:text-[#0e63eb] dark:group-hover:text-[#b2c5ff] transition-colors">
-                  {item.title}
-                </h4>
-              </a>
-            ))}
-            {newsData.length === 0 && (
-              <p className="text-sm text-[#737786]">No news available right now.</p>
-            )}
-          </div>
-        </section>
 
         <section className="space-y-4">
           <div className="flex justify-between items-end">

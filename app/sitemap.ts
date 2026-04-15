@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { getNews } from "@/lib/rss";
 import { getJobs } from "@/lib/jobs";
 
 const SITE_URL = "https://qatar-portal.vercel.app";
@@ -10,7 +9,6 @@ const STATIC_LAST_MODIFIED = new Date("2026-04-13");
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: "hourly", priority: 1 },
-    { url: `${SITE_URL}/news`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.9 },
     { url: `${SITE_URL}/jobs`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/weather`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
     { url: `${SITE_URL}/currency`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
@@ -27,14 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/qatar-public-holidays`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/emergency-numbers-qatar`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/work-in-qatar`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.8 },
-    { url: `${SITE_URL}/news-category`, lastModified: new Date(), changeFrequency: "daily", priority: 0.6 },
-    // News category pages
-    ...["qatar", "business", "sports", "world", "gulf"].map((cat) => ({
-      url: `${SITE_URL}/news-category/${cat}`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.6,
-    })),
     // City prayer pages
     ...["dubai", "abu-dhabi", "riyadh", "jeddah", "kuwait-city", "muscat", "manama", "cairo", "islamabad", "manila", "dhaka"].map((city) => ({
       url: `${SITE_URL}/prayer/${city}`,
@@ -59,22 +49,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const [news, jobs] = await Promise.all([getNews(48), getJobs(48)]);
+    const [jobs] = await Promise.all([getJobs(48)]);
 
     // Only include items within 7-day Redis TTL — older items may no longer resolve
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
-    const newsPages: MetadataRoute.Sitemap = news
-      .filter((item) => {
-        if (!item.pubDate) return true;
-        try { return new Date(item.pubDate).getTime() >= cutoff; } catch { return false; }
-      })
-      .map((item) => ({
-        url: `${SITE_URL}/news/${item.slug}`,
-        lastModified: item.pubDate ? new Date(item.pubDate) : new Date(),
-        changeFrequency: "daily" as const,
-        priority: 0.5,   // expires after 7 days — lower priority
-      }));
 
     const jobPages: MetadataRoute.Sitemap = jobs
       .filter((job) => {
@@ -88,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.5,   // expires after 7 days — lower priority
       }));
 
-    return [...base, ...newsPages, ...jobPages];
+    return [...base, ...jobPages];
   } catch {
     return base;
   }

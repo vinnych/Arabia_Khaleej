@@ -48,13 +48,6 @@ export default function HomeHero() {
             <span className="lang-ar">استكشاف البوابة</span>
             <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform rtl:rotate-180">arrow_forward</span>
           </a>
-          <a
-            href="/news"
-            className="inline-flex bg-white/10 backdrop-blur-md border border-white/20 text-white px-8 sm:px-10 py-4 sm:py-5 rounded-2xl font-black text-sm sm:text-base hover:bg-white/20 transition-all active:scale-95 items-center gap-3"
-          >
-            <span className="lang-en">Latest News</span>
-            <span className="lang-ar">آخر الأخبار</span>
-          </a>
         </div>
       </div>
     </section>

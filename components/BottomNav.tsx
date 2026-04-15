@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { path: "/", icon: "home", en: "Home", ar: "الرئيسية" },
-  { path: "/news", icon: "newspaper", en: "News", ar: "الأخبار" },
   { path: "/jobs", icon: "work", en: "Jobs", ar: "الوظائف" },
   { path: "/prayer", icon: "mosque", en: "Prayer", ar: "الصلاة" },
   { path: "/qatar-metro", icon: "subway", en: "Metro", ar: "المترو" },

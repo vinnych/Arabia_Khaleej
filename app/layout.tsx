@@ -13,15 +13,15 @@ const newsreader = Newsreader({ subsets: ["latin"], weight: ["700"], style: ["it
 export const metadata: Metadata = {
   metadataBase: new URL("https://qatar-portal.vercel.app"),
   verification: { google: "fg-taPtjNWtu89uOmajC0OB3XxlZapUPAIItSnSnBQo" },
-  title: "Qatar Portal — Prayer Times, Jobs & News",
+  title: "Qatar Portal — Prayer Times, Jobs & Services",
   description:
-    "Your daily Qatar resource: accurate prayer times for Doha, latest job listings in Qatar, and top Gulf news headlines.",
-  keywords: ["Qatar prayer times", "Doha prayer times today", `Qatar jobs ${new Date().getFullYear()}`, "Qatar news", "Gulf jobs", "Fajr time Doha"],
+    "Your daily Qatar resource: accurate prayer times for Doha, latest job listings in Qatar, and local guides.",
+  keywords: ["Qatar prayer times", "Doha prayer times today", `Qatar jobs ${new Date().getFullYear()}`, "Gulf jobs", "Fajr time Doha", "Qatar Portal"],
   alternates: { canonical: "https://qatar-portal.vercel.app" },
   applicationName: "Qatar Portal",
   openGraph: {
     title: "Qatar Portal",
-    description: "Prayer times, jobs, and news for Qatar",
+    description: "Prayer times, jobs, and services for Qatar",
     url: "https://qatar-portal.vercel.app",
     siteName: "Qatar Portal",
     locale: "en_US",
@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "@type": "WebSite",
             "name": "Qatar Portal",
             "url": "https://qatar-portal.vercel.app",
-            "description": "Prayer times, jobs, and news for Qatar"
+            "description": "Prayer times, jobs, and services for Qatar"
           })}}
         />
         <script
@@ -67,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "name": "Qatar Portal",
             "url": "https://qatar-portal.vercel.app",
             "logo": { "@type": "ImageObject", "url": "https://qatar-portal.vercel.app/logo.png", "width": 200, "height": 60 },
-            "description": "Your daily Qatar resource: accurate prayer times for Doha, latest job listings in Qatar, and top Gulf news headlines.",
+            "description": "Your daily Qatar resource: accurate prayer times for Doha, and latest job listings in Qatar.",
             "address": {
               "@type": "PostalAddress",
               "addressLocality": "West Bay",
@@ -122,7 +122,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <li><a href="/prayer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Prayer Times</span><span className="lang-ar">مواقيت الصلاة</span></a></li>
                     <li><a href="/weather" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Weather</span><span className="lang-ar">الطقس</span></a></li>
                     <li><a href="/currency" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Currency</span><span className="lang-ar">العملات</span></a></li>
-                    <li><a href="/news" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">News</span><span className="lang-ar">الأخبار</span></a></li>
                     <li><a href="/jobs" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors"><span className="lang-en">Jobs</span><span className="lang-ar">الوظائف</span></a></li>
                   </ul>
                 </div>

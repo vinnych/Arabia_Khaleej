@@ -4,7 +4,6 @@ const HOME_NAV = [
   { href: "/prayer", en: "Prayer", ar: "الصلاة" },
   { href: "/weather", en: "Weather", ar: "الطقس" },
   { href: "/currency", en: "Currency", ar: "العملات" },
-  { href: "/news", en: "News", ar: "الأخبار" },
 ];
 
 export default function HomeNav() {

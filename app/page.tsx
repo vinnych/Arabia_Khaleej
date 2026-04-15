@@ -4,18 +4,17 @@ import HomeHero from "@/components/HomeHero";
 import PrayerCard from "@/components/PrayerCard";
 import { getFullWeather } from "@/lib/weather";
 import { getQARRates } from "@/lib/currency";
-import { getNews } from "@/lib/rss";
 import { getJobs } from "@/lib/jobs";
 import { safeJsonLd } from "@/lib/utils";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata = pageMeta({
-  title: "Doha Prayer Times Today — Qatar News & Jobs | Qatar Portal",
-  description: "Accurate Doha prayer times for today including Fajr, Dhuhr, Asr, Maghrib and Isha. Plus latest Qatar news and job listings.",
+  title: "Doha Prayer Times Today — Qatar Jobs & Services | Qatar Portal",
+  description: "Accurate Doha prayer times for today including Fajr, Dhuhr, Asr, Maghrib and Isha. Plus latest job listings and weather updates.",
   path: "/",
-  keywords: ["Doha prayer times today", "Fajr time Doha", "Qatar prayer times", "Qatar news today", "jobs in Qatar", "Maghrib time Doha", "Qatar Portal"],
-  ogTitle: "Doha Prayer Times Today — Qatar News & Jobs | Qatar Portal",
-  ogDescription: "Accurate Doha prayer times for today including Fajr, Dhuhr, Asr, Maghrib and Isha. Plus latest Qatar news and job listings.",
+  keywords: ["Doha prayer times today", "Fajr time Doha", "Qatar prayer times", "jobs in Qatar", "Maghrib time Doha", "Qatar Portal"],
+  ogTitle: "Doha Prayer Times Today — Qatar Jobs & Services | Qatar Portal",
+  ogDescription: "Accurate Doha prayer times for today including Fajr, Dhuhr, Asr, Maghrib and Isha. Plus latest job listings and weather updates.",
 });
 
 const homeJsonLd = {
@@ -39,10 +38,9 @@ const CURRENCY_BG   = ["bg-blue-50 dark:bg-blue-900/30", "bg-indigo-50 dark:bg-i
 const CURRENCY_TEXT = ["text-blue-600 dark:text-blue-400", "text-indigo-600 dark:text-indigo-400", "text-orange-600 dark:text-orange-400", "text-green-600 dark:text-green-400"];
 
 export default async function Home() {
-  const [weather, currency, news, jobs] = await Promise.allSettled([
+  const [weather, currency, jobs] = await Promise.allSettled([
     getFullWeather(),
     getQARRates(),
-    getNews(3),
     getJobs(5),
   ]);
 
@@ -50,7 +48,6 @@ export default async function Home() {
   const weatherData   = fullWeather?.current ?? null;
   const todayForecast = fullWeather?.forecast?.[0] ?? null;
   const currencyData  = currency.status  === "fulfilled" ? currency.value  : null;
-  const newsData      = news.status      === "fulfilled" ? news.value      : [];
   const jobsData      = jobs.status      === "fulfilled" ? jobs.value      : [];
   const topRates      = currencyData?.rates?.slice(0, 4) ?? [];
 
@@ -75,33 +72,6 @@ export default async function Home() {
               <Suspense fallback={<div className="h-72 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse" />}>
                 <PrayerCard />
               </Suspense>
-            </div>
-
-            {/* News Feature — col-span-8 */}
-            <div className="lg:col-span-8 bento-tile overflow-hidden !p-0 group relative">
-              {newsData[0] && (
-                <a href={`/news/${newsData[0].slug}`} className="block h-full relative">
-                  {newsData[0].imageUrl ? (
-                    <Image
-                      src={newsData[0].imageUrl}
-                      alt={newsData[0].title}
-                      fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-dark" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-8 sm:p-10">
-                    <span className="inline-block bg-primary text-white text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-widest mb-4">
-                      {newsData[0].source}
-                    </span>
-                    <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight group-hover:text-primary-dark transition-colors">
-                      {newsData[0].title}
-                    </h2>
-                  </div>
-                </a>
-              )}
             </div>
 
             {/* Weather — col-span-4 */}
@@ -196,39 +166,6 @@ export default async function Home() {
                </a>
             </div>
 
-          </section>
-
-          {/* ── More News ────────────────────────────────────────── */}
-          <section className="space-y-8">
-            <div className="flex items-baseline justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
-              <h3 className="text-xl font-black uppercase tracking-tighter">
-                <span className="lang-en">Latest Insights</span>
-                <span className="lang-ar">آخر الأخبار</span>
-              </h3>
-              <a href="/news" className="text-sm font-bold text-primary hover:underline">View All</a>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {newsData.slice(1, 4).map((item) => (
-                <a key={item.link} href={`/news/${item.slug}`} className="group block">
-                  <div className="relative aspect-[16/10] rounded-3xl overflow-hidden mb-4">
-                    {item.imageUrl ? (
-                      <Image src={item.imageUrl} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="absolute inset-0 bg-slate-100 dark:bg-slate-800" />
-                    )}
-                  </div>
-                  <h4 className="font-bold text-lg leading-snug group-hover:text-primary transition-colors">
-                    {item.title}
-                  </h4>
-                  <div className="flex items-center gap-3 mt-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    <span>{item.source}</span>
-                    <span className="w-1 h-1 rounded-full bg-slate-300" />
-                    <span>3 min read</span>
-                  </div>
-                </a>
-              ))}
-            </div>
           </section>
 
           {/* ── Jobs ──────────────────────────────────────────────── */}
