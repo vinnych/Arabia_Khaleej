@@ -186,7 +186,7 @@ html[lang="ar"] {
 
   /* Bento Tile Base */
   .bento-tile {
-    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1;
+    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1;
   }
 
   /* Premium Card Styles */
