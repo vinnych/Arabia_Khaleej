@@ -186,7 +186,13 @@ html[lang="ar"] {
 
   /* Bento Tile Base */
   .bento-tile {
-    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1;
+    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+  .bento-tile:hover {
+    border-color: rgba(138, 21, 56, 0.2);
+  }
+  html.dark .bento-tile:hover {
+    border-color: rgba(138, 21, 56, 0.4);
   }
 
   /* Premium Card Styles */
