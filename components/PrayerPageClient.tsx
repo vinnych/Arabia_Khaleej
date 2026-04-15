@@ -139,32 +139,32 @@ export default function PrayerPageClient({
   const todayStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 
   return (
-    <div className={`space-y-12 pb-20 transition-opacity duration-500 ${loading ? "opacity-60" : "opacity-100"}`}>
+    <div className={`space-y-8 sm:space-y-12 pb-20 transition-opacity duration-500 ${loading ? "opacity-60" : "opacity-100"}`}>
       
-      {/* ── Dynamic Sky Hero ─────────────────────────────────── */}
-      <section className={`relative rounded-[3rem] overflow-hidden p-10 sm:p-20 text-white shadow-2xl transition-colors duration-1000 bg-gradient-to-br ${SKY_THEMES[nextPrayer]}`}>
+      {/* ── Dynamic Sky Hero & Sticky Hub ────────────────────── */}
+      <section className={`relative rounded-[2.5rem] sm:rounded-[3rem] overflow-hidden p-8 sm:p-20 text-white shadow-2xl transition-colors duration-1000 bg-gradient-to-br ${SKY_THEMES[nextPrayer]}`}>
         <div className="absolute inset-0 bg-black/10 backdrop-blur-[2px]" />
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8 sm:gap-10">
           <div>
-            <div className="flex items-center gap-3 mb-6 bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full w-fit">
-              <span className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/80">{countdown} until {nextPrayer}</p>
+            <div className="flex items-center gap-3 mb-4 sm:mb-6 bg-white/10 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full w-fit">
+              <span className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />
+              <p className="label-mobile text-white/80 lowercase first-letter:uppercase">{countdown} until {nextPrayer}</p>
             </div>
-            <h1 className="national-title text-6xl sm:text-9xl mb-4 leading-none italic">
+            <h1 className="national-title text-5xl sm:text-9xl mb-4 leading-none italic">
               {usingGeo ? "Your Location" : CITIES[selected].label}
             </h1>
-            <div className="flex items-center gap-6 text-sm font-black uppercase tracking-widest text-white/60">
+            <div className="flex items-center gap-4 sm:gap-6 label-mobile text-white/50 normal-case">
               <span>{dateEn}</span>
               <span className="w-1.5 h-1.5 bg-white/20 rounded-full" />
               <span className="text-accent">{hijriStr}</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 w-full md:w-auto">
             <select
               value={selected}
               onChange={e => { setUsingGeo(false); setSelected(Number(e.target.value)); }}
-              className="appearance-none px-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white hover:text-primary transition-all cursor-pointer outline-none"
+              className="appearance-none w-full md:w-auto px-6 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-white hover:text-primary transition-all cursor-pointer outline-none active:scale-95"
             >
               {CITIES.map((c, i) => (
                 <option key={i} value={i} className="text-slate-900 font-sans">{c.label}</option>
@@ -175,17 +175,17 @@ export default function PrayerPageClient({
       </section>
 
       {/* ── Daily Clock Dashboard ───────────────────────────── */}
-      <section className="bento-grid">
+      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
         {PRAYERS.map((name) => {
           const isNext = name === nextPrayer;
           return (
-            <div key={name} className={`lg:col-span-2 bento-tile flex flex-col items-center justify-center p-8 relative group ${isNext ? 'border-primary/50 shadow-primary/10 bg-primary/5' : ''}`}>
-              {isNext && <span className="absolute top-4 right-4 text-[10px] font-black text-primary uppercase tracking-widest">Next</span>}
-              <span className={`material-symbols-outlined mb-4 text-4xl transition-transform group-hover:scale-110 ${isNext ? 'text-primary' : 'text-slate-300'}`} style={isNext ? { fontVariationSettings: "'FILL' 1" } : {}}>
+            <div key={name} className={`bento-tile flex flex-col items-center justify-center p-6 sm:p-8 relative group transition-all touch-active ${isNext ? 'border-primary/50 ring-2 ring-primary/10 bg-primary/5' : ''}`}>
+              {isNext && <span className="absolute top-3 right-4 label-mobile text-primary lowercase first-letter:uppercase">Next</span>}
+              <span className={`material-symbols-outlined mb-3 text-3xl transition-transform group-hover:scale-110 ${isNext ? 'text-primary' : 'text-slate-300'}`} style={isNext ? { fontVariationSettings: "'FILL' 1" } : {}}>
                 {PRAYER_ICONS[name]}
               </span>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">{name}</p>
-              <h3 className={`text-3xl font-black tracking-tighter ${isNext ? 'text-primary' : 'text-slate-900 dark:text-slate-100'}`}>
+              <p className="label-mobile text-slate-400 mb-1 normal-case tracking-wide">{name}</p>
+              <h3 className={`text-xl sm:text-3xl font-black tracking-tighter ${isNext ? 'text-primary' : 'text-slate-900 dark:text-slate-100'}`}>
                 {formatTime12(times?.[name] || "")}
               </h3>
             </div>
@@ -197,7 +197,7 @@ export default function PrayerPageClient({
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
         {/* ── Monthly Table ──────────────────────────── */}
-        <div className="lg:col-span-8 bento-tile !p-0 overflow-hidden shadow-xl">
+        <div className="lg:col-span-8 bento-tile !p-0 overflow-hidden shadow-xl sm:block hidden">
 
           {/* Table header / controls */}
           <div className="px-6 py-5 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4">

@@ -33,6 +33,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={serif.variable}>
       <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#faf9f6" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"
@@ -110,26 +114,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
                 <div>
                   <span className="font-black text-xs uppercase tracking-[0.2em] block mb-6 text-slate-900 dark:text-slate-100">
-                    <span className="lang-en">Services</span>
                     <span className="lang-ar">الخدمات</span>
+                    <span className="lang-en">Services</span>
                   </span>
                   <ul className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <li><a href="/prayer" className="hover:text-primary transition-colors"><span className="lang-en">Prayer Times</span><span className="lang-ar">مواقيت الصلاة</span></a></li>
-                    <li><a href="/weather" className="hover:text-primary transition-colors"><span className="lang-en">Weather</span><span className="lang-ar">الطقس</span></a></li>
-                    <li><a href="/currency" className="hover:text-primary transition-colors"><span className="lang-en">Currency</span><span className="lang-ar">العملات</span></a></li>
+                    <li><a href="/prayer" className="hover:text-primary transition-colors"><span className="lang-ar">مواقيت الصلاة</span><span className="lang-en">Prayer Times</span></a></li>
+                    <li><a href="/weather" className="hover:text-primary transition-colors"><span className="lang-ar">الطقس</span><span className="lang-en">Weather</span></a></li>
+                    <li><a href="/currency" className="hover:text-primary transition-colors"><span className="lang-ar">العملات</span><span className="lang-en">Currency</span></a></li>
                   </ul>
                 </div>
                 <div>
                   <span className="font-black text-xs uppercase tracking-[0.2em] block mb-6 text-slate-900 dark:text-slate-100">
-                    <span className="lang-en">Resources</span>
                     <span className="lang-ar">الموارد</span>
+                    <span className="lang-en">Resources</span>
                   </span>
                   <ul className="space-y-4 text-sm font-medium text-slate-600 dark:text-slate-400">
-                    <li><a href="/qatar-visa-requirements" className="hover:text-primary transition-colors"><span className="lang-en">Visa Requirements</span><span className="lang-ar">متطلبات التأشيرة</span></a></li>
-                    <li><a href="/cost-of-living-doha" className="hover:text-primary transition-colors"><span className="lang-en">Cost of Living</span><span className="lang-ar">تكلفة المعيشة</span></a></li>
-                    <li><a href="/qatar-salary-guide" className="hover:text-primary transition-colors"><span className="lang-en">Salary Guide</span><span className="lang-ar">دليل الرواتب</span></a></li>
-                    <li><a href="/qatar-public-holidays" className="hover:text-primary transition-colors"><span className="lang-en">Public Holidays</span><span className="lang-ar">الإجازات الرسمية</span></a></li>
-                    <li><a href="/qatar-labour-law" className="hover:text-primary transition-colors"><span className="lang-en">Labour Law</span><span className="lang-ar">قانون العمل</span></a></li>
+                    <li><a href="/qatar-visa-requirements" className="hover:text-primary transition-colors"><span className="lang-ar">متطلبات التأشيرة</span><span className="lang-en">Visa Requirements</span></a></li>
+                    <li><a href="/cost-of-living-doha" className="hover:text-primary transition-colors"><span className="lang-ar">تكلفة المعيشة</span><span className="lang-en">Cost of Living</span></a></li>
+                    <li><a href="/qatar-salary-guide" className="hover:text-primary transition-colors"><span className="lang-ar">دليل الرواتب</span><span className="lang-en">Salary Guide</span></a></li>
+                    <li><a href="/qatar-public-holidays" className="hover:text-primary transition-colors"><span className="lang-ar">الإجازات الرسمية</span><span className="lang-en">Public Holidays</span></a></li>
+                    <li><a href="/qatar-labour-law" className="hover:text-primary transition-colors"><span className="lang-ar">قانون العمل</span><span className="lang-en">Labour Law</span></a></li>
                   </ul>
                 </div>
                 <div className="hidden sm:block">

@@ -68,8 +68,8 @@ export default async function WeatherPage() {
       ) : (
         <>
           {/* Current weather card */}
-          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-100 dark:border-amber-800/30 rounded-lg p-4">
-            <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-4">Current Conditions</p>
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-100 dark:border-amber-800/30 rounded-[2rem] p-6 sm:p-8">
+            <p className="label-mobile text-amber-700 dark:text-amber-400 mb-6 lowercase first-letter:uppercase">Current Conditions</p>
             <div className="flex items-center gap-4 sm:gap-6 mb-4">
               <span className="text-5xl sm:text-7xl">{weather.current.icon}</span>
               <div>
@@ -97,7 +97,7 @@ export default async function WeatherPage() {
 
           {/* 7-day forecast — calendar cards */}
           <section>
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">7-Day Forecast — Doha, Qatar</h2>
+            <h2 className="label-mobile text-gray-500 dark:text-slate-400 mb-4 lowercase first-letter:uppercase">7-Day Forecast — Doha, Qatar</h2>
             <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
               {weather.forecast.map((day, i) => {
                 const isToday = i === 0;
@@ -139,7 +139,7 @@ export default async function WeatherPage() {
 
           {/* Qatar climate info */}
           <section>
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">Qatar Weather Guide</h2>
+            <h2 className="label-mobile text-gray-500 dark:text-slate-400 mb-4 lowercase first-letter:uppercase">Qatar Weather Guide</h2>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="bg-stone-50 dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Summer (May – Sep)</h3>

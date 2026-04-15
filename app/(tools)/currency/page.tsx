@@ -75,9 +75,9 @@ export default async function CurrencyPage() {
           <div className="flex items-center gap-4 p-4 sm:p-5 bg-primary/5 dark:bg-primary/10 border border-primary/20 dark:border-primary/30 rounded-2xl">
             <span className="text-4xl shrink-0">🇶🇦</span>
             <div>
-              <p className="label-xs text-primary mb-1">Qatari Riyal (QAR) — Fixed Peg</p>
+              <p className="label-mobile text-primary mb-1 lowercase first-letter:uppercase">Qatari Riyal (QAR) — Fixed Peg</p>
               <p className="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
-                The QAR is <strong>pegged to the US Dollar</strong> at a fixed rate of <strong>1 USD = 3.64 QAR</strong>. This peg has been maintained since 1980 and provides currency stability for residents and businesses.
+                The QAR is <strong>pegged to the US Dollar</strong> at a fixed rate of <strong>1 USD = 3.64 QAR</strong>.
               </p>
             </div>
           </div>

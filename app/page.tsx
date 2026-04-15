@@ -43,9 +43,9 @@ export default async function Home() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(homeJsonLd) }} />
 
-      <div className="-mx-4 sm:-mx-5 md:-mx-8 lg:-mx-12 -mt-5 sm:-mt-6 -mb-20 md:-mb-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      <div className="-mx-4 sm:-mx-5 md:-mx-8 lg:-mx-12 -mt-4 sm:-mt-6 -mb-20 md:-mb-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
-        <div className="max-w-7xl mx-auto px-6 lg:px-12 py-10 space-y-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-10 space-y-12 sm:space-y-20">
 
           <HomeHero />
 
@@ -68,9 +68,9 @@ export default async function Home() {
                 <a href="/weather" className="absolute inset-0 z-10 rounded-[2rem]" aria-label="View full weather forecast for Doha" />
                 <span className="absolute -right-8 -top-8 material-symbols-outlined text-[180px] text-blue-500 dark:text-blue-400 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 select-none">wb_sunny</span>
                 <div className="relative z-0">
-                  <p className="label-xs text-slate-400 mb-6">
-                    <span className="lang-en">Current Climate — Doha</span>
+                  <p className="label-mobile text-slate-400 mb-6 lowercase first-letter:uppercase">
                     <span className="lang-ar">الطقس الحالي — الدوحة</span>
+                    <span className="lang-en">Current Climate — Doha</span>
                   </p>
                   {weatherData ? (
                     <div className="flex items-center gap-4">
@@ -89,8 +89,8 @@ export default async function Home() {
                 {/* Visual footer — decorative only, the stretched link above handles navigation */}
                 <div className="mt-6 flex items-center justify-between relative z-0">
                   <span className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest">
-                    <span className="lang-en">Full Forecast</span>
                     <span className="lang-ar">توقعات كاملة</span>
+                    <span className="lang-en">Full Forecast</span>
                   </span>
                   <span className="material-symbols-outlined text-blue-500 dark:text-blue-400 group-hover:translate-x-1 transition-transform">arrow_forward</span>
                 </div>
@@ -101,9 +101,9 @@ export default async function Home() {
                 {/* Stretched link covers the whole card */}
                 <a href="/currency" className="absolute inset-0 z-10 rounded-[2rem]" aria-label="View QAR exchange rates" />
                 <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 to-transparent pointer-events-none" />
-                <p className="label-xs text-white/40 mb-6 relative z-0">
-                  <span className="lang-en">QAR Exchange Rate</span>
+                <p className="label-mobile text-white/40 mb-6 lowercase first-letter:uppercase">
                   <span className="lang-ar">سعر صرف الريال</span>
+                  <span className="lang-en">QAR Exchange Rate</span>
                 </p>
                 <div className="space-y-4 relative z-0 flex-1">
                   {topRates.slice(0, 4).map((rate) => (
@@ -123,8 +123,8 @@ export default async function Home() {
                 {/* Visual footer — decorative only, stretched link above handles navigation */}
                 <div className="mt-8 flex items-center justify-between relative z-0">
                   <span className="label-xs text-white/60">
-                    <span className="lang-en">All Rates</span>
                     <span className="lang-ar">جميع الأسعار</span>
+                    <span className="lang-en">All Rates</span>
                   </span>
                   <span className="material-symbols-outlined text-accent group-hover:translate-x-1 transition-transform" style={{ fontSize: "18px" }}>arrow_forward</span>
                 </div>
@@ -136,13 +136,13 @@ export default async function Home() {
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-center gap-8">
                 <div className="shrink-0">
-                  <p className="label-xs text-white/60 mb-2">
-                    <span className="lang-en">Essential Guides</span>
+                  <p className="label-mobile text-white/60 mb-2 lowercase first-letter:uppercase">
                     <span className="lang-ar">الأدلة الأساسية</span>
+                    <span className="lang-en">Essential Guides</span>
                   </p>
                   <h2 className="national-title text-3xl sm:text-4xl text-white">
-                    <span className="lang-en">Qatar at a Glance</span>
                     <span className="lang-ar">قطر في لمحة</span>
+                    <span className="lang-en">Qatar at a Glance</span>
                   </h2>
                 </div>
 
@@ -166,8 +166,8 @@ export default async function Home() {
                         {item.icon}
                       </span>
                       <p className="font-bold text-xs group-hover:text-primary transition-colors leading-tight">
-                        <span className="lang-en">{item.en}</span>
                         <span className="lang-ar">{item.ar}</span>
+                        <span className="lang-en">{item.en}</span>
                       </p>
                     </a>
                   ))}
@@ -181,8 +181,8 @@ export default async function Home() {
           <section className="py-20 max-w-5xl mx-auto">
             <div className="text-center mb-20">
               <h2 className="national-title text-5xl sm:text-7xl mb-6 text-slate-900 dark:text-slate-100">
-                <span className="lang-en">Common Inquiries</span>
                 <span className="lang-ar">الأسئلة الشائعة</span>
+                <span className="lang-en">Common Inquiries</span>
               </h2>
             </div>
             <div className="grid gap-6">
@@ -223,8 +223,8 @@ export default async function Home() {
                     <div className="flex items-center gap-6">
                       <span className="material-symbols-outlined text-primary group-hover:scale-125 transition-transform" style={{ fontSize: "24px" }}>{icon}</span>
                       <span className="font-bold text-lg text-slate-900 dark:text-slate-100 tracking-tight">
-                        <span className="lang-en">{en}</span>
                         <span className="lang-ar">{ar}</span>
+                        <span className="lang-en">{en}</span>
                       </span>
                     </div>
                     <span className="material-symbols-outlined text-slate-300 group-open:rotate-180 transition-transform">expand_more</span>

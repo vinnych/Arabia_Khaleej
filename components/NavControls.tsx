@@ -9,14 +9,22 @@ export default function NavControls() {
   const [lang, setLang] = useState<"en" | "ar">("en");
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    const prefersDark = saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    // 1. Theme initialization
+    const savedTheme = localStorage.getItem("theme");
+    const prefersDark = savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches);
     if (prefersDark) {
       setDark(true);
       document.documentElement.classList.add("dark");
     }
-    document.documentElement.lang = "en";
-    document.documentElement.dir = "ltr";
+
+    // 2. Language initialization (Arabic-first for mobile)
+    const savedLang = localStorage.getItem("lang") as "en" | "ar" | null;
+    const isMobile = window.innerWidth < 768;
+    const defaultLang = savedLang || (isMobile ? "ar" : "en");
+    
+    setLang(defaultLang);
+    document.documentElement.lang = defaultLang;
+    document.documentElement.dir = defaultLang === "ar" ? "rtl" : "ltr";
   }, []);
 
   const toggleTheme = () => {
@@ -31,6 +39,7 @@ export default function NavControls() {
     setLang(next);
     document.documentElement.lang = next;
     document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
+    localStorage.setItem("lang", next);
   };
 
   return (
@@ -39,7 +48,7 @@ export default function NavControls() {
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="material-symbols-outlined text-slate-600 dark:text-slate-400 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors touch-manipulation cursor-pointer"
+          className="material-symbols-outlined text-slate-600 dark:text-slate-400 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90 touch-manipulation cursor-pointer"
           aria-label="Toggle theme"
           title="Toggle Theme"
         >
@@ -50,7 +59,7 @@ export default function NavControls() {
         {/* Language toggle */}
         <button
           onClick={toggleLang}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-sm font-bold text-slate-900 dark:text-slate-100 touch-manipulation cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95 text-sm font-bold text-slate-900 dark:text-slate-100 touch-manipulation cursor-pointer"
           aria-label="Switch language"
         >
           <span className="material-symbols-outlined text-lg">language</span>

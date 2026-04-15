@@ -19,38 +19,38 @@ export default function GuidePageLayout({ guide }: Props) {
       : `${guide.minDays}–${guide.maxDays} days`;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12 sm:space-y-20">
 
       <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Services", href: "/qatar-services" }, { label: guide.title }]} />
 
       {/* ── Premium Service Hero ─────────────────────────── */}
-      <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
+      <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[300px] sm:min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
         <div className="relative z-10 w-full max-w-4xl">
-          <Link href="/qatar-services" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-8 hover:text-white transition-colors">
-            <ArrowLeft size={12} /> Back to Directory
+          <Link href="/qatar-services" className="flex items-center gap-2 label-mobile text-white/40 mb-8 hover:text-white transition-colors">
+            <ArrowLeft size={14} /> <span className="lang-en">Back to Directory</span>
           </Link>
           <div className="flex items-center gap-2 mb-6">
              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-white/10 border border-white/10 rounded-full text-accent whitespace-nowrap">For: {guide.role}</span>
              {guide.fastTrack && <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-amber-500/20 border border-amber-500/20 rounded-full text-amber-300 flex items-center gap-1"><Zap size={10} /> Fast Track</span>}
           </div>
-          <h1 className="national-title text-6xl sm:text-8xl mb-8 italic leading-[0.9] tracking-tighter">
+          <h1 className="national-title text-5xl sm:text-8xl mb-8 italic leading-[0.9] tracking-tighter">
              <span className="lang-en">{guide.title}</span>
           </h1>
           <p className="text-sm font-medium text-white/50 leading-relaxed max-w-xl mb-12 italic">
             {guide.intro}
           </p>
-          <div className="flex flex-wrap gap-8 border-t border-white/10 pt-10">
+          <div className="flex flex-wrap gap-x-8 gap-y-6 border-t border-white/10 pt-10">
             <div>
-               <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1 flex items-center gap-1"><Clock size={10} /> Timeline</p>
+               <p className="label-mobile text-white/30 mb-1 flex items-center gap-1"><Clock size={12} /> Timeline</p>
                <p className="text-xl font-black">{timeLabel}</p>
             </div>
             <div>
-               <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1 flex items-center gap-1"><Banknote size={10} /> Fees</p>
+               <p className="label-mobile text-white/30 mb-1 flex items-center gap-1"><Banknote size={12} /> Fees</p>
                <p className="text-xl font-black text-accent">{totalFees === 0 ? "Free" : `~QAR ${totalFees.toLocaleString()}`}</p>
             </div>
             <div>
-               <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Requirements</p>
+               <p className="label-mobile text-white/30 mb-1">Requirements</p>
                <p className="text-xl font-black">{guide.docs.length} Documents</p>
             </div>
           </div>
@@ -82,11 +82,27 @@ export default function GuidePageLayout({ guide }: Props) {
       {/* ── Fee Breakdown & Legal ───────────────────────────── */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
          <div className="lg:col-span-2 bento-tile !p-0 overflow-hidden shadow-xl">
-           <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
-              <h3 className="text-sm font-black uppercase tracking-widest">Official Fee Matrix</h3>
-              <span className="px-3 py-1 bg-primary/5 text-primary text-[10px] font-black rounded-full uppercase border border-primary/10">Est. 2026</span>
+            <div className="p-5 sm:p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
+              <h3 className="label-mobile">Official Fee Matrix</h3>
+              <span className="label-mobile px-3 py-1 bg-primary/5 text-primary rounded-full border border-primary/10 transition-colors">Est. 2026</span>
            </div>
-           <table className="w-full text-left">
+           
+           {/* Mobile Card list */}
+           <div className="sm:hidden divide-y divide-slate-100 dark:divide-slate-900">
+              {guide.fees.map(f => (
+                <div key={f.label} className="p-5 flex justify-between items-center bg-white dark:bg-slate-950">
+                   <div className="label-mobile text-slate-500 lowercase first-letter:uppercase">{f.label}</div>
+                   <div className="font-black text-sm text-slate-950 dark:text-white">{f.amount === 0 ? "Free" : `QAR ${f.amount.toLocaleString()}`}</div>
+                </div>
+              ))}
+              <div className="p-5 flex justify-between items-center bg-primary/5">
+                 <div className="label-mobile text-primary">Total Due</div>
+                 <div className="text-xl font-black text-primary">{totalFees === 0 ? "Free" : `~QAR ${totalFees.toLocaleString()}`}</div>
+              </div>
+           </div>
+
+           {/* Desktop Table */}
+           <table className="hidden sm:table w-full text-left">
               <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
                 {guide.fees.map(f => (
                   <tr key={f.label} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50">

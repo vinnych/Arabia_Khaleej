@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import NavControls from "./NavControls";
 
 const PRIMARY_NAV = [
   { path: "/",        icon: "home",    en: "Home",    ar: "الرئيسية" },
@@ -49,7 +50,7 @@ export default function BottomNav() {
                 key={path}
                 href={path}
                 aria-current={isActive ? "page" : undefined}
-                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-90 ${
+                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all touch-active ${
                   isActive ? "text-primary" : "text-slate-500 dark:text-slate-400"
                 }`}
               >
@@ -69,9 +70,9 @@ export default function BottomNav() {
                     <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
                   )}
                 </div>
-                <span className={`text-xs font-bold tracking-tight ${isActive ? "opacity-100" : "opacity-70"}`}>
-                  <span className="lang-en">{en}</span>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? "opacity-100" : "opacity-60"}`}>
                   <span className="lang-ar">{ar}</span>
+                  <span className="lang-en">{en}</span>
                 </span>
               </a>
             );
@@ -82,7 +83,7 @@ export default function BottomNav() {
             onClick={() => setSheet(sheet === "guides" ? null : "guides")}
             aria-expanded={sheet === "guides"}
             aria-label="All Guides"
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-90 ${
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all touch-active ${
               sheet === "guides" ? "text-primary" : "text-slate-500 dark:text-slate-400"
             }`}
           >
@@ -91,9 +92,9 @@ export default function BottomNav() {
                 menu_book
               </span>
             </div>
-            <span className="text-xs font-bold tracking-tight opacity-70">
-              <span className="lang-en">Guides</span>
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
               <span className="lang-ar">الأدلة</span>
+              <span className="lang-en">Guides</span>
             </span>
           </button>
 
@@ -102,7 +103,7 @@ export default function BottomNav() {
             onClick={() => setSheet(sheet === "more" ? null : "more")}
             aria-expanded={sheet === "more"}
             aria-label="More pages"
-            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all active:scale-90 ${
+            className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-all touch-active ${
               sheet === "more" ? "text-primary" : "text-slate-500 dark:text-slate-400"
             }`}
           >
@@ -111,9 +112,9 @@ export default function BottomNav() {
                 more_horiz
               </span>
             </div>
-            <span className="text-xs font-bold tracking-tight opacity-70">
-              <span className="lang-en">More</span>
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">
               <span className="lang-ar">المزيد</span>
+              <span className="lang-en">More</span>
             </span>
           </button>
 
@@ -131,21 +132,39 @@ export default function BottomNav() {
 
       {/* Guides sheet */}
       <div
-        className={`md:hidden fixed bottom-16 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-3xl shadow-2xl transition-transform duration-300 ${
+        className={`md:hidden fixed left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-3xl shadow-2xl transition-transform duration-300 max-h-[85vh] overflow-y-auto pb-safe ${
           sheet === "guides" ? "translate-y-0" : "translate-y-full pointer-events-none"
         }`}
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
         role="dialog"
         aria-label="Guides menu"
       >
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
         </div>
-        <div className="px-4 pb-2 pt-1">
-          <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">
-            <span className="lang-en">Essential Guides</span>
+        {/* System Bar */}
+        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-800/30">
+          <NavControls />
+          <button 
+            onClick={closeSheet}
+            className="p-2 -me-2 text-slate-400 hover:text-primary transition-colors touch-active"
+            aria-label="Close menu"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        {/* Category Header */}
+        <div className="px-6 pt-8 pb-2">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-2">
             <span className="lang-ar">الأدلة الأساسية</span>
+            <span className="lang-en">Essential Guides</span>
           </p>
-          <div className="grid grid-cols-2 gap-2 pb-4">
+          <div className="w-12 h-1 bg-accent rounded-full mb-6" />
+        </div>
+
+        <div className="px-5 pb-8">
+          <div className="grid grid-cols-2 gap-3 pb-4">
             {GUIDES_ITEMS.map(({ path, icon, en, ar }) => (
               <a
                 key={path}
@@ -157,8 +176,8 @@ export default function BottomNav() {
                   {icon}
                 </span>
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-tight">
-                  <span className="lang-en">{en}</span>
                   <span className="lang-ar">{ar}</span>
+                  <span className="lang-en">{en}</span>
                 </span>
               </a>
             ))}
@@ -168,21 +187,39 @@ export default function BottomNav() {
 
       {/* More sheet */}
       <div
-        className={`md:hidden fixed bottom-16 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-3xl shadow-2xl transition-transform duration-300 ${
+        className={`md:hidden fixed left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-3xl shadow-2xl transition-transform duration-300 max-h-[85vh] overflow-y-auto pb-safe ${
           sheet === "more" ? "translate-y-0" : "translate-y-full pointer-events-none"
         }`}
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}
         role="dialog"
         aria-label="More menu"
       >
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-12 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
+        <div className="flex justify-center pt-3 pb-2">
+          <div className="w-10 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
         </div>
-        <div className="px-4 pb-6 pt-1">
-          <p className="text-xs font-black uppercase tracking-widest text-slate-400 mb-3">
-            <span className="lang-en">More</span>
+        {/* System Bar */}
+        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-800/30">
+          <NavControls />
+          <button 
+            onClick={closeSheet}
+            className="p-2 -me-2 text-slate-400 hover:text-primary transition-colors touch-active"
+            aria-label="Close menu"
+          >
+            <span className="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        {/* Category Header */}
+        <div className="px-6 pt-8 pb-2">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-2">
             <span className="lang-ar">المزيد</span>
+            <span className="lang-en">More</span>
           </p>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="w-12 h-1 bg-accent rounded-full mb-6" />
+        </div>
+
+        <div className="px-5 pb-10">
+          <div className="grid grid-cols-2 gap-3">
             {MORE_ITEMS.map(({ path, icon, en, ar }) => (
               <a
                 key={path}
@@ -194,8 +231,8 @@ export default function BottomNav() {
                   {icon}
                 </span>
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-tight">
-                  <span className="lang-en">{en}</span>
                   <span className="lang-ar">{ar}</span>
+                  <span className="lang-en">{en}</span>
                 </span>
               </a>
             ))}

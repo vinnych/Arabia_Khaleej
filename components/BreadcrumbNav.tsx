@@ -14,7 +14,7 @@ interface BreadcrumbNavProps {
  */
 export default function BreadcrumbNav({ crumbs }: BreadcrumbNavProps) {
   return (
-    <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 flex-wrap">
+    <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 overflow-x-auto whitespace-nowrap custom-scrollbar pb-1">
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return (

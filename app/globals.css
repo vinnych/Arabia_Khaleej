@@ -212,7 +212,7 @@ html[lang="ar"] {
 
   /* Bento Tile Base */
   .bento-tile {
-    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-6 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-5 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] active:translate-y-0 overflow-hidden;
   }
   .bento-tile:hover {
     border-color: rgba(138, 21, 56, 0.2);
@@ -238,16 +238,13 @@ html[lang="ar"] {
 @layer utilities {
   /* Minimum readable label — replaces text-[10px]/text-[9px] throughout the site.
      12px is the WCAG-recommended floor for UI labels. */
-  .label-xs {
-    font-size: 0.75rem; /* 12px */
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  /* Standardized mobile labels: minimum 12px, high contrast */
+  .label-mobile {
+    @apply text-[12px] font-black uppercase tracking-widest leading-none;
   }
-  /* Global accessibility floor: any Tailwind arbitrary-size class below 12px
-     is overridden to 12px. Prevents sub-pixel labels failing WCAG 2.1 AA. */
+
   .text-\[10px\], .text-\[11px\], .text-\[9px\], .text-\[8px\] {
-    font-size: 0.75rem; /* 12px minimum */
+    font-size: 0.75rem; /* 12px minimum for WCAG */
   }
   .shadow-ambient {
     box-shadow: 0 20px 40px rgba(87, 40, 50, 0.07);
@@ -258,6 +255,16 @@ html[lang="ar"] {
   /* Qatar maroon accent ring on interactive cards */
   .ring-qatar {
     --tw-ring-color: rgba(139, 26, 60, 0.18);
+  }
+
+  /* Mobile Exclusive UX Utilities */
+  .touch-active {
+    @apply active:scale-95 transition-transform;
+  }
+
+  /* Safe Area Helpers */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 

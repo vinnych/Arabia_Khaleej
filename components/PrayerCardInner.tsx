@@ -50,7 +50,7 @@ export default function PrayerCardInner({ prayers }: { prayers: Prayer[] }) {
       {/* ── Header ─────────────────────────────────────── */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <p className="label-xs text-primary mb-1">
+          <p className="label-mobile text-primary mb-1 lowercase first-letter:uppercase">
             <span className="lang-en">Prayer Times</span>
             <span className="lang-ar">مواقيت الصلاة</span>
           </p>
@@ -66,7 +66,7 @@ export default function PrayerCardInner({ prayers }: { prayers: Prayer[] }) {
         {/* Countdown badge */}
         <div className="bg-primary text-white px-4 py-2.5 rounded-xl flex flex-col items-center shadow-lg shadow-primary/20 shrink-0 ml-3">
           <span className="text-xl font-black leading-none tabular-nums">{countdown}</span>
-          <span className="label-xs text-white/50 mt-0.5 normal-case tracking-wider">
+          <span className="label-mobile text-white/50 mt-0.5 lowercase normal-case">
             <span className="lang-en">remaining</span>
             <span className="lang-ar">متبقية</span>
           </span>
@@ -101,7 +101,7 @@ export default function PrayerCardInner({ prayers }: { prayers: Prayer[] }) {
                   <span className="lang-ar">{AR_NAMES[p.name] ?? p.name}</span>
                 </span>
                 {isNext && (
-                  <span className="label-xs text-white/60 normal-case tracking-wider hidden sm:inline">
+                  <span className="label-mobile text-white/60 lowercase normal-case tracking-wide hidden sm:inline">
                     <span className="lang-en">· next</span>
                     <span className="lang-ar">· القادمة</span>
                   </span>
