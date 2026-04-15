@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMonthlyPrayerTimes, getMonthlyPrayerTimesByCoords } from "@/lib/prayer";
-import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
-
 export async function GET(req: NextRequest) {
-  const allowed = await checkRateLimit(getClientIp(req));
-  if (!allowed) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": "60" } });
-  }
   const rawLat = req.nextUrl.searchParams.get("lat");
   const rawLng = req.nextUrl.searchParams.get("lng");
   const city = (req.nextUrl.searchParams.get("city") || "Doha").replace(/[^a-zA-Z\s\-]/g, "").slice(0, 60);

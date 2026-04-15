@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Qatar Portal — Prayer Times, Jobs & News",
+    name: "Qatar Portal — Prayer Times & Service Guides",
     short_name: "Qatar Portal",
     description:
-      "Your daily Qatar resource: accurate prayer times for Doha, latest job listings, and top Gulf news headlines.",
+      "Your daily Qatar resource: accurate prayer times for Doha, service guides, and essential public utilities.",
     start_url: "/",
     display: "standalone",
     background_color: "#faf9f6",

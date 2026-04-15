@@ -305,7 +305,7 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
       {
         title: "Obtain salary certificate from employer",
         detail:
-          "Request an official salary certificate from your HR department. It must state your monthly basic salary and be stamped by the company.",
+          "Request a stamped salary certificate from your HR department. It must state your monthly basic salary and be stamped by the company.",
       },
       {
         title: "Attest family documents",
@@ -492,7 +492,7 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
       {
         title: "Theory exam (if required)",
         detail:
-          "Non-transfer countries must pass a computerised theory test (30 questions, need 21+ correct). Study the official Qatar traffic law booklet available on the MOI website. Tests are available in English and Arabic.",
+          "Non-transfer countries must pass a computerised theory test (30 questions, need 21+ correct). Study the Qatar traffic law booklet available on the MOI website. Tests are available in English and Arabic.",
       },
       {
         title: "Road test (if required)",

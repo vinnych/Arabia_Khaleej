@@ -1,13 +1,13 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
+import RelatedGuides from "@/components/RelatedGuides";
 
 export const metadata = pageMeta({
-  title: "Emergency Numbers Qatar & Embassy Contacts Doha 2026",
-  description: "Qatar emergency numbers: police, ambulance, fire, traffic. Embassy contacts for India, Pakistan, Philippines, UK, USA and more.",
+  title: "Qatar Emergency Contacts 2026 | Public Contact Directory",
+  description: "Emergency contact numbers for the State of Qatar. Police, Ambulance, Fire, and Consular contacts for residents and visitors.",
   path: "/emergency-numbers-qatar",
-  keywords: ["emergency numbers Qatar", "Qatar police number", "ambulance Qatar", "embassies in Doha", "Indian embassy Qatar", "Pakistan embassy Qatar"],
-  ogTitle: "Emergency Numbers Qatar & Embassies in Doha",
-  ogDescription: "Qatar emergency contacts and embassy phone numbers for major nationalities in Doha.",
+  keywords: ["999 Qatar", "emergency numbers Doha", "embassy contacts Qatar", "police Qatar", "ambulance help"],
 });
 
 export default function EmergencyNumbersQatarPage() {
@@ -17,152 +17,121 @@ export default function EmergencyNumbersQatarPage() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "What is the emergency number in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "The emergency number in Qatar is 999 for police, ambulance, and fire. For the traffic police, call 96600000.",
-        },
+        name: "What is the primary emergency number in Qatar?",
+        acceptedAnswer: { "@type": "Answer", text: "The primary emergency number for police, fire, and ambulance is 999." },
       },
-      {
-        "@type": "Question",
-        name: "What is the Indian Embassy number in Doha, Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "The Indian Embassy in Doha, Qatar can be reached at +974 4425 5777. The embassy is located in the diplomatic area of Doha.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How do I call an ambulance in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "To call an ambulance in Qatar, dial 999. Hamad Medical Corporation operates the national ambulance service, which is free to call.",
-        },
-      },
-    ],
-  };
-
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Emergency Numbers Qatar", item: `${SITE_URL}/emergency-numbers-qatar` },
     ],
   };
 
   return (
-    <div className="page-sections">
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Emergency Contacts", item: `${SITE_URL}/emergency-numbers-qatar` }] }) }} />
 
-      <div>
-        <h1 className="font-newsreader text-3xl font-bold text-on-surface mb-3">Emergency Numbers Qatar & Embassies in Doha</h1>
-        <p className="text-gray-600 text-base leading-relaxed">
-          Save these numbers before you need them. Essential contacts for emergencies, legal assistance, and consular services in Qatar.
-        </p>
-      </div>
+      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Emergency Numbers" }]} />
 
-      {/* Emergency numbers */}
-      <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🚨 Emergency Numbers</h2>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {[
-            { service: "Police", number: "999", icon: "👮" },
-            { service: "Ambulance", number: "999", icon: "🚑" },
-            { service: "Fire Department", number: "999", icon: "🚒" },
-            { service: "Traffic Police", number: "96600000", icon: "🚗" },
-            { service: "Hamad Medical (Hospital)", number: "44393333", icon: "🏥" },
-            { service: "Women & Children Protection", number: "919", icon: "👧" },
-            { service: "Ministry of Interior Hotline", number: "44406444", icon: "🏛️" },
-            { service: "Electricity & Water (KAHRAMAA)", number: "991", icon: "💡" },
-            { service: "Ooredoo Customer Service", number: "111", icon: "📞" },
-            { service: "Vodafone Qatar", number: "800 7111", icon: "📱" },
-          ].map((e) => (
-            <div key={e.service} className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center gap-3">
-              <span className="text-2xl">{e.icon}</span>
-              <div>
-                <p className="font-semibold text-gray-900 text-sm">{e.service}</p>
-                <a href={`tel:${e.number}`} className="text-red-700 font-bold text-lg hover:underline">{e.number}</a>
-              </div>
-            </div>
-          ))}
+      {/* ── National Response Hero ─────────────────────────── */}
+      <section className="bento-tile bg-gradient-to-br from-rose-900 via-primary-dark to-slate-950 !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/10 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3 animate-pulse" />
+        <div className="relative z-10 w-full max-w-4xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">Directorate of Public Safety · 2026</p>
+          <h1 className="national-title text-6xl sm:text-9xl mb-8 italic leading-[0.8]">
+             <span className="lang-en">First Response</span>
+             <span className="lang-ar">الاستجابة الأولى</span>
+          </h1>
+          <p className="text-sm font-medium text-white/50 leading-relaxed max-w-md">
+            The consolidated registry of emergency, consular, and utility services for the State of Qatar.
+          </p>
         </div>
       </section>
 
-      {/* Embassies */}
-      <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🌍 Embassies & Consulates in Doha</h2>
-        <div className="rounded-xl border border-stone-200 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-stone-100 text-gray-700">
-                <th className="px-4 py-3 text-left font-semibold">Country</th>
-                <th className="px-4 py-3 text-left font-semibold">Phone</th>
-                <th className="px-4 py-3 text-left font-semibold">Area</th>
-              </tr>
+      {/* ── High-Priority Dashboard ────────────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-8">
+           {[
+             { title: "Universal Rescue", s: "Police · Fire · Med", num: "999", color: "bg-primary !text-white" },
+             { title: "Traffic Response", s: "Road Safety Unit", num: "96600", color: "bg-slate-900 !text-white" },
+             { title: "Energy Hub", s: "Water & Electricity", num: "991", color: "bg-amber-400 !text-primary" },
+             { title: "Hamad Medical", s: "Hospital Gateway", num: "44393", color: "bg-slate-50 dark:bg-slate-900" },
+           ].map(card => (
+             <a key={card.title} href={`tel:${card.num}`} className={`bento-tile flex flex-col justify-between p-10 min-h-[240px] border-none shadow-xl active:scale-95 transition-all ${card.color}`}>
+                <div>
+                   <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60 mb-2">{card.s}</h4>
+                   <h3 className="text-2xl font-black italic tracking-tight">{card.title}</h3>
+                </div>
+                <div className="flex items-center gap-4">
+                   <span className="text-5xl font-black italic">{card.num}</span>
+                   <span className="material-symbols-outlined">call</span>
+                </div>
+             </a>
+           ))}
+        </div>
+
+        <div className="lg:col-span-4 bento-tile flex flex-col justify-center bg-slate-50 dark:bg-slate-900 border-none">
+           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-6">Language Support</h3>
+           <p className="text-sm text-slate-500 leading-relaxed font-medium">
+             Emergency operators in Qatar are multi-lingual. Support is available for <b>English, Arabic, Hindi, Tagalog, and Urdu</b> speakers.
+           </p>
+           <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 font-black text-[9px] text-slate-400 uppercase tracking-widest">
+              <span>EN</span><span>AR</span><span>HI</span><span>TL</span><span>UR</span>
+           </div>
+        </div>
+      </section>
+
+      {/* ── Consular Directory ──────────────────────────────── */}
+      <section className="space-y-12">
+        <div>
+          <h2 className="national-title text-4xl">Consular Services</h2>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Embassy & Diplomatic Support</p>
+        </div>
+
+        <div className="bento-tile !p-0 overflow-hidden shadow-2xl">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 dark:bg-slate-950">
+               <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="py-6 px-8 whitespace-nowrap">Distinction</th>
+                  <th className="py-6 px-8">Consular Hotline</th>
+                  <th className="py-6 px-8">Location Hub</th>
+               </tr>
             </thead>
-            <tbody>
-              {[
-                { country: "🇮🇳 India", phone: "+974 4425 5777", area: "Al Hilal" },
-                { country: "🇵🇰 Pakistan", phone: "+974 4467 9210", area: "Al Dafna" },
-                { country: "🇧🇩 Bangladesh", phone: "+974 4483 5031", area: "Al Hilal" },
-                { country: "🇵🇭 Philippines", phone: "+974 4483 6444", area: "Al Hilal" },
-                { country: "🇳🇵 Nepal", phone: "+974 4483 7015", area: "Al Hilal" },
-                { country: "🇱🇰 Sri Lanka", phone: "+974 4483 5721", area: "Al Hilal" },
-                { country: "🇪🇬 Egypt", phone: "+974 4483 5022", area: "Al Mansoura" },
-                { country: "🇬🇧 United Kingdom", phone: "+974 4496 2000", area: "West Bay" },
-                { country: "🇺🇸 United States", phone: "+974 4496 6000", area: "Al Luqta" },
-                { country: "🇫🇷 France", phone: "+974 4420 6600", area: "West Bay" },
-                { country: "🇩🇪 Germany", phone: "+974 4408 6300", area: "West Bay" },
-                { country: "🇸🇦 Saudi Arabia", phone: "+974 4483 5722", area: "Al Hilal" },
-                { country: "🇯🇴 Jordan", phone: "+974 4483 5555", area: "Al Hilal" },
-                { country: "🇹🇷 Turkey", phone: "+974 4483 5432", area: "Al Hilal" },
-              ].map((e, i) => (
-                <tr key={e.country} className={`border-t border-stone-100 ${i % 2 === 0 ? "bg-white" : "bg-stone-50"}`}>
-                  <td className="px-4 py-2.5 font-medium text-gray-900">{e.country}</td>
-                  <td className="px-4 py-2.5">
-                    <a href={`tel:${e.phone}`} className="text-rose-700 hover:underline">{e.phone}</a>
-                  </td>
-                  <td className="px-4 py-2.5 text-gray-500">{e.area}</td>
-                </tr>
-              ))}
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
+               {[
+                 { c: "India", n: "4425 5777", l: "Al Hilal" },
+                 { c: "United Kingdom", n: "4496 2000", l: "West Bay" },
+                 { c: "Pakistan", n: "4467 9210", l: "Al Dafna" },
+                 { c: "United States", n: "4496 6000", l: "Al Luqta" },
+                 { c: "Philippines", n: "4483 6444", l: "Al Hilal" },
+               ].map(row => (
+                 <tr key={row.c} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                    <td className="py-6 px-8 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">{row.c}</td>
+                    <td className="py-6 px-8 text-xs font-bold text-slate-500 group-hover:text-slate-900 dark:group-hover:text-slate-100"><a href={`tel:${row.n}`}>{row.n}</a></td>
+                    <td className="py-6 px-8 text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{row.l}</td>
+                 </tr>
+               ))}
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-gray-400 mt-2">Phone numbers are approximate — verify with the official embassy website before visiting.</p>
       </section>
 
-      {/* Hospitals */}
-      <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">🏥 Major Hospitals in Doha</h2>
-        <div className="space-y-2 text-sm text-gray-700">
-          {[
-            { name: "Hamad General Hospital", note: "Main public hospital, 24/7 emergency", phone: "44393333" },
-            { name: "Al Khor Hospital", note: "North Qatar public hospital", phone: "44719999" },
-            { name: "Sidra Medicine", note: "Women & children specialist", phone: "40030000" },
-            { name: "Aster DM Healthcare", note: "Private, multiple branches", phone: "44413999" },
-          ].map((h) => (
-            <div key={h.name} className="bg-stone-50 border border-stone-200 rounded-xl p-3 flex justify-between items-center">
-              <div>
-                <p className="font-semibold text-gray-900">{h.name}</p>
-                <p className="text-gray-500 text-xs">{h.note}</p>
-              </div>
-              <a href={`tel:${h.phone}`} className="text-rose-700 font-bold hover:underline ml-4">{h.phone}</a>
-            </div>
-          ))}
+      {/* ── Social Support ──────────────────────────────────── */}
+      <section className="bento-tile bg-primary-dark !text-white border-none flex flex-col md:flex-row items-center gap-12 p-12">
+        <div className="flex-1">
+           <h3 className="national-title text-5xl mb-6 italic">Aman Hotline</h3>
+           <p className="text-sm font-medium text-white/60 leading-relaxed italic">
+             Providing a safe haven and advocacy for women and children in the State of Qatar. Secure, confidential, and professional assistance.
+           </p>
         </div>
+        <a href="tel:919" className="w-[180px] h-[180px] shrink-0 rounded-full bg-accent flex flex-col items-center justify-center text-primary shadow-2xl shadow-accent/20 hover:scale-105 transition-all outline outline-8 outline-white/5">
+           <span className="text-5xl font-black italic mb-1 tracking-tighter">919</span>
+           <span className="label-xs">Aman Help</span>
+        </a>
       </section>
 
-      {/* Internal links */}
-      <section className="bg-rose-50 border border-rose-100 rounded-2xl p-6 text-sm">
-        <p className="font-semibold text-rose-900 mb-2">More Qatar guides</p>
-        <div className="flex flex-wrap gap-3">
-          <a href="/qatar-visa-requirements" className="text-rose-700 hover:underline">→ Qatar Visa Requirements</a>
-          <a href="/cost-of-living-doha" className="text-rose-700 hover:underline">→ Cost of Living in Doha</a>
-          <a href="/qatar-public-holidays" className="text-rose-700 hover:underline">→ Qatar Public Holidays</a>
-        </div>
-      </section>
+      <RelatedGuides guides={[
+        { href: "/community-resources",   icon: "groups",      title: "Community Resources", description: "Healthcare, banking, schools, and expat life support in Qatar." },
+        { href: "/qatar-labour-law",      icon: "gavel",       title: "Labour Law",          description: "Know your rights if you face issues with an employer." },
+        { href: "/qatar-visa-requirements", icon: "id_card",   title: "Visa Requirements",   description: "Entry and residency rules for visitors and workers." },
+      ]} />
     </div>
   );
 }

@@ -21,7 +21,7 @@ export default function GuidePageLayout({ guide }: Props) {
         className="inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors"
       >
         <ArrowLeft size={13} />
-        Government Services
+        Services Directory
       </Link>
  
       {/* Hero */}
@@ -36,7 +36,7 @@ export default function GuidePageLayout({ guide }: Props) {
             </span>
           )}
         </div>
-        <h1 className="font-newsreader text-2xl font-bold text-on-surface mt-1 mb-2">{guide.title}</h1>
+        <h1 className="font-serif text-2xl font-bold text-on-surface mt-1 mb-2">{guide.title}</h1>
         <p className="text-gray-600 text-base leading-relaxed">{guide.intro}</p>
       </div>
  
@@ -123,7 +123,7 @@ export default function GuidePageLayout({ guide }: Props) {
       {/* Portals */}
       {guide.portals.length > 0 && (
         <section>
-          <h2 className="text-base font-semibold text-on-surface mb-2">Official portals</h2>
+          <h2 className="text-base font-semibold text-on-surface mb-2">Public portals</h2>
           <div className="flex flex-wrap gap-2">
             {guide.portals.map((p) => (
               <a

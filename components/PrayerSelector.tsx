@@ -156,7 +156,7 @@ export default function PrayerSelector({
 
       {/* Header */}
       <div>
-        <h1 className="font-newsreader text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface mb-1">
+        <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-on-surface mb-1">
           Prayer Times — {usingGeo ? geoLabel : CITIES[selected].label}
         </h1>
         <p className="text-gray-500 text-sm">

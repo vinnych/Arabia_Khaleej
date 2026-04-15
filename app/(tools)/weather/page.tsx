@@ -57,7 +57,7 @@ export default async function WeatherPage() {
 
       {/* Header */}
       <div>
-        <h1 className="font-newsreader text-xl font-bold text-on-surface mb-1">
+        <h1 className="font-serif text-xl font-bold text-on-surface mb-1">
           Doha Weather Today
         </h1>
         <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">{today} · Doha, Qatar · Updates every 30 min</p>

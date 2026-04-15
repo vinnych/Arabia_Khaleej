@@ -18,14 +18,14 @@ export default async function PrayerCard() {
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full p-6 sm:p-8">
       <PrayerCardInner prayers={prayers} />
       <a
         href="/prayer"
-        className="mt-8 w-full py-4 font-bold text-sm rounded-2xl text-center block border-2 border-blue-100 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all text-blue-600 dark:text-blue-400"
+        className="mt-auto pt-6 w-full py-4 font-black text-xs uppercase tracking-widest rounded-2xl text-center block border-2 border-primary/20 hover:bg-primary hover:text-white hover:border-primary text-primary transition-all duration-300"
       >
-        <span className="lang-en">Full Prayer Calendar</span>
-        <span className="lang-ar">جدول الصلاة الكامل</span>
+        <span className="lang-en">Full Prayer Calendar →</span>
+        <span className="lang-ar">جدول الصلاة الكامل →</span>
       </a>
     </div>
   );

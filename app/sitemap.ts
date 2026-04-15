@@ -1,5 +1,4 @@
 import type { MetadataRoute } from "next";
-import { getJobs } from "@/lib/jobs";
 
 const SITE_URL = "https://qatar-portal.vercel.app";
 
@@ -9,7 +8,6 @@ const STATIC_LAST_MODIFIED = new Date("2026-04-13");
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: "hourly", priority: 1 },
-    { url: `${SITE_URL}/jobs`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${SITE_URL}/weather`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
     { url: `${SITE_URL}/currency`, lastModified: new Date(), changeFrequency: "hourly", priority: 0.8 },
     { url: `${SITE_URL}/about`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.5 },
@@ -32,13 +30,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily" as const,
       priority: 0.6,
     })),
-    // Job category pages
-    ...["engineering", "it", "healthcare", "finance", "construction"].map((cat) => ({
-      url: `${SITE_URL}/jobs-category/${cat}`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.6,
-    })),
     // Qatar services guide pages
     ...["qid", "work-visa", "family-visa", "business-registration", "driving-licence", "exit-permit", "document-attestation"].map((slug) => ({
       url: `${SITE_URL}/qatar-services/${slug}`,
@@ -48,26 +39,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
-  try {
-    const [jobs] = await Promise.all([getJobs(48)]);
-
-    // Only include items within 7-day Redis TTL — older items may no longer resolve
-    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-
-    const jobPages: MetadataRoute.Sitemap = jobs
-      .filter((job) => {
-        if (!job.pubDate) return true;
-        try { return new Date(job.pubDate).getTime() >= cutoff; } catch { return false; }
-      })
-      .map((job) => ({
-        url: `${SITE_URL}/jobs/${job.slug}`,
-        lastModified: job.pubDate ? new Date(job.pubDate) : new Date(),
-        changeFrequency: "daily" as const,
-        priority: 0.5,   // expires after 7 days — lower priority
-      }));
-
-    return [...base, ...jobPages];
-  } catch {
-    return base;
-  }
+  return base;
 }

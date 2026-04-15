@@ -1,25 +1,20 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
 
 export const metadata = pageMeta({
-  title: "Qatar Public Holidays 2026 — Official Government & Islamic Holidays",
-  description: "Complete list of Qatar public holidays for 2026 including National Day, Sports Day, Eid Al-Fitr, Eid Al-Adha, and all official government holidays.",
+  title: "Qatar Public Holidays 2026 | Community Calendar",
+  description: "Independent schedule of public holidays in the State of Qatar for 2026. Explore dates for National Day, Eid Al-Fitr, and Qatar Sports Day.",
   path: "/qatar-public-holidays",
-  keywords: ["Qatar public holidays 2026", "Qatar national day", "Eid holidays Qatar", "Qatar Sports Day", "Qatar government holidays", "Qatar holiday calendar"],
-  ogTitle: "Qatar Public Holidays 2026",
-  ogDescription: "Official Qatar public holidays 2026: National Day, Sports Day, Eid Al-Fitr, Eid Al-Adha, and all government holidays.",
+  keywords: ["Qatar holidays 2026", "National Day Qatar", "Eid holidays 2026", "Qatar Sports Day"],
 });
 
-const HOLIDAYS_2026 = [
-  { date: "1 Jan 2026", name: "New Year's Day", type: "International" },
-  { date: "10 Feb 2026", name: "Qatar National Sports Day", type: "Sports" },
-  { date: "20 Mar 2026 (approx)", name: "Eid Al-Fitr (End of Ramadan)", type: "Islamic" },
-  { date: "21–23 Mar 2026", name: "Eid Al-Fitr Holiday", type: "Islamic" },
-  { date: "27 May 2026 (approx)", name: "Eid Al-Adha", type: "Islamic" },
-  { date: "28–30 May 2026", name: "Eid Al-Adha Holiday", type: "Islamic" },
-  { date: "16 Jun 2026 (approx)", name: "Islamic New Year (Hijri New Year)", type: "Islamic" },
-  { date: "25 Aug 2026 (approx)", name: "Prophet Muhammad's Birthday (Mawlid)", type: "Islamic" },
-  { date: "18 Dec 2026", name: "Qatar National Day", type: "National" },
+const HOLIDAYS = [
+  { date: "10 Feb", name: "National Sports Day", type: "State", color: "text-amber-500" },
+  { date: "20 Mar*", name: "Eid Al-Fitr", type: "Islamic", color: "text-emerald-500" },
+  { date: "27 May*", name: "Eid Al-Adha", type: "Islamic", color: "text-emerald-500" },
+  { date: "16 Jun*", name: "Islamic New Year", type: "Islamic", color: "text-emerald-500" },
+  { date: "18 Dec", name: "National Day", type: "National", color: "text-primary" },
 ];
 
 export default function QatarPublicHolidaysPage() {
@@ -29,140 +24,105 @@ export default function QatarPublicHolidaysPage() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "How many public holidays does Qatar have in 2026?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Qatar has approximately 9–10 public holidays in 2026, including New Year's Day, National Sports Day (10 Feb), Eid Al-Fitr (3 days), Eid Al-Adha (3 days), Islamic New Year, Prophet's Birthday, and National Day on December 18.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "When is Qatar National Day?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Qatar National Day is on December 18 every year. It commemorates the unification of Qatar under Sheikh Jassim bin Mohammed Al Thani in 1878. It is marked with parades, fireworks, and cultural events.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "When is Eid Al-Fitr 2026 in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Eid Al-Fitr 2026 in Qatar is expected around March 20, 2026, marking the end of Ramadan. The exact date depends on the moon sighting. The official holiday lasts 3 days.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "When is Qatar National Sports Day 2026?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Qatar National Sports Day 2026 is on Tuesday, 10 February 2026. It falls on the second Tuesday of February each year. It is a public holiday that promotes physical activity and a healthy lifestyle across Qatar.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Do private sector employees get public holidays in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Yes. Under Qatar Labour Law, all employees (public and private sector) are entitled to paid public holidays. If a holiday falls on a rest day, the employee is entitled to compensation.",
-        },
+        name: "When is Qatar National Day 2026?",
+        acceptedAnswer: { "@type": "Answer", text: "Qatar National Day is celebrated on December 18 annually." },
       },
     ],
   };
 
   return (
-    <div className="page-sections">
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar Public Holidays 2026", item: "https://qatar-portal.vercel.app/qatar-public-holidays" }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Public Holidays", item: `${SITE_URL}/qatar-public-holidays` }] }) }} />
 
-      <div>
-        <h1 className="font-newsreader text-3xl font-bold text-on-surface mb-3">Qatar Public Holidays 2026</h1>
-        <p className="text-gray-600 text-base leading-relaxed">
-          Official government and Islamic holidays in Qatar for 2026. Islamic holiday dates are approximate — confirmed by moon sighting.
-        </p>
-      </div>
+      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Public Holidays" }]} />
 
-      {/* Holiday table */}
-      <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">📅 2026 Holiday Calendar</h2>
-        <div className="rounded-xl border border-stone-200 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-stone-100 text-gray-700">
-                <th className="px-4 py-3 text-left font-semibold">Date</th>
-                <th className="px-4 py-3 text-left font-semibold">Holiday</th>
-                <th className="px-4 py-3 text-left font-semibold">Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              {HOLIDAYS_2026.map((h, i) => (
-                <tr key={h.name} className={`border-t border-stone-100 ${i % 2 === 0 ? "bg-white" : "bg-stone-50"}`}>
-                  <td className="px-4 py-2.5 text-gray-600 whitespace-nowrap">{h.date}</td>
-                  <td className="px-4 py-2.5 font-medium text-gray-900">{h.name}</td>
-                  <td className="px-4 py-2.5">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      h.type === "Islamic" ? "bg-emerald-100 text-emerald-800" :
-                      h.type === "National" ? "bg-rose-100 text-rose-800" :
-                      h.type === "Sports" ? "bg-amber-100 text-amber-800" :
-                      "bg-sky-100 text-sky-800"
-                    }`}>
-                      {h.type}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* ── National Calendar Hero ─────────────────────────── */}
+      <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
+        <div className="relative z-10 w-full max-w-4xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">State Protocols · 2026</p>
+          <h1 className="national-title text-6xl sm:text-9xl mb-8 italic leading-[0.8]">
+             <span className="lang-en">Public Holidays</span>
+             <span className="lang-ar">العطل الرسمية</span>
+          </h1>
+          <p className="text-sm font-medium text-white/70 leading-relaxed max-w-md">
+            The public schedule of commemorative, religious, and civic observances in the State of Qatar.
+          </p>
         </div>
-        <p className="text-xs text-gray-400 mt-2">* Islamic holiday dates subject to official moon sighting announcement.</p>
       </section>
 
-      {/* National Day */}
-      <section className="bg-rose-50 border border-rose-100 rounded-2xl p-6">
-        <h2 className="text-lg font-bold text-rose-900 mb-2">🇶🇦 Qatar National Day — 18 December</h2>
-        <p className="text-sm text-gray-700 leading-relaxed">
-          Qatar National Day commemorates the unification of the country under Sheikh Jassim bin Mohammed Al Thani on December 18, 1878.
-          Celebrated with military parades, fireworks over Doha Corniche, traditional performances, and cultural events across the country.
-        </p>
-      </section>
+      {/* ── Holiday Feed ────────────────────────────────────── */}
+      <section className="space-y-12">
+        <div className="flex justify-between items-end">
+          <div>
+            <h2 className="national-title text-4xl">The Schedule</h2>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Gregorian · Hijri Alignment</p>
+          </div>
+        </div>
 
-      {/* Ramadan note */}
-      <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-3">🌙 Ramadan 2026</h2>
-        <p className="text-sm text-gray-700 mb-2">
-          Ramadan 2026 is expected to begin around <strong>18 February 2026</strong> and end around <strong>19 March 2026</strong> (subject to moon sighting).
-        </p>
-        <p className="text-sm text-gray-700">
-          During Ramadan, working hours are reduced by 2 hours per day for all employees. Public eating, drinking, and smoking during daylight hours is prohibited in public spaces.
-        </p>
-        <a href="/prayer" className="inline-block mt-3 text-sm text-rose-700 hover:underline">→ Check prayer times during Ramadan</a>
-      </section>
-
-      {/* FAQ */}
-      <section>
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-        <div className="space-y-3">
-          {[
-            { q: "When is Qatar Sports Day 2026?", a: "Qatar National Sports Day 2026 falls on Tuesday, 10 February 2026. It is observed on the second Tuesday of February every year and is a public holiday for all employees." },
-            { q: "Are Islamic holidays the same date every year?", a: "No. Islamic holidays follow the Hijri (lunar) calendar, which is 11 days shorter than the Gregorian calendar. So Islamic holidays shift about 11 days earlier each Gregorian year." },
-            { q: "Do shops close on public holidays in Qatar?", a: "Most government offices close. Malls and supermarkets usually remain open with reduced hours on Eid holidays. Restaurants typically close during Eid prayer times." },
-            { q: "Is Friday a public holiday in Qatar?", a: "Friday is the official weekly rest day (like Sunday in Western countries). Some companies also give Saturday off, making the weekend Friday–Saturday." },
-          ].map(({ q, a }) => (
-            <details key={q} className="bg-stone-50 border border-stone-200 rounded-xl p-4 cursor-pointer">
-              <summary className="font-semibold text-gray-900 text-sm">{q}</summary>
-              <p className="text-sm text-gray-600 mt-2">{a}</p>
-            </details>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {HOLIDAYS.map(h => (
+            <div key={h.name} className="bento-tile flex items-center justify-between p-8 group hover:border-primary/20 transition-all">
+              <div className="flex flex-col gap-1">
+                <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${h.color}`}>{h.type}</span>
+                <h3 className="text-xl font-bold tracking-tight">{h.name}</h3>
+              </div>
+              <div className="text-right">
+                <span className="text-2xl font-black text-slate-900 dark:text-slate-100 italic">{h.date}</span>
+              </div>
+            </div>
           ))}
+          <div className="bento-tile bg-slate-50 dark:bg-slate-900 border-none flex flex-col justify-center items-center text-center p-8 opacity-60">
+             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+               * Islamic dates are subject to moon sighting confirmation by the Ministry of Awqaf.
+             </p>
+          </div>
         </div>
       </section>
 
-      {/* Internal links */}
-      <section className="bg-amber-50 border border-amber-100 rounded-2xl p-6 text-sm">
-        <p className="font-semibold text-amber-900 mb-2">Related</p>
-        <div className="flex flex-wrap gap-3">
-          <a href="/prayer" className="text-rose-700 hover:underline">→ Prayer Times in Doha</a>
-          <a href="/news" className="text-rose-700 hover:underline">→ Qatar News</a>
-          <a href="/qatar-visa-requirements" className="text-rose-700 hover:underline">→ Qatar Visa Guide</a>
+      {/* ── Significant Observances ─────────────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-12 bento-tile !p-0 overflow-hidden shadow-2xl">
+           <div className="grid grid-cols-1 md:grid-cols-2">
+              <div className="p-12 sm:p-20 bg-primary !text-white border-none flex flex-col justify-center">
+                 <h3 className="national-title text-6xl italic mb-6">National Day</h3>
+                 <p className="text-sm font-medium text-white/70 leading-relaxed mb-10">
+                   Commemorating the unification of Qatar in 1878. A day of national pride, heritage, and state-wide celebration across the Doha Corniche.
+                 </p>
+                 <div className="px-6 py-4 bg-white/10 rounded-2xl border border-white/10 w-fit font-black text-xs uppercase tracking-[0.2em]">
+                   18 December · 2026
+                 </div>
+              </div>
+              <div className="p-12 sm:p-20 bg-slate-900 !text-white border-none flex flex-col justify-center">
+                 <h3 className="national-title text-6xl italic mb-6">Ramadan</h3>
+                 <p className="text-sm font-medium text-white/70 leading-relaxed mb-10">
+                   The holy month of fasting. Working hours are reduced across state and private sectors to accommodate spiritual obligations.
+                 </p>
+                 <a href="/prayer" className="px-6 py-4 bg-accent text-primary rounded-2xl w-fit font-black text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all">
+                   Prayer Timings
+                 </a>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* ── Concierge Support ────────────────────────────────── */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bento-tile">
+           <h4 className="text-sm font-black uppercase tracking-widest mb-4">Labour Rights</h4>
+           <p className="text-sm text-slate-500 leading-relaxed">
+             Under Qatar Labour Law, all employees are entitled to fully paid leave during public holidays. Companies operating during these days must provide alternative rest days or overtime compensation.
+           </p>
+        </div>
+        <div className="bento-tile bg-slate-50 dark:bg-slate-950 border-none flex items-center justify-between group">
+           <div>
+             <h4 className="font-bold mb-1">Planning a visit?</h4>
+             <p className="text-xs text-slate-400">Review your residency requirements.</p>
+           </div>
+           <a href="/qatar-visa-requirements" className="w-12 h-12 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-300 group-hover:text-primary group-hover:border-primary transition-all">
+              <span className="material-symbols-outlined">east</span>
+           </a>
         </div>
       </section>
     </div>

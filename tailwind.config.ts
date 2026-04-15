@@ -16,6 +16,7 @@ const config: Config = {
         "primary-dark": "var(--color-primary-dark)",
         "surface-low": "var(--color-surface-low)",
         "on-surface": "var(--color-on-surface)",
+        accent: "var(--color-accent)",
         "secondary-accent": "#D4AF37",
         "utility-chip": "#acf2c7",
         "qatar-sand": "#E3D5C8",
@@ -23,7 +24,7 @@ const config: Config = {
         "page-bg": "#faf9f6",
       },
       fontFamily: {
-        newsreader: ["var(--font-newsreader)", "Georgia", "serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
       },
     },
   },

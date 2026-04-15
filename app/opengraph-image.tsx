@@ -1,56 +1,45 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Qatar Portal — Prayer Times, Jobs & News";
+export const alt = "Qatar Portal — Prayer Times, Jobs & Utilities";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OgImage() {
+export default async function Image() {
   return new ImageResponse(
     (
       <div
         style={{
-          background: "linear-gradient(135deg, #003fa4 0%, #0056d2 50%, #0078f0 100%)",
+          background: "linear-gradient(135deg, #1e1b4b 0%, #8A1538 100%)",
           width: "100%",
           height: "100%",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "sans-serif",
+          fontFamily: "Inter",
+          color: "white",
+          padding: "80px",
         }}
       >
-        {/* Subtle grid overlay */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-        <div style={{ fontSize: 80, fontWeight: 900, color: "#ffffff", letterSpacing: -2, marginBottom: 16 }}>
-          QATAR PORTAL
+        <div style={{ fontSize: 100, fontWeight: 900, letterSpacing: "-0.05em", marginBottom: "20px" }}>
+          Qatar Portal
         </div>
-        <div style={{ fontSize: 28, color: "rgba(255,255,255,0.8)", marginBottom: 48, letterSpacing: 6, fontWeight: 500 }}>
-          Prayer Times · Jobs · News
+        <div style={{ fontSize: 32, fontWeight: 500, letterSpacing: "0.2em", opacity: 0.7, textTransform: "uppercase" }}>
+          Prayer Times · Service Guides · Utilities
         </div>
-        <div
-          style={{
-            display: "flex",
-            gap: 32,
-            fontSize: 20,
-            color: "#fff",
-            background: "rgba(255,255,255,0.12)",
-            borderRadius: 16,
-            padding: "16px 36px",
-            border: "1px solid rgba(255,255,255,0.15)",
-          }}
-        >
-          <span>🕌 Doha Prayer Times</span>
-          <span>💼 Qatar Jobs</span>
-          <span>📰 Gulf News</span>
+        
+        <div style={{ 
+          display: "flex", 
+          gap: "20px", 
+          marginTop: "60px" 
+        }}>
+          <div style={{ background: "rgba(255,255,255,0.1)", padding: "12px 24px", borderRadius: "100px", fontSize: 18, border: "1px solid rgba(255,255,255,0.2)" }}>
+            📍 Doha, Qatar
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.1)", padding: "12px 24px", borderRadius: "100px", fontSize: 18, border: "1px solid rgba(255,255,255,0.2)" }}>
+            ⚡ Public Services
+          </div>
         </div>
       </div>
     ),

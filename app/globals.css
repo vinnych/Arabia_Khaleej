@@ -39,66 +39,92 @@ html[lang="ar"] {
      Grid / flex gap    →  16px (mobile) · 24px (sm) · 32px (lg)
    ─────────────────────────────────────────────────────────── */
 
-/* ── Zip design utilities ─────────────────────────────────── */
+/* ── Premium National Identity Design System ──────────────── */
+@layer base {
+  :root {
+    --color-primary: #8A1538;       /* Qatar Maroon */
+    --color-primary-dark: #640023;
+    --color-accent: #D4AF37;        /* Champagne Gold */
+    --color-accent-light: #F4E4BC;
+    --color-on-surface: #1a1c1a;
+    --color-surface-low: #fdfcfa;
+    --font-heading: 'Newsreader', serif;
+    --radius-premium: 2.5rem;
+  }
+}
+
+.premium-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .premium-hub-grid {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 2rem;
+  }
+}
+
+.premium-glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ambient-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.ambient-glow::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(138, 21, 56, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .bento-grid {
+    grid-template-columns: repeat(12, 1fr);
+    gap: 2rem;
+  }
+}
+
+.bento-tile {
+  @apply bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 sm:p-10 
+         border border-slate-200/50 dark:border-slate-800/50 
+         shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
+         hover:shadow-[0_20px_50px_rgba(138,21,56,0.08)] 
+         hover:-translate-y-1 transition-all duration-500 ease-out;
+}
+
+.national-title {
+  @apply font-serif italic font-black tracking-tight leading-[0.9];
+}
+
+/* ── Zip design utilities (Legacy Cleanup) ───────────────── */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  @apply premium-glass;
 }
 
 .card-base {
-  background: linear-gradient(145deg, #ffffff 0%, #fdfcfa 100%);
-  border-radius: 0.875rem;
-  box-shadow: 0 1px 2px rgba(87, 65, 68, 0.04), 0 20px 40px rgba(87, 65, 68, 0.06);
-  border: 1px solid rgba(28, 25, 23, 0.06);
-  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
-}
-
-.card-base:hover {
-  box-shadow: 0 1px 2px rgba(87, 65, 68, 0.04), 0 24px 48px rgba(87, 65, 68, 0.11);
-  border-color: rgba(138, 21, 56, 0.12);
-}
-
-.section-label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.625rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: #78716c;
-}
-
-.section-label::after {
-  content: "";
-  height: 1px;
-  flex-grow: 1;
-  background-color: #e5e7eb;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.pb-safe {
-  padding-bottom: env(safe-area-inset-bottom);
+  @apply bento-tile;
 }
 
 @layer base {
-  :root {
-    --color-on-surface: #1a1c1a;
-    --color-primary: #8A1538; /* Qatar Maroon */
-    --color-primary-dark: #640023;
-    --color-accent: #D4AF37;   /* Gold */
-    --color-surface-low: #fdfcfa;
-    --font-heading: 'Newsreader', serif;
-  }
   html.dark {
     --color-on-surface: #e2e8f0;
     --color-primary: #8A1538;
@@ -210,6 +236,19 @@ html[lang="ar"] {
 }
 
 @layer utilities {
+  /* Minimum readable label — replaces text-[10px]/text-[9px] throughout the site.
+     12px is the WCAG-recommended floor for UI labels. */
+  .label-xs {
+    font-size: 0.75rem; /* 12px */
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  /* Global accessibility floor: any Tailwind arbitrary-size class below 12px
+     is overridden to 12px. Prevents sub-pixel labels failing WCAG 2.1 AA. */
+  .text-\[10px\], .text-\[11px\], .text-\[9px\], .text-\[8px\] {
+    font-size: 0.75rem; /* 12px minimum */
+  }
   .shadow-ambient {
     box-shadow: 0 20px 40px rgba(87, 40, 50, 0.07);
   }

@@ -9,15 +9,18 @@ function toMin(t: string) {
   return h * 60 + (m || 0);
 }
 
-const MATERIAL_ICONS: Record<string, string> = {
-  Fajr: "bedtime", Sunrise: "wb_twilight", Dhuhr: "wb_sunny", Asr: "wb_cloudy", Maghrib: "wb_twilight", Isha: "nightlight",
+const ICONS: Record<string, string> = {
+  Fajr: "bedtime", Sunrise: "wb_twilight", Dhuhr: "wb_sunny",
+  Asr: "light_mode", Maghrib: "wb_shade", Isha: "nightlight",
 };
-
-const GRID_PRAYERS = ["Fajr", "Dhuhr", "Maghrib", "Isha"];
 
 const AR_NAMES: Record<string, string> = {
-  Fajr: "الفجر", Dhuhr: "الظهر", Asr: "العصر", Maghrib: "المغرب", Isha: "العشاء",
+  Fajr: "الفجر", Sunrise: "الشروق", Dhuhr: "الظهر",
+  Asr: "العصر", Maghrib: "المغرب", Isha: "العشاء",
 };
+
+/** The 5 canonical prayers shown in the card (Sunrise omitted) */
+const CARD_PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
 
 export default function PrayerCardInner({ prayers }: { prayers: Prayer[] }) {
   const [now, setNow] = useState(new Date());
@@ -29,6 +32,7 @@ export default function PrayerCardInner({ prayers }: { prayers: Prayer[] }) {
 
   const qatarTime = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Qatar" }));
   const localMin = qatarTime.getHours() * 60 + qatarTime.getMinutes();
+
   let nextIdx = prayers.findIndex((p) => toMin(p.time) > localMin);
   if (nextIdx === -1) nextIdx = 0;
   const next = prayers[nextIdx];
@@ -37,70 +41,86 @@ export default function PrayerCardInner({ prayers }: { prayers: Prayer[] }) {
   if (diffMin < 0) diffMin += 24 * 60;
   const h = Math.floor(diffMin / 60);
   const m = diffMin % 60;
-  const countdown = h > 0 ? `${h}h ${m}m` : `${m}`;
-  const countdownLabel = h > 0 ? "remaining" : "mins to go";
+  const countdown = h > 0 ? `${h}h ${m}m` : `${m}m`;
 
-  const gridPrayers = prayers.filter((p) => GRID_PRAYERS.includes(p.name));
+  const cardPrayers = prayers.filter((p) => CARD_PRAYERS.includes(p.name));
 
   return (
     <>
-      {/* Header row */}
-      <div className="flex justify-between items-start mb-10">
+      {/* ── Header ─────────────────────────────────────── */}
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <p className="text-[11px] font-bold text-primary dark:text-primary uppercase tracking-[0.2em] mb-2">
-            <span className="lang-en">Coming Up Next</span>
-            <span className="lang-ar">الصلاة القادمة</span>
+          <p className="label-xs text-primary mb-1">
+            <span className="lang-en">Prayer Times</span>
+            <span className="lang-ar">مواقيت الصلاة</span>
           </p>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-100 leading-none">
+          <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 leading-none">
             <span className="lang-en">{next.name}</span>
             <span className="lang-ar">{AR_NAMES[next.name] ?? next.name}</span>
+            <span className="ml-2 text-sm font-bold text-slate-400">
+              <span className="lang-en">is next</span>
+              <span className="lang-ar">قادمة</span>
+            </span>
           </h2>
         </div>
         {/* Countdown badge */}
-        <div className="bg-primary text-white px-5 py-3 rounded-2xl flex flex-col items-center shadow-lg shadow-primary/20 shrink-0 ml-4">
-          <span className="text-2xl font-black leading-none tabular-nums tracking-tighter">{countdown}</span>
-          <span className="text-[9px] font-bold uppercase tracking-widest mt-1 text-white/50">
-            <span className="lang-en">{countdownLabel}</span>
+        <div className="bg-primary text-white px-4 py-2.5 rounded-xl flex flex-col items-center shadow-lg shadow-primary/20 shrink-0 ml-3">
+          <span className="text-xl font-black leading-none tabular-nums">{countdown}</span>
+          <span className="label-xs text-white/50 mt-0.5 normal-case tracking-wider">
+            <span className="lang-en">remaining</span>
             <span className="lang-ar">متبقية</span>
           </span>
         </div>
       </div>
 
-      {/* Next prayer highlighted row */}
-      <div className="flex items-center justify-between p-6 bg-primary/5 dark:bg-primary/20 rounded-3xl border border-primary/10 mb-4 transition-all hover:bg-primary/10">
-        <div className="flex items-center gap-4">
-          <span
-            className="material-symbols-outlined text-4xl text-primary"
-            style={{ fontVariationSettings: "'FILL' 1" }}
-          >
-            {MATERIAL_ICONS[next.name] ?? "schedule"}
-          </span>
-          <span className="text-2xl font-black text-slate-900 dark:text-slate-100">
-            <span className="lang-en">Today</span>
-            <span className="lang-ar">اليوم</span>
-          </span>
-        </div>
-        <span className="font-mono font-black text-3xl text-primary">
-          {next.time.replace(/\s*\([^)]*\)/, "").trim()}
-        </span>
-      </div>
-
-      {/* 2×2 grid */}
-      <div className="grid grid-cols-2 gap-3">
-        {gridPrayers.map((p) => (
-          <div
-            key={p.name}
-            className={`p-5 rounded-2xl flex flex-col gap-2 transition-all ${p.name === next.name ? "bg-primary text-white shadow-xl shadow-primary/20" : "bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800"}`}
-          >
-            <span className={`text-[10px] font-black uppercase tracking-widest ${p.name === next.name ? "text-white/60" : "text-slate-400"}`}>
-              <span className="lang-en">{p.name}</span>
-              <span className="lang-ar">{AR_NAMES[p.name] ?? p.name}</span>
-            </span>
-            <span className={`font-mono font-black text-xl tabular-nums ${p.name === next.name ? "text-white" : "text-slate-900 dark:text-slate-100"}`}>
-              {p.time.replace(/\s*\([^)]*\)/, "").trim()}
-            </span>
-          </div>
-        ))}
+      {/* ── Prayer list ────────────────────────────────── */}
+      <div className="space-y-1.5">
+        {cardPrayers.map((p) => {
+          const isNext = p.name === next.name;
+          const timeStr = p.time.replace(/\s*\([^)]*\)/, "").trim();
+          return (
+            <a
+              key={p.name}
+              href="/prayer"
+              aria-label={`${p.name} prayer at ${timeStr}${isNext ? " — next prayer" : ""}`}
+              className={`flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-300 cursor-pointer group/row ${
+                isNext
+                  ? "bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary-dark"
+                  : "bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span
+                  className={`material-symbols-outlined text-xl shrink-0 transition-transform group-hover/row:scale-110 ${isNext ? "text-white" : "text-slate-400"}`}
+                  style={{ fontVariationSettings: isNext ? "'FILL' 1" : "'FILL' 0" }}
+                >
+                  {ICONS[p.name] ?? "schedule"}
+                </span>
+                <span className={`font-bold text-sm ${isNext ? "text-white" : "text-slate-700 dark:text-slate-300"}`}>
+                  <span className="lang-en">{p.name}</span>
+                  <span className="lang-ar">{AR_NAMES[p.name] ?? p.name}</span>
+                </span>
+                {isNext && (
+                  <span className="label-xs text-white/60 normal-case tracking-wider hidden sm:inline">
+                    <span className="lang-en">· next</span>
+                    <span className="lang-ar">· القادمة</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`font-mono font-black text-base tabular-nums ${isNext ? "text-white" : "text-slate-900 dark:text-slate-100"}`}>
+                  {timeStr}
+                </span>
+                <span
+                  className={`material-symbols-outlined text-base opacity-0 group-hover/row:opacity-100 transition-opacity ${isNext ? "text-white/60" : "text-slate-400"}`}
+                  style={{ fontSize: "16px" }}
+                >
+                  arrow_forward
+                </span>
+              </div>
+            </a>
+          );
+        })}
       </div>
     </>
   );

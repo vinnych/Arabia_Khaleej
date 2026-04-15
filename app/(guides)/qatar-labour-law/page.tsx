@@ -1,99 +1,21 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
+import RelatedGuides from "@/components/RelatedGuides";
 
 export const metadata = pageMeta({
-  title: "Qatar Labour Law 2026 — Employee Rights & Work Rules",
-  description: "Complete guide to Qatar Labour Law 2026: working hours, minimum wage, annual leave, end of service, overtime, notice period, and worker rights.",
+  title: "Qatar Labour Law 2026 | Employee Rights & Legal Framework",
+  description: "Independent guide to the Qatar Labour Law for 2026. Detailed insights on working hours, minimum wage standards, notice periods, and worker protections.",
   path: "/qatar-labour-law",
-  keywords: ["Qatar labour law 2026", "Qatar employment law", "Qatar working hours", "Qatar minimum wage", "Qatar end of service", "Qatar overtime pay", "Qatar annual leave"],
-  ogTitle: "Qatar Labour Law 2026 — Employee Rights & Work Rules",
-  ogDescription: "Qatar Labour Law guide: working hours, minimum wage, annual leave, end of service, and worker rights for expats.",
+  keywords: ["Qatar labour law", "worker rights Doha", "minimum wage Qatar", "employment regulations 2026"],
 });
 
 const SECTIONS = [
-  {
-    icon: "🕐",
-    title: "Working Hours",
-    rows: [
-      ["Standard hours", "8 hours/day · 48 hours/week"],
-      ["During Ramadan", "6 hours/day · 36 hours/week"],
-      ["Rest day", "Friday (minimum 1 day/week off)"],
-      ["Break entitlement", "1 hour break if working 5+ continuous hours"],
-    ],
-  },
-  {
-    icon: "💰",
-    title: "Minimum Wage",
-    rows: [
-      ["Basic minimum wage", "QAR 1,000/month"],
-      ["Food allowance", "QAR 300/month (if no food provided)"],
-      ["Accommodation allowance", "QAR 500/month (if no housing provided)"],
-      ["Total minimum package", "QAR 1,800/month"],
-      ["Applies to", "All private sector workers (since March 2021)"],
-    ],
-  },
-  {
-    icon: "🏖️",
-    title: "Annual Leave",
-    rows: [
-      ["First 5 years of service", "3 weeks (21 days) per year"],
-      ["After 5 years", "4 weeks (28 days) per year"],
-      ["Leave carry-over", "Unused leave can be carried forward (max 1 year)"],
-      ["Leave encashment", "Entitled to pay in lieu of unused leave upon exit"],
-    ],
-  },
-  {
-    icon: "🤝",
-    title: "End of Service Gratuity",
-    rows: [
-      ["Minimum service required", "1 year continuous employment"],
-      ["First 5 years", "3 weeks basic salary per year"],
-      ["After 5 years", "4 weeks basic salary per year"],
-      ["Calculation base", "Final basic salary only (not allowances)"],
-      ["Payment timeline", "Within 7 days of contract end"],
-    ],
-  },
-  {
-    icon: "📋",
-    title: "Probation & Notice Period",
-    rows: [
-      ["Probation period", "Maximum 6 months"],
-      ["Notice period (< 2 years)", "1 month"],
-      ["Notice period (≥ 2 years)", "2 months"],
-      ["Notice pay in lieu", "Employer can pay salary in lieu of notice"],
-    ],
-  },
-  {
-    icon: "⏰",
-    title: "Overtime Pay",
-    rows: [
-      ["Weekday overtime", "Basic hourly rate + 25%"],
-      ["Rest day / Friday", "Basic hourly rate + 50%"],
-      ["Public holidays", "Basic hourly rate + 150%"],
-      ["Maximum overtime", "2 hours/day (except in emergencies)"],
-    ],
-  },
-  {
-    icon: "🏥",
-    title: "Other Entitlements",
-    rows: [
-      ["Sick leave", "Up to 4 weeks paid, 4 weeks half-pay per year"],
-      ["Maternity leave", "50 days (for female employees)"],
-      ["Paternity leave", "5 days"],
-      ["Hajj leave", "Once during employment (unpaid, or as agreed)"],
-      ["Medical insurance", "Employer must provide basic health coverage"],
-    ],
-  },
-  {
-    icon: "✈️",
-    title: "Travel & Exit Rights",
-    rows: [
-      ["Exit permit", "Abolished in 2020 — workers can leave freely"],
-      ["End of service ticket", "Employer must provide repatriation ticket"],
-      ["Passport retention", "Illegal — employer cannot hold your passport"],
-      ["Job change", "Workers can change employers after 1 year (no NOC needed)"],
-    ],
-  },
+  { t: "Working Hours", d: "Standard: 8h/day (48h/week). Ramadan: 6h/day (36h/week).", icon: "schedule" },
+  { t: "Minimum Wage", d: "Total: QAR 1,800. Basic: 1,000 + 300 (Food) + 500 (Housing).", icon: "payments" },
+  { t: "Annual Leave", d: "21 days (Years 1-5). 28 days (Year 5+). Fully paid leave.", icon: "beach_access" },
+  { t: "Notice Period", d: "1 Month (< 2 yrs service). 2 Months (>= 2 yrs service).", icon: "assignment_return" },
 ];
 
 export default function QatarLabourLawPage() {
@@ -103,101 +25,104 @@ export default function QatarLabourLawPage() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "What is the minimum wage in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Qatar's minimum wage (since March 2021) is QAR 1,000/month basic salary, plus QAR 300/month food allowance and QAR 500/month accommodation allowance if not provided by the employer — totalling QAR 1,800/month minimum.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How many days annual leave are employees entitled to in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Employees in Qatar are entitled to 3 weeks (21 days) of annual leave per year for the first 5 years of service, and 4 weeks (28 days) per year thereafter.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How is end of service gratuity calculated in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "End of service gratuity in Qatar is 3 weeks of basic salary per year for the first 5 years of service, and 4 weeks per year thereafter. It is calculated on basic salary only, not on allowances.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Do workers in Qatar need an exit permit to leave the country?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "No. Qatar abolished the exit permit requirement in 2020. Workers can now leave the country freely without employer permission, except for employees in specific government security roles.",
-        },
+        name: "Is there a minimum wage in Qatar?",
+        acceptedAnswer: { "@type": "Answer", text: "Yes, Qatar set a non-discriminatory minimum wage of QAR 1,000 basic plus allowances in 2021." },
       },
     ],
   };
 
   return (
-    <div className="page-sections">
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Qatar Labour Law 2026", item: "https://qatar-portal.vercel.app/qatar-labour-law" }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Labour Law", item: `${SITE_URL}/qatar-labour-law` }] }) }} />
 
-      <h1 className="font-newsreader text-2xl font-bold text-on-surface mb-2">Qatar Labour Law 2026</h1>
-      <p className="text-gray-500 mb-2 text-sm">
-        Key rights and rules under Qatar&apos;s Labour Law (Law No. 14 of 2004) as amended — for private sector employees and expatriate workers.
-      </p>
-      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 mb-6">
-        ℹ️ This is a summary guide. For legal advice or disputes, contact the <strong>Ministry of Labour Qatar</strong> (Adaala portal) or a licensed employment lawyer.
-      </p>
+      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Labour Law" }]} />
 
-      {/* Law sections */}
-      <div className="space-y-5">
-        {SECTIONS.map(({ icon, title, rows }) => (
-          <div key={title} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="bg-gray-50 border-b border-gray-100 px-5 py-3 flex items-center gap-2">
-              <span className="text-xl">{icon}</span>
-              <h2 className="font-bold text-gray-900">{title}</h2>
+      {/* ── Legal Archive Hero ────────────────────────────── */}
+      <section className="bento-tile bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
+        <div className="relative z-10 w-full max-w-4xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">Ministry of Labour · Regulatory Framework</p>
+          <h1 className="national-title text-6xl sm:text-9xl mb-8 italic leading-[0.8] tracking-tighter">
+             <span className="lang-en">Labour Law</span>
+             <span className="lang-ar">قانون العمل</span>
+          </h1>
+          <p className="text-sm font-medium text-white/50 leading-relaxed max-w-md">
+            The fundamental legal protections and obligations for the workforce in the State of Qatar. Updated for 2026.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Disclaimer ─────────────────────────────────────── */}
+      <DisclaimerBanner
+        officialSourceUrl="https://www.mol.gov.qa"
+        officialSourceName="Qatar Ministry of Labour"
+        lastReviewed="March 2026"
+      />
+
+      {/* ── Core Protections ────────────────────────────────── */}
+      <section className="space-y-12">
+        <div className="text-center">
+          <h2 className="national-title text-4xl">Core Protections</h2>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Legal Benchmarks for Employees</p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {SECTIONS.map(s => (
+            <div key={s.t} className="bento-tile group">
+              <span className="material-symbols-outlined text-primary text-4xl mb-6 group-hover:scale-110 transition-transform">{s.icon}</span>
+              <h3 className="text-lg font-black mb-3 tracking-tight uppercase">{s.t}</h3>
+              <p className="text-xs text-slate-500 leading-relaxed font-medium">{s.d}</p>
             </div>
-            <table className="w-full text-sm">
-              <tbody>
-                {rows.map(([label, value], i) => (
-                  <tr key={label} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                    <td className="px-5 py-2.5 text-gray-600 font-medium w-1/2">{label}</td>
-                    <td className="px-5 py-2.5 text-gray-900 font-semibold">{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ))}
-      </div>
-
-      {/* FAQ */}
-      <div className="mt-8 bg-white rounded-xl border border-gray-100 shadow-sm p-4">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Frequently Asked Questions</h2>
-        <div className="space-y-3">
-          {[
-            { q: "What is the minimum wage in Qatar?", a: "Qatar's minimum wage is QAR 1,000/month basic + QAR 300 food allowance + QAR 500 housing allowance = QAR 1,800/month total if those are not provided by the employer." },
-            { q: "Can my employer hold my passport in Qatar?", a: "No. Passport confiscation by employers is illegal under Qatar Labour Law. If your employer has your passport, you can report it to the Ministry of Labour." },
-            { q: "Do I need a No Objection Certificate (NOC) to change jobs?", a: "Since 2020, workers in Qatar can change jobs without a NOC from their employer after completing 1 year of service. This is part of Qatar's labour reform." },
-            { q: "Do workers in Qatar need an exit permit?", a: "No. Qatar abolished the exit permit system in September 2020. Workers can now leave the country freely without employer approval." },
-          ].map(({ q, a }) => (
-            <details key={q} className="group">
-              <summary className="cursor-pointer font-medium text-gray-800 py-2 list-none flex justify-between items-center">
-                {q}
-                <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="text-gray-600 text-sm pt-1 pb-3">{a}</p>
-            </details>
           ))}
         </div>
-      </div>
+      </section>
 
-      <div className="mt-6 flex gap-3 flex-wrap text-sm">
-        <a href="/qatar-visa-requirements" className="text-rose-700 hover:underline">→ Visa requirements</a>
-        <a href="/cost-of-living-doha" className="text-rose-700 hover:underline">→ Cost of living</a>
-        <a href="/qatar-salary-guide" className="text-rose-700 hover:underline">→ Salary guide</a>
-        <a href="/jobs" className="text-rose-700 hover:underline">→ Jobs in Qatar</a>
-      </div>
+      {/* ── Worker Rights & Reforms ──────────────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-8 bento-tile !p-0 overflow-hidden shadow-2xl">
+           <div className="p-8 sm:p-12 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+              <h3 className="national-title text-5xl italic mb-1">Labour Reforms</h3>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Post-2020 Legislative Updates</p>
+           </div>
+           <div className="divide-y divide-slate-100 dark:divide-slate-800">
+             {[
+               { t: "NOC Abolishment", d: "The No Objection Certificate is no longer required to change employers after completing initial tenure." },
+               { t: "Minimum Wage Law", d: "First country in the region to implement a non-discriminatory, state-mandated minimum wage." },
+               { t: "Exit Permit Removal", d: "Freedom of movement: Expatriate workers can leave the country without an exit permit." },
+               { t: "Heat Stress Laws", d: "Prohibited outdoor work during specific afternoon hours in summer months (June – Sept)." },
+             ].map(reform => (
+               <div key={reform.t} className="p-8 sm:p-12 group hover:bg-slate-50 dark:hover:bg-slate-950 transition-all">
+                  <h4 className="text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest mb-2 group-hover:text-primary transition-colors">{reform.t}</h4>
+                  <p className="text-sm text-slate-500 leading-relaxed max-w-2xl">{reform.d}</p>
+               </div>
+             ))}
+           </div>
+        </div>
+
+        <div className="lg:col-span-4 space-y-8">
+           <div className="bento-tile !bg-primary !text-white border-none p-12 relative overflow-hidden shadow-xl shadow-primary/20">
+              <span className="material-symbols-outlined absolute -right-10 -top-10 text-[200px] text-white/5 rotate-12">gavel</span>
+              <h3 className="national-title text-4xl italic mb-6">Metrash2</h3>
+              <p className="text-sm font-medium text-white/70 leading-relaxed mb-10">
+                Formal grievances and legal inquiries can be filed directly via the MOI Metrash2 application.
+              </p>
+              <a href="https://portal.moi.gov.qa" className="block w-full py-4 bg-white text-primary text-center rounded-2xl font-black text-[10px] uppercase tracking-widest">Access MOI Portal</a>
+           </div>
+
+           <div className="bento-tile bg-slate-950 !text-white border-none flex flex-col justify-center">
+              <h4 className="text-xs font-black text-primary uppercase tracking-[0.2em] mb-4">Passport Rights</h4>
+              <p className="text-sm text-white/50 leading-relaxed font-medium">
+                It is strictly illegal for an employer to retain an employee's passport. This act carries a penalty of up to QAR 25,000 per passport.
+              </p>
+           </div>
+        </div>
+      </section>
+
+      <RelatedGuides guides={[
+        { href: "/work-in-qatar",       icon: "work",       title: "Work in Qatar",    description: "Understand the full process of getting a job and settling in Qatar." },
+        { href: "/qatar-salary-guide",  icon: "bar_chart",  title: "Salary Guide",     description: "See what salaries look like across Engineering, Tech, and Finance." },
+        { href: "/qatar-visa-requirements", icon: "id_card", title: "Visa Requirements", description: "Entry and residency visa rules for visitors and new workers." },
+      ]} />
     </div>
   );
 }

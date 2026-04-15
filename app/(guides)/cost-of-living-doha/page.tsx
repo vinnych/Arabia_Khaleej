@@ -1,14 +1,22 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
+import RelatedGuides from "@/components/RelatedGuides";
 
 export const metadata = pageMeta({
-  title: "Cost of Living in Doha, Qatar 2026 — Expat Guide",
-  description: "Complete cost of living guide for Doha, Qatar in 2026. Housing, food, transport, utilities, and schooling costs for expats and new arrivals.",
+  title: "Cost of Living Doha 2026 | Lifestyle Analytics",
+  description: "Explore the economic landscape of Doha, Qatar. A luxury concierge's guide to housing, schooling, transport, and leisure costs in a tax-free haven.",
   path: "/cost-of-living-doha",
-  keywords: ["cost of living Doha", "cost of living Qatar 2026", "Doha rent prices", "expat life Qatar", "Qatar living expenses"],
-  ogTitle: "Cost of Living in Doha, Qatar 2026",
-  ogDescription: "Housing, food, transport, and utilities costs for expats living in Doha, Qatar.",
+  keywords: ["Cost of living Doha", "Qatar expenses 2026", "rent in Doha", "lifestyle Qatar"],
 });
+
+const SUMMARY = [
+  { item: "Housing (1BR)", cost: "4.5k – 8k", family: "9k – 16k", bg: "bg-primary/5" },
+  { item: "Education (Intl)", cost: "N/A", family: "2.5k – 5k", bg: "bg-slate-50 dark:bg-slate-900" },
+  { item: "Utilities / Fiber", cost: "500 – 800", family: "1k – 1.8k", bg: "bg-primary/5" },
+  { item: "Transportation", cost: "400 – 1.2k", family: "2k – 4k", bg: "bg-slate-50 dark:bg-slate-900" },
+];
 
 export default function CostOfLivingDohaPage() {
   const jsonLd = {
@@ -17,178 +25,114 @@ export default function CostOfLivingDohaPage() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "Is Qatar expensive to live in?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Qatar is moderately expensive. Housing is the biggest cost — a 1-bedroom apartment in Doha costs QAR 4,000–8,000/month. However, there is no income tax, which significantly increases take-home pay for expats.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "How much does it cost to rent in Doha?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "A 1-bedroom apartment in central Doha costs QAR 5,000–8,000/month. A 3-bedroom costs QAR 9,000–15,000/month. Areas like Al Wakra and Lusail offer more affordable options.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Is food expensive in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Food costs vary. A meal at a local restaurant costs QAR 15–30. Groceries at Carrefour or LuLu Hypermarket cost QAR 600–1,200/month for a family. Many expats cook at home to save.",
-        },
-      },
-      {
-        "@type": "Question",
-        name: "Do expats pay tax in Qatar?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "No. Qatar has zero personal income tax. There is also no VAT on most goods, though a 5% VAT applies to some items. This makes Qatar financially attractive for expats compared to Western countries.",
-        },
+        name: "How much is rent in Doha?",
+        acceptedAnswer: { "@type": "Answer", text: "Rent varies significantly. A luxury 1BR in The Pearl starts at QAR 8,000, while central Doha (Al Sadd) offers units for QAR 4,500 – 6,500." },
       },
     ],
   };
 
   return (
-    <div className="page-sections">
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Cost of Living in Doha", item: `${SITE_URL}/cost-of-living-doha` }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Cost of Living", item: `${SITE_URL}/cost-of-living-doha` }] }) }} />
 
-      <div>
-        <h1 className="font-newsreader text-2xl font-bold text-on-surface mb-2">Cost of Living in Doha, Qatar 2026</h1>
-        <p className="text-gray-600 text-base leading-relaxed">
-          A practical breakdown of monthly expenses for expats and new arrivals in Doha. All prices in Qatari Riyal (QAR). 1 USD ≈ 3.64 QAR.
-        </p>
-      </div>
+      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Cost of Living" }]} />
 
-      {/* Summary table */}
-      <section className="bg-amber-50 border border-amber-100 rounded-xl p-4">
-        <h2 className="text-lg font-bold text-amber-900 mb-4">Monthly Cost Summary</h2>
-        <div className="rounded-xl border border-amber-200 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-amber-100 text-gray-700">
-                <th className="px-4 py-2 text-left font-semibold">Category</th>
-                <th className="px-4 py-2 text-left font-semibold">Single</th>
-                <th className="px-4 py-2 text-left font-semibold">Family (4)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["Housing", "QAR 4,000–7,000", "QAR 8,000–15,000"],
-                ["Food & groceries", "QAR 600–1,000", "QAR 1,500–2,500"],
-                ["Transport", "QAR 300–800", "QAR 800–1,500"],
-                ["Utilities", "QAR 200–400", "QAR 500–1,000"],
-                ["Entertainment", "QAR 300–600", "QAR 600–1,200"],
-                ["**Total estimate**", "**QAR 5,400–9,800**", "**QAR 11,400–21,200**"],
-              ].map(([cat, single, family], i) => (
-                <tr key={cat} className={`border-t border-amber-100 ${i % 2 === 0 ? "bg-white" : "bg-amber-50"}`}>
-                  <td className="px-4 py-2 font-medium text-gray-800">{cat.replace(/\*\*/g, "")}</td>
-                  <td className="px-4 py-2 text-gray-600">{single.replace(/\*\*/g, "")}</td>
-                  <td className="px-4 py-2 text-gray-600">{family.replace(/\*\*/g, "")}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* ── Lifestyle Archive Hero ─────────────────────────── */}
+      <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[100px] translate-x-1/2 -translate-y-1/2" />
+        <div className="relative z-10 w-full max-w-4xl">
+          <p className="label-xs text-white/60 mb-6">Independent Guide · 2026</p>
+          <h1 className="national-title text-6xl sm:text-9xl mb-8 italic leading-[0.8] tracking-tighter">
+             <span className="lang-en">Living Index</span>
+             <span className="lang-ar">مؤشر المعيشة</span>
+          </h1>
+          <p className="text-sm font-medium text-white/50 leading-relaxed max-w-md">
+            A granular analysis of the economic lifestyle within the Doha metropolitan area. Curated for the global professional.
+          </p>
         </div>
       </section>
 
-      {/* Housing */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">🏠 Housing</h2>
-        <div className="space-y-3 text-sm text-gray-700">
-          {[
-            { area: "The Pearl / West Bay", price: "QAR 7,000–15,000/mo", note: "Premium, near business district" },
-            { area: "Al Sadd / Najma", price: "QAR 4,000–7,000/mo", note: "Central, popular with expats" },
-            { area: "Lusail", price: "QAR 5,000–10,000/mo", note: "New city, modern apartments" },
-            { area: "Al Wakra / Al Wukair", price: "QAR 3,000–6,000/mo", note: "Affordable, south of Doha" },
-          ].map((h) => (
-            <div key={h.area} className="bg-stone-50 border border-stone-200 rounded-xl p-4 flex justify-between items-start">
-              <div>
-                <p className="font-semibold text-gray-900">{h.area}</p>
-                <p className="text-gray-500">{h.note}</p>
+      {/* ── Disclaimer ─────────────────────────────────────── */}
+      <DisclaimerBanner
+        officialSourceUrl="https://www.psa.gov.qa"
+        officialSourceName="Qatar Planning and Statistics Authority"
+        lastReviewed="March 2026"
+      />
+
+      {/* ── Monthly Allocation Dashboard ───────────────────── */}
+      <section className="space-y-12">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+          <div>
+            <h2 className="national-title text-5xl">The Breakdown</h2>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Monthly Expenditure Matrix (QAR)</p>
+          </div>
+        </div>
+
+        <div className="bento-tile !p-0 overflow-hidden shadow-xl">
+           <table className="w-full text-left">
+              <thead className="bg-slate-50 dark:bg-slate-950">
+                 <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <th className="py-6 px-8 whitespace-nowrap">Distinction</th>
+                    <th className="py-6 px-8">Single Professional</th>
+                    <th className="py-6 px-8">Family of Four</th>
+                 </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {SUMMARY.map(row => (
+                  <tr key={row.item} className={`group hover:bg-slate-50 dark:hover:bg-slate-900/50 ${row.bg}`}>
+                     <td className="py-6 px-8 text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">{row.item}</td>
+                     <td className="py-6 px-8 font-mono text-sm font-bold text-slate-500">{row.cost}</td>
+                     <td className="py-6 px-8 font-mono text-sm font-bold text-primary">{row.family}</td>
+                  </tr>
+                ))}
+              </tbody>
+           </table>
+        </div>
+      </section>
+
+      {/* ── Residential Districts ────────────────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-8 space-y-12">
+          <div>
+            <h2 className="national-title text-4xl">Residential Focus</h2>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Premium District Analysis</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            {[
+              { t: "The Pearl / Lusail", p: "8,000+", l: "Exclusive Waterfront", d: "The pinnacle of luxury living, featuring high-rise apartments and extensive promenade access." },
+              { t: "Msheireb / West Bay", p: "7,500+", l: "Central Business", d: "Smart-city living and historical fusion. Proximity to the financial district and major embassies." },
+              { t: "Al Sadd / Najma", p: "5,000+", l: "Heritage Central", d: "Vibrant, high-density residential zones favored by seasoned professionals for their connectivity." },
+              { t: "Al Wakra / South", p: "3,500+", l: "Coastal Serenity", d: "Rapidly expanding residential hubs offering high-value housing for larger families." },
+            ].map(area => (
+              <div key={area.t} className="bento-tile group">
+                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{area.l}</h4>
+                 <h3 className="text-xl font-bold mb-1">{area.t}</h3>
+                 <p className="text-sm font-black text-primary mb-4">Starts QAR {area.p}</p>
+                 <p className="text-xs text-slate-500 leading-relaxed font-medium">{area.d}</p>
               </div>
-              <p className="font-bold text-rose-900 text-right whitespace-nowrap ml-4">{h.price}</p>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        <div className="lg:col-span-4 bento-tile !bg-slate-900 !text-white border-none p-12 flex flex-col justify-center shadow-2xl relative overflow-hidden">
+           <span className="material-symbols-outlined absolute -right-10 -bottom-10 text-[200px] text-white/5 rotate-12">receipt</span>
+           <h3 className="national-title text-4xl mb-6 italic">Fiscal Reality</h3>
+           <p className="text-sm font-medium text-white/60 leading-relaxed mb-10">
+             The absence of personal income tax in Qatar effectively increases a professional's purchasing power by <b>30-45%</b> relative to European or North American benchmarks.
+           </p>
+           <div className="flex gap-4">
+              <a href="/currency" className="px-6 py-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all">Rates Map</a>
+              <a href="/qatar-salary-guide" className="px-6 py-4 bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white/20 transition-all border border-white/20">Salary Guide</a>
+           </div>
         </div>
       </section>
 
-      {/* Food */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">🍽️ Food & Groceries</h2>
-        <div className="rounded-xl border border-stone-200 overflow-x-auto">
-          <table className="w-full text-sm">
-            <tbody>
-              {[
-                ["Local restaurant meal", "QAR 15–30"],
-                ["Fast food combo (McDonald's/KFC)", "QAR 25–40"],
-                ["Mid-range restaurant (2 people)", "QAR 80–150"],
-                ["Monthly groceries (1 person)", "QAR 600–1,000"],
-                ["1L milk", "QAR 6–8"],
-                ["1kg chicken breast", "QAR 18–25"],
-                ["1kg rice (basmati)", "QAR 5–10"],
-              ].map(([item, price], i) => (
-                <tr key={item} className={`border-t border-stone-100 ${i % 2 === 0 ? "bg-white" : "bg-stone-50"}`}>
-                  <td className="px-4 py-2.5 text-gray-800">{item}</td>
-                  <td className="px-4 py-2.5 font-medium text-gray-700">{price}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Transport */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">🚗 Transport</h2>
-        <div className="space-y-2 text-sm text-gray-700">
-          <p><strong>Fuel:</strong> QAR 1.85/litre (petrol is very cheap in Qatar)</p>
-          <p><strong>Taxi (Karwa):</strong> QAR 4 flag fall + QAR 1.6/km</p>
-          <p><strong>Metro (Doha Metro):</strong> QAR 2–6 per trip, monthly pass QAR 100</p>
-          <p><strong>Car rental:</strong> QAR 1,200–2,500/month</p>
-          <p><strong>Car purchase:</strong> Toyota Camry ~QAR 85,000 new</p>
-        </div>
-      </section>
-
-      {/* Utilities */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">💡 Utilities</h2>
-        <p className="text-sm text-gray-700 mb-2">
-          Electricity and water are subsidised for residents. Average monthly bill for a 1-bedroom: <strong>QAR 150–400</strong>.
-        </p>
-        <p className="text-sm text-gray-700">
-          Internet: <strong>QAR 200–350/month</strong> for fibre broadband (Ooredoo or Vodafone Qatar). Mobile plans start at QAR 60/month.
-        </p>
-      </section>
-
-      {/* FAQ */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">Frequently Asked Questions</h2>
-        <div className="space-y-3">
-          {[
-            { q: "Is there income tax in Qatar?", a: "No. Qatar has zero personal income tax, making it financially attractive for expats." },
-            { q: "Is alcohol available in Qatar?", a: "Alcohol is available only at licensed hotel bars and the Qatar Distribution Company (QDC) store for non-Muslim residents with a permit." },
-            { q: "How does Qatar compare to Dubai for cost of living?", a: "Qatar and Dubai are similar in cost. Qatar is slightly cheaper for housing, while Dubai offers more entertainment options. Both have no income tax." },
-          ].map(({ q, a }) => (
-            <details key={q} className="bg-stone-50 border border-stone-200 rounded-xl p-4 cursor-pointer">
-              <summary className="font-semibold text-gray-900 text-sm">{q}</summary>
-              <p className="text-sm text-gray-600 mt-2">{a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
-
-      {/* Internal links */}
-      <section className="bg-rose-50 border border-rose-100 rounded-xl p-4 text-sm">
-        <p className="font-semibold text-rose-900 mb-2">Useful resources</p>
-        <div className="flex flex-wrap gap-3">
-          <a href="/jobs" className="text-rose-700 hover:underline">→ Jobs in Qatar</a>
-          <a href="/currency" className="text-rose-700 hover:underline">→ QAR Exchange Rates</a>
-          <a href="/qatar-visa-requirements" className="text-rose-700 hover:underline">→ Qatar Visa Requirements</a>
-        </div>
-      </section>
+      <RelatedGuides guides={[
+        { href: "/qatar-salary-guide",    icon: "bar_chart",   title: "Salary Guide",     description: "Compare salaries across Engineering, Tech, and Finance to plan your budget." },
+        { href: "/work-in-qatar",         icon: "work",        title: "Work in Qatar",    description: "Everything you need to prepare before and after arriving in Qatar." },
+        { href: "/community-resources",   icon: "groups",      title: "Community Resources", description: "Banking, healthcare, schools, and expat life essentials in Doha." },
+      ]} />
     </div>
   );
 }

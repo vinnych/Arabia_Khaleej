@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Clock, Banknote, Zap } from "lucide-react";
+import { ArrowLeft, Clock, Banknote, Zap, ExternalLink } from "lucide-react";
 import EligibilityScale from "@/components/visuals/EligibilityScale";
 import DocStack from "@/components/visuals/DocStack";
 import StepGarden from "@/components/visuals/StepGarden";
+import DisclaimerBanner from "@/components/DisclaimerBanner";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
 import type { GuideData } from "@/lib/qatar-services-data";
-import { GUIDES, GUIDE_SUMMARIES } from "@/lib/qatar-services-data";
 
 interface Props {
   guide: GuideData;
@@ -18,209 +19,133 @@ export default function GuidePageLayout({ guide }: Props) {
       : `${guide.minDays}–${guide.maxDays} days`;
 
   return (
-    <div className="page-sections">
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
 
-      {/* ── Hero ── */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: "linear-gradient(135deg, #640023 0%, #3A0E20 60%, #1e0810 100%)" }}>
-        {/* Subtle texture overlay */}
-        <div className="relative px-5 pt-5 pb-6 sm:px-8 sm:pt-7 sm:pb-8"
-          style={{ backgroundImage: "radial-gradient(ellipse 80% 50% at 50% 0%, rgba(212,175,55,0.08) 0%, transparent 70%)" }}>
+      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Services", href: "/qatar-services" }, { label: guide.title }]} />
 
-          {/* Breadcrumb */}
-          <Link
-            href="/qatar-services"
-            className="inline-flex items-center gap-1.5 text-xs text-white/60 hover:text-white/90 transition-colors mb-4"
-          >
-            <ArrowLeft size={12} />
-            Government Services
+      {/* ── Premium Service Hero ─────────────────────────── */}
+      <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
+        <div className="relative z-10 w-full max-w-4xl">
+          <Link href="/qatar-services" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-8 hover:text-white transition-colors">
+            <ArrowLeft size={12} /> Back to Directory
           </Link>
-
-          {/* Role badge */}
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full"
-              style={{ background: "rgba(212,175,55,0.18)", color: "#D4AF37", border: "1px solid rgba(212,175,55,0.3)" }}>
-              For: {guide.role}
-            </span>
-            {guide.fastTrack && (
-              <span className="text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full"
-                style={{ background: "rgba(251,191,36,0.15)", color: "#fbbf24", border: "1px solid rgba(251,191,36,0.25)" }}>
-                <Zap size={9} className="inline mr-1" />Fast track
-              </span>
-            )}
+          <div className="flex items-center gap-2 mb-6">
+             <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-white/10 border border-white/10 rounded-full text-accent whitespace-nowrap">For: {guide.role}</span>
+             {guide.fastTrack && <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-amber-500/20 border border-amber-500/20 rounded-full text-amber-300 flex items-center gap-1"><Zap size={10} /> Fast Track</span>}
           </div>
-
-          {/* Title */}
-          <h1 className="font-newsreader text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
-            {guide.title}
+          <h1 className="national-title text-6xl sm:text-8xl mb-8 italic leading-[0.9] tracking-tighter">
+             <span className="lang-en">{guide.title}</span>
           </h1>
-
-          {/* Intro */}
-          <p className="text-sm text-white/70 leading-relaxed mb-6 max-w-2xl">
+          <p className="text-sm font-medium text-white/50 leading-relaxed max-w-xl mb-12 italic">
             {guide.intro}
           </p>
-
-          {/* Stat chips */}
-          <div className="flex flex-wrap gap-3">
-            <div className="guide-stat-chip">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-white/50 flex items-center gap-1">
-                <Clock size={8} />Processing
-              </span>
-              <span className="text-sm font-bold text-white">{timeLabel}</span>
+          <div className="flex flex-wrap gap-8 border-t border-white/10 pt-10">
+            <div>
+               <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1 flex items-center gap-1"><Clock size={10} /> Timeline</p>
+               <p className="text-xl font-black">{timeLabel}</p>
             </div>
-            <div className="guide-stat-chip">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-white/50 flex items-center gap-1">
-                <Banknote size={8} />Est. fees
-              </span>
-              <span className="text-sm font-bold text-white">
-                {totalFees === 0 ? "Free" : `~QAR ${totalFees.toLocaleString()}`}
-              </span>
+            <div>
+               <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1 flex items-center gap-1"><Banknote size={10} /> Fees</p>
+               <p className="text-xl font-black text-accent">{totalFees === 0 ? "Free" : `~QAR ${totalFees.toLocaleString()}`}</p>
             </div>
-            <div className="guide-stat-chip">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-white/50">Documents</span>
-              <span className="text-sm font-bold text-white">{guide.docs.length} required</span>
-            </div>
-            <div className="guide-stat-chip">
-              <span className="text-[9px] font-bold uppercase tracking-widest text-white/50">Steps</span>
-              <span className="text-sm font-bold text-white">{guide.steps.length} steps</span>
+            <div>
+               <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Requirements</p>
+               <p className="text-xl font-black">{guide.docs.length} Documents</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ── Disclaimer ── */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900">
-        <strong>Important:</strong> Fees, timelines, and requirements change frequently. Always verify
-        current information directly with the relevant Qatar government portal before applying.
-      </div>
-
-      {/* ── Eligibility + Docs (2-col desktop) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* ── Practical Framework ────────────────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <EligibilityScale criteria={guide.eligibility} />
         <DocStack docs={guide.docs} />
-      </div>
+      </section>
 
-      {/* ── Steps ── */}
-      <section>
-        <h2 className="guide-section-label">Step-by-step process</h2>
+      {/* ── Disclaimer ─────────────────────────────────────── */}
+      <DisclaimerBanner
+        officialSourceUrl="https://www.hukoomi.gov.qa"
+        officialSourceName="Hukoomi — Qatar e-Government Portal"
+        lastReviewed="March 2026"
+      />
+
+      {/* ── Procedural Flow ────────────────────────────────── */}
+      <section className="space-y-12">
+        <div className="text-center">
+           <h2 className="national-title text-5xl italic">The Process</h2>
+           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Step-by-step Execution</p>
+        </div>
         <StepGarden steps={guide.steps} />
       </section>
 
-      {/* ── Fee breakdown + Tips (2-col desktop) ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Fee table */}
-        <section>
-          <h2 className="guide-section-label">Fee breakdown</h2>
-          <div className="rounded-xl border border-stone-200 overflow-hidden">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-stone-100 text-gray-700">
-                  <th className="px-3 py-2 text-left font-semibold">Item</th>
-                  <th className="px-3 py-2 text-right font-semibold">QAR</th>
-                </tr>
-              </thead>
-              <tbody>
-                {guide.fees.map((fee, i) => (
-                  <tr
-                    key={fee.label}
-                    className={`border-t border-stone-100 ${i % 2 === 0 ? "bg-white" : "bg-stone-50"}`}
-                  >
-                    <td className="px-3 py-2 text-gray-700">{fee.label}</td>
-                    <td className="px-3 py-2 text-right font-medium text-gray-900">
-                      {fee.amount === 0 ? "Free" : fee.amount.toLocaleString()}
-                    </td>
+      {/* ── Fee Breakdown & Legal ───────────────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+         <div className="lg:col-span-2 bento-tile !p-0 overflow-hidden shadow-xl">
+           <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 flex justify-between items-center">
+              <h3 className="text-sm font-black uppercase tracking-widest">Official Fee Matrix</h3>
+              <span className="px-3 py-1 bg-primary/5 text-primary text-[10px] font-black rounded-full uppercase border border-primary/10">Est. 2026</span>
+           </div>
+           <table className="w-full text-left">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-900">
+                {guide.fees.map(f => (
+                  <tr key={f.label} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                     <td className="py-6 px-8 text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">{f.label}</td>
+                     <td className="py-6 px-8 text-sm font-black text-slate-900 dark:text-slate-100 text-right">{f.amount === 0 ? "Free" : `QAR ${f.amount.toLocaleString()}`}</td>
                   </tr>
                 ))}
-                <tr className="border-t-2 border-stone-300 bg-stone-100">
-                  <td className="px-3 py-2 font-semibold text-gray-900">Estimated total</td>
-                  <td className="px-3 py-2 text-right font-bold text-primary">
-                    {totalFees === 0 ? "Free" : `~${totalFees.toLocaleString()}`}
-                  </td>
+                <tr className="bg-primary/5">
+                   <td className="py-6 px-8 text-xs font-black uppercase tracking-[0.2em] text-primary">Calculation Total</td>
+                   <td className="py-6 px-8 text-lg font-black text-primary text-right">{totalFees === 0 ? "Free" : `~QAR ${totalFees.toLocaleString()}`}</td>
                 </tr>
               </tbody>
-            </table>
-          </div>
-        </section>
+           </table>
+         </div>
 
-        {/* Tips */}
-        {guide.tips.length > 0 && (
-          <section>
-            <h2 className="guide-section-label">Tips</h2>
-            <ul className="space-y-2">
-              {guide.tips.map((tip) => (
-                <li key={tip} className="flex items-start gap-2 text-xs text-gray-700 bg-rose-50 border border-rose-100 rounded-lg p-3">
-                  <span className="text-primary shrink-0 font-bold mt-0.5">→</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-      </div>
+         <div className="space-y-8">
+            <div className="bento-tile !bg-slate-900 !text-white border-none p-10 flex flex-col justify-center min-h-[300px] relative overflow-hidden">
+               <span className="material-symbols-outlined absolute -right-5 -top-5 text-[150px] text-white/5 rotate-12">verified</span>
+               <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-4">Official Portals</h4>
+               <div className="space-y-4 relative z-10">
+                  {guide.portals.map(p => (
+                    <a key={p.name} href={p.url} target="_blank" className="flex items-center justify-between text-xs font-bold text-white/70 hover:text-white transition-colors group">
+                       {p.name} <ExternalLink size={12} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    </a>
+                  ))}
+               </div>
+            </div>
+            {guide.tips.length > 0 && (
+              <div className="bento-tile bg-emerald-50 dark:bg-emerald-950/20 !border-emerald-100/50">
+                 <h4 className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-4">Concierge Tips</h4>
+                 <ul className="space-y-4">
+                    {guide.tips.map(tip => (
+                      <li key={tip} className="text-xs font-medium text-emerald-800 dark:text-emerald-500 leading-relaxed flex gap-3">
+                         <span className="text-emerald-400 shrink-0">→</span> {tip}
+                      </li>
+                    ))}
+                 </ul>
+              </div>
+            )}
+         </div>
+      </section>
 
-      {/* ── Official portals ── */}
-      {guide.portals.length > 0 && (
-        <section>
-          <h2 className="guide-section-label">Official portals</h2>
-          <div className="flex flex-wrap gap-2">
-            {guide.portals.map((p) => (
-              <a
-                key={p.name}
-                href={p.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-medium border border-primary/30 text-primary rounded-full px-3 py-2 hover:bg-primary/5 transition-colors min-h-[36px]"
-              >
-                {p.name}
-                <ExternalLink size={11} />
-              </a>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── FAQ ── */}
+      {/* ── FAQ Overlay ─────────────────────────────────────── */}
       {guide.faq.length > 0 && (
-        <section>
-          <h2 className="guide-section-label">Frequently asked questions</h2>
-          <div className="space-y-2">
-            {guide.faq.map(({ q, a }) => (
-              <details
-                key={q}
-                suppressHydrationWarning
-                className="bg-stone-50 border border-stone-200 rounded-xl group"
-              >
-                <summary className="min-h-[44px] flex items-center justify-between gap-2 px-4 text-xs font-semibold text-gray-900 cursor-pointer list-none">
-                  {q}
-                  <span className="text-gray-400 shrink-0 group-open:rotate-180 transition-transform">▾</span>
-                </summary>
-                <p className="px-4 pb-4 text-xs text-gray-600 leading-relaxed">{a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Related guides ── */}
-      {guide.related.length > 0 && (
-        <section>
-          <h2 className="guide-section-label">Related guides</h2>
-          <div className="flex flex-wrap gap-3">
-            {guide.related.map((slug) => {
-              const related = GUIDES[slug];
-              const summary = GUIDE_SUMMARIES[slug];
-              if (!related || !summary) return null;
-              return (
-                <Link
-                  key={slug}
-                  href={`/qatar-services/${slug}`}
-                  className="flex items-center gap-2 text-xs font-medium bg-white border border-stone-200 rounded-xl px-3 py-2.5 hover:border-primary/30 hover:bg-rose-50 transition-colors shadow-sm"
-                >
-                  <span className="text-base leading-none">{summary.icon}</span>
-                  <span className="text-gray-800">{related.title}</span>
-                </Link>
-              );
-            })}
-          </div>
+        <section className="space-y-8 max-w-4xl mx-auto">
+           <div className="text-center">
+              <h2 className="national-title text-4xl italic">Clarifications</h2>
+           </div>
+           <div className="grid gap-4">
+             {guide.faq.map(item => (
+               <details key={item.q} className="group bento-tile !p-8 hover:border-primary transition-all">
+                  <summary className="flex justify-between items-center cursor-pointer list-none font-bold tracking-tight text-sm uppercase">
+                     {item.q}
+                     <span className="material-symbols-outlined text-primary group-open:rotate-180 transition-transform">expand_more</span>
+                  </summary>
+                  <p className="mt-6 text-sm text-slate-500 leading-relaxed font-medium italic">{item.a}</p>
+               </details>
+             ))}
+           </div>
         </section>
       )}
     </div>

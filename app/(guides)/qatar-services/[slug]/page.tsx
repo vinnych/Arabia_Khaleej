@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props) {
  
   return pageMeta({
     title: `${guide.title} Guide 2026 — Qatar Portal`,
-    description: `Complete ${guide.title} guide for Qatar 2026. Processing time: ${timeLabel}. Estimated fees: ${totalFees === 0 ? "Free" : `~QAR ${totalFees}`}. Step-by-step with required documents and official portals.`,
+    description: `Complete ${guide.title} guide for Qatar 2026. Processing time: ${timeLabel}. Estimated fees: ${totalFees === 0 ? "Free" : `~QAR ${totalFees}`}. Step-by-step with required documents and public portals.`,
     path: `/qatar-services/${slug}`,
     keywords: [
       guide.title,

@@ -1,247 +1,177 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
+import RelatedGuides from "@/components/RelatedGuides";
 
 export const metadata = pageMeta({
-  title: "Qatar Metro Guide — Doha Metro Lines, Stations & Fares",
-  description: "Complete guide to the Doha Metro: Red, Green, and Gold lines, station map, ticket prices, operating hours, and tips for riding the Qatar Metro.",
+  title: "Doha Metro Guide 2026 | Lines, Fares & Map",
+  description: "Navigate the State of Qatar with an independent Doha Metro guide. Detailed info on the Red, Green, and Gold lines, station maps, and fare information.",
   path: "/qatar-metro",
-  keywords: ["Qatar Metro", "Doha Metro", "Doha Metro stations", "Qatar Metro map", "Doha Metro fare", "Qatar Metro lines", "Gold line Doha", "Red line Doha Metro"],
-  ogTitle: "Qatar Metro Guide — Lines, Stations & Fares",
-  ogDescription: "Everything you need to know about the Doha Metro: lines, stations, fares, and operating hours.",
+  keywords: ["Doha Metro", "Qatar Metro guide", "Metro fares Qatar", "Red Line Doha", "Gold Line Metro"],
 });
 
 const LINES = [
   {
     name: "Red Line",
-    color: "red",
-    bgClass: "bg-red-600",
-    lightClass: "bg-red-50 border-red-100",
-    textClass: "text-red-700",
-    route: "Lusail City ↔ Mesaieed",
-    length: "40 km",
-    stations: 17,
-    key: ["Lusail", "Qatar University", "Al Qassar", "Legtaifiya", "Al Messila", "Msheireb", "Corniche", "National Museum", "Al Wakra", "Mesaieed"],
-    note: "North–South backbone running through Msheireb, Doha's central interchange.",
+    color: "from-red-600 to-red-900",
+    route: "Lusail QNB ↔ Al Wakra / HIA",
+    desc: "The primary north-south artery connecting the coastal cities to Doha's heart at Msheireb.",
+    key: ["Lusail", "Katara", "West Bay", "Msheireb", "Wakra"],
   },
   {
     name: "Green Line",
-    color: "green",
-    bgClass: "bg-green-600",
-    lightClass: "bg-green-50 border-green-100",
-    textClass: "text-green-700",
-    route: "Al Riffa ↔ Hamad International Airport",
-    length: "29 km",
-    stations: 11,
-    key: ["Al Riffa", "Bin Mahmoud", "Al Doha Al Jadeda", "Msheireb", "Musheirib", "Al Aziziyah", "Qatar National Library", "Education City", "Hamad Int'l Airport"],
-    note: "East–West corridor connecting Education City to the Airport. Intersects Red Line at Msheireb.",
+    color: "from-emerald-600 to-emerald-900",
+    route: "Al Riffa ↔ Al Mansoura",
+    desc: "Linking the Education City hub and the historical districts to the central downtown area.",
+    key: ["Education City", "QN Library", "Hamad Hospital", "Msheireb"],
   },
   {
     name: "Gold Line",
-    color: "yellow",
-    bgClass: "bg-yellow-500",
-    lightClass: "bg-yellow-50 border-yellow-100",
-    textClass: "text-yellow-700",
-    route: "Al Wakair ↔ Ras Bu Abboud",
-    length: "29 km",
-    stations: 10,
-    key: ["Al Wakair", "Al Mansoura", "Msheireb", "Al Souq", "Ras Bu Abboud"],
-    note: "Heritage route linking Msheireb Downtown to the souq district and waterfront.",
+    color: "from-amber-500 to-amber-700",
+    route: "Aziziyah ↔ Ras Bu Abboud",
+    desc: "The historical corridor connecting the Aspire Zone to the heritage markets and seafront.",
+    key: ["Villaggio", "Sport City", "Souq Waqif", "Msheireb"],
   },
 ];
 
-const FARES = [
-  { zone: "1 zone", standard: "2 QAR", gold: "10 QAR" },
-  { zone: "2 zones", standard: "3 QAR", gold: "15 QAR" },
-  { zone: "3 zones", standard: "4 QAR", gold: "20 QAR" },
-  { zone: "Daily cap", standard: "10 QAR", gold: "50 QAR" },
-];
-
-const HOURS = [
-  { day: "Saturday – Wednesday", firstTrain: "6:00 AM", lastTrain: "11:00 PM" },
-  { day: "Thursday", firstTrain: "6:00 AM", lastTrain: "12:00 AM (midnight)" },
-  { day: "Friday", firstTrain: "2:00 PM", lastTrain: "12:00 AM (midnight)" },
-];
-
-const TIPS = [
-  { icon: "💳", title: "Get a Alhazm Card", desc: "Tap-and-go Alhazm smart card for discounted fares. Available at all station vending machines and online." },
-  { icon: "🚆", title: "Gold Class carriages", desc: "Each train has a Gold Class carriage at the front — premium seating for a higher fare. Women and children may also use the Family & Women carriage." },
-  { icon: "🛄", title: "Baggage & luggage", desc: "Large luggage permitted in designated areas. There is no extra charge, but space is limited during peak hours." },
-  { icon: "🍽️", title: "No food or drink", desc: "Eating and drinking (including water) is prohibited on all Metro trains and within paid areas of stations. Fines apply." },
-  { icon: "🔌", title: "Charging & Wi-Fi", desc: "Free Wi-Fi is available at all stations. USB charging points are provided on platform seating areas." },
-  { icon: "♿", title: "Accessibility", desc: "All stations are fully accessible with lifts, tactile guidance paths, and dedicated spaces for wheelchair users." },
-];
-
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: [
-    {
-      "@type": "Question",
-      name: "How many metro lines are there in Doha?",
-      acceptedAnswer: { "@type": "Answer", text: "Doha Metro has three lines: the Red Line (north–south, 17 stations), the Green Line (east–west, 11 stations), and the Gold Line (heritage route, 10 stations). All three lines intersect at Msheireb station." },
-    },
-    {
-      "@type": "Question",
-      name: "What is the fare for the Qatar Metro?",
-      acceptedAnswer: { "@type": "Answer", text: "Qatar Metro fares start at 2 QAR for one zone in Standard class (3 QAR for 2 zones, 4 QAR for 3 zones). Gold Class costs 10–20 QAR depending on zones. A daily cap of 10 QAR (Standard) applies." },
-    },
-    {
-      "@type": "Question",
-      name: "What time does the Doha Metro open and close?",
-      acceptedAnswer: { "@type": "Answer", text: "The Doha Metro runs from 6:00 AM to 11:00 PM Saturday–Wednesday, until midnight on Thursdays, and from 2:00 PM to midnight on Fridays." },
-    },
-    {
-      "@type": "Question",
-      name: "Does the Doha Metro go to the airport?",
-      acceptedAnswer: { "@type": "Answer", text: "Yes. Hamad International Airport is served by the Green Line. The journey from Msheireb (city centre) to the airport takes approximately 10 minutes." },
-    },
-  ],
-};
-
 export default function QatarMetroPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "How many metro lines are in Doha?",
+        acceptedAnswer: { "@type": "Answer", text: "Doha Metro consists of three automated lines: Red, Green, and Gold, intersecting at the Msheireb Central Station." },
+      },
+    ],
+  };
+
   return (
-    <div className="w-full">
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Qatar Metro", item: `${SITE_URL}/qatar-metro` }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Metro Guide", item: `${SITE_URL}/qatar-metro` }] }) }} />
 
-      <h1 className="font-newsreader text-xl font-bold text-on-surface mb-1">Qatar Metro — Doha Metro Guide</h1>
-      <p className="text-xs text-gray-400 mb-4">Lines, stations, fares, and operating hours for the Doha Metro system.</p>
+      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Doha Metro" }]} />
 
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: "Total Lines", value: "3", icon: "🚇" },
-          { label: "Total Stations", value: "37+", icon: "🗺️" },
-          { label: "Network Length", value: "~76 km", icon: "📏" },
-          { label: "Min Fare", value: "2 QAR", icon: "💳" },
-        ].map(({ label, value, icon }) => (
-          <div key={label} className="bg-white border border-gray-100 rounded-lg p-3 shadow-sm">
-            <p className="text-xl mb-1">{icon}</p>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{label}</p>
-            <p className="font-bold text-gray-900 text-base">{value}</p>
+      {/* ── National Transport Hero ─────────────────────────── */}
+      <section className="bento-tile bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 !text-white border-none min-h-[450px] flex items-center relative overflow-hidden shadow-2xl">
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_120%,rgba(138,21,56,0.5),transparent)]" />
+        </div>
+        <div className="relative z-10 w-full max-w-4xl">
+          <div className="flex items-center gap-3 mb-8 bg-white/5 border border-white/10 px-4 py-2 rounded-full w-fit">
+            <span className="material-symbols-outlined text-primary text-sm">directions_subway</span>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Qatar Rail · National Network</p>
           </div>
-        ))}
-      </div>
+          <h1 className="national-title text-6xl sm:text-9xl mb-10 italic leading-[0.8]">
+             <span className="lang-en">Metro Doha</span>
+             <span className="lang-ar">مترو الدوحة</span>
+          </h1>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 border-t border-white/10 pt-10">
+            {[
+              { l: "Operating Hours", v: "06:00 – 23:00" },
+              { l: "Min. Fare", v: "2.00 QAR" },
+              { l: "Station Count", v: "37 Modern Hubs" },
+              { l: "Class Options", v: "Standard & Gold" },
+            ].map(stat => (
+              <div key={stat.l}>
+                <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">{stat.l}</p>
+                <p className="text-xl font-black text-primary">{stat.v}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Lines */}
-      <h2 className="text-sm font-semibold text-gray-700 mb-2">Metro Lines</h2>
-      <div className="space-y-3 mb-6">
-        {LINES.map((line) => (
-          <div key={line.name} className={`${line.lightClass} border rounded-lg overflow-hidden`}>
-            <div className={`${line.bgClass} px-4 py-2 flex items-center gap-2`}>
-              <span className="text-white font-bold text-sm">{line.name}</span>
-              <span className="text-white/70 text-xs ml-auto">{line.length} · {line.stations} stations</span>
-            </div>
-            <div className="px-4 py-3">
-              <p className={`${line.textClass} text-xs font-semibold mb-1`}>{line.route}</p>
-              <p className="text-gray-500 text-xs mb-2">{line.note}</p>
-              <div className="flex flex-wrap gap-1">
-                {line.key.map((s) => (
-                  <span key={s} className="bg-white border border-gray-200 text-gray-600 text-[10px] px-2 py-0.5 rounded-full">{s}</span>
+      {/* ── The Network ─────────────────────────────────────── */}
+      <section className="space-y-12">
+        <div className="text-center">
+          <h2 className="national-title text-5xl">The Network</h2>
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Automated Rapid Transport Lines</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {LINES.map(line => (
+            <div key={line.name} className="bento-tile flex flex-col group hover:border-primary/20 transition-all">
+              <div className={`h-2 w-full rounded-full bg-gradient-to-r ${line.color} mb-8`} />
+              <h3 className="text-2xl font-black mb-2 tracking-tight">{line.name}</h3>
+              <p className="text-xs font-black text-primary uppercase tracking-widest mb-4">{line.route}</p>
+              <p className="text-sm text-slate-500 leading-relaxed mb-8 flex-1">{line.desc}</p>
+              <div className="flex flex-wrap gap-2">
+                {line.key.map(s => (
+                  <span key={s} className="px-3 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-[10px] font-bold text-slate-400">
+                    {s}
+                  </span>
                 ))}
               </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Fare Structure & Hours ───────────────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="bento-tile !p-0 overflow-hidden">
+          <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+             <h3 className="text-xl font-black tracking-tight uppercase">Fare Matrix</h3>
+             <span className="px-3 py-1 bg-primary/5 text-primary text-[10px] font-black rounded-full uppercase tracking-widest border border-primary/10">Public Rates</span>
+          </div>
+          <table className="w-full text-left">
+             <thead className="bg-slate-50 dark:bg-slate-950">
+               <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="py-6 px-8">Class</th>
+                  <th className="py-6 px-8">Single Trip</th>
+                  <th className="py-6 px-8">Daily Cap</th>
+               </tr>
+             </thead>
+             <tbody className="divide-y divide-slate-50 dark:divide-slate-900">
+               {[
+                 { c: "Standard", s: "2 QAR", d: "6 QAR" },
+                 { c: "Goldclub", s: "10 QAR", d: "30 QAR" },
+                 { c: "Haza Card", s: "10 QAR", d: "Base Price" },
+               ].map(row => (
+                 <tr key={row.c} className="group hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                   <td className="py-6 px-8 text-sm font-black text-slate-900 dark:text-slate-100 uppercase tracking-wider">{row.c}</td>
+                   <td className="py-6 px-8 font-mono text-sm font-bold text-slate-500">{row.s}</td>
+                   <td className="py-6 px-8 font-mono text-sm font-bold text-primary">{row.d}</td>
+                 </tr>
+               ))}
+             </tbody>
+          </table>
+        </div>
+
+        <div className="bento-tile bg-primary-dark !text-white border-none flex flex-col justify-center p-12 relative overflow-hidden shadow-xl shadow-primary/20">
+          <span className="material-symbols-outlined absolute -right-10 -bottom-10 text-[200px] text-white/5 rotate-12">schedule</span>
+          <h3 className="national-title text-5xl mb-8 italic">Operating Hours</h3>
+          <div className="space-y-6 relative z-10">
+            {[
+              { d: "Saturday – Wednesday", t: "06:00 – 23:00" },
+              { d: "Thursday", t: "06:00 – 23:59" },
+              { d: "Friday", t: "14:00 – 23:59" },
+            ].map(row => (
+              <div key={row.d} className="flex justify-between items-center border-b border-white/10 pb-4">
+                <span className="text-xs font-black uppercase tracking-widest text-white/60">{row.d}</span>
+                <span className="text-lg font-black font-mono">{row.t}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Travel Concierge Tips ───────────────────────────── */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {[
+          { title: "Goldclub Access", icon: "stars", desc: "Experience the pinnacle of urban transport with premium seating and panoramic views for a refined journey." },
+          { title: "Family Zones", icon: "family_restroom", desc: "Dedicated carriages for women and children ensure a comfortable and private commute across the city." },
+          { title: "Smart Connectivity", icon: "wifi", desc: "High-speed Wi-Fi and USB charging across all stations and trains keep you connected en route." },
+        ].map(tip => (
+          <div key={tip.title} className="bento-tile !bg-slate-50 dark:!bg-slate-900 border-none group">
+            <span className="material-symbols-outlined text-primary text-3xl mb-6 group-hover:scale-110 transition-transform">{tip.icon}</span>
+            <h4 className="font-bold mb-3 uppercase tracking-tighter text-sm">{tip.title}</h4>
+            <p className="text-xs text-slate-500 leading-relaxed font-medium">{tip.desc}</p>
           </div>
         ))}
-      </div>
-
-      {/* Fares */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden mb-6">
-        <div className="bg-gray-800 px-4 py-2">
-          <h2 className="text-white font-bold text-sm">Ticket Fares</h2>
-          <p className="text-gray-300 text-xs mt-0.5">Alhazm smart card rates (cash may be higher)</p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-4 py-2 font-semibold text-gray-600">Journey</th>
-                <th className="text-left px-4 py-2 font-semibold text-gray-700">Standard</th>
-                <th className="text-left px-4 py-2 font-semibold text-yellow-700">Gold Class</th>
-              </tr>
-            </thead>
-            <tbody>
-              {FARES.map((row, i) => (
-                <tr key={row.zone} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                  <td className="px-4 py-2 text-gray-700 font-medium">{row.zone}</td>
-                  <td className="px-4 py-2 text-gray-700">{row.standard}</td>
-                  <td className="px-4 py-2 text-yellow-700 font-medium">{row.gold}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Operating hours */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm overflow-hidden mb-6">
-        <div className="bg-gray-800 px-4 py-2">
-          <h2 className="text-white font-bold text-sm">Operating Hours</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-100">
-                <th className="text-left px-4 py-2 font-semibold text-gray-600">Day</th>
-                <th className="text-left px-4 py-2 font-semibold text-gray-600">First Train</th>
-                <th className="text-left px-4 py-2 font-semibold text-gray-600">Last Train</th>
-              </tr>
-            </thead>
-            <tbody>
-              {HOURS.map((row, i) => (
-                <tr key={row.day} className={i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}>
-                  <td className="px-4 py-2 text-gray-700 font-medium">{row.day}</td>
-                  <td className="px-4 py-2 text-gray-700">{row.firstTrain}</td>
-                  <td className="px-4 py-2 text-gray-700">{row.lastTrain}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Tips */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-3 mb-4">
-        <h2 className="text-sm font-semibold text-gray-700 mb-2">Tips for Riding the Metro</h2>
-        <div className="space-y-2">
-          {TIPS.map(({ icon, title, desc }) => (
-            <div key={title} className="flex gap-2">
-              <span className="text-lg flex-shrink-0 mt-0.5">{icon}</span>
-              <div>
-                <p className="font-semibold text-gray-800 text-sm">{title}</p>
-                <p className="text-gray-600 text-sm">{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* FAQ */}
-      <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-3 mb-4">
-        <h2 className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">FAQ</h2>
-        <div className="space-y-3">
-          {[
-            { q: "Does the Doha Metro go to Hamad International Airport?", a: "Yes. The airport is served by the Green Line. From Msheireb (city centre) the journey takes approximately 10 minutes." },
-            { q: "Can I bring my bike on the Qatar Metro?", a: "Bicycles are allowed on the Metro during off-peak hours (before 7 AM and after 8 PM on weekdays, and all day on weekends). Folded bikes and scooters are permitted at any time." },
-            { q: "Is there a women-only carriage on the Doha Metro?", a: "Yes. Each train has a dedicated Family & Women carriage. Women travelling alone or with children may use it. Men are not permitted in this carriage." },
-            { q: "How do I get an Alhazm card?", a: "Alhazm smart cards are available at all Metro station vending machines, Customer Service desks, and online. Cards cost 10 QAR and can be loaded with credit at any station." },
-          ].map(({ q, a }) => (
-            <details key={q} className="group">
-              <summary className="cursor-pointer text-xs font-medium text-gray-700 py-2 list-none flex justify-between items-center">
-                {q}
-                <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
-              </summary>
-              <p className="text-xs text-gray-500 pt-1 pb-3">{a}</p>
-            </details>
-          ))}
-        </div>
-      </div>
-
-      <div className="flex gap-3 flex-wrap text-xs">
-        <a href="/weather" className="text-rose-700 hover:underline">→ Doha Weather</a>
-        <a href="/cost-of-living-doha" className="text-rose-700 hover:underline">→ Cost of Living in Doha</a>
-        <a href="/work-in-qatar" className="text-rose-700 hover:underline">→ Working in Qatar</a>
-      </div>
+      </section>
     </div>
   );
 }

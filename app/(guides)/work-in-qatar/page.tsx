@@ -1,194 +1,149 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
-
-export const revalidate = 86400;
+import DisclaimerBanner from "@/components/DisclaimerBanner";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
+import RelatedGuides from "@/components/RelatedGuides";
 
 export const metadata = pageMeta({
-  title: "Working in Qatar 2026 — Complete Expat Guide | Qatar Portal",
-  description: "Complete guide to working in Qatar: visa requirements, salary ranges, labour law, cost of living, and how to find jobs in Doha.",
+  title: "Working in Qatar 2026 | Professional Onboarding Guide",
+  description: "The definitive guide to the professional landscape in the State of Qatar. Seamlessly navigate your career transition into the world's most tax-efficient economy.",
   path: "/work-in-qatar",
-  keywords: ["working in Qatar", "work in Qatar 2026", "Qatar expat guide", "jobs in Qatar", "Qatar work visa", "Qatar salary", "moving to Qatar"],
-  ogTitle: "Working in Qatar 2026 — Complete Expat Guide",
-  ogDescription: "Everything you need to know about working in Qatar: visa, salary, labour law, cost of living, and finding a job.",
+  keywords: ["Working in Qatar", "Doha professional guide", "Moving to Qatar 2026", "Expat careers Qatar"],
 });
 
 const RESOURCES = [
-  {
-    icon: "🛂",
-    title: "Qatar Visa Requirements",
-    desc: "Work visas, sponsorship rules, and which nationalities get visa-on-arrival.",
-    href: "/qatar-visa-requirements",
-    color: "sky",
-  },
-  {
-    icon: "⚖️",
-    title: "Qatar Labour Law",
-    desc: "Working hours, minimum wage, annual leave, end-of-service, overtime, and notice periods.",
-    href: "/qatar-labour-law",
-    color: "rose",
-  },
-  {
-    icon: "💰",
-    title: "Qatar Salary Guide",
-    desc: "Average salaries by job category and seniority. All income is 100% tax-free.",
-    href: "/qatar-salary-guide",
-    color: "amber",
-  },
-  {
-    icon: "💼",
-    title: "Jobs in Qatar",
-    desc: "Latest job vacancies in Doha and Qatar — updated daily from top Gulf job boards.",
-    href: "/jobs",
-    color: "emerald",
-  },
-  {
-    icon: "🏠",
-    title: "Cost of Living in Doha",
-    desc: "Rent, food, transport, schools, and utilities — what to expect on an expat budget.",
-    href: "/cost-of-living-doha",
-    color: "violet",
-  },
-];
-
-const FAQS = [
-  {
-    q: "Do I need a visa to work in Qatar?",
-    a: "Yes, most nationalities require a work visa sponsored by your employer. Your employer handles the visa process — you do not apply independently. Some nationalities (GCC, UK, USA, EU) can enter visa-free for up to 30–180 days but still need a residence permit to work.",
-  },
-  {
-    q: "Is there income tax in Qatar?",
-    a: "No. Qatar has zero personal income tax. Your entire salary is take-home pay. There is also no VAT on most goods and services, making Qatar one of the most tax-efficient countries for expats.",
-  },
-  {
-    q: "What is the minimum wage in Qatar?",
-    a: "Qatar's minimum wage is QAR 1,000/month basic salary, plus QAR 500 food allowance and QAR 500 accommodation allowance if not provided by employer — totalling QAR 2,000/month minimum.",
-  },
-  {
-    q: "Can I change jobs in Qatar?",
-    a: "Yes. Since 2020, Qatar abolished the exit permit requirement and allows job changes without employer permission after 1 year of service (or immediately in cases of employer breach). Workers can now freely change employers.",
-  },
-  {
-    q: "What are typical working hours in Qatar?",
-    a: "Standard working hours are 8 hours/day and 48 hours/week. During Ramadan, working hours are reduced to 6 hours/day for Muslim employees. Overtime is paid at 125% on weekdays and 150% on rest days and public holidays.",
-  },
-  {
-    q: "What is end of service gratuity?",
-    a: "Qatar Labour Law entitles employees to end of service gratuity: 3 weeks basic salary per year for the first 5 years of service, and 4 weeks per year thereafter. This is paid when you leave, in addition to your regular salary.",
-  },
-  {
-    q: "How do I find jobs in Qatar?",
-    a: "Top job boards for Qatar include Bayt.com, GulfTalent, LinkedIn, and Naukrigulf. Many jobs are also filled through company websites and recruitment agencies. Qatar Portal aggregates daily job listings from multiple sources.",
-  },
-  {
-    q: "What is the cost of renting in Doha?",
-    a: "Renting in Doha varies widely. A 1-bedroom apartment in a central area costs QAR 5,000–9,000/month. Many employers include housing allowances in the package (typically QAR 2,000–8,000/month).",
-  },
+  { t: "Visa Protocols", h: "/qatar-visa-requirements", i: "badge" },
+  { t: "Labour Framework", h: "/qatar-labour-law", i: "gavel" },
+  { t: "Salary Benchmarks", h: "/qatar-salary-guide", i: "account_balance" },
+  { t: "Economic Living", h: "/cost-of-living-doha", i: "payments" },
 ];
 
 export default function WorkInQatarPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQS.map(({ q, a }) => ({
-      "@type": "Question",
-      name: q,
-      acceptedAnswer: { "@type": "Answer", text: a },
-    })),
-  };
-
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-      { "@type": "ListItem", position: 2, name: "Working in Qatar", item: `${SITE_URL}/work-in-qatar` },
+    mainEntity: [
+      {
+        "@type": "Question",
+        name: "Is Qatar tax-free?",
+        acceptedAnswer: { "@type": "Answer", text: "Yes, Qatar has 0% personal income tax, providing one of the most efficient compensation environments globally." },
+      },
     ],
   };
 
   return (
-    <div className="page-sections">
+    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Work in Qatar", item: `${SITE_URL}/work-in-qatar` }] }) }} />
 
-      {/* Hero */}
-      <div className="mb-4">
-        <h1 className="font-newsreader text-xl font-bold text-on-surface mb-1">
-          Working in Qatar — Complete Guide 2026
-        </h1>
-        <p className="text-xs text-gray-400 dark:text-slate-500">
-          Everything you need to know before moving to Qatar for work: visas, salaries, labour rights, cost of living, and how to find a job. All information is verified and updated for 2026.
-        </p>
-      </div>
+      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Work in Qatar" }]} />
 
-      {/* Tax-free highlight */}
-      <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/30 rounded-lg p-3 mb-4 flex items-start gap-2">
-        <span className="text-xl">💡</span>
-        <div>
-          <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">Qatar is 100% tax-free</p>
-          <p className="text-xs text-emerald-700 dark:text-emerald-400">No income tax, no VAT on most goods. Your entire salary is yours to keep — making Qatar one of the highest-paying expat destinations in the world.</p>
+      {/* ── Professional Onboarding Hero ───────────────────── */}
+      <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
+        <div className="relative z-10 w-full max-w-4xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">Concierge Roadmap · Career Excellence</p>
+          <h1 className="national-title text-6xl sm:text-9xl mb-10 italic leading-[0.8] tracking-tighter">
+             <span className="lang-en">Work Guide</span>
+             <span className="lang-ar">دليل الوظائف</span>
+          </h1>
+          <p className="text-sm font-medium text-white/50 leading-relaxed max-w-md">
+            The architect's blueprint for a successful professional transition into the world's leading economic hub.
+          </p>
         </div>
-      </div>
+      </section>
 
-      {/* Resource cards */}
-      <div className="grid sm:grid-cols-2 gap-3 mb-6">
-        {RESOURCES.map(({ icon, title, desc, href }) => (
-          <a
-            key={href}
-            href={href}
-            className="bg-white dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 shadow-none p-3 hover:shadow-md hover:border-rose-200 dark:hover:border-rose-800/50 transition-all flex gap-3 items-start"
-          >
-            <span className="text-2xl flex-shrink-0">{icon}</span>
-            <div>
-              <h2 className="text-sm font-bold text-gray-900 dark:text-slate-100 mb-0.5">{title}</h2>
-              <p className="text-xs text-gray-500 dark:text-slate-400 leading-relaxed">{desc}</p>
-            </div>
-          </a>
-        ))}
-      </div>
+      {/* ── Disclaimer ─────────────────────────────────────── */}
+      <DisclaimerBanner
+        officialSourceUrl="https://www.mol.gov.qa"
+        officialSourceName="Qatar Ministry of Labour"
+        lastReviewed="March 2026"
+      />
 
-      {/* Quick stats */}
-      <div className="bg-rose-900 text-white rounded-lg p-4 mb-6">
-        <h2 className="text-sm font-bold text-amber-300 mb-3">Qatar at a Glance</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-          {[
-            { label: "Income Tax", value: "0%" },
-            { label: "Minimum Wage", value: "QAR 2,000" },
-            { label: "Work Week", value: "48 hrs max" },
-            { label: "Expat Population", value: "~88%" },
-            { label: "Currency", value: "QAR (≈ USD 0.27)" },
-            { label: "Language", value: "Arabic / English" },
-          ].map(({ label, value }) => (
-            <div key={label} className="bg-rose-800 rounded-md p-2.5">
-              <p className="text-[10px] text-rose-300 mb-1">{label}</p>
-              <p className="text-sm font-bold text-white">{value}</p>
-            </div>
-          ))}
+      {/* ── Key Resource Compass ────────────────────────────── */}
+      <section className="space-y-12">
+        <div className="text-center">
+           <h2 className="national-title text-5xl">The Compass</h2>
+           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Essential Professional Pillars</p>
         </div>
-      </div>
-
-      {/* FAQ */}
-      <div className="bg-white dark:bg-slate-800 rounded-lg border border-gray-100 dark:border-slate-700 shadow-sm p-3 mb-5">
-        <h2 className="text-xs font-medium text-gray-400 dark:text-slate-500 uppercase tracking-wide mb-2">FAQ</h2>
-        <div className="space-y-1">
-          {FAQS.map(({ q, a }) => (
-            <details key={q} className="group border-b border-gray-50 last:border-0">
-              <summary className="cursor-pointer text-xs font-medium text-gray-800 dark:text-slate-200 py-2 list-none flex justify-between items-center gap-2">
-                <span>{q}</span>
-                <span className="text-gray-400 dark:text-slate-500 flex-shrink-0 group-open:rotate-180 transition-transform text-xs">▼</span>
-              </summary>
-              <p className="text-xs text-gray-500 dark:text-slate-400 pb-3 leading-relaxed">{a}</p>
-            </details>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+           {RESOURCES.map(res => (
+             <a key={res.h} href={res.h} className="bento-tile flex flex-col items-center text-center p-12 group hover:border-primary/20 transition-all">
+                <span className="material-symbols-outlined text-primary text-4xl mb-6 group-hover:scale-110 transition-transform">{res.i}</span>
+                <h3 className="text-xs font-black uppercase tracking-widest leading-relaxed mb-4">{res.t}</h3>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] group-hover:text-primary transition-colors">Learn More <span className="material-symbols-outlined text-[10px] align-middle">east</span></span>
+             </a>
+           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Related links */}
-      <div className="flex flex-wrap gap-3 text-xs">
-        <a href="/jobs" className="text-rose-700 hover:underline">→ Browse jobs in Qatar</a>
-        <a href="/qatar-labour-law" className="text-rose-700 hover:underline">→ Qatar Labour Law</a>
-        <a href="/prayer" className="text-rose-700 hover:underline">→ Prayer Times & Hijri</a>
-        <a href="/qatar-public-holidays" className="text-rose-700 hover:underline">→ Public holidays</a>
-      </div>
+      {/* ── National Advantage Dashboard ───────────────────── */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-12 bento-tile !bg-slate-900 !text-white border-none p-12 md:p-20 relative overflow-hidden shadow-2xl shadow-primary/20">
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
+              <div>
+                 <h3 className="national-title text-6xl mb-8 italic">The Advantage</h3>
+                 <p className="text-sm font-medium text-white/50 leading-relaxed mb-12">
+                   Professional life in Qatar is defined by a 100% tax-free compensation model, state-of-the-art infrastructure, and a multicultural professional network.
+                 </p>
+                 <div className="grid grid-cols-2 gap-8">
+                   {[
+                     { l: "Tax Rate", v: "0.00%", sub: "Net = Gross" },
+                     { l: "Growth Hub", v: "Doha", sub: "Global Gateway" },
+                   ].map(stat => (
+                     <div key={stat.l}>
+                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">{stat.l}</p>
+                        <p className="text-3xl font-black text-accent mb-1">{stat.v}</p>
+                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{stat.sub}</p>
+                     </div>
+                   ))}
+                 </div>
+              </div>
+              <div className="bento-tile bg-white/5 border-white/10 !p-10 space-y-8 backdrop-blur-md relative overflow-hidden">
+                 <span className="absolute -right-5 -bottom-5 material-symbols-outlined text-[150px] text-white/5 rotate-12">verified</span>
+                 <h4 className="text-sm font-black uppercase tracking-widest border-b border-white/10 pb-4">Onboarding Checklist</h4>
+                 <div className="space-y-4">
+                    {[
+                      "Obtain a Qatari Employer Sponsorship",
+                      "Attest Educational Qualifications",
+                      "Medical Screening & Fingerprinting",
+                      "Electronic Qatar ID Disbursement",
+                    ].map(step => (
+                      <div key={step} className="flex items-center gap-4 text-xs font-bold text-white/70">
+                         <span className="material-symbols-outlined text-sm text-accent">check_circle</span>
+                         {step}
+                      </div>
+                    ))}
+                 </div>
+              </div>
+           </div>
+        </div>
+      </section>
+
+      {/* ── Concierge Support ────────────────────────────────── */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="bento-tile flex flex-col justify-center">
+           <h4 className="text-sm font-black uppercase tracking-widest mb-4">Before You Arrive</h4>
+           <p className="text-sm text-slate-500 leading-relaxed font-bold">
+             Understand your rights, salary benchmarks, and the QID process before your first day.
+           </p>
+           <a href="/qatar-services/qid" className="mt-8 flex items-center gap-3 text-xs font-black text-primary uppercase tracking-widest hover:underline">
+              QID Application Guide <span className="material-symbols-outlined text-sm">east</span>
+           </a>
+        </div>
+        <div className="bento-tile bg-slate-50 dark:bg-slate-900 border-none flex flex-col justify-center text-center">
+           <h4 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Legal Certainty</h4>
+           <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] leading-relaxed">
+             All private sector contracts are subject to Qatar Law No. 14 of 2004.
+           </p>
+        </div>
+      </section>
+
+      <RelatedGuides guides={[
+        { href: "/qatar-labour-law",       icon: "gavel",      title: "Labour Law",         description: "Know your rights: working hours, minimum wage, notice periods, and reforms." },
+        { href: "/qatar-salary-guide",     icon: "bar_chart",  title: "Salary Guide",        description: "Benchmark your package across Tech, Engineering, and Finance sectors." },
+        { href: "/qatar-visa-requirements", icon: "id_card",   title: "Visa Requirements",   description: "Visa-free entry, work residency, and family visit rules explained." },
+      ]} />
     </div>
   );
 }

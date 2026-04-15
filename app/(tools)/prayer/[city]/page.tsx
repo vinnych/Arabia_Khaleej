@@ -110,7 +110,7 @@ export default async function CityPrayerPage({ params }: { params: Promise<{ cit
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       )}
       <div className="mb-4">
-        <h1 className="font-newsreader text-xl font-bold text-on-surface mb-2">Prayer Times in {entry.label}</h1>
+        <h1 className="font-serif text-xl font-bold text-on-surface mb-2">Prayer Times in {entry.label}</h1>
         <p className="text-sm text-gray-500 mt-1">
           Also see: <a href="/prayer" className="text-rose-700 hover:underline">Doha, Qatar prayer times</a>
           {" · "}

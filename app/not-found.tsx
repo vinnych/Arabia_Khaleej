@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Page Not Found | Qatar Portal",
+  title: "Page Not Found | Qatar Portal — Jobs & Utilities",
   description: "The page you are looking for could not be found.",
 };
 
@@ -22,10 +22,6 @@ export default function NotFound() {
         <Link href="/" className="bg-blue-600 dark:bg-blue-500 text-white rounded-xl px-6 py-3 text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 dark:hover:bg-blue-600 hover:-translate-y-0.5 transition-all active:scale-95">
           <span className="lang-en">Go to Home</span>
           <span className="lang-ar">الصفحة الرئيسية</span>
-        </Link>
-        <Link href="/news" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-6 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-sm">
-          <span className="lang-en">Latest News</span>
-          <span className="lang-ar">آخر الأخبار</span>
         </Link>
         <Link href="/jobs" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-6 py-3 text-sm font-bold text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 hover:-translate-y-0.5 transition-all shadow-sm">
           <span className="lang-en">Jobs in Qatar</span>
