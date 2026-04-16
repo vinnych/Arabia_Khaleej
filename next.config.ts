@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
-  },
   async headers() {
     return [
       {
@@ -19,12 +16,11 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://pagead2.googlesyndication.com https://partner.googleadservices.com https://www.googletagmanager.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
-              "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com data:",
-              "img-src 'self' https: data: pagead2.googlesyndication.com tpc.googlesyndication.com www.google-analytics.com",
-              "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
-              "connect-src 'self' https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://www.google-analytics.com https://region1.google-analytics.com api.aladhan.com www.aljazeera.com thepeninsulaqatar.com www.gulf-times.com www.qna.org.qa www.bayt.com www.gulftalent.com api.groq.com api.pexels.com",
+              "script-src 'self' 'unsafe-inline' https://va.vercel-scripts.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com data:",
+              "img-src 'self' data:",
+              "connect-src 'self' https://va.vercel-scripts.com",
             ].join("; "),
           },
         ],
