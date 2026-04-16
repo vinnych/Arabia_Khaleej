@@ -2,13 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: sans-serif;
-  line-height: 1.5;
-  color: #333;
-  background: #fff;
+@layer base {
+  body {
+    @apply bg-white text-slate-900 antialiased;
+  }
 }
 
-b {
-  font-weight: bold;
-}
