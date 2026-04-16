@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, DM_Serif_Display } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import HomeNav from "@/components/HomeNav";
 import CookieConsent from "@/components/CookieConsent";
 import { safeJsonLd } from "@/lib/utils";
@@ -107,6 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main id="main-content" className="flex-grow w-full px-4 sm:px-5 md:px-8 lg:px-12 py-2 sm:py-6">{children}</main>
         <CookieConsent />
         <SpeedInsights />
+        <Analytics />
 
         <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-auto">
           <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
