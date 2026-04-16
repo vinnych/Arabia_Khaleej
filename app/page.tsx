@@ -45,7 +45,7 @@ export default async function Home() {
 
       <div className="-mx-4 sm:-mx-5 md:-mx-8 lg:-mx-12 -mt-4 sm:-mt-6 -mb-20 md:-mb-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-6 sm:py-10 space-y-12 sm:space-y-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-2 sm:py-10 space-y-12 sm:space-y-20">
 
           <HomeHero />
 

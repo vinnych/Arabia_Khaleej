@@ -54,7 +54,14 @@ export function pageMeta({
     title,
     description,
     ...(keywords && { keywords }),
-    alternates: { canonical },
+    alternates: {
+      canonical,
+      languages: {
+        "en": canonical,
+        "ar": canonical,
+        "x-default": canonical,
+      },
+    },
     other: {
       "geo.region": "QA-DA",
       "geo.placename": "Doha, Qatar",

@@ -23,6 +23,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/qatar-public-holidays`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/emergency-numbers-qatar`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.6 },
     { url: `${SITE_URL}/work-in-qatar`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.8 },
+    { url: `${SITE_URL}/community-resources`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "monthly", priority: 0.7 },
+{ url: `${SITE_URL}/mobile`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "weekly", priority: 0.4 },
+    { url: `${SITE_URL}/contact`, lastModified: STATIC_LAST_MODIFIED, changeFrequency: "yearly", priority: 0.3 },
     // City prayer pages
     ...["dubai", "abu-dhabi", "riyadh", "jeddah", "kuwait-city", "muscat", "manama", "cairo", "islamabad", "manila", "dhaka"].map((city) => ({
       url: `${SITE_URL}/prayer/${city}`,

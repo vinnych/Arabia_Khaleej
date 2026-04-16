@@ -32,23 +32,24 @@ export default function WorkInQatarPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Work in Qatar", item: `${SITE_URL}/work-in-qatar` }] }) }} />
 
-      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Work in Qatar" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
+        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Work in Qatar" }]} />
 
       {/* ── Professional Onboarding Hero ───────────────────── */}
       <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
         <div className="relative z-10 w-full max-w-4xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">Concierge Roadmap · Career Excellence</p>
+          <p className="label-xs text-white/60 mb-6">Independent Guide · Moving & Working</p>
           <h1 className="national-title text-6xl sm:text-9xl mb-10 italic leading-[0.8] tracking-tighter">
              <span className="lang-en">Work Guide</span>
              <span className="lang-ar">دليل الوظائف</span>
           </h1>
           <p className="text-sm font-medium text-white/50 leading-relaxed max-w-md">
-            The architect's blueprint for a successful professional transition into the world's leading economic hub.
+            Everything you need to know before and after arriving in Qatar — visas, QID, your rights, and what life looks like on the ground.
           </p>
         </div>
       </section>
@@ -63,8 +64,8 @@ export default function WorkInQatarPage() {
       {/* ── Key Resource Compass ────────────────────────────── */}
       <section className="space-y-12">
         <div className="text-center">
-           <h2 className="national-title text-5xl">The Compass</h2>
-           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Essential Professional Pillars</p>
+           <h2 className="national-title text-5xl">Key Resources</h2>
+           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Everything You Need in One Place</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
            {RESOURCES.map(res => (
@@ -82,9 +83,9 @@ export default function WorkInQatarPage() {
         <div className="lg:col-span-12 bento-tile !bg-slate-900 !text-white border-none p-12 md:p-20 relative overflow-hidden shadow-2xl shadow-primary/20">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
               <div>
-                 <h3 className="national-title text-6xl mb-8 italic">The Advantage</h3>
+                 <h3 className="national-title text-6xl mb-8 italic">Why Qatar?</h3>
                  <p className="text-sm font-medium text-white/50 leading-relaxed mb-12">
-                   Professional life in Qatar is defined by a 100% tax-free compensation model, state-of-the-art infrastructure, and a multicultural professional network.
+                   Zero income tax, modern infrastructure, and a multicultural workforce make Qatar one of the most rewarding places to build a career in the world.
                  </p>
                  <div className="grid grid-cols-2 gap-8">
                    {[
@@ -144,6 +145,7 @@ export default function WorkInQatarPage() {
         { href: "/qatar-salary-guide",     icon: "bar_chart",  title: "Salary Guide",        description: "Benchmark your package across Tech, Engineering, and Finance sectors." },
         { href: "/qatar-visa-requirements", icon: "id_card",   title: "Visa Requirements",   description: "Visa-free entry, work residency, and family visit rules explained." },
       ]} />
-    </div>
+      </div>
+    </>
   );
 }

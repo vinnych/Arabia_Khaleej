@@ -10,7 +10,7 @@ export const metadata = pageMeta({
 export default function ContactPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-20 space-y-24">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://media.org", "@type": "ContactPage", url: `${SITE_URL}/contact` }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "ContactPage", url: `${SITE_URL}/contact` }) }} />
 
       {/* ── Contact Header ────────────────────────────────── */}
       <section className="space-y-8">

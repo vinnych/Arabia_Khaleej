@@ -1,6 +1,7 @@
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
+import RelatedGuides from "@/components/RelatedGuides";
 
 export const metadata = pageMeta({
   title: "Qatar Public Holidays 2026 | Community Calendar",
@@ -10,32 +11,80 @@ export const metadata = pageMeta({
 });
 
 const HOLIDAYS = [
-  { date: "10 Feb", name: "National Sports Day", type: "State", color: "text-amber-500" },
-  { date: "20 Mar*", name: "Eid Al-Fitr", type: "Islamic", color: "text-emerald-500" },
-  { date: "27 May*", name: "Eid Al-Adha", type: "Islamic", color: "text-emerald-500" },
-  { date: "16 Jun*", name: "Islamic New Year", type: "Islamic", color: "text-emerald-500" },
-  { date: "18 Dec", name: "National Day", type: "National", color: "text-primary" },
+  { date: "10 Feb", isoDate: "2026-02-10", name: "National Sports Day",  type: "State",    color: "text-amber-500",   description: "Qatar's annual National Sports Day promoting health and physical activity across the state." },
+  { date: "20 Mar*", isoDate: "2026-03-20", name: "Eid Al-Fitr",         type: "Islamic",  color: "text-emerald-500", description: "The festival marking the end of Ramadan. Exact date subject to moon sighting confirmation." },
+  { date: "27 May*", isoDate: "2026-05-27", name: "Eid Al-Adha",         type: "Islamic",  color: "text-emerald-500", description: "The feast of sacrifice, one of the two major Islamic festivals. Exact date subject to moon sighting." },
+  { date: "16 Jun*", isoDate: "2026-06-16", name: "Islamic New Year",    type: "Islamic",  color: "text-emerald-500", description: "The Islamic Hijri New Year marking the start of Muharram." },
+  { date: "18 Dec", isoDate: "2026-12-18",  name: "National Day",        type: "National", color: "text-primary",     description: "Qatar National Day commemorates the unification of Qatar in 1878. Celebrated with state events across Doha." },
 ];
 
 export default function QatarPublicHolidaysPage() {
-  const jsonLd = {
+  const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: [
       {
         "@type": "Question",
         name: "When is Qatar National Day 2026?",
-        acceptedAnswer: { "@type": "Answer", text: "Qatar National Day is celebrated on December 18 annually." },
+        acceptedAnswer: { "@type": "Answer", text: "Qatar National Day is celebrated on December 18, 2026." },
+      },
+      {
+        "@type": "Question",
+        name: "How many public holidays are there in Qatar in 2026?",
+        acceptedAnswer: { "@type": "Answer", text: "Qatar has 5 official public holidays in 2026: National Sports Day (Feb 10), Eid Al-Fitr (approx. Mar 20), Eid Al-Adha (approx. May 27), Islamic New Year (approx. Jun 16), and National Day (Dec 18). Islamic dates are subject to moon sighting." },
       },
     ],
   };
 
+  const eventsJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Qatar Public Holidays 2026",
+    url: `${SITE_URL}/qatar-public-holidays`,
+    itemListElement: HOLIDAYS.map((h, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Event",
+        name: h.name,
+        startDate: h.isoDate,
+        endDate: h.isoDate,
+        eventStatus: "https://schema.org/EventScheduled",
+        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+        description: h.description,
+        image: `${SITE_URL}/opengraph-image`,
+        location: {
+          "@type": "Country",
+          name: "Qatar",
+          address: {
+            "@type": "PostalAddress",
+            addressCountry: "QA",
+            addressLocality: "Doha",
+          },
+        },
+        organizer: {
+          "@type": "GovernmentOrganization",
+          name: "State of Qatar",
+          url: "https://hukoomi.gov.qa",
+        },
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "QAR",
+          availability: "https://schema.org/InStock",
+        },
+      },
+    })),
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(eventsJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Public Holidays", item: `${SITE_URL}/qatar-public-holidays` }] }) }} />
 
-      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Public Holidays" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
+        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Public Holidays" }]} />
 
       {/* ── National Calendar Hero ─────────────────────────── */}
       <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden">
@@ -125,6 +174,13 @@ export default function QatarPublicHolidaysPage() {
            </a>
         </div>
       </section>
-    </div>
+
+      <RelatedGuides guides={[
+        { href: "/prayer",                  icon: "mosque",   title: "Prayer Times",      description: "Live Doha prayer times and full monthly calendar." },
+        { href: "/qatar-labour-law",        icon: "gavel",    title: "Labour Law",         description: "Your rights during public holidays — paid leave and overtime rules." },
+        { href: "/qatar-visa-requirements", icon: "id_card",  title: "Visa Requirements",  description: "Entry rules for visitors planning around Qatar public holidays." },
+      ]} />
+      </div>
+    </>
   );
 }

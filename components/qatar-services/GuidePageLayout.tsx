@@ -19,7 +19,7 @@ export default function GuidePageLayout({ guide }: Props) {
       : `${guide.minDays}–${guide.maxDays} days`;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-12 sm:space-y-20">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-12 space-y-12 sm:space-y-20">
 
       <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Services", href: "/qatar-services" }, { label: guide.title }]} />
 
@@ -73,8 +73,8 @@ export default function GuidePageLayout({ guide }: Props) {
       {/* ── Procedural Flow ────────────────────────────────── */}
       <section className="space-y-12">
         <div className="text-center">
-           <h2 className="national-title text-5xl italic">The Process</h2>
-           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Step-by-step Execution</p>
+           <h2 className="national-title text-5xl italic">Step by Step</h2>
+           <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">How to Complete the Application</p>
         </div>
         <StepGarden steps={guide.steps} />
       </section>

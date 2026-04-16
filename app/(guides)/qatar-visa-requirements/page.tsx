@@ -28,11 +28,12 @@ export default function QatarVisaRequirementsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Visa Requirements", item: `${SITE_URL}/qatar-visa-requirements` }] }) }} />
 
-      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Visa Requirements" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
+        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Visa Requirements" }]} />
 
       {/* ── Premium National Hero ────────────────────────────── */}
       <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden">
@@ -135,6 +136,7 @@ export default function QatarVisaRequirementsPage() {
         { href: "/qatar-services/qid",  icon: "badge",       title: "QID Application",  description: "Step-by-step guide to getting your Qatar ID card after arrival." },
         { href: "/qatar-metro",         icon: "subway",      title: "Doha Metro",       description: "Navigate the city — metro lines, fares, and station guide." },
       ]} />
-    </div>
+      </div>
+    </>
   );
 }

@@ -24,11 +24,12 @@ export default function EmergencyNumbersQatarPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Emergency Contacts", item: `${SITE_URL}/emergency-numbers-qatar` }] }) }} />
 
-      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Emergency Numbers" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
+        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Emergency Numbers" }]} />
 
       {/* ── National Response Hero ─────────────────────────── */}
       <section className="bento-tile bg-gradient-to-br from-rose-900 via-primary-dark to-slate-950 !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
@@ -132,6 +133,7 @@ export default function EmergencyNumbersQatarPage() {
         { href: "/qatar-labour-law",      icon: "gavel",       title: "Labour Law",          description: "Know your rights if you face issues with an employer." },
         { href: "/qatar-visa-requirements", icon: "id_card",   title: "Visa Requirements",   description: "Entry and residency rules for visitors and workers." },
       ]} />
-    </div>
+      </div>
+    </>
   );
 }

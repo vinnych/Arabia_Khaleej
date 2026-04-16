@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, DM_Serif_Display } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import HomeNav from "@/components/HomeNav";
-import BottomNav from "@/components/BottomNav";
 import CookieConsent from "@/components/CookieConsent";
 import { safeJsonLd } from "@/lib/utils";
 import "./globals.css";
@@ -15,12 +14,12 @@ export const metadata: Metadata = {
   verification: { google: "fg-taPtjNWtu89uOmajC0OB3XxlZapUPAIItSnSnBQo" },
   description:
     "An independent community resource for the State of Qatar. Access curate prayer times, lifestyle guides, and career portals.",
-  keywords: ["Qatar prayer times", "Doha prayer times today", `Qatar jobs ${new Date().getFullYear()}`, "Gulf jobs", "Fajr time Doha", "Qatar Portal"],
+  keywords: ["Qatar prayer times", "Doha prayer times today", "Qatar expat guide", "living in Qatar", "Fajr time Doha", "Qatar Portal"],
   alternates: { canonical: "https://qatar-portal.vercel.app" },
   applicationName: "Qatar Portal",
   openGraph: {
     title: "Qatar Portal",
-    description: "Prayer times, jobs, and services for Qatar",
+    description: "Prayer times, expat guides, and services for Qatar",
     url: "https://qatar-portal.vercel.app",
     siteName: "Qatar Portal",
     locale: "en_US",
@@ -58,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "@type": "WebSite",
             "name": "Qatar Portal",
             "url": "https://qatar-portal.vercel.app",
-            "description": "Prayer times, jobs, and services for Qatar"
+            "description": "Prayer times, expat guides, and services for Qatar"
           })}}
         />
         <script
@@ -70,7 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             "name": "Qatar Portal",
             "url": "https://qatar-portal.vercel.app",
             "logo": { "@type": "ImageObject", "url": "https://qatar-portal.vercel.app/logo.png", "width": 200, "height": 60 },
-            "description": "Your daily Qatar resource: accurate prayer times for Doha, and latest job listings in Qatar.",
+            "description": "An independent community resource for the State of Qatar — prayer times, expat guides, visa information, and public service directories.",
             "address": {
               "@type": "PostalAddress",
               "addressLocality": "West Bay",
@@ -98,11 +97,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }
           })}}
         />
-        <main id="main-content" className="flex-grow w-full px-4 sm:px-5 md:px-8 lg:px-12 py-5 sm:py-6 pb-20 md:pb-6">{children}</main>
+        <main id="main-content" className="flex-grow w-full px-4 sm:px-5 md:px-8 lg:px-12 py-2 sm:py-6">{children}</main>
         <CookieConsent />
         <SpeedInsights />
 
-        <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-auto pb-20 md:pb-0">
+        <footer className="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-auto">
           <div className="max-w-7xl mx-auto px-6 lg:px-12 py-16">
             <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-12">
               <div className="max-w-xs">
@@ -161,7 +160,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </footer>
 
-        <BottomNav />
       </body>
     </html>
   );

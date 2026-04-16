@@ -9,7 +9,7 @@ export const metadata = pageMeta({
 
 export default function PrivacyPage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-20 space-y-24">
+    <div className="max-w-4xl mx-auto px-6 py-4 sm:py-20 space-y-24">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "WebPage", name: "Privacy Manifesto", url: `${SITE_URL}/privacy` }) }} />
 
       {/* ── The Manifesto Header ─────────────────────────── */}

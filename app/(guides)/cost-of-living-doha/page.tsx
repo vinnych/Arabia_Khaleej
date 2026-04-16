@@ -32,11 +32,12 @@ export default function CostOfLivingDohaPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Cost of Living", item: `${SITE_URL}/cost-of-living-doha` }] }) }} />
 
-      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Cost of Living" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
+        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Cost of Living" }]} />
 
       {/* ── Lifestyle Archive Hero ─────────────────────────── */}
       <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
@@ -64,8 +65,8 @@ export default function CostOfLivingDohaPage() {
       <section className="space-y-12">
         <div className="flex flex-col md:flex-row justify-between items-end gap-6">
           <div>
-            <h2 className="national-title text-5xl">The Breakdown</h2>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Monthly Expenditure Matrix (QAR)</p>
+            <h2 className="national-title text-5xl">Monthly Costs</h2>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Estimated Monthly Expenses (QAR)</p>
           </div>
         </div>
 
@@ -95,8 +96,8 @@ export default function CostOfLivingDohaPage() {
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <div className="lg:col-span-8 space-y-12">
           <div>
-            <h2 className="national-title text-4xl">Residential Focus</h2>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Premium District Analysis</p>
+            <h2 className="national-title text-4xl">Where to Live in Doha</h2>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Neighbourhoods & Typical Rents</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
             {[
@@ -117,13 +118,13 @@ export default function CostOfLivingDohaPage() {
 
         <div className="lg:col-span-4 bento-tile !bg-slate-900 !text-white border-none p-12 flex flex-col justify-center shadow-2xl relative overflow-hidden">
            <span className="material-symbols-outlined absolute -right-10 -bottom-10 text-[200px] text-white/5 rotate-12">receipt</span>
-           <h3 className="national-title text-4xl mb-6 italic">Fiscal Reality</h3>
+           <h3 className="national-title text-4xl mb-6 italic">Your Money Goes Further</h3>
            <p className="text-sm font-medium text-white/60 leading-relaxed mb-10">
-             The absence of personal income tax in Qatar effectively increases a professional's purchasing power by <b>30-45%</b> relative to European or North American benchmarks.
+             Zero personal income tax in Qatar means your take-home pay is <b>30-45% higher</b> in real terms compared to equivalent roles in Europe or North America.
            </p>
            <div className="flex gap-4">
-              <a href="/currency" className="px-6 py-4 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all">Rates Map</a>
-              <a href="/qatar-salary-guide" className="px-6 py-4 bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white/20 transition-all border border-white/20">Salary Guide</a>
+              <a href="/currency" className="px-6 py-4 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:scale-105 transition-all">Exchange Rates</a>
+              <a href="/qatar-salary-guide" className="px-6 py-4 bg-white/10 text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:bg-white/20 transition-all border border-white/20">Salary Guide</a>
            </div>
         </div>
       </section>
@@ -133,6 +134,7 @@ export default function CostOfLivingDohaPage() {
         { href: "/work-in-qatar",         icon: "work",        title: "Work in Qatar",    description: "Everything you need to prepare before and after arriving in Qatar." },
         { href: "/community-resources",   icon: "groups",      title: "Community Resources", description: "Banking, healthcare, schools, and expat life essentials in Doha." },
       ]} />
-    </div>
+      </div>
+    </>
   );
 }

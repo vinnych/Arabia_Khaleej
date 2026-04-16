@@ -26,11 +26,12 @@ export default function QatarServicesPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Community Services", item: `${SITE_URL}/qatar-services` }] }) }} />
 
-      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Services Directory" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
+        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Services Directory" }]} />
 
       {/* ── National Utility Hero ─────────────────────────── */}
       <section className="bento-tile bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 !text-white border-none min-h-[400px] flex items-center relative overflow-hidden shadow-2xl">
@@ -51,8 +52,8 @@ export default function QatarServicesPage() {
       <section className="space-y-12">
         <div className="flex justify-between items-end border-b border-slate-100 dark:border-slate-800 pb-8">
            <div>
-              <h2 className="national-title text-4xl">The Directory</h2>
-              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Active Protocols & Guides</p>
+              <h2 className="national-title text-4xl">All Services</h2>
+              <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Step-by-Step Application Guides</p>
            </div>
         </div>
 
@@ -105,6 +106,7 @@ export default function QatarServicesPage() {
           Hukoomi Portal <span className="material-symbols-outlined align-middle" style={{ fontSize: "13px" }}>open_in_new</span>
         </a>
       </section>
-    </div>
+      </div>
+    </>
   );
 }

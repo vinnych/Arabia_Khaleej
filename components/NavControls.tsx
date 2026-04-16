@@ -63,8 +63,8 @@ export default function NavControls() {
           aria-label="Switch language"
         >
           <span className="material-symbols-outlined text-lg">language</span>
-          <span className="lang-en">العربية</span>
-          <span className="lang-ar">English</span>
+          <span className="lang-en hidden xs:inline">العربية</span>
+          <span className="lang-ar hidden xs:inline">English</span>
         </button>
       </div>
     </div>

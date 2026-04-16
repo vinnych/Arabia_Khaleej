@@ -7,7 +7,6 @@ const TOOLS = [
   { href: "/prayer",   icon: "mosque",         en: "Prayer Times",   ar: "مواقيت الصلاة" },
   { href: "/weather",  icon: "wb_sunny",        en: "Weather",        ar: "الطقس" },
   { href: "/currency", icon: "payments",        en: "Currency",       ar: "العملات" },
-  { href: "/sky",      icon: "nights_stay",     en: "Sky View",       ar: "رؤية السماء" },
 ];
 
 const GUIDES = [
@@ -19,6 +18,7 @@ const GUIDES = [
   { href: "/cost-of-living-doha",     icon: "home_work",     en: "Cost of Living",     ar: "تكلفة المعيشة" },
   { href: "/work-in-qatar",           icon: "work",            en: "Work in Qatar",      ar: "العمل في قطر" },
   { href: "/emergency-numbers-qatar", icon: "emergency",     en: "Emergency Numbers",  ar: "أرقام الطوارئ" },
+  { href: "/community-resources",     icon: "groups",        en: "Community",          ar: "المجتمع" },
 ];
 
 const SERVICES = [

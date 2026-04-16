@@ -52,11 +52,12 @@ export default function QatarSalaryGuidePage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12 space-y-20">
+    <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Salary Guide", item: `${SITE_URL}/qatar-salary-guide` }] }) }} />
 
-      <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Salary Guide" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
+        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Salary Guide" }]} />
 
       {/* ── Economic Insight Hero ──────────────────────────── */}
       <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[450px] flex items-center relative overflow-hidden shadow-2xl">
@@ -97,8 +98,8 @@ export default function QatarSalaryGuidePage() {
       <section className="space-y-12">
         <div className="flex flex-col md:flex-row justify-between items-end gap-6">
           <div>
-            <h2 className="national-title text-5xl">Sectoral Benchmarks</h2>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Monthly Compensation (QAR)</p>
+            <h2 className="national-title text-5xl">Salary by Sector</h2>
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Monthly Take-Home Pay (QAR, Tax-Free)</p>
           </div>
           <div className="flex gap-4">
              <div className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-slate-200" /><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Junior</span></div>
@@ -143,9 +144,9 @@ export default function QatarSalaryGuidePage() {
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <div className="bento-tile !bg-primary !text-white border-none p-12 relative overflow-hidden shadow-2xl shadow-primary/20">
            <span className="material-symbols-outlined absolute -right-10 -top-10 text-[250px] text-white/5 -rotate-12">receipt_long</span>
-           <h3 className="national-title text-5xl italic mb-8">The Package</h3>
+           <h3 className="national-title text-5xl italic mb-8">How Packages Work</h3>
            <p className="text-sm font-medium text-white/70 leading-relaxed mb-10 max-w-sm">
-             Employment contracts in Qatar typically consolidate several allowances into a monthly lump sum.
+             Qatar employment contracts typically bundle several allowances into your monthly pay. Here's what to look for when reviewing an offer.
            </p>
            <div className="space-y-6 relative z-10">
              {[
@@ -186,6 +187,7 @@ export default function QatarSalaryGuidePage() {
         { href: "/work-in-qatar",          icon: "work",        title: "Work in Qatar",     description: "End-to-end guide to relocating and starting your career in Qatar." },
         { href: "/cost-of-living-doha",    icon: "home_work",   title: "Cost of Living",    description: "How far does your salary actually go? Housing, transport, and school costs." },
       ]} />
-    </div>
+      </div>
+    </>
   );
 }

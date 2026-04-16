@@ -9,7 +9,7 @@ export const metadata = pageMeta({
 
 export default function AboutPage() {
   return (
-    <div className="max-w-7xl mx-auto px-6 py-20 space-y-32">
+    <div className="max-w-7xl mx-auto px-6 py-4 sm:py-20 space-y-32">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "WebPage", name: "About Qatar Portal", url: `${SITE_URL}/about` }) }} />
 
       {/* ── The Visionary Hero ────────────────────────────── */}

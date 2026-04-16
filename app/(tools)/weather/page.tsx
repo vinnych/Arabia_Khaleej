@@ -51,7 +51,7 @@ export default async function WeatherPage() {
   };
 
   return (
-    <div className="page-sections">
+    <div className="page-sections pt-2 sm:pt-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Doha Weather", item: "https://qatar-portal.vercel.app/weather" }] }) }} />
 
