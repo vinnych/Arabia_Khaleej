@@ -1,4 +1,4 @@
-# Legal Compliance Manifesto: Qatar Insider (Hobbyist)
+# Legal Compliance Manifesto: Arabia Khaleej (Hobbyist)
 
 As an unofficial and unregistered web project focusing on the **State of Qatar**, the following rules are **STRICT** and must be reviewed regularly to ensure compliance with the **Cybercrime Prevention Law (No. 14 of 2014)** and local media regulations.
 

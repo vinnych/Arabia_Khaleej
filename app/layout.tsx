@@ -10,21 +10,21 @@ const inter = Inter({ subsets: ["latin"] });
 const serif = DM_Serif_Display({ subsets: ["latin"], weight: ["400"], style: ["italic"], variable: "--font-serif" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://qatar-portal.vercel.app"),
+  metadataBase: new URL("https://arabiakhaleej.com"),
   verification: { google: "fg-taPtjNWtu89uOmajC0OB3XxlZapUPAIItSnSnBQo" },
   description:
-    "An independent community resource for the State of Qatar. Access curate prayer times, lifestyle guides, and career portals.",
-  keywords: ["Qatar prayer times", "Doha prayer times today", "Qatar expat guide", "living in Qatar", "Fajr time Doha", "Qatar Insider"],
-  alternates: { canonical: "https://qatar-portal.vercel.app" },
-  applicationName: "Qatar Insider",
+    "The definitive digital concierge for the GCC region. Elite curator analysis of prayer times, administrative protocols, and lifestyle registries for the global professional.",
+  keywords: ["Arabia Khaleej", "GCC digital concierge", "Gulf expat registry", "living in Saudi Arabia 2026", "UAE administrative protocols", "Arabia Khaleej portal"],
+  alternates: { canonical: "https://arabiakhaleej.com" },
+  applicationName: "Arabia Khaleej",
   openGraph: {
-    title: "Qatar Insider",
-    description: "Prayer times, expat guides, and services for Qatar",
-    url: "https://qatar-portal.vercel.app",
-    siteName: "Qatar Insider",
+    title: "Arabia Khaleej | Elite GCC Digital Concierge",
+    description: "The definitive digital concierge for the GCC region. Performance-grade prayer times, administrative protocols, and lifestyle registries.",
+    url: "https://arabiakhaleej.com",
+    siteName: "Arabia Khaleej",
     locale: "en_US",
     type: "website",
-    images: [{ url: "https://qatar-portal.vercel.app/opengraph-image", width: 1200, height: 630 }],
+    images: [{ url: "https://arabiakhaleej.com/opengraph-image", width: 1200, height: 630 }],
   },
 };
 
@@ -32,8 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={serif.variable}>
       <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#faf9f6" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -63,9 +62,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{__html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "Qatar Insider",
-            "url": "https://qatar-portal.vercel.app",
-            "description": "Prayer times, expat guides, and services for Qatar"
+            "name": "Arabia Khaleej",
+            "url": "https://arabiakhaleej.com",
+            "description": "The definitive digital concierge for the GCC region — prayer times, expat guides, and administrative protocols."
           })}}
         />
         <script
@@ -73,11 +72,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{__html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "Organization",
-            "@id": "https://qatar-portal.vercel.app/#organization",
-            "name": "Qatar Insider",
-            "url": "https://qatar-portal.vercel.app",
-            "logo": { "@type": "ImageObject", "url": "https://qatar-portal.vercel.app/icon.png", "width": 512, "height": 512 },
-            "description": "An independent community resource for the State of Qatar — prayer times, expat guides, visa information, and public service directories.",
+            "@id": "https://arabiakhaleej.com/#organization",
+            "name": "Arabia Khaleej",
+            "url": "https://arabiakhaleej.com",
+            "logo": { "@type": "ImageObject", "url": "https://arabiakhaleej.com/icon.png", "width": 512, "height": 512 },
+            "description": "An independent community resource for the GCC region — prayer times, expat guides, visa information, and public service directories.",
             "address": {
               "@type": "PostalAddress",
               "addressLocality": "West Bay",
@@ -91,9 +90,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "longitude": 51.5310
             },
             "areaServed": [
-              { "@type": "Country", "name": "Qatar" },
-              { "@type": "Country", "name": "United Arab Emirates" },
               { "@type": "Country", "name": "Saudi Arabia" },
+              { "@type": "Country", "name": "United Arab Emirates" },
+              { "@type": "Country", "name": "Qatar" },
               { "@type": "Country", "name": "Kuwait" },
               { "@type": "Country", "name": "Bahrain" },
               { "@type": "Country", "name": "Oman" }
@@ -115,7 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="max-w-xs">
                 <p className="text-xs font-black uppercase tracking-[0.2em] mb-4 text-primary">Independent Hobby Project</p>
                 <p className="text-xs leading-relaxed mb-6 text-slate-500 dark:text-slate-400 font-medium">
-                  <span className="lang-en">A dedicated, unofficial digital concierge for the State of Qatar. We provide high-density utility data focused on speed and simplicity.</span>
+                  <span className="lang-en">A dedicated, unofficial digital concierge for the GCC region. We provide high-density utility data focused on speed and simplicity.</span>
                 </p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
@@ -140,7 +139,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     <li><a href="/cost-of-living-doha" className="hover:text-primary transition-colors"><span className="lang-ar">تكلفة المعيشة</span><span className="lang-en">Cost of Living</span></a></li>
                     <li><a href="/qatar-salary-guide" className="hover:text-primary transition-colors"><span className="lang-ar">دليل الرواتب</span><span className="lang-en">Salary Guide</span></a></li>
                     <li><a href="/qatar-public-holidays" className="hover:text-primary transition-colors"><span className="lang-ar">الإجازات الرسمية</span><span className="lang-en">Public Holidays</span></a></li>
-                    <li><a href="/qatar-labour-law" className="hover:text-primary transition-colors"><span className="lang-ar">قانون العمل</span><span className="lang-en">Labour Law</span></a></li>
                   </ul>
                 </div>
                 <div className="hidden sm:block">
@@ -158,11 +156,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </div>
             </div>
             <div className="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-              <p>© {new Date().getFullYear()} The Digital Concierge Qatar.</p>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="lang-en">All Systems Operational</span>
-                <span className="lang-ar">جميع الأنظمة تعمل</span>
+              <p>© {new Date().getFullYear()} Arabia Khaleej — Independent Hobby Project</p>
+              <div className="flex items-center gap-6">
+                <a href="/about" className="hover:text-primary transition-colors">About</a>
+                <a href="/contact" className="hover:text-primary transition-colors">Contact</a>
+                <a href="/privacy" className="hover:text-primary transition-colors">Privacy</a>
+                <a href="/terms" className="hover:text-primary transition-colors">Terms</a>
               </div>
             </div>
           </div>

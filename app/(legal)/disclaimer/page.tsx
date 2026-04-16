@@ -2,8 +2,8 @@ import { pageMeta } from "@/lib/seo";
 import BreadcrumbNav from "@/components/BreadcrumbNav";
 
 export const metadata = pageMeta({
-  title: "Legal Disclaimer | Qatar Insider",
-  description: "Official legal and operational disclaimers for the Qatar Insider community guide.",
+  title: "Legal Disclaimer | Arabia Khaleej",
+  description: "Official legal and operational disclaimers for the Arabia Khaleej community guide.",
   path: "/disclaimer",
 });
 
@@ -23,7 +23,7 @@ export default function DisclaimerPage() {
 
       <section className="bento-tile bg-slate-900 !text-white border-none p-10 sm:p-12">
         <p className="text-sm leading-relaxed font-medium opacity-80 mb-0">
-          Qatar Insider is an independent, unofficial hobbyist project. It is not affiliated with, endorsed by, or sponsored by the State of Qatar or any of its ministries, including but not limited to the Ministry of Interior, Ministry of Culture, or the Ministry of Labour.
+          Arabia Khaleej is an independent, unofficial hobbyist project. It is not affiliated with, endorsed by, or sponsored by the State of Qatar or any of its ministries, including but not limited to the Ministry of Interior, Ministry of Culture, or the Ministry of Labour.
         </p>
       </section>
 
@@ -31,14 +31,14 @@ export default function DisclaimerPage() {
         <div className="bento-tile space-y-4">
           <h2 className="text-lg font-bold tracking-tight">General Information Only</h2>
           <p className="text-xs text-slate-500 leading-relaxed font-medium">
-            The information provided on Qatar Insider is for general informational purposes only. While we strive to maintain accurate and up-to-date data, we make no warranties of any kind regarding the completeness, accuracy, or availability of any data on this site.
+            The information provided on Arabia Khaleej is for general informational purposes only. While we strive to maintain accurate and up-to-date data, we make no warranties of any kind regarding the completeness, accuracy, or availability of any data on this site.
           </p>
         </div>
 
         <div className="bento-tile space-y-4">
           <h2 className="text-lg font-bold tracking-tight">"As-Is" Mandate</h2>
           <p className="text-xs text-slate-500 leading-relaxed font-medium">
-            Any reliance you place on such information is strictly at your own risk. We strongly recommend verifying any critical information (Visa, Labour Law, Prayer Times) directly at official government portals.
+            Any reliance you place on such information is strictly at your own risk. We strongly recommend verifying any critical information (Visa, Services, Prayer Times) directly at official government portals.
           </p>
         </div>
 
@@ -52,7 +52,7 @@ export default function DisclaimerPage() {
         <div className="bento-tile space-y-4">
           <h2 className="text-lg font-bold tracking-tight">Limitation of Liability</h2>
           <p className="text-xs text-slate-500 leading-relaxed font-medium">
-            In no event will Qatar Insider or its operator be liable for any loss or damage (including indirect or consequential loss) arising from the use of this website or reliance on its content.
+            In no event will Arabia Khaleej or its operator be liable for any loss or damage (including indirect or consequential loss) arising from the use of this website or reliance on its content.
           </p>
         </div>
       </div>

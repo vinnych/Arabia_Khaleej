@@ -2,7 +2,7 @@
 
 export interface FeeItem {
   label: string;
-  amount: number; // 0 = free
+  amount?: number; // 0 = free, undefined = official rate (verify at source)
 }
 
 export interface Step {
@@ -97,11 +97,11 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
     minDays: 14,
     maxDays: 28,
     fees: [
-      { label: "Residence Permit — 1 year", amount: 100 },
-      { label: "Residence Permit — 2 years", amount: 200 },
-      { label: "Medical fitness examination", amount: 150 },
+      { label: "Residence Permit — 1 year" },
+      { label: "Residence Permit — 2 years" },
+      { label: "Medical fitness examination" },
       { label: "QID card (included in RP fee)", amount: 0 },
-      { label: "Q-Post delivery (optional)", amount: 20 },
+      { label: "Q-Post delivery (optional)" },
     ],
     eligibility: [
       { label: "Have a Qatar employer as your sponsor", met: true },
@@ -114,7 +114,7 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
       "Passport original + copy (minimum 6 months validity)",
       "Entry visa / visa stamp in passport",
       "2 passport-size photographs (white background)",
-      "Employment contract (attested by MADLSA)",
+      "Employment contract (attested by MOL)",
       "Medical fitness certificate from an MOI-approved centre",
       "Educational/professional certificates (if required by employer)",
     ],
@@ -186,10 +186,10 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
     minDays: 14,
     maxDays: 42,
     fees: [
-      { label: "Work entry visa fee", amount: 200 },
-      { label: "Residence Permit (1 year)", amount: 100 },
-      { label: "Medical fitness examination", amount: 150 },
-      { label: "Labour contract registration (MADLSA)", amount: 0 },
+      { label: "Work entry visa fee" },
+      { label: "Residence Permit" },
+      { label: "Medical fitness examination" },
+      { label: "Labour contract registration", amount: 0 },
     ],
     eligibility: [
       { label: "Confirmed Qatar employer as sponsor", met: true },
@@ -239,20 +239,20 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
           "QID is ready for collection or Q-Post delivery once the RP is issued. The employee is now a legal Qatar resident.",
       },
       {
-        title: "Register labour contract with MADLSA",
+        title: "Register labour contract with MOL",
         detail:
-          "Within 30 days of arrival, the employer must register the employment contract with the Ministry of Labour (MADLSA) via madlsa.gov.qa. This is mandatory and free.",
+          "Within 30 days of arrival, the employer must register the employment contract with the Ministry of Labour (MOL) via mol.gov.qa. This is mandatory and free.",
       },
     ],
     tips: [
       "Attested educational certificates must be attested in the home country and then by MOFA Qatar — do this before the employee travels to save weeks.",
       "Police clearance certificates must be issued within 6 months of the visa application date; plan the timing carefully.",
       "The entry visa is usually single-entry with a 30–60 day validity. The employee must arrive before it expires.",
-      "Employers who skip the MADLSA contract registration face penalties — set a calendar reminder for this step.",
+      "Employers who skip the MOL contract registration face penalties — set a calendar reminder for this step.",
     ],
     portals: [
       { name: "MOI Portal", url: "https://portal.moi.gov.qa/" },
-      { name: "MADLSA (Ministry of Labour)", url: "https://www.madlsa.gov.qa/" },
+      { name: "MOL (Ministry of Labour)", url: "https://www.mol.gov.qa/" },
       { name: "Hukoomi", url: "https://hukoomi.gov.qa/" },
     ],
     faq: [
@@ -262,7 +262,7 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
       },
       {
         q: "Can I change jobs after getting my QID?",
-        a: "Yes. Qatar's labour law allows job changes after 1 year of service (or immediately if the employer agrees or violates the contract). You apply for a No Objection Certificate (NOC) or use the job change provisions in the Expat Labour Law amendments.",
+        a: "Job change regulations are subject to Ministry of Labour (MOL) approval. For current requirements regarding notice periods and transfer protocols, refer to the official MOL portal or the Ministry of Interior's 'Metrash2' status checker.",
       },
       {
         q: "Do all nationalities need attested educational certificates?",
@@ -281,9 +281,9 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
     minDays: 14,
     maxDays: 28,
     fees: [
-      { label: "Family entry visa (per person)", amount: 200 },
-      { label: "Residence Permit per dependant (1 year)", amount: 100 },
-      { label: "Medical fitness examination per person", amount: 150 },
+      { label: "Family entry visa (per person)" },
+      { label: "Residence Permit per dependant" },
+      { label: "Medical fitness examination per person" },
     ],
     eligibility: [
       { label: "Hold a valid Qatar QID", met: true },
@@ -366,10 +366,10 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
     maxDays: 7,
     fastTrack: true,
     fees: [
-      { label: "Commercial Registration (CR) fee", amount: 1000 },
-      { label: "Trade name reservation", amount: 100 },
-      { label: "Municipality (Baladiya) approval", amount: 200 },
-      { label: "Trade licence (varies by activity)", amount: 500 },
+      { label: "Commercial Registration (CR) fee" },
+      { label: "Trade name reservation" },
+      { label: "Municipality (Baladiya) approval" },
+      { label: "Trade licence (varies by activity)" },
     ],
     eligibility: [
       { label: "Qatari national OR GCC national (100% ownership)", met: false },
@@ -456,11 +456,11 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
     minDays: 7,
     maxDays: 90,
     fees: [
-      { label: "Eye test at approved optician", amount: 50 },
-      { label: "Theory test (if required)", amount: 30 },
-      { label: "Road test (if required)", amount: 100 },
-      { label: "Driving licence issuance", amount: 100 },
-      { label: "Driving lessons (per hour, if needed)", amount: 80 },
+      { label: "Eye test at approved optician" },
+      { label: "Theory test (if required)" },
+      { label: "Road test (if required)" },
+      { label: "Driving licence issuance" },
+      { label: "Driving lessons (if needed)" },
     ],
     eligibility: [
       { label: "Hold a valid Qatar QID", met: true },
@@ -585,12 +585,12 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
       "Check travel ban status at least 5–7 days before departure — resolving a dispute or paying a fine takes time and you do not want to miss your flight.",
       "Collect your end-of-service gratuity, final salary, and vacation pay settlement before your QID is cancelled — recovering money owed after leaving Qatar is very difficult.",
       "Return your accommodation, company assets (laptop, car), and surrender your company SIM card before the final exit to avoid disputes.",
-      "Keep a copy of your employment contract, payslips, and MADLSA labour card after departure in case of future legal claims.",
+      "Keep a copy of your employment contract, payslips, and official MOL registration after departure in case of future legal claims.",
     ],
     portals: [
       { name: "MOI Portal (Travel Ban Check)", url: "https://portal.moi.gov.qa/" },
       { name: "Metrash2 App", url: "https://portal.moi.gov.qa/wps/portal/MOIInternet/services/metrash" },
-      { name: "MADLSA (Labour disputes)", url: "https://www.madlsa.gov.qa/" },
+      { name: "MOL (Labour disputes)", url: "https://www.mol.gov.qa/" },
     ],
     faq: [
       {
@@ -619,9 +619,9 @@ export const GUIDES: Record<GuideSlug, GuideData> = {
     maxDays: 5,
     fastTrack: true,
     fees: [
-      { label: "MOFA attestation — standard (per document)", amount: 150 },
-      { label: "MOFA attestation — express 1-day (per document)", amount: 300 },
-      { label: "Certified Arabic translation (if required)", amount: 100 },
+      { label: "MOFA attestation — standard" },
+      { label: "MOFA attestation — express 1-day" },
+      { label: "Certified Arabic translation (if required)" },
     ],
     eligibility: [
       { label: "Document is original or officially certified copy", met: true },

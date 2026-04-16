@@ -3,7 +3,7 @@ import { safeJsonLd } from "@/lib/utils";
 
 export const metadata = pageMeta({
   title: "Terms of Protocol | Independent User Agreement",
-  description: "The legal and operational agreement governing the use of the Qatar Insider hobby project. Unofficial, independent, and provided as-is.",
+  description: "The legal and operational agreement governing the use of the Arabia Khaleej hobby project. Unofficial, independent, and provided as-is.",
   path: "/terms",
 });
 
@@ -29,7 +29,7 @@ export default function TermsPage() {
            {
              id: "01",
              title: "Unofficial Independent Status",
-             content: "Qatar Insider is a private, independent web project. It is not affiliated, authorized, maintained, or sponsored by the State of Qatar or any of its government bodies including Hukoomi, the Ministry of Interior, or the Ministry of Labour."
+             content: "Arabia Khaleej is a private, independent web project. It is not affiliated, authorized, maintained, or sponsored by the State of Qatar or any of its government bodies including Hukoomi, the Ministry of Interior, or the Ministry of Labour."
            },
            {
              id: "02",

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Page Not Found | Qatar Insider — Jobs & Utilities",
+  title: "Page Not Found | Arabia Khaleej — Jobs & Utilities",
   description: "The page you are looking for could not be found.",
 };
 

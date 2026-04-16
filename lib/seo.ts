@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-export const SITE_URL = "https://qatar-portal.vercel.app";
+export const SITE_URL = "https://arabiakhaleej.com";
 
 interface PageMetaOptions {
-  /** Full page title (e.g. "Qatar Metro Guide — Lines & Fares | Qatar Insider") */
+  /** Full page title (e.g. "Qatar Metro Guide — Lines & Fares | Arabia Khaleej") */
   title: string;
   /** Meta description, max ~160 chars */
   description: string;
@@ -29,7 +29,7 @@ interface PageMetaOptions {
  *
  * Usage:
  *   export const metadata = pageMeta({
- *     title: "My Page | Qatar Insider",
+ *     title: "My Page | Arabia Khaleej",
  *     description: "...",
  *     path: "/my-page",
  *     keywords: ["keyword1", "keyword2"],
@@ -72,7 +72,7 @@ export function pageMeta({
       title: og,
       description: ogDesc,
       url: canonical,
-      siteName: "Qatar Insider",
+      siteName: "Arabia Khaleej",
       locale: "en_US",
       type,
       images: [{ url: img, width: 1200, height: 630 }],

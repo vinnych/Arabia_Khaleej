@@ -3,12 +3,10 @@ import { safeJsonLd } from "@/lib/utils";
 import { pageMeta, SITE_URL } from "@/lib/seo";
 
 export const metadata = pageMeta({
-  title: "Doha Weather Today — 7-Day Forecast | Qatar Insider",
-  description: "Live Doha weather today: current temperature, humidity, wind speed and 7-day forecast for Qatar. Updated every 30 minutes from Open-Meteo.",
+  title: "GCC Weather Registry | Live Observations & 7-Day Protocol | Arabia Khaleej",
+  description: "Live GCC weather observations: current temperature, humidity, and 7-day atmospheric forecast for Riyadh, Dubai, Doha, and the region. Elite digital concierge weather protocol.",
   path: "/weather",
-  keywords: ["Doha weather today", "Qatar weather", "weather in Doha", "Doha temperature today", "Qatar weather forecast", "Doha 7 day forecast", "weather Qatar"],
-  ogTitle: "Doha Weather Today — Qatar Temperature & 7-Day Forecast",
-  ogDescription: "Live current weather and 7-day forecast for Doha, Qatar. Temperature, humidity, wind speed updated every 30 minutes.",
+  keywords: ["GCC weather registry", "Arabia climate protocol", "Riyadh temperature today", "Dubai 7-day forecast", "Arabia Khaleej weather"],
 });
 
 export default async function WeatherPage() {
@@ -23,28 +21,28 @@ export default async function WeatherPage() {
     mainEntity: [
       {
         "@type": "Question",
-        name: "What is the weather in Doha today?",
+        name: "What is the weather in the GCC today?",
         acceptedAnswer: {
           "@type": "Answer",
           text: weather
-            ? `Currently ${weather.current.temperature}°C in Doha, Qatar. Condition: ${weather.current.condition}. Feels like ${weather.current.feelsLike}°C. Humidity: ${weather.current.humidity}%. Wind: ${weather.current.windSpeed} km/h.`
-            : "Live weather data is currently unavailable. Please try again shortly.",
+            ? `Currently ${weather.current.temperature}°C across the central Gulf. Condition: ${weather.current.condition}. Humidity: ${weather.current.humidity}%.`
+            : "Live weather data for the region is currently unavailable. Please try again shortly.",
         },
       },
       {
         "@type": "Question",
-        name: "What is Qatar's climate like?",
+        name: "What is the climate of the Arabian Peninsula?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "Qatar has a hot desert climate. Summers (May–September) are extremely hot and humid with temperatures regularly exceeding 40°C. Winters (November–February) are mild and pleasant, averaging 15–25°C. Rainfall is scarce, averaging less than 80mm annually.",
+          text: "The GCC region features a hot desert climate. Summers are extremely hot and humid (40°C+), while winters are mild and pleasant average between 15–25°C. Coastal cities like Dubai, Doha, and Abu Dhabi experience higher humidity than inland cities like Riyadh.",
         },
       },
       {
         "@type": "Question",
-        name: "What is the best time to visit Qatar?",
+        name: "What is the best time to visit the Gulf?",
         acceptedAnswer: {
           "@type": "Answer",
-          text: "The best time to visit Qatar is between October and April, when temperatures are mild (15–30°C) and humidity is low. December to February is the coolest and most comfortable period for outdoor activities.",
+          text: "The peak season is between November and March. During these months, the weather is perfect for outdoor activities, events like the Dubai Shopping Festival, and desert exploration.",
         },
       },
     ],
@@ -53,14 +51,14 @@ export default async function WeatherPage() {
   return (
     <div className="page-sections pt-2 sm:pt-10">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: "https://qatar-portal.vercel.app" }, { "@type": "ListItem", position: 2, name: "Doha Weather", item: "https://qatar-portal.vercel.app/weather" }] }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Doha Weather", item: `${SITE_URL}/weather` }] }) }} />
 
       {/* Header */}
       <div>
         <h1 className="font-serif text-xl font-bold text-on-surface mb-1">
-          Doha Weather Today
+          Arabia Weather Registry
         </h1>
-        <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">{today} · Doha, Qatar · Updates every 30 min</p>
+        <p className="text-xs text-gray-400 dark:text-slate-500 mb-3">{today} · Gulf Region · Updates every 30 min</p>
       </div>
 
       {!weather ? (
@@ -97,7 +95,7 @@ export default async function WeatherPage() {
 
           {/* 7-day forecast — calendar cards */}
           <section>
-            <h2 className="label-mobile text-gray-500 dark:text-slate-400 mb-4 lowercase first-letter:uppercase">7-Day Forecast — Doha, Qatar</h2>
+            <h2 className="label-mobile text-gray-500 dark:text-slate-400 mb-4 lowercase first-letter:uppercase">7-Day Regional Forecast</h2>
             <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
               {weather.forecast.map((day, i) => {
                 const isToday = i === 0;
@@ -139,23 +137,23 @@ export default async function WeatherPage() {
 
           {/* Qatar climate info */}
           <section>
-            <h2 className="label-mobile text-gray-500 dark:text-slate-400 mb-4 lowercase first-letter:uppercase">Qatar Weather Guide</h2>
+            <h2 className="label-mobile text-gray-500 dark:text-slate-400 mb-4 lowercase first-letter:uppercase">GCC Regional Climate Guide</h2>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="bg-stone-50 dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Summer (May – Sep)</h3>
-                <p className="text-sm text-gray-600 dark:text-slate-400">Extremely hot and humid. Temperatures regularly exceed 40°C. High UV index. Stay hydrated and limit outdoor activity midday.</p>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Extreme heat across the region. Coastal cities (Dubai, Doha, Manama) experience intense humidity, while inland (Riyadh) is dry heat. 40°C–50°C is common.</p>
               </div>
               <div className="bg-stone-50 dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 p-3">
                 <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Winter (Nov – Feb)</h3>
-                <p className="text-sm text-gray-600 dark:text-slate-400">Mild and pleasant, 15–25°C. Occasional rain. The best season for outdoor activities, desert camping, and sightseeing.</p>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Peak season for the GCC. Mild and pleasant, 15–25°C. Northern regions (KSA, Kuwait) can see cold nights below 10°C.</p>
               </div>
               <div className="bg-stone-50 dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 p-3">
-                <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Spring (Mar – Apr)</h3>
-                <p className="text-sm text-gray-600 dark:text-slate-400">Warm with rising humidity, 20–35°C. Occasional dust storms (haboob) possible. Brief but lively wildflower season in northern Qatar.</p>
+                <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Spring/Autumn</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Transitional periods with warm temperatures (25–35°C). Ideal for outdoor sports and beach activities before the summer peak.</p>
               </div>
               <div className="bg-stone-50 dark:bg-slate-800 rounded-lg border border-stone-200 dark:border-slate-700 p-3">
-                <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Autumn (Oct)</h3>
-                <p className="text-sm text-gray-600 dark:text-slate-400">Transitional month. Temperatures drop from 40°C+ to a comfortable 25–30°C. Sea temperatures still warm — ideal for water sports.</p>
+                <h3 className="font-semibold text-gray-800 dark:text-slate-200 mb-2">Regional Variations</h3>
+                <p className="text-sm text-gray-600 dark:text-slate-400">Oman (Salalah) experiences the Khareef (monsoon) from June to Sept, offering a rare green escape while the rest of the GCC is in peak summer.</p>
               </div>
             </div>
           </section>
@@ -166,12 +164,9 @@ export default async function WeatherPage() {
         <div className="flex-1">
           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-3">Protocol: Official Verification</h3>
           <p className="text-sm font-medium text-stone-300 leading-relaxed">
-            This dashboard uses aggregated Open-Meteo data for guidance. For safety-critical decisions or official state weather warnings, always cross-verify at the <span className="text-accent font-bold">Qatar Meteorology Department (QMD)</span>.
+            This dashboard uses aggregated Open-Meteo data for guidance. For safety-critical decisions, always cross-verify at the respective national meteorology departments (QMD, NCM, etc.).
           </p>
         </div>
-        <a href="https://www.qweather.gov.qa" target="_blank" rel="noopener noreferrer" className="shrink-0 px-6 py-4 bg-white/5 hover:bg-accent hover:text-primary border border-white/10 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all whitespace-nowrap">
-          Verify At QMD Official <span className="material-symbols-outlined align-middle" style={{ fontSize: "14px" }}>open_in_new</span>
-        </a>
       </div>
 
       <p className="text-[10px] text-gray-400 dark:text-slate-500 font-bold uppercase tracking-widest text-center mt-6">

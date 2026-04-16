@@ -55,7 +55,6 @@ export default function MobileDashboardClient() {
               { i: "payments", l: "Rates", h: "/currency" },
               { i: "emergency", l: "Help", h: "/emergency-numbers-qatar" },
               { i: "account_balance", l: "Salary", h: "/qatar-salary-guide" },
-              { i: "gavel", l: "Legal", h: "/qatar-labour-law" },
               { i: "receipt_long", l: "Costs", h: "/cost-of-living-doha" },
               { i: "apps", l: "All", h: "/qatar-services" },
             ].map((tool) => (
@@ -91,7 +90,6 @@ export default function MobileDashboardClient() {
             {[
               { href: "/qatar-services/qid",       icon: "badge",          en: "QID Application",  sub: "7–30 days · QAR 100" },
               { href: "/qatar-services/work-visa",  icon: "work_history",   en: "Work Visa",        sub: "14–30 days · Varies" },
-              { href: "/qatar-labour-law",           icon: "gavel",          en: "Labour Law",       sub: "Rights & protections" },
             ].map((item) => (
               <a key={item.href} href={item.href} className="bento-tile !p-5 !rounded-2xl flex items-center gap-4 active:scale-[0.98] border-none shadow-md">
                 <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center border border-primary/10 shrink-0">

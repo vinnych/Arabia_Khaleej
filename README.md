@@ -1,8 +1,8 @@
-# Qatar Insider — Independent Digital Concierge
+# Arabia Khaleej — Elite GCC Digital Concierge
 
 A high-performance, static-first utility hub for the State of Qatar. Focused on speed, privacy, and curated public data for residents and visitors.
 
-**Live:** https://qatar-portal.vercel.app
+**Live:** https://arabiakhaleej.com
 
 ---
 
@@ -16,7 +16,7 @@ This is an **unofficial hobby project**. All operators and contributors must adh
 ## Features
 
 - **Prayer Times** — Real-time Doha timings + monthly utility calendar via Aladhan API.
-- **Utility Guides** — Step-by-step roadmaps for QID, Visas, Driving Licences, and Labour Law.
+- **Utility Guides** — Step-by-step roadmaps for QID, Visas, Driving Licences, and Public Services.
 - **Market Insights** — Benchmarking data on salaries, cost of living, and public holidays.
 - **Real-Time Data** — Live QAR exchange rates and Doha weather conditions (Open-Meteo).
 - **Metro Nav** — Static guide to the Doha Metro network and operation.
@@ -43,7 +43,7 @@ app/
 ├── layout.tsx                  # Root layout — nav, footer, skip link
 ├── sitemap.ts                  # Dynamic sitemap (Guides & Tools)
 ├── not-found.tsx               # Custom 404 page
-├── (guides)/                   # QID, Visa, and Law guides
+├── (guides)/                   # QID, Visa, and Service guides
 ├── (legal)/                    # Privacy & Terms
 └── (tools)/                    # Weather, Prayer, Currency tools
 

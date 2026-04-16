@@ -14,7 +14,6 @@ const GUIDES = [
   { href: "/qatar-metro",             icon: "subway",        en: "Metro",              ar: "المترو" },
   { href: "/qatar-salary-guide",      icon: "bar_chart",     en: "Salary Guide",       ar: "دليل الرواتب" },
   { href: "/qatar-public-holidays",   icon: "calendar_month",en: "Public Holidays",    ar: "الإجازات الرسمية" },
-  { href: "/qatar-labour-law",        icon: "gavel",         en: "Labour Law",         ar: "قانون العمل" },
   { href: "/cost-of-living-doha",     icon: "home_work",     en: "Cost of Living",     ar: "تكلفة المعيشة" },
   { href: "/work-in-qatar",           icon: "work",            en: "Work in Qatar",      ar: "العمل في قطر" },
   { href: "/emergency-numbers-qatar", icon: "emergency",     en: "Emergency Numbers",  ar: "أرقام الطوارئ" },
@@ -59,8 +58,8 @@ export default function HomeNav() {
         {/* Logo + desktop nav */}
         <div className="flex items-center gap-6 md:gap-10">
           <a href="/" className="text-lg md:text-xl font-extrabold tracking-tight text-primary shrink-0 transition-transform active:scale-95 touch-manipulation">
-            <span className="lang-ar">مرشد قطر</span>
-            <span className="lang-en font-serif italic text-xl">Qatar Insider</span>
+            <span className="lang-ar">عربية الخليج</span>
+            <span className="lang-en font-serif italic text-xl">Arabia Khaleej</span>
           </a>
 
           {/* Desktop grouped nav */}
@@ -111,8 +110,8 @@ export default function HomeNav() {
             href="/work-in-qatar"
             className="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-wide hover:bg-primary-dark transition-all shadow-sm hover:shadow-md active:scale-95"
           >
-            <span className="lang-ar">جديد؟</span>
-            <span className="lang-en">New?</span>
+            <span className="lang-ar">ابدأ هنا</span>
+            <span className="lang-en">Explore the Region</span>
             <span className="material-symbols-outlined" style={{ fontSize: "14px" }}>arrow_forward</span>
           </a>
 

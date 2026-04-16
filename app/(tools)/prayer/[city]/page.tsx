@@ -4,7 +4,7 @@ import { safeJsonLd } from "@/lib/utils";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-const SITE_URL = "https://qatar-portal.vercel.app";
+import { pageMeta, SITE_URL } from "@/lib/seo";
 
 const CITIES: Record<string, { city: string; country: string; label: string; countryCode: string; geoRegion: string; lat: number; lng: number }> = {
   dubai: { city: "Dubai", country: "UAE", label: "Dubai, UAE", countryCode: "AE", geoRegion: "AE-DU", lat: 25.2048, lng: 55.2708 },
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const entry = CITIES[slug];
   if (!entry) return {};
   return {
-    title: `Prayer Times in ${entry.city} Today — ${entry.label} | Qatar Insider`,
+    title: `Prayer Times in ${entry.city} Today — ${entry.label} | Arabia Khaleej`,
     description: `Accurate Fajr, Dhuhr, Asr, Maghrib and Isha prayer times for ${entry.city}, ${entry.country} — today and monthly calendar.`,
     keywords: [`${entry.city} prayer times`, `prayer times ${entry.city} today`, `Fajr time ${entry.city}`, `salah times ${entry.city}`],
     alternates: { canonical: `${SITE_URL}/prayer/${slug}` },
@@ -40,14 +40,14 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
       "ICBM": `${entry.lat}, ${entry.lng}`,
     },
     openGraph: {
-      title: `Prayer Times in ${entry.city} Today | Qatar Insider`,
+      title: `Prayer Times in ${entry.city} Today | Arabia Khaleej`,
       description: `Accurate prayer times for ${entry.city}, ${entry.country}.`,
       url: `${SITE_URL}/prayer/${slug}`,
-      siteName: "Qatar Insider",
+      siteName: "Arabia Khaleej",
       type: "website",
       images: [{ url: `${SITE_URL}/opengraph-image`, width: 1200, height: 630 }],
     },
-    twitter: { card: "summary_large_image" as const, title: `Prayer Times in ${entry.city} Today | Qatar Insider`, description: `Accurate Fajr, Dhuhr, Asr, Maghrib and Isha prayer times for ${entry.city}.` },
+    twitter: { card: "summary_large_image" as const, title: `Prayer Times in ${entry.city} Today | Arabia Khaleej`, description: `Accurate Fajr, Dhuhr, Asr, Maghrib and Isha prayer times for ${entry.city}.` },
   };
 }
 
@@ -76,11 +76,11 @@ export default async function CityPrayerPage({ params }: { params: Promise<{ cit
     ? {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        name: `${entry.city} Prayer Times — Qatar Insider`,
+        name: `${entry.city} Prayer Times — Arabia Khaleej`,
         url: `${SITE_URL}/prayer/${slug}`,
         description: `Daily prayer times for ${entry.city}. Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}.`,
         inLanguage: "en",
-        isPartOf: { "@type": "WebSite", name: "Qatar Insider", url: SITE_URL },
+        isPartOf: { "@type": "WebSite", name: "Arabia Khaleej", url: SITE_URL },
         mainEntity: {
           "@type": "ItemList",
           itemListElement: [

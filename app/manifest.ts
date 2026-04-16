@@ -2,14 +2,14 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Qatar Insider — Independent Community Guide",
-    short_name: "Qatar Insider",
+    name: "Arabia Khaleej — Elite GCC Digital Concierge",
+    short_name: "Arabia Khaleej",
     description:
-      "Your daily Qatar resource: accurate prayer times for Doha, community guides, and essential public utilities.",
+      "The definitive digital concierge for the GCC: accurate prayer times, country guides, and regional protocols.",
     start_url: "/",
     display: "standalone",
     background_color: "#faf9f6",
-    theme_color: "#8A1538",
+    theme_color: "#0f172a",
     icons: [
       { src: "/icon", sizes: "32x32", type: "image/png" },
       { src: "/apple-icon", sizes: "180x180", type: "image/png" },

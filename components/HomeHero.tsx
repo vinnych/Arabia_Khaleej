@@ -4,7 +4,7 @@ export default function HomeHero() {
   return (
     <section 
       className="relative rounded-[2.5rem] overflow-hidden min-h-[440px] sm:min-h-[520px] lg:min-h-[600px] flex items-center shadow-2xl shadow-primary/20 ambient-glow"
-      style={{ background: "linear-gradient(135deg, #1e1b4b 0%, #8A1538 100%)" }}
+      style={{ background: "linear-gradient(135deg, #020617 0%, #0f172a 100%)" }}
     >
       {/* Decorative Blur Orbs */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
@@ -25,15 +25,15 @@ export default function HomeHero() {
         {/* Title */}
         <h1 className="text-white mb-8 sm:mb-10 lg:mb-12">
           <span className="national-title block text-6xl sm:text-8xl md:text-9xl lg:text-[10rem]">
-            <span className="lang-en">Qatar</span>
-            <span className="lang-ar">قطر</span>
+            <span className="lang-en">The GCC</span>
+            <span className="lang-ar">الخليج</span>
           </span>
           <span className="block mt-4 text-sm sm:text-lg md:text-xl font-medium tracking-wide text-white/70 max-w-3xl leading-relaxed">
             <span className="lang-en">
-              Your independent guide to Qatar — prayer times, visa requirements, labour law, metro, currency rates, and more. No fluff. No registration.
+              Your independent concierge for Arabia Khaleej — prayer times, visa requirements, transit protocols, and essential registries for all GCC nations.
             </span>
             <span className="lang-ar">
-              دليلك المستقل في قطر — أوقات الصلاة، متطلبات التأشيرة، قانون العمل، المترو، أسعار الصرف، والمزيد.
+              دليلك المستقل في الخليج — أوقات الصلاة، متطلبات التأشيرة، النقل، وأهم الموارد لجميع دول مجلس التعاون.
             </span>
           </span>
         </h1>
@@ -47,7 +47,7 @@ export default function HomeHero() {
           <div className="hidden sm:block h-8 w-px bg-white/10" />
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-white/40 text-lg">public</span>
-            <span className="text-white/60 text-xs font-bold uppercase tracking-widest">Doha, QA</span>
+            <span className="text-white/60 text-xs font-bold uppercase tracking-widest">Arabia Khaleej</span>
           </div>
         </div>
 
@@ -67,8 +67,8 @@ export default function HomeHero() {
               className="inline-flex items-center gap-2 bg-white text-primary px-5 py-3 rounded-xl font-black text-sm shadow-xl hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] hover:bg-slate-50 transition-all active:scale-95"
             >
               <span className="material-symbols-outlined text-lg">work</span>
-              <span className="lang-en">Moving to Qatar?</span>
-              <span className="lang-ar">الانتقال إلى قطر؟</span>
+              <span className="lang-en">Moving to the GCC?</span>
+              <span className="lang-ar">الانتقال إلى الخليج؟</span>
             </a>
             <a
               href="/currency"

@@ -4,12 +4,10 @@ import { safeJsonLd } from "@/lib/utils";
 import { pageMeta, SITE_URL } from "@/lib/seo";
 
 export const metadata = pageMeta({
-  title: "Prayer Times & Hijri Calendar — Doha, Qatar | Qatar Insider",
-  description: "Accurate Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha prayer times for Doha and 35+ Muslim cities. Full monthly prayer calendar with Hijri dates.",
+  title: "Prayer Times & Hijri Calendar Registry | Arabia Khaleej",
+  description: "Accurate Fajr, Dhuhr, Asr, Maghrib and Isha prayer times for Doha, Riyadh, Dubai and the GCC region. Full monthly Hijri calendar and Islamic date registry.",
   path: "/prayer",
-  keywords: ["Doha prayer times", "Qatar prayer times today", "Fajr time Doha", "Isha time Qatar", `prayer times ${new Date().getFullYear()} Qatar`, "Hijri calendar", "Islamic date today", "salah times Doha"],
-  ogTitle: "Prayer Times & Hijri Calendar — Doha, Qatar | Qatar Insider",
-  ogDescription: "Accurate prayer times for Doha and 35+ Muslim cities. Monthly calendar with Hijri dates.",
+  keywords: ["GCC prayer times registry", "Arabia prayer times today", "Fajr time Dubai", "Islamic calendar Arabia", "Arabia Khaleej prayer"],
 });
 
 export default async function PrayerPage() {
@@ -33,14 +31,14 @@ export default async function PrayerPage() {
     ? {
         "@context": "https://schema.org",
         "@type": "WebPage",
-        name: "Prayer Times & Hijri Calendar — Qatar Insider",
+        name: "Prayer Times & Hijri Calendar — Arabia Khaleej",
         url: `${SITE_URL}/prayer`,
-        description: `Today's prayer times in Doha, Qatar. Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}. Hijri: ${today.hijriDate} ${today.hijriMonth} ${today.hijriYear} AH.`,
+        description: `Today's prayer times in the GCC. Fajr: ${today.Fajr}, Dhuhr: ${today.Dhuhr}, Asr: ${today.Asr}, Maghrib: ${today.Maghrib}, Isha: ${today.Isha}. Hijri: ${today.hijriDate} ${today.hijriMonth} ${today.hijriYear} AH.`,
         inLanguage: "en",
-        isPartOf: { "@type": "WebSite", name: "Qatar Insider", url: SITE_URL },
+        isPartOf: { "@type": "WebSite", name: "Arabia Khaleej", url: SITE_URL },
         about: {
           "@type": "Place",
-          name: "Doha, Qatar",
+          name: "Arabia Khaleej",
           geo: { "@type": "GeoCoordinates", latitude: 25.2854, longitude: 51.5310 },
           address: { "@type": "PostalAddress", addressLocality: "Doha", addressCountry: "QA" },
         },

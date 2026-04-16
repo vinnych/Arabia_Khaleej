@@ -12,8 +12,8 @@ const config: Config = {
         "4xl": "2rem",
       },
       colors: {
-        primary: "var(--color-primary)",
-        "primary-dark": "var(--color-primary-dark)",
+        primary: "#8A1538",
+        "primary-dark": "#640023",
         "surface-low": "var(--color-surface-low)",
         "on-surface": "var(--color-on-surface)",
         accent: "var(--color-accent)",

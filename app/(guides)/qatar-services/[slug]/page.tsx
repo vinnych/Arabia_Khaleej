@@ -17,24 +17,24 @@ export async function generateMetadata({ params }: Props) {
   const guide = GUIDES[slug as GuideSlug];
   if (!guide) notFound();
  
-  const totalFees = guide.fees.reduce((s, f) => s + f.amount, 0);
+  const hasOfficialRate = guide.fees.some(f => f.amount === undefined);
+  const totalFees = guide.fees.reduce((s, f) => s + (f.amount || 0), 0);
   const timeLabel =
     guide.minDays === guide.maxDays
       ? `${guide.minDays} days`
       : `${guide.minDays}–${guide.maxDays} days`;
  
   return pageMeta({
-    title: `${guide.title} Guide 2026 — Qatar Insider`,
-    description: `Complete ${guide.title} guide for Qatar 2026. Processing time: ${timeLabel}. Estimated fees: ${totalFees === 0 ? "Free" : `~QAR ${totalFees}`}. Step-by-step with required documents and public portals.`,
+    title: `${guide.title} Protocol | Elite Service Registry | Qatar Insider`,
+    description: `Complete ${guide.title} administrative protocol for Qatar 2026. Processing cycle: ${timeLabel}. Fees: ${hasOfficialRate ? "Official Registry Rate" : (totalFees === 0 ? "Free" : `~QAR ${totalFees}`)}. Step-by-step verification registry.`,
     path: `/qatar-services/${slug}`,
     keywords: [
       guide.title,
-      `Qatar ${guide.title} 2026`,
-      "Qatar community guide",
-      "Qatar expat resource",
+      `Qatar ${guide.title} protocol`,
+      "Qatar administrative registry",
+      "Qatar Insider services",
     ],
-    ogTitle: `${guide.title} Guide 2026 — Qatar Insider`,
-    ogDescription: `Complete ${guide.title} guide for Qatar 2026. Processing time: ${timeLabel}. Fees: ${totalFees === 0 ? "Free" : `~QAR ${totalFees}`}. Step-by-step with required documents.`,
+    ogTitle: `${guide.title} | Administrative Protocol`,
   });
 }
  
@@ -43,7 +43,8 @@ export default async function GuidePage({ params }: Props) {
   const guide = GUIDES[slug as GuideSlug];
   if (!guide) notFound();
  
-  const totalFees = guide.fees.reduce((s, f) => s + f.amount, 0);
+  const hasOfficialRate = guide.fees.some(f => f.amount === undefined);
+  const totalFees = guide.fees.reduce((s, f) => s + (f.amount || 0), 0);
  
   const jsonLd = {
     "@context": "https://schema.org",
@@ -54,7 +55,7 @@ export default async function GuidePage({ params }: Props) {
     estimatedCost: {
       "@type": "MonetaryAmount",
       currency: "QAR",
-      value: totalFees.toString(),
+      value: hasOfficialRate ? "Official Registry Rate" : totalFees.toString(),
     },
     step: guide.steps.map((step, i) => ({
       "@type": "HowToStep",
@@ -77,6 +78,7 @@ export default async function GuidePage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Service Registry", item: `${SITE_URL}/qatar-services` }] }) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbLd) }} />
       <GuidePageLayout guide={guide} />
     </>

@@ -1,21 +1,23 @@
+import ProtocolHero from "@/components/protocols/ProtocolHero";
+import ProtocolGrid from "@/components/protocols/ProtocolGrid";
+import ProtocolVerification from "@/components/protocols/ProtocolVerification";
+import RelatedGuides from "@/components/RelatedGuides";
 import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
-import BreadcrumbNav from "@/components/BreadcrumbNav";
-import RelatedGuides from "@/components/RelatedGuides";
 
 export const metadata = pageMeta({
-  title: "Qatar Public Holidays 2026 | Community Calendar",
-  description: "Independent schedule of public holidays in the State of Qatar for 2026. Explore dates for National Day, Eid Al-Fitr, and Qatar Sports Day.",
+  title: "Qatar State Calendar 2026 | Elite Public Holiday Registry | Arabia Khaleej",
+  description: "The definitive curator registry of public holidays and national observances in the State of Qatar. Elite verification protocols for state and religious calendars.",
   path: "/qatar-public-holidays",
-  keywords: ["Qatar holidays 2026", "National Day Qatar", "Eid holidays 2026", "Qatar Sports Day"],
+  keywords: ["Qatar public holiday registry", "Qatar National Day 2026", "Eid Al-Fitr 2026 Qatar", "Doha state calendar", "Arabia Khaleej holidays"],
 });
 
 const HOLIDAYS = [
-  { date: "10 Feb", isoDate: "2026-02-10", name: "National Sports Day",  type: "State",    color: "text-amber-500",   description: "Qatar's annual National Sports Day promoting health and physical activity across the state." },
-  { date: "20 Mar*", isoDate: "2026-03-20", name: "Eid Al-Fitr",         type: "Islamic",  color: "text-emerald-500", description: "The festival marking the end of Ramadan. Exact date subject to moon sighting confirmation." },
-  { date: "27 May*", isoDate: "2026-05-27", name: "Eid Al-Adha",         type: "Islamic",  color: "text-emerald-500", description: "The feast of sacrifice, one of the two major Islamic festivals. Exact date subject to moon sighting." },
-  { date: "16 Jun*", isoDate: "2026-06-16", name: "Islamic New Year",    type: "Islamic",  color: "text-emerald-500", description: "The Islamic Hijri New Year marking the start of Muharram." },
-  { date: "18 Dec", isoDate: "2026-12-18",  name: "National Day",        type: "National", color: "text-primary",     description: "Qatar National Day commemorates the unification of Qatar in 1878. Celebrated with state events across Doha." },
+  { date: "10 Feb", name: "National Sports Day",  type: "State",    description: "National health and physical activity directive." },
+  { date: "20 Mar*", name: "Eid Al-Fitr",         type: "Islamic",  description: "Festival marking the conclusion of the holy month." },
+  { date: "27 May*", name: "Eid Al-Adha",         type: "Islamic",  description: "The feast of sacrifice, a major Islamic observance." },
+  { date: "16 Jun*", name: "Islamic New Year",    type: "Islamic",  description: "Marking the commencement of the Hijri calendar." },
+  { date: "18 Dec",  name: "National Day",        type: "National", description: "Commemorating the unification of the State in 1878." },
 ];
 
 export default function QatarPublicHolidaysPage() {
@@ -28,159 +30,91 @@ export default function QatarPublicHolidaysPage() {
         name: "When is Qatar National Day 2026?",
         acceptedAnswer: { "@type": "Answer", text: "Qatar National Day is celebrated on December 18, 2026." },
       },
-      {
-        "@type": "Question",
-        name: "How many public holidays are there in Qatar in 2026?",
-        acceptedAnswer: { "@type": "Answer", text: "Qatar has 5 official public holidays in 2026: National Sports Day (Feb 10), Eid Al-Fitr (approx. Mar 20), Eid Al-Adha (approx. May 27), Islamic New Year (approx. Jun 16), and National Day (Dec 18). Islamic dates are subject to moon sighting." },
-      },
     ],
-  };
-
-  const eventsJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: "Qatar Public Holidays 2026",
-    url: `${SITE_URL}/qatar-public-holidays`,
-    itemListElement: HOLIDAYS.map((h, i) => ({
-      "@type": "ListItem",
-      position: i + 1,
-      item: {
-        "@type": "Event",
-        name: h.name,
-        startDate: h.isoDate,
-        endDate: h.isoDate,
-        eventStatus: "https://schema.org/EventScheduled",
-        eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
-        description: h.description,
-        image: `${SITE_URL}/opengraph-image`,
-        location: {
-          "@type": "Country",
-          name: "Qatar",
-          address: {
-            "@type": "PostalAddress",
-            addressCountry: "QA",
-            addressLocality: "Doha",
-          },
-        },
-        organizer: {
-          "@type": "GovernmentOrganization",
-          name: "State of Qatar",
-          url: "https://hukoomi.gov.qa",
-        },
-        offers: {
-          "@type": "Offer",
-          price: "0",
-          priceCurrency: "QAR",
-          availability: "https://schema.org/InStock",
-        },
-      },
-    })),
   };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(faqJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(eventsJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Public Holidays", item: `${SITE_URL}/qatar-public-holidays` }] }) }} />
 
-      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-12 sm:gap-20">
-        <BreadcrumbNav crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Public Holidays" }]} />
+      <div className="max-w-7xl mx-auto px-6 py-2 sm:py-12 flex flex-col gap-24">
+        <ProtocolHero 
+          category="State Protocols & Calendar"
+          titleEn="Public Holidays"
+          titleAr="العطل الرسمية"
+          description="The public schedule of commemorative, religious, and civic observances in the State of Qatar. A definitive registry for personal and professional planning."
+          crumbs={[{ label: "Home", href: "/" }, { label: "Guides" }, { label: "Public Holidays" }]}
+        />
 
-      {/* ── National Calendar Hero ─────────────────────────── */}
-      <section className="bento-tile bg-gradient-to-br from-primary to-primary-dark !text-white border-none min-h-[400px] flex items-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
-        <div className="relative z-10 w-full max-w-4xl">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-6">State Protocols · 2026</p>
-          <h1 className="national-title text-6xl sm:text-9xl mb-8 italic leading-[0.8]">
-             <span className="lang-en">Public Holidays</span>
-             <span className="lang-ar">العطل الرسمية</span>
-          </h1>
-          <p className="text-sm font-medium text-white/70 leading-relaxed max-w-md">
-            The public schedule of commemorative, religious, and civic observances in the State of Qatar.
-          </p>
-        </div>
-      </section>
+        <ProtocolGrid 
+          points={[
+            { label: "Cycle Status", value: "Gregorian/Hijri", icon: "calendar_month" },
+            { label: "Islamic Dates", value: "Moon Sighting", icon: "dark_mode" },
+            { label: "State Alignment", value: "Verified", icon: "verified" },
+            { label: "Next Major", value: "National Day", icon: "event_note" },
+          ]}
+        />
 
-      {/* ── Holiday Feed ────────────────────────────────────── */}
-      <section className="space-y-12">
-        <div className="flex justify-between items-end">
+        <section className="space-y-12">
           <div>
-            <h2 className="national-title text-4xl">The Schedule</h2>
-            <p className="text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Gregorian · Hijri Alignment</p>
+            <h2 className="luxury-text text-5xl">The Registry</h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mt-4">Commemorative & Islamic Observances</p>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {HOLIDAYS.map(h => (
-            <div key={h.name} className="bento-tile flex items-center justify-between p-8 group hover:border-primary/20 transition-all">
-              <div className="flex flex-col gap-1">
-                <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${h.color}`}>{h.type}</span>
-                <h3 className="text-xl font-bold tracking-tight">{h.name}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+            {HOLIDAYS.map(h => (
+              <div key={h.name} className="insider-card flex justify-between items-center group">
+                <div className="space-y-1">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-primary/40">{h.type}</span>
+                  <h3 className="text-xl font-bold tracking-tight">{h.name}</h3>
+                  <p className="text-[10px] font-medium text-slate-500 max-w-[180px]">{h.description}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-black font-serif italic text-primary">{h.date}</p>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-black text-slate-900 dark:text-slate-100 italic">{h.date}</span>
-              </div>
+            ))}
+            <div className="insider-card bg-slate-50 dark:bg-slate-900 border-none flex flex-col justify-center items-center text-center">
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                 * Islamic dates are subject to moon sighting confirmation by the Ministry of Awqaf.
+               </p>
             </div>
-          ))}
-          <div className="bento-tile bg-slate-50 dark:bg-slate-900 border-none flex flex-col justify-center items-center text-center p-8 opacity-60">
-             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
-               * Islamic dates are subject to moon sighting confirmation by the Ministry of Awqaf.
-             </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── Significant Observances ─────────────────────────── */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-12 bento-tile !p-0 overflow-hidden shadow-2xl">
-           <div className="grid grid-cols-1 md:grid-cols-2">
-              <div className="p-12 sm:p-20 bg-primary !text-white border-none flex flex-col justify-center">
-                 <h3 className="national-title text-6xl italic mb-6">National Day</h3>
-                 <p className="text-sm font-medium text-white/70 leading-relaxed mb-10">
-                   Commemorating the unification of Qatar in 1878. A day of national pride, heritage, and state-wide celebration across the Doha Corniche.
-                 </p>
-                 <div className="px-6 py-4 bg-white/10 rounded-2xl border border-white/10 w-fit font-black text-xs uppercase tracking-[0.2em]">
-                   18 December · 2026
-                 </div>
-              </div>
-              <div className="p-12 sm:p-20 bg-slate-900 !text-white border-none flex flex-col justify-center">
-                 <h3 className="national-title text-6xl italic mb-6">Ramadan</h3>
-                 <p className="text-sm font-medium text-white/70 leading-relaxed mb-10">
-                   The holy month of fasting. Working hours are reduced across state and private sectors to accommodate spiritual obligations.
-                 </p>
-                 <a href="/prayer" className="px-6 py-4 bg-accent text-primary rounded-2xl w-fit font-black text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all">
-                   Prayer Timings
-                 </a>
-              </div>
-           </div>
-        </div>
-      </section>
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-1">
+          <div className="insider-card bg-primary !text-white border-none space-y-8 flex flex-col justify-center p-12 lg:p-20">
+             <h3 className="luxury-text text-6xl italic">National Day</h3>
+             <p className="text-sm font-medium text-white/70 leading-relaxed max-w-sm">
+                Commemorating the unification of Qatar in 1878. A day of national pride, heritage, and state-wide celebration across the Doha Corniche.
+             </p>
+             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-accent">
+                Protocol: 18 December
+             </div>
+          </div>
+          <div className="insider-card bg-slate-900 !text-white border-none space-y-8 flex flex-col justify-center p-12 lg:p-20">
+             <h3 className="luxury-text text-6xl italic">Ramadan</h3>
+             <p className="text-sm font-medium text-white/70 leading-relaxed max-w-sm">
+                The holy month of fasting. Working hours are typically adjusted across state and private sectors to accommodate spiritual obligations.
+             </p>
+             <div className="flex gap-4 pt-4">
+                <a href="/" className="text-[10px] font-black uppercase tracking-[0.3em] text-accent hover:underline transition-all">Protocol Guide</a>
+             </div>
+          </div>
+        </section>
 
-      {/* ── Concierge Support ────────────────────────────────── */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bento-tile">
-           <h4 className="text-sm font-black uppercase tracking-widest mb-4">Labour Rights</h4>
-           <p className="text-sm text-slate-500 leading-relaxed">
-             Under Qatar Labour Law, all employees are entitled to fully paid leave during public holidays. Companies operating during these days must provide alternative rest days or overtime compensation.
-           </p>
-        </div>
-        <div className="bento-tile bg-slate-50 dark:bg-slate-950 border-none flex items-center justify-between group">
-           <div>
-             <h4 className="font-bold mb-1">Planning a visit?</h4>
-             <p className="text-xs text-slate-400">Review your residency requirements.</p>
-           </div>
-           <a href="/qatar-visa-requirements" className="w-12 h-12 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-300 group-hover:text-primary group-hover:border-primary transition-all">
-              <span className="material-symbols-outlined">east</span>
-           </a>
-        </div>
-      </section>
+        <ProtocolVerification 
+          sourceName="Qatar Ministry of Interior (MOI)" 
+          sourceUrl="https://portal.moi.gov.qa" 
+        />
 
-      <RelatedGuides guides={[
-        { href: "/prayer",                  icon: "mosque",   title: "Prayer Times",      description: "Live Doha prayer times and full monthly calendar." },
-        { href: "/qatar-labour-law",        icon: "gavel",    title: "Labour Law",         description: "Your rights during public holidays — paid leave and overtime rules." },
-        { href: "/qatar-visa-requirements", icon: "id_card",  title: "Visa Requirements",  description: "Entry rules for visitors planning around Qatar public holidays." },
-      ]} />
+        <RelatedGuides guides={[
+          { href: "/work-in-qatar",         icon: "work",        title: "Work in Qatar",    description: "Everything you need to prepare before and after arriving in Qatar." },
+          { href: "/qatar-visa-requirements", icon: "id_card",   title: "Visa Requirements",   description: "Entry and residency rules for visitors and workers." },
+        ]} />
       </div>
     </>
   );
 }
+

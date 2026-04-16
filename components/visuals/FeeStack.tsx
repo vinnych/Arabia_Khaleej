@@ -9,7 +9,8 @@ interface Props {
   fees: FeeItem[];
 }
  
-function coinColor(amount: number) {
+function coinColor(amount?: number) {
+  if (amount === undefined) return "#7c2d12"; // dark brown — official rate
   if (amount === 0) return "#9ca3af"; // gray — free
   if (amount < 200) return "#16a34a"; // green
   if (amount <= 500) return "#d97706"; // amber
@@ -19,7 +20,7 @@ function coinColor(amount: number) {
 export default function FeeStack({ fees }: Props) {
   const shouldReduce = useReducedMotion();
   const [hovered, setHovered] = useState<number | null>(null);
-  const total = fees.reduce((s, f) => s + f.amount, 0);
+  const total = fees.reduce((s, f) => s + (f.amount || 0), 0);
  
   return (
     <div className="flex flex-col items-center gap-2 p-4 bg-surface-low rounded-xl border border-stone-200 min-w-[140px]">
@@ -45,7 +46,7 @@ export default function FeeStack({ fees }: Props) {
             {/* Tooltip */}
             {hovered === i && (
               <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 z-10 bg-gray-900 text-white text-[10px] rounded px-2 py-1 whitespace-nowrap pointer-events-none">
-                {fee.label}: {fee.amount === 0 ? "Free" : `QAR ${fee.amount}`}
+                {fee.label}: {fee.amount === undefined ? "Official Rate" : (fee.amount === 0 ? "Free" : `QAR ${fee.amount}`)}
               </div>
             )}
           </motion.div>

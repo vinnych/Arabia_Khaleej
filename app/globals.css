@@ -48,80 +48,104 @@ html[lang="ar"] {
     --color-accent-light: #F4E4BC;
     --color-on-surface: #1a1c1a;
     --color-surface-low: #fdfcfa;
-    --font-heading: 'Newsreader', serif;
+    --color-luxury-beige: #faf9f6;
+    --font-serif: var(--font-serif);
     --radius-premium: 2.5rem;
   }
 }
 
-.premium-hub-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
+@layer components {
+  .luxury-text {
+    @apply font-serif italic font-black tracking-tight leading-[0.95];
+  }
 
-@media (min-width: 1024px) {
+  .protocol-glass {
+    @apply bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/20 dark:border-white/5;
+  }
+
+  .insider-card {
+    @apply bg-white dark:bg-slate-900 rounded-[3rem] p-10 
+           border border-slate-200/50 dark:border-slate-800/50 
+           shadow-[0_4px_20px_rgba(0,0,0,0.03)] 
+           hover:shadow-[0_30px_60px_rgba(138,21,56,0.05)] 
+           transition-all duration-700 ease-in-out;
+  }
+
   .premium-hub-grid {
-    grid-template-columns: repeat(12, 1fr);
-    gap: 2rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
   }
-}
 
-.premium-glass {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+  @media (min-width: 1024px) {
+    .premium-hub-grid {
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+    }
+  }
 
-.ambient-glow {
-  position: relative;
-  overflow: hidden;
-}
+  .premium-glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
-.ambient-glow::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at center, rgba(138, 21, 56, 0.05) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
-}
+  .ambient-glow {
+    position: relative;
+    overflow: hidden;
+  }
 
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 1.5rem;
-}
+  .ambient-glow::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(138, 21, 56, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
 
-@media (min-width: 1024px) {
   .bento-grid {
-    grid-template-columns: repeat(12, 1fr);
-    gap: 2rem;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
-}
+  @media (min-width: 768px) {
+    .bento-grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
 
-.bento-tile {
-  @apply bg-white dark:bg-slate-900 rounded-[2.5rem] p-8 sm:p-10 
-         border border-slate-200/50 dark:border-slate-800/50 
-         shadow-[0_8px_30px_rgb(0,0,0,0.04)] 
-         hover:shadow-[0_20px_50px_rgba(138,21,56,0.08)] 
-         hover:-translate-y-1 transition-all duration-500 ease-out;
-}
+  .bento-tile {
+    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-5 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-500 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] active:translate-y-0 overflow-hidden;
+  }
+  .bento-tile:hover {
+    border-color: rgba(138, 21, 56, 0.2);
+  }
+  html.dark .bento-tile:hover {
+    border-color: rgba(138, 21, 56, 0.4);
+  }
 
-.national-title {
-  @apply font-serif italic font-black tracking-tight leading-[0.9];
-}
+  .national-title {
+    @apply font-serif italic font-black tracking-tighter leading-[0.85];
+  }
 
-/* ── Zip design utilities (Legacy Cleanup) ───────────────── */
-.glass-panel {
-  @apply premium-glass;
-}
+  .protocol-number {
+    @apply text-4xl sm:text-6xl font-serif italic font-black text-primary/10 dark:text-primary/20;
+  }
 
-.card-base {
-  @apply bento-tile;
+  /* ── Zip design utilities (Legacy Cleanup) ───────────────── */
+  .glass-panel {
+    @apply premium-glass;
+  }
+
+  .card-base {
+    @apply bento-tile;
+  }
 }
 
 @layer base {
@@ -195,30 +219,6 @@ html[lang="ar"] {
   }
   @media (min-width: 640px) {
     .page-sections { gap: 3rem; } /* 48px sm+ */
-  }
-
-  /* ── Optimal Bento Grid System ─────────────────────────── */
-  .bento-grid {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-  @media (min-width: 768px) {
-    .bento-grid {
-      grid-template-columns: repeat(12, minmax(0, 1fr));
-      gap: 1.5rem;
-    }
-  }
-
-  /* Bento Tile Base */
-  .bento-tile {
-    @apply bg-white dark:bg-slate-900 rounded-[2rem] p-5 sm:p-8 border border-slate-200 dark:border-slate-800 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98] active:translate-y-0 overflow-hidden;
-  }
-  .bento-tile:hover {
-    border-color: rgba(138, 21, 56, 0.2);
-  }
-  html.dark .bento-tile:hover {
-    border-color: rgba(138, 21, 56, 0.4);
   }
 
   /* Premium Card Styles */

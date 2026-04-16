@@ -2,8 +2,8 @@ import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
 
 export const metadata = pageMeta({
-  title: "Contact Protocol | Reach the Qatar Insider Operator",
-  description: "Official channels to reach the Qatar Insider hobbyist operator for feedback, data corrections, or technical inquiries.",
+  title: "Contact Protocol | Reach the Arabia Khaleej Operator",
+  description: "Official channels to reach the Arabia Khaleej hobbyist operator for feedback, data corrections, or technical inquiries.",
   path: "/contact",
 });
 

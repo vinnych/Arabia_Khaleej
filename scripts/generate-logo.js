@@ -1,6 +1,6 @@
 /**
- * Generates public/logo.png — a 200×60 Qatar Insider logo banner.
- * Design: white serrated left strip (Qatar-flag-inspired) on maroon background.
+ * Generates public/logo.png — a 200×60 Arabia Khaleej logo banner.
+ * Design: Premium split - Gold left accent, Slate background.
  * Pure Node.js, no external dependencies.
  */
 const zlib = require("zlib");
@@ -9,8 +9,8 @@ const path = require("path");
 
 const W = 200;
 const H = 60;
-const MAROON = [0x7c, 0x1c, 0x2e];
-const WHITE = [0xff, 0xff, 0xff];
+const SLATE = [0x0f, 0x17, 0x2a]; // #0f172a
+const GOLD  = [0xd4, 0xaf, 0x37]; // #d4af37
 
 // ── CRC-32 ──────────────────────────────────────────────────────────────────
 const CRC_TABLE = new Uint32Array(256);
@@ -37,16 +37,11 @@ function pngChunk(type, data) {
 }
 
 // ── Pixel generator ──────────────────────────────────────────────────────────
-// Serrated edge design (matches app/icon.svg scaled to 200×60):
-//   - y period: 12px → 5 full teeth across 60px height
-//   - white base band: x = 0..29
-//   - serration peak: x = 43 (extends 14px into maroon)
-//   - triangle wave: peaks at every 6px, valleys at every 12px
 function pixelColor(x, y) {
-  const t = (y % 12) / 12; // 0→1 within each tooth
-  const wave = 1 - 2 * Math.abs(t - 0.5); // triangle: 0 at start/end, 1 at mid
-  const edgeX = Math.round(29 + 14 * wave);
-  return x <= edgeX ? WHITE : MAROON;
+  // Simple premium split: Gold accent bar on the left
+  if (x < 15) return GOLD;
+  // Subtle gradient or solid slate
+  return SLATE;
 }
 
 // ── Build raw scanlines (filter byte 0 = None per row) ──────────────────────

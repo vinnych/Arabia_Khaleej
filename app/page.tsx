@@ -7,21 +7,20 @@ import { safeJsonLd } from "@/lib/utils";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata = pageMeta({
-  title: "Qatar Insider — Essential Services & Utilities in Doha",
-  description: "An independent gateway to Qatar. Access real-time Doha prayer times, weather updates, QAR exchange rates, and essential public utilities in the State of Qatar.",
+  title: "Arabia Khaleej | Elite GCC Digital Concierge & Utility Registry",
+  description: "The definitive independent digital concierge for the GCC region. Real-time prayer times, administrative protocols, and lifestyle registries for the global professional.",
   path: "/",
-  keywords: ["Qatar Insider", "Doha prayer times", "Qatar Visa", "Metro Doha", "Currency exchange QAR", "Qatar essential services"],
-  ogTitle: "Qatar Insider — Independent Digital Concierge",
-  ogDescription: "Access live prayer times, weather, and currency rates in Qatar through our independent digital portal.",
+  keywords: ["Arabia Khaleej", "GCC digital concierge", "Gulf residency protocol", "Saudi salary guide 2026", "UAE prayer times today"],
+  ogTitle: "Arabia Khaleej — Elite GCC Digital Concierge",
 });
 
 const homeJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "name": "Qatar Insider",
-  "alternateName": "بوابة قطر",
-  "url": "https://qatar-portal.vercel.app",
-  "description": "Essential utilities and services for residents and visitors in Qatar.",
+  "name": "Arabia Khaleej",
+  "alternateName": "عربية الخليج",
+  "url": "https://arabiakhaleej.com",
+  "description": "Elite digital concierge and administrative protocol registry for the GCC region.",
 };
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -69,8 +68,8 @@ export default async function Home() {
                 <span className="absolute -right-8 -top-8 material-symbols-outlined text-[180px] text-blue-500 dark:text-blue-400 opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 transition-all duration-700 select-none">wb_sunny</span>
                 <div className="relative z-0">
                   <p className="label-mobile text-slate-400 mb-6 lowercase first-letter:uppercase">
-                    <span className="lang-ar">الطقس الحالي — الدوحة</span>
-                    <span className="lang-en">Current Climate — Doha</span>
+                    <span className="lang-ar">الطقس الحالي — الخليج</span>
+                    <span className="lang-en">Current Climate — The GCC</span>
                   </p>
                   {weatherData ? (
                     <div className="flex items-center gap-4">
@@ -141,8 +140,8 @@ export default async function Home() {
                     <span className="lang-en">Essential Guides</span>
                   </p>
                   <h2 className="national-title text-3xl sm:text-4xl text-white">
-                    <span className="lang-ar">قطر في لمحة</span>
-                    <span className="lang-en">Qatar at a Glance</span>
+                    <span className="lang-ar">الخليج في لمحة</span>
+                    <span className="lang-en">The GCC at a Glance</span>
                   </h2>
                 </div>
 
@@ -152,9 +151,8 @@ export default async function Home() {
                     { icon: "id_card",         en: "Visa",     ar: "التأشيرة",  href: "/qatar-visa-requirements" },
                     { icon: "bar_chart",       en: "Salaries", ar: "الرواتب",   href: "/qatar-salary-guide" },
                     { icon: "calendar_month",  en: "Holidays", ar: "الإجازات",  href: "/qatar-public-holidays" },
-                    { icon: "gavel",           en: "Labour",   ar: "العمل",     href: "/qatar-labour-law" },
                     { icon: "home_work",       en: "Living",   ar: "المعيشة",   href: "/cost-of-living-doha" },
-                    { icon: "work",            en: "Work in QA", ar: "العمل",   href: "/work-in-qatar" },
+                    { icon: "work",            en: "Work",     ar: "العمل",     href: "/work-in-qatar" },
                     { icon: "emergency",       en: "Emergency", ar: "الطوارئ",  href: "/emergency-numbers-qatar" },
                   ].map((item) => (
                     <a
@@ -189,33 +187,33 @@ export default async function Home() {
               {[
                 {
                   icon: "badge",
-                  en: "How do I get a Qatar ID (QID)?",
-                  ar: "كيف أحصل على بطاقة الهوية القطرية؟",
+                  en: "How do I get a residence permit in the GCC?",
+                  ar: "كيف أحصل على إقامة في دول الخليج؟",
                   a: {
-                    en: "Your employer sponsors the QID application through the MOI portal. The process takes 7–30 days and costs QAR 100. Our step-by-step guide covers documents, fees, and timelines.",
-                    ar: "يتقدم صاحب العمل بطلب البطاقة عبر بوابة وزارة الداخلية. تستغرق العملية 7-30 يومًا وتكلف 100 ريال قطري.",
+                    en: "Each GCC nation has its own sponsorship or investment visa protocol. Typically, an employer sponsors your residency. The process takes 14–30 days. Our regional guides cover documents, medical checks, and fees for each country.",
+                    ar: "لكل دولة خليجية بروتوكول تأشيرة خاص بها. عادة ما يكفل صاحب العمل إقامتك. تستغرق العملية 14-30 يومًا.",
                   },
-                  link: { href: "/qatar-services/qid", en: "View QID Guide →", ar: "دليل البطاقة →" },
+                  link: { href: "/qatar-services/qid", en: "View Residency Guides →", ar: "أدلة الإقامة →" },
                 },
                 {
                   icon: "id_card",
-                  en: "Do I need a visa to visit Qatar?",
-                  ar: "هل أحتاج تأشيرة لزيارة قطر؟",
+                  en: "Do I need a visa to visit the GCC?",
+                  ar: "هل أحتاج تأشيرة لزيارة دول الخليج؟",
                   a: {
-                    en: "Over 100 nationalities — including the US, UK, EU, and all GCC citizens — receive visa-free or free visa-on-arrival entry. Check our Visa Guide for your specific country.",
-                    ar: "أكثر من 100 جنسية، بما فيها الولايات المتحدة والمملكة المتحدة والاتحاد الأوروبي ومواطنو دول الخليج، يحصلون على دخول بدون تأشيرة.",
+                    en: "Citizens of GCC countries (Saudi Arabia, UAE, Qatar, Kuwait, Bahrain, Oman) enjoy visa-free travel between member states. Over 100 other nationalities receive visa-free entry or E-Visas depending on the destination.",
+                    ar: "يتمتع مواطنو دول الخليج بدخول بدون تأشيرة بين الدول الأعضاء. كما يحصل مواطنو أكثر من 100 دولة أخرى على دخول بدون تأشيرة.",
                   },
-                  link: { href: "/qatar-visa-requirements", en: "View Visa Requirements →", ar: "متطلبات التأشيرة →" },
+                  link: { href: "/qatar-visa-requirements", en: "View Visa Protocols →", ar: "بروتوكولات التأشيرة →" },
                 },
                 {
                   icon: "mosque",
-                  en: "When is Fajr prayer in Doha today?",
-                  ar: "ما وقت صلاة الفجر في الدوحة اليوم؟",
+                  en: "When are prayer times in the GCC today?",
+                  ar: "متى أوقات الصلاة في الخليج اليوم؟",
                   a: {
-                    en: "Prayer times in Doha are calculated daily using Muslim World League (MWL) standards for coordinates 25.28°N, 51.53°E. Check our live Prayer Times page for today's exact times.",
-                    ar: "يتم حساب أوقات الصلاة في الدوحة يوميًا وفق معايير رابطة العالم الإسلامي للإحداثيات 25.28 شمالًا، 51.53 شرقًا.",
+                    en: "Prayer times are calculated daily using regional authorities (e.g., Umm al-Qura for KSA, MWL for others). Our platform provides real-time timings for Riyadh, Dubai, Doha, Kuwait City, Manama, and Muscat.",
+                    ar: "يتم حساب أوقات الصلاة يوميًا وفق المعايير المحلية لكل دولة خليجية. توفر منصتنا أوقاتًا دقيقة للرياض ودبي والدوحة والكويت والمنامة ومسقط.",
                   },
-                  link: { href: "/prayer", en: "Today's Prayer Times →", ar: "أوقات الصلاة اليوم →" },
+                  link: { href: "/prayer", en: "Regional Prayer Times →", ar: "أوقات الصلاة في المنطقة →" },
                 },
               ].map(({ icon, en, ar, a, link }) => (
                 <details key={en} className="group bg-white dark:bg-slate-900/50 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all overflow-hidden" suppressHydrationWarning>

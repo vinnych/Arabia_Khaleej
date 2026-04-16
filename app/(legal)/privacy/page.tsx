@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Anonymity by Design</p>
         <h1 className="national-title text-6xl md:text-9xl italic leading-tight">Privacy <br/> Protocol.</h1>
         <p className="text-sm font-medium text-slate-500 leading-relaxed max-w-xl">
-          In an era of invasive data harvesting, Qatar Insider operates on a structural "Zero-PII" mandate. We do not store your identity because we do not need it.
+          In an era of invasive data harvesting, Arabia Khaleej operates on a structural "Zero-PII" mandate. We do not store your identity because we do not need it.
         </p>
       </section>
 
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
            },
            {
              title: "3. Cookie-Less Philosophy",
-             desc: "Qatar Insider does not deploy first-party tracking cookies. Your navigation patterns are not stored beyond the local browser session cached for performance.",
+             desc: "Arabia Khaleej does not deploy first-party tracking cookies. Your navigation patterns are not stored beyond the local browser session cached for performance.",
              footer: "Target: Zero First-Party Cookies"
            }
          ].map(pillar => (

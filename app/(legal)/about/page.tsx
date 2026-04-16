@@ -2,7 +2,7 @@ import { pageMeta, SITE_URL } from "@/lib/seo";
 import { safeJsonLd } from "@/lib/utils";
 
 export const metadata = pageMeta({
-  title: "About Qatar Insider | The Digital Concierge Protocol",
+  title: "About Arabia Khaleej | The Digital Concierge Protocol",
   description: "An independent hobby project dedicated to the State of Qatar. Built on the principles of speed, anonymity, and high-density information architecture.",
   path: "/about",
 });
@@ -10,7 +10,7 @@ export const metadata = pageMeta({
 export default function AboutPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-4 sm:py-20 space-y-32">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "WebPage", name: "About Qatar Insider", url: `${SITE_URL}/about` }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd({ "@context": "https://schema.org", "@type": "WebPage", name: "About Arabia Khaleej", url: `${SITE_URL}/about` }) }} />
 
       {/* ── The Visionary Hero ────────────────────────────── */}
       <section className="relative min-h-[60vh] flex flex-col justify-center">
@@ -21,7 +21,7 @@ export default function AboutPage() {
           <span className="text-primary">Intelligence.</span>
         </h1>
         <p className="text-lg font-medium text-slate-500 max-w-2xl leading-relaxed">
-          Qatar Insider is an unofficial digital experiment. We curate the pulse of the State into a singular, premium interface designed for the modern resident.
+          Arabia Khaleej is an unofficial digital experiment. We curate the pulse of the State into a singular, premium interface designed for the modern resident.
         </p>
       </section>
 

@@ -2,9 +2,9 @@ import { pageMeta } from "@/lib/seo";
 import MobileDashboardClient from "./MobileDashboardClient";
 
 export const metadata = pageMeta({
-  title: "Qatar Concierge Hub — Prayer, Rates & Services | Qatar Insider",
+  title: "Qatar Concierge Hub — Prayer, Rates & Services | Arabia Khaleej",
   description:
-    "Your mobile dashboard for Qatar essentials: next prayer time, QAR exchange rate, visa guides, labour law, and public service directories — all in one place.",
+    "Your mobile dashboard for Qatar essentials: next prayer time, QAR exchange rate, visa guides, metro schedules, and public service directories — all in one place.",
   path: "/mobile",
   keywords: ["Qatar mobile dashboard", "Doha prayer times", "QAR exchange rate", "Qatar expat hub", "Qatar services mobile"],
 });
