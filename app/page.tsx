@@ -2,13 +2,32 @@
 
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function Home() {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [inviteStatus, setInviteStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const emailRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setMounted(true), []);
+
+  async function handleInvite(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const email = emailRef.current?.value?.trim();
+    if (!email) return;
+    setInviteStatus("sending");
+    try {
+      const res = await fetch("https://arabiakhaleej.com/api/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      setInviteStatus(res.ok ? "sent" : "error");
+    } catch {
+      setInviteStatus("error");
+    }
+  }
 
   // Prevent hydration flicker
   const currentTheme = mounted ? theme : "dark";
@@ -48,25 +67,28 @@ export default function Home() {
         {/* Newsletter Section: Gilded Access */}
         <div className="mt-8 pt-8 border-t border-brand-gold/10">
           <h2 className="text-xs tracking-[0.3em] uppercase font-bold mb-6 opacity-60">Gilded Access</h2>
-          <form
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const email = (e.currentTarget.elements.namedItem("email") as HTMLInputElement)?.value;
-              window.location.href = `mailto:connect@arabiakhaleej.com?subject=Invite Request&body=Please send an invite to: ${encodeURIComponent(email)}`;
-            }}
-          >
-            <input
-              type="email"
-              name="email"
-              placeholder="Your email for exclusive access..."
-              className="flex-grow bg-brand-slate/10 dark:bg-brand-obsidian/40 border border-brand-gold/20 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-brand-gold transition-colors placeholder:opacity-50"
-              required
-            />
-            <button className="gold-gradient text-brand-obsidian font-bold text-xs uppercase tracking-widest px-8 py-3 rounded-full hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all active:scale-95">
-              Request Invite
-            </button>
-          </form>
+          {inviteStatus === "sent" ? (
+            <p className="text-sm text-brand-gold/80 tracking-widest uppercase">Request received — we'll be in touch.</p>
+          ) : (
+            <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleInvite}>
+              <input
+                ref={emailRef}
+                type="email"
+                placeholder="Your email for exclusive access..."
+                className="flex-grow bg-brand-slate/10 dark:bg-brand-obsidian/40 border border-brand-gold/20 rounded-full px-6 py-3 text-sm focus:outline-none focus:border-brand-gold transition-colors placeholder:opacity-50"
+                required
+              />
+              <button
+                disabled={inviteStatus === "sending"}
+                className="gold-gradient text-brand-obsidian font-bold text-xs uppercase tracking-widest px-8 py-3 rounded-full hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all active:scale-95 disabled:opacity-60"
+              >
+                {inviteStatus === "sending" ? "Sending..." : "Request Invite"}
+              </button>
+            </form>
+          )}
+          {inviteStatus === "error" && (
+            <p className="mt-2 text-xs text-red-400 opacity-70">Something went wrong — please try again.</p>
+          )}
           <p className="mt-4 text-[10px] opacity-40 uppercase tracking-widest">
             Premier Digital Experience Arriving Soon
           </p>
