@@ -1,11 +1,13 @@
 name            = "arabiakhaleej-contact"
 main            = "worker.js"
 compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
 
 [[routes]]
 pattern = "arabiakhaleej.com/api/invite"
 zone_name = "arabiakhaleej.com"
 
+# Email Sending Configuration
 [[send_email]]
 name                = "SEND_EMAIL"
 destination_address = "asishchilakapati@gmail.com"
