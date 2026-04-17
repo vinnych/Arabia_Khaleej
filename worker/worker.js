@@ -3,8 +3,20 @@ import { createMimeMessage } from "mimetext";
 
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get("Origin");
+    const allowedOrigins = [
+      "https://arabiakhaleej.com",
+      "https://www.arabiakhaleej.com"
+    ];
+
+    // Allow main domain, www, and Vercel preview deployments
+    const isAllowedOrigin = origin && (
+      allowedOrigins.includes(origin) || 
+      origin.endsWith(".vercel.app")
+    );
+
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://arabiakhaleej.com",
+      "Access-Control-Allow-Origin": isAllowedOrigin ? origin : "https://arabiakhaleej.com",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
