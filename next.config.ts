@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
               "img-src 'self' data:",
-              "connect-src 'self' https://va.vercel-scripts.com",
+              "connect-src 'self' https://va.vercel-scripts.com https://arabiakhaleej-contact.asishchilakapati.workers.dev",
             ].join("; "),
           },
         ],
