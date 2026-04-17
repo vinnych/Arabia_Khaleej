@@ -18,7 +18,7 @@ export default function Home() {
     if (!email) return;
     setInviteStatus("sending");
     try {
-      const res = await fetch("https://arabiakhaleej-contact.asishchilakapati.workers.dev", {
+      const res = await fetch("/api/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
