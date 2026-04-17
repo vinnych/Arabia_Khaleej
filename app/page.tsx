@@ -66,9 +66,9 @@ export default function Home() {
         
         {/* Newsletter Section: Gilded Access */}
         <div className="mt-8 pt-8 border-t border-brand-gold/10">
-          <h2 className="text-xs tracking-[0.3em] uppercase font-bold mb-6 opacity-60">Gilded Access</h2>
+          <h2 className="text-xs tracking-[0.3em] uppercase font-bold mb-6 opacity-60">Community Inquiry</h2>
           {inviteStatus === "sent" ? (
-            <p className="text-sm text-brand-gold/80 tracking-widest uppercase">Request received — we'll be in touch.</p>
+            <p className="text-sm text-brand-gold/80 tracking-widest uppercase">Inquiry received — we'll be in touch.</p>
           ) : (
             <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={handleInvite}>
               <input
@@ -82,7 +82,7 @@ export default function Home() {
                 disabled={inviteStatus === "sending"}
                 className="gold-gradient text-brand-obsidian font-bold text-xs uppercase tracking-widest px-8 py-3 rounded-full hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all active:scale-95 disabled:opacity-60"
               >
-                {inviteStatus === "sending" ? "Sending..." : "Request Invite"}
+                {inviteStatus === "sending" ? "Sending..." : "Submit Inquiry"}
               </button>
             </form>
           )}

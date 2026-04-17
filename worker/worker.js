@@ -32,14 +32,14 @@ export default {
       const msg = createMimeMessage();
       msg.setSender({ name: "Arabia Khaleej", addr: "connect@arabiakhaleej.com" });
       msg.setRecipient("asishchilakapati@gmail.com");
-      msg.setSubject("✨ New Invite Request: Arabia Khaleej");
+      msg.setSubject("✨ New Inquiry: Arabia Khaleej");
       msg.addMessage({
         contentType: 'text/html',
         data: `
           <div style="font-family: sans-serif; padding: 40px; background-color: #f9f9f9; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; border: 1px solid #D4AF37;">
-              <h2 style="color: #D4AF37; margin-bottom: 20px;">Gilded Access Requested</h2>
-              <p>A new user has requested exclusive access to the <strong>Arabia Khaleej</strong> portal.</p>
+              <h2 style="color: #D4AF37; margin-bottom: 20px;">Community Inquiry</h2>
+              <p>A new inquiry has been received for the <strong>Arabia Khaleej</strong> portal.</p>
               <div style="margin: 30px 0; padding: 20px; background: #fafafa; border-radius: 8px; border-left: 4px solid #D4AF37;">
                 <p style="margin: 0; font-size: 16px;"><strong>Email:</strong> ${email}</p>
               </div>
