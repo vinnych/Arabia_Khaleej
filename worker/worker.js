@@ -42,8 +42,8 @@ export default {
         data: `
           <div style="font-family: sans-serif; padding: 40px; background-color: #f9f9f9; color: #333;">
             <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; border: 1px solid #D4AF37;">
-              <h2 style="color: #D4AF37; margin-bottom: 20px;">Community Inquiry</h2>
-              <p>A new inquiry has been received for the <strong>Arabia Khaleej</strong> portal.</p>
+              <h2 style="color: #D4AF37; margin-bottom: 20px;">Access Request</h2>
+              <p>A new request has been received for the <strong>Arabia Khaleej</strong> reference portal.</p>
               <div style="margin: 30px 0; padding: 20px; background: #fafafa; border-radius: 8px; border-left: 4px solid #D4AF37;">
                 <p style="margin: 0 0 10px 0; font-size: 16px;"><strong>Name:</strong> ${name || 'Not provided'}</p>
                 <p style="margin: 0; font-size: 16px;"><strong>Email:</strong> ${email}</p>
@@ -102,14 +102,14 @@ export default {
                   <div style="max-width: 500px; margin: 0 auto; border: 1px solid #D4AF37; padding: 40px; border-radius: 4px;">
                     <h1 style="color: #D4AF37; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 30px;">Arabia Khaleej</h1>
                     <p style="font-size: 18px; line-height: 1.8; font-style: italic; opacity: 0.9;">
-                      "Thank you, ${name || 'valued guest'}, for your interest in our premier community guide."
+                      "Thank you, ${name || 'valued guest'}, for your interest in our premier regional reference."
                     </p>
                     <div style="margin: 40px auto; width: 40px; height: 1px; background: #D4AF37; opacity: 0.5;"></div>
                     <p style="font-size: 14px; opacity: 0.7; line-height: 1.6; letter-spacing: 1px;">
                       Our team has received your inquiry. We are currently curating our exclusive waitlist and will reach out to you personally as we expand our gilded access.
                     </p>
                     <p style="margin-top: 60px; font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: #D4AF37; opacity: 0.8;">
-                      Independent Community Guide — GCC
+                      GCC Service Portal
                     </p>
                   </div>
                 </div>
@@ -137,14 +137,14 @@ export default {
                     <div style="max-width: 500px; margin: 0 auto; border: 1px solid #D4AF37; padding: 40px; border-radius: 4px;">
                       <h1 style="color: #D4AF37; font-weight: 300; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 30px;">Arabia Khaleej</h1>
                       <p style="font-size: 18px; line-height: 1.8; font-style: italic; opacity: 0.9;">
-                        "Thank you, ${name || 'valued guest'}, for your interest in our premier community guide."
+                        "Thank you, ${name || 'valued guest'}, for your interest in our premier regional reference."
                       </p>
                       <div style="margin: 40px auto; width: 40px; height: 1px; background: #D4AF37; opacity: 0.5;"></div>
                       <p style="font-size: 14px; opacity: 0.7; line-height: 1.6; letter-spacing: 1px;">
                         Our team has received your inquiry. We are currently curating our exclusive waitlist and will reach out to you personally as we expand our gilded access.
                       </p>
                       <p style="margin-top: 60px; font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: #D4AF37; opacity: 0.8;">
-                        Independent Community Guide — GCC
+                        GCC Service Portal
                       </p>
                     </div>
                   </div>

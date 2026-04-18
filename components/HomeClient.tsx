@@ -4,23 +4,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Clock, TrendingUp, UserPlus } from "lucide-react";
-
-const NAV_LINKS = [
-  { name: "Prayer Times", href: "/prayer", desc: "Local & regional schedules", icon: Clock },
-  { name: "Market Insights", href: "/finance", desc: "Gold & GCC currency rates", icon: TrendingUp },
-  { name: "Boutique Enquiry", href: "/join", desc: "Direct community assistance", icon: UserPlus },
-];
+import { useLanguage } from "@/lib/i18n";
 
 export default function HomeClient() {
   const [mounted, setMounted] = useState(false);
+  const { t, isRTL } = useLanguage();
+
+  const NAV_LINKS = [
+    { name: t('prayerTimes'), href: "/prayer", desc: t('prayerDesc'), icon: Clock },
+    { name: t('marketInsights'), href: "/finance", desc: t('marketDesc'), icon: TrendingUp },
+    { name: t('boutiqueEnquiry'), href: "/join", desc: t('boutiqueDesc'), icon: UserPlus },
+  ];
 
   useEffect(() => setMounted(true), []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-center px-4 relative py-6">
+    <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-center px-4 relative py-6 ${isRTL ? 'font-serif-ar' : ''}`}>
       
       {/* Visually Hidden H1 for SEO */}
-      <h1 className="sr-only">Arabia Khaleej — Independent GCC Community Guide</h1>
+      <h1 className="sr-only">{t('siteName')} — {t('siteSlogan')}</h1>
       
       {/* Main Branding Section */}
       <div className="relative mb-12 sm:mb-16 animate-in fade-in zoom-in duration-1000 slide-in-from-top-4">
@@ -35,7 +37,7 @@ export default function HomeClient() {
           />
         </div>
         <p className="text-base sm:text-lg font-light italic serif text-foreground/70 px-4 max-w-lg mx-auto leading-relaxed">
-          "The independent community guide for a refined GCC experience."
+          "{t('siteSlogan')}"
         </p>
       </div>
 
@@ -48,7 +50,7 @@ export default function HomeClient() {
             className="group relative glass p-6 sm:p-8 rounded-[2.5rem] border-brand-gold/15 hover:border-brand-gold/40 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-2xl flex flex-col items-center text-center overflow-hidden"
           >
             {/* Decorative Background Icon */}
-            <div className="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 transform group-hover:scale-110">
+            <div className={`absolute ${isRTL ? '-left-4' : '-right-4'} -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 transform group-hover:scale-110`}>
               <link.icon size={100} />
             </div>
 

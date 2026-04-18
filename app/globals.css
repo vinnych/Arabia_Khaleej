@@ -110,11 +110,55 @@
     font-family: var(--font-serif);
     @apply tracking-tight font-semibold;
   }
+
+  /* RTL Specific Readability Boosts */
+  [dir="rtl"] {
+    font-size: 1.1rem; /* Global 10% boost for Arabic script */
+    line-height: 1.6;
+  }
+
+  [dir="rtl"] .font-serif-ar {
+    font-family: var(--font-amiri), var(--font-serif);
+    letter-spacing: 0 !important; /* Arabic doesn't use letter-spacing */
+    word-spacing: 0.05em;
+  }
+
+  /* Override specific tiny text for RTL */
+  [dir="rtl"] .text-\[9px\],
+  [dir="rtl"] .text-\[10px\],
+  [dir="rtl"] .text-xs {
+    font-size: 0.85rem !important; /* Roughly 13.6px instead of 9-12px */
+    letter-spacing: 0.01em !important; /* Almost no tracking for Arabic */
+    font-weight: 500 !important; /* Slightly bolder for tiny text */
+  }
+
+  [dir="rtl"] .text-\[11px\],
+  [dir="rtl"] .text-sm {
+    font-size: 0.95rem !important; /* Roughly 15px */
+    letter-spacing: 0.01em !important;
+  }
+
+  [dir="rtl"] .font-light {
+    font-weight: 400 !important; /* Arabic needs more weight than Latin for light text */
+  }
+
+  [dir="rtl"] .tracking-\[0\.2em\],
+  [dir="rtl"] .tracking-\[0\.3em\],
+  [dir="rtl"] .tracking-\[0\.4em\],
+  [dir="rtl"] .tracking-\[0\.6em\],
+  [dir="rtl"] .tracking-widest {
+    letter-spacing: 0.01em !important; /* Arabic script breaks with tracking */
+  }
 }
 
 @layer utilities {
   .serif {
     font-family: var(--font-serif);
+  }
+
+  .font-serif-ar {
+    font-family: var(--font-amiri), var(--font-serif);
+    @apply leading-relaxed;
   }
 
   .glass {

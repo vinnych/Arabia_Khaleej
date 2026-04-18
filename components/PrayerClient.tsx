@@ -7,6 +7,7 @@ import Link from "next/link";
 import { GCC_COUNTRIES } from "@/lib/countries";
 import HijriCalendar from "@/components/HijriCalendar";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 interface PrayerClientProps {
   initialCity?: {
@@ -19,6 +20,8 @@ interface PrayerClientProps {
 }
 
 export default function PrayerClient({ initialCity }: PrayerClientProps) {
+  const { t, isRTL, language } = useLanguage();
+  
   const [selectedCity, setSelectedCity] = useState<any>(initialCity || {
     name: GCC_COUNTRIES[0].capital,
     country: GCC_COUNTRIES[0].name,
@@ -44,7 +47,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
           const res = await fetch("https://freeipapi.com/api/json");
           const data = await res.json();
           if (data.latitude && data.longitude) {
-            const name = data.cityName || "Your Location";
+            const name = data.cityName || t('yourLocation');
             setDetectedCity(name);
             setSelectedCity({ name, lat: data.latitude, lng: data.longitude, isAuto: true });
           }
@@ -54,7 +57,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
       }
       detectLocation();
     }
-  }, [mounted, initialCity]);
+  }, [mounted, initialCity, t]);
 
   useEffect(() => {
     if (!mounted) return;
@@ -113,13 +116,31 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
 
   if (!mounted) return null;
 
+  // Helper to get translated names
+  const getTranslatedCountryName = (slug: string, fallback: string) => {
+    const key = slug === "saudi-arabia" ? "saudiArabia" : slug;
+    const translated = t(key);
+    return translated !== key ? translated : fallback;
+  };
+
+  const getTranslatedCityName = (capital: string) => {
+    const key = capital.toLowerCase().replace(' ', '');
+    const translated = t(key);
+    return translated !== key ? translated : capital;
+  };
+
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen pt-20 pb-20 px-4 relative">
-      <HijriCalendar isOpen={showCalendar} onClose={() => setShowCalendar(false)} />
+    <div className={`flex flex-col items-center justify-start min-h-screen pt-20 pb-20 px-4 relative ${isRTL ? 'font-serif-ar' : ''}`}>
+      <HijriCalendar 
+        isOpen={showCalendar} 
+        onClose={() => setShowCalendar(false)} 
+        lat={selectedCity.lat}
+        lng={selectedCity.lng}
+      />
 
       {/* Header */}
       <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-        <h1 className="text-xs tracking-[0.6em] uppercase font-bold text-accent mb-6 text-center">Prayer Times</h1>
+        <h1 className="text-xs tracking-[0.6em] uppercase font-bold text-accent mb-6 text-center">{t('prayerTimes')}</h1>
         <div className="flex flex-wrap justify-center gap-3 max-w-2xl mx-auto">
           {/* Detected City Button (if found) */}
           {detectedCity && (
@@ -134,7 +155,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
               }`}
             >
               <span className={`w-1.5 h-1.5 rounded-full ${selectedCity.isAuto ? "bg-white animate-pulse" : "bg-accent"}`} />
-              {detectedCity}
+              {detectedCity === "Your Location" ? t('yourLocation') : detectedCity}
             </button>
           )}
 
@@ -148,7 +169,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
                   : "bg-white/50 dark:bg-brand-obsidian/20 border-brand-gold/30 text-foreground/70 dark:text-brand-gold hover:border-brand-gold hover:text-accent"
               }`}
             >
-              {country.name}
+              {getTranslatedCountryName(country.slug, country.name)}
             </Link>
           ))}
         </div>
@@ -165,14 +186,15 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
             <div className="w-full text-center mb-10 relative">
               <button 
                 onClick={() => setShowCalendar(true)}
-                className="absolute top-0 right-0 p-4 rounded-2xl bg-brand-gold/10 text-accent hover:bg-brand-gold hover:text-brand-obsidian transition-all shadow-lg hover:rotate-12"
-                title="View Hijri Calendar"
+                className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} p-4 rounded-2xl bg-brand-gold/10 text-accent hover:bg-brand-gold hover:text-brand-obsidian transition-all shadow-lg hover:rotate-12`}
+                title={t('viewHijri')}
               >
                 <CalendarIcon size={20} />
               </button>
-              <p className="text-[10px] text-accent font-bold uppercase tracking-[0.4em] mb-1">Schedule for</p>
+              <p className="text-[10px] text-accent font-bold uppercase tracking-[0.4em] mb-1">{t('scheduleFor')}</p>
               <h2 className="text-2xl font-black serif text-foreground">
-                {selectedCity.name} {selectedCity.country && `— ${selectedCity.country}`}
+                {selectedCity.slug ? getTranslatedCityName(selectedCity.name) : selectedCity.name} 
+                {selectedCity.slug && ` — ${getTranslatedCountryName(selectedCity.slug, selectedCity.country)}`}
               </h2>
             </div>
 
@@ -181,6 +203,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
                 .filter(([key]) => key !== "source")
                 .map(([name, time]: [string, any]) => {
                   const isActive = activePrayer === name;
+                  const displayName = t(name.toLowerCase());
                   return (
                     <div 
                       key={name} 
@@ -191,12 +214,12 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
                       }`}
                     >
                       {isActive && (
-                        <div className="absolute top-2 right-2 flex items-center gap-1.5">
-                          <span className="text-[7px] font-black uppercase tracking-tighter opacity-40">Upcoming</span>
+                        <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} flex items-center gap-1.5`}>
+                          <span className="text-[7px] font-black uppercase tracking-tighter opacity-40">{t('upcoming')}</span>
                           <div className="w-1.5 h-1.5 rounded-full bg-brand-obsidian animate-pulse" />
                         </div>
                       )}
-                      <span className={`text-[10px] uppercase tracking-[0.3em] font-bold mb-3 ${isActive ? "text-brand-obsidian/60" : "text-accent"}`}>{name}</span>
+                      <span className={`text-[10px] uppercase tracking-[0.3em] font-bold mb-3 ${isActive ? "text-brand-obsidian/60" : "text-accent"}`}>{displayName}</span>
                       <span className="text-xl sm:text-2xl font-black tabular-nums">{time}</span>
                     </div>
                   );
@@ -205,11 +228,9 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
           </>
         )}
 
-
-        
         <div className="mt-12 text-center">
           <p className="text-[11px] text-foreground/70 font-bold uppercase tracking-[0.4em]">
-            Umm Al-Qura Calculation Method (Local Engine)
+            {t('calculationMethod')}
           </p>
         </div>
       </div>
@@ -222,7 +243,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
       {/* Back to Home */}
       <div className="mt-16">
         <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
-          ← Home
+          {isRTL ? 'الرئيسية ←' : '← Home'}
         </Link>
       </div>
     </div>

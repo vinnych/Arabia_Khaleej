@@ -1,7 +1,7 @@
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
 
 interface StructuredDataProps {
-  type: "Organization" | "LocalBusiness" | "WebSite" | "BreadcrumbList" | "Place" | "Dataset";
+  type: "Organization" | "LocalBusiness" | "WebSite" | "BreadcrumbList" | "Place" | "Dataset" | "Service" | "ItemList";
   data: any;
 }
 

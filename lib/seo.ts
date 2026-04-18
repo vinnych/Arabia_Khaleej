@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const SITE_URL = "https://arabiakhaleej.com";
 export const SITE_NAME = "Arabia Khaleej";
-export const SITE_DESCRIPTION = "The independent community guide for a refined GCC experience.";
+export const SITE_DESCRIPTION = "The definitive reference for a refined GCC experience.";
 
 interface PageMetaOptions {
   /** Full page title */

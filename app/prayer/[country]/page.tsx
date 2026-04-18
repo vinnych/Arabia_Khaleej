@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ country: 
     title: `Prayer Times in ${country.name} — ${country.capital} | ${SITE_NAME}`,
     description: `Accurate prayer times for ${country.name} (${country.capital}). Daily schedules for Fajr, Dhuhr, Asr, Maghrib, and Isha based on Umm Al-Qura calculation.`,
     path: `/prayer/${country.slug}`,
-    keywords: [`prayer times ${country.name}`, `salat times ${country.capital}`, `adhan ${country.name}`, country.name, country.capital],
+    keywords: [`prayer times ${country.name}`, `salat times ${country.capital}`, `adhan ${country.name}`, `hijri calendar ${country.name}`, `islamic dates ${country.capital}`, country.name, country.capital],
     geo: {
       latitude: country.lat,
       longitude: country.lng,
@@ -75,14 +75,40 @@ export default async function CountryPrayerPage({ params }: { params: Promise<{ 
 
   const datasetData = {
     "@type": "Dataset",
-    "name": `Prayer Times for ${country.capital}, ${country.name}`,
-    "description": `Official daily prayer times schedule for ${country.capital}, ${country.name}.`,
+    "name": `Prayer Times and Hijri Calendar for ${country.capital}, ${country.name}`,
+    "description": `Official daily prayer times schedule and 7-day Hijri calendar for ${country.capital}, ${country.name}. Based on the Unified Umm Al-Qura calculation method.`,
     "url": `https://arabiakhaleej.com/prayer/${country.slug}`,
     "temporalCoverage": `${new Date().getFullYear()}`,
     "isAccessibleForFree": true,
     "creator": {
       "@type": "Organization",
       "name": "Arabia Khaleej"
+    },
+    "keywords": ["Prayer Times", "Hijri Calendar", "Salat", "Umm Al-Qura", country.name]
+  };
+
+  const hijriDatasetData = {
+    "@type": "Dataset",
+    "name": `Unified Hijri Calendar for ${country.name}`,
+    "description": `7-day Islamic Hijri calendar for ${country.name} (${country.capital}), synchronized with the Umm Al-Qura unified system.`,
+    "spatialCoverage": {
+      "@type": "Place",
+      "name": country.name
+    },
+    "license": "https://creativecommons.org/licenses/by/4.0/"
+  };
+
+  const serviceData = {
+    "@type": "Service",
+    "serviceType": "Information Service",
+    "name": `Prayer & Hijri Service — ${country.capital}`,
+    "provider": {
+      "@type": "Organization",
+      "name": SITE_NAME
+    },
+    "areaServed": {
+      "@type": "City",
+      "name": country.capital
     }
   };
 
@@ -91,6 +117,8 @@ export default async function CountryPrayerPage({ params }: { params: Promise<{ 
       <StructuredData type="BreadcrumbList" data={breadcrumbData} />
       <StructuredData type="Place" data={placeData} />
       <StructuredData type="Dataset" data={datasetData} />
+      <StructuredData type="Dataset" data={hijriDatasetData} />
+      <StructuredData type="Service" data={serviceData} />
       <PrayerClient 
         initialCity={{
           name: country.capital,

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Arabia Khaleej — Independent Community Guide";
+export const alt = "Arabia Khaleej — The GCC Standard";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,7 +26,7 @@ export default async function Image() {
           Arabia Khaleej
         </div>
         <div style={{ fontSize: 32, fontWeight: 500, letterSpacing: "0.2em", opacity: 0.7, textTransform: "uppercase" }}>
-          Independent Community Guide
+          The GCC Standard
         </div>
         
         <div style={{ 
