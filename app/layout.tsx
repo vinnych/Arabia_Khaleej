@@ -3,6 +3,7 @@ import { Inter, Playfair_Display, Amiri } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import ClientLayout from "@/components/ClientLayout";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
@@ -25,6 +26,15 @@ export const metadata = pageMeta({
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable} ${playfair.variable} ${amiri.variable}`}>
+      <head>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-WRXQ5H9Z7K');
+        `}</Script>
+      </head>
       <body className="font-sans min-h-screen flex flex-col antialiased">
         <Providers>
           <OrganizationSchema />
