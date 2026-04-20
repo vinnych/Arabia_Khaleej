@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Clock, TrendingUp, UserPlus } from "lucide-react";
+import { Clock, TrendingUp, UserPlus, Newspaper } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 
 export default function HomeClient() {
@@ -13,6 +13,7 @@ export default function HomeClient() {
   const NAV_LINKS = [
     { name: t('prayerTimes'), href: "/prayer", desc: t('prayerDesc'), icon: Clock },
     { name: t('marketInsights'), href: "/market-insight", desc: t('marketDesc'), icon: TrendingUp },
+    { name: t('pressTerminal'), href: "/news", desc: t('newsDesc'), icon: Newspaper },
     { name: t('boutiqueEnquiry'), href: "/join", desc: t('boutiqueDesc'), icon: UserPlus },
   ];
 
@@ -41,8 +42,8 @@ export default function HomeClient() {
         </p>
       </div>
 
-      {/* 3-Column Vertical Pillar Grid */}
-      <nav className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
+      {/* 4-Column Vertical Pillar Grid */}
+      <nav className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
         {NAV_LINKS.map((link) => (
           <Link
             key={link.href}

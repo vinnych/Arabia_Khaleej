@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
-import FinanceTicker from "@/components/FinanceTicker";
 import Link from "next/link";
 import { GCC_COUNTRIES } from "@/lib/countries";
 import HijriCalendar from "@/components/HijriCalendar";
@@ -251,10 +250,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
         </div>
       </div>
 
-      {/* Finance Ticker */}
-      <div className="mt-12 w-full">
-        <FinanceTicker />
-      </div>
+
 
       {/* Back to Home */}
       <div className="mt-16">

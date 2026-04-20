@@ -15,6 +15,18 @@ export const translations: Translations = {
     en: "Arabia Khaleej",
     ar: "عربية خليج"
   },
+  pressTerminal: {
+    en: "Updates",
+    ar: "تحديثات"
+  },
+  officialUpdates: {
+    en: "Official Updates",
+    ar: "تحديثات رسمية"
+  },
+  newsDesc: {
+    en: "Real-time feeds from official regional agencies",
+    ar: "خلاصات فورية من الوكالات الرسمية الإقليمية"
+  },
   siteSlogan: {
     en: "The definitive reference for a refined GCC experience.",
     ar: "المرجع النهائي لتجربة خليجية متميزة."
@@ -117,8 +129,8 @@ export const translations: Translations = {
   transparencyNotice: { en: "Transparency & Neutrality", ar: "الشفافية والحياد" },
   transparencyTitle: { en: "Official Compliance & Transparency Statement", ar: "بيان الامتثال الرسمي والشفافية" },
   transparencyBody: {
-    en: "Arabia Khaleej is a strictly independent digital reference platform. We aggregate and surface publicly available information provided by official government portals and international institutions. Our mission is to promote regional understanding and accessibility through high-fidelity data. We operate with full respect for the sovereign laws and digital regulations of every GCC member state. If you represent a regulatory authority and have inquiries regarding our content, please contact us directly via our formal channels. We are committed to transparency and constructive dialogue.",
-    ar: "عربية خليج هي منصة مرجعية رقمية مستقلة تماماً. نحن نجمع ونعرض المعلومات المتاحة للجمهور المقدمة من البوابات الحكومية الرسمية والمؤسسات الدولية. مهمتنا هي تعزيز الفهم الإقليمي وسهولة الوصول من خلال بيانات عالية الدقة. نحن نعمل باحترام كامل للقوانين السيادية واللوائح الرقمية لكل دولة عضو في مجلس التعاون الخليجي. إذا كنت تمثل سلطة تنظيمية ولديك استفسارات بشأن محتوانا، يرجى الاتصال بنا مباشرة عبر قنواتنا الرسمية. نحن ملتزمون بالشفافية والحوار البناء."
+    en: "Arabia Khaleej is a strictly independent international digital reference platform. We aggregate and surface publicly available information provided by official government portals and state news agencies across the GCC. Our mission is to promote regional understanding and accessibility through high-fidelity data. We operate with full respect for the sovereign laws and digital regulations of every GCC member state. If you represent a regulatory authority and have inquiries regarding our content, please contact us directly via our formal channels. We are committed to transparency and constructive dialogue.",
+    ar: "عربية خليج هي منصة مرجعية رقمية دولية مستقلة تماماً. نحن نجمع ونعرض المعلومات المتاحة للجمهور المقدمة من البوابات الحكومية الرسمية ووكالات الأنباء الرسمية عبر دول مجلس التعاون الخليجي. مهمتنا هي تعزيز الفهم الإقليمي وسهولة الوصول من خلال بيانات عالية الدقة. نحن نعمل باحترام كامل للقوانين السيادية واللوائح الرقمية لكل دولة عضو في مجلس التعاون الخليجي. إذا كنت تمثل سلطة تنظيمية ولديك استفسارات بشأن محتوانا، يرجى الاتصال بنا مباشرة عبر قنواتنا الرسمية. نحن ملتزمون بالشفافية والحوار البناء."
   },
 
   // UI
@@ -164,8 +176,8 @@ export const translations: Translations = {
 
   // Legal Footer note
   passionProject: { 
-    en: "Arabia Khaleej is a premier regional reference — not an official government entity. Information is provided for convenience and should be verified with relevant authorities.",
-    ar: "عربية خليج هي مرجع إقليمي متميز - وليست جهة حكومية رسمية. يتم توفير المعلومات للتسهيل ويجب التحقق منها لدى الجهات المختصة."
+    en: "Arabia Khaleej is a premier international regional reference — not an official government entity. Information is aggregated from official sources for convenience and should be verified with relevant authorities.",
+    ar: "عربية خليج هي مرجع إقليمي دولي متميز - وليست جهة حكومية رسمية. يتم جمع المعلومات من المصادر الرسمية للتسهيل ويجب التحقق منها لدى الجهات المختصة."
   },
 
   // Legal Titles
@@ -293,7 +305,34 @@ export const translations: Translations = {
   ratesDisclaimer: {
     en: "Rates for informational purposes only. Verify with local financial institutions for official rates.",
     ar: "الأسعار لأغراض إعلامية فقط. تحقق من المؤسسات المالية المحلية للأسعار الرسمية."
-  }
+  },
+
+  // News
+  officialSource: { en: "Official Source", ar: "المصدر الرسمي" },
+  readMore: { en: "Read Full Article", ar: "اقرأ المقال كاملاً" },
+  latestFrom: { en: "Latest from", ar: "آخر الأخبار من" },
+  qna: { en: "Qatar News Agency", ar: "وكالة الأنباء القطرية" },
+  wam: { en: "Emirates News Agency", ar: "وكالة أنباء الإمارات" },
+  spa: { en: "Saudi Press Agency", ar: "وكالة الأنباء السعودية" },
+  bna: { en: "Bahrain News Agency", ar: "وكالة أنباء البحرين" },
+  ona: { en: "Oman News Agency", ar: "وكالة الأنباء العمانية" },
+  newsDisclaimer: {
+    en: "Direct feed from official state news agencies. Content is provided as-is without modification.",
+    ar: "خلاصة مباشرة من وكالات الأنباء الرسمية للدولة. يتم توفير المحتوى كما هو دون تعديل."
+  },
+  communityNews: { en: "Community Terminal", ar: "محطة المجتمع" },
+  expatNews: { en: "Expat Updates", ar: "تحديثات الوافدين" },
+  india: { en: "India", ar: "الهند" },
+  pakistan: { en: "Pakistan", ar: "باكستان" },
+  bangladesh: { en: "Bangladesh", ar: "بنغلاديش" },
+  philippines: { en: "Philippines", ar: "الفلبين" },
+  regionalLanguage: { en: "Regional Language", ar: "اللغة الإقليمية" },
+  allNews: { en: "All News", ar: "كل الأخبار" },
+  gccNews: { en: "GCC Official", ar: "الرسمية الخليجية" },
+  all: { en: "All News", ar: "كل الأخبار" },
+  gcc: { en: "GCC Official", ar: "الرسمية الخليجية" },
+  expat: { en: "Community Terminal", ar: "محطة المجتمع" },
+  refresh: { en: "Refresh Feed", ar: "تحديث الخلاصات" }
 };
 
 interface LanguageContextType {
