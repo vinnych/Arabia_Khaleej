@@ -176,26 +176,12 @@ export async function GET(request: Request) {
   const cacheKey = `news_unified_${lang}`;
 
   try {
-    // 1. Try to fetch from Redis Cache
-    const cachedData = await redis.get(cacheKey) as NewsItem[] | null;
+    // 1. Check if we need to fetch fresh news
+    const isStale = !(await redis.get(cacheKey));
+    const archiveKey = `news_archive_${lang}`;
+    let allNews = (await redis.get(archiveKey) as NewsItem[] | null) || [];
     
-    if (cachedData) {
-      if (slug) {
-        const item = cachedData.find(n => n.slug === slug);
-        if (item) {
-          return NextResponse.json({ status: 'success', news: [item] });
-        }
-      } else {
-        return NextResponse.json({
-          status: 'success',
-          count: cachedData.length,
-          news: cachedData,
-          source: 'cache'
-        });
-      }
-    }
-
-    // 2. If not in cache, fetch fresh from RSS
+    if (isStale || allNews.length === 0) {
     const gccResults = await Promise.allSettled(
       Object.entries(GCC_FEEDS).map(async ([key, urls]) => {
         try {
@@ -263,31 +249,55 @@ export async function GET(request: Request) {
     );
 
 
-    const allNews = [
-      ...gccResults.filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === 'fulfilled').flatMap(r => r.value),
-      ...expatResults.filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === 'fulfilled').flatMap(r => r.value)
-    ].sort((a, b) => {
-      const dateA = new Date(a.pubDate).getTime();
-      const dateB = new Date(b.pubDate).getTime();
-      return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
-    });
+      const freshNews = [
+        ...gccResults.filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === 'fulfilled').flatMap(r => r.value),
+        ...expatResults.filter((r): r is PromiseFulfilledResult<NewsItem[]> => r.status === 'fulfilled').flatMap(r => r.value)
+      ];
 
-    console.log(`Total news items collected: ${allNews.length}`);
+      console.log(`Total fresh news items collected: ${freshNews.length}`);
 
-    // 3. Save to Redis Cache (Transient storage)
-    if (allNews.length > 0) {
-      try {
-        await redis.set(cacheKey, allNews, { ex: CACHE_TIMES.NEWS });
-      } catch (redisError) {
-        console.error('Redis cache set error:', redisError);
+      if (freshNews.length > 0) {
+        const mergedMap = new Map<string, NewsItem>();
+        allNews.forEach(item => mergedMap.set(item.slug, item));
+        freshNews.forEach(item => mergedMap.set(item.slug, item));
+        
+        allNews = Array.from(mergedMap.values());
+        allNews.sort((a, b) => {
+          const dateA = new Date(a.pubDate).getTime();
+          const dateB = new Date(b.pubDate).getTime();
+          return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+        });
+        
+        // Cap at 3000 items (~6MB) to protect memory
+        allNews = allNews.slice(0, 3000);
+
+        try {
+          await redis.set(archiveKey, allNews, { ex: CACHE_TIMES.NEWS_ARCHIVE || 2592000 });
+          await redis.set(cacheKey, 'true', { ex: CACHE_TIMES.NEWS });
+        } catch (redisError) {
+          console.error('Redis cache set error:', redisError);
+        }
       }
     }
 
+    if (slug) {
+      const item = allNews.find(n => n.slug === slug);
+      if (item) {
+        return NextResponse.json({ status: 'success', news: [item] });
+      } else {
+        return NextResponse.json({ status: 'error', message: 'News not found' }, { status: 404 });
+      }
+    }
+
+    // For the main feed, only return the most recent 100 items to avoid crashing the frontend
+    const feedNews = allNews.slice(0, 100);
+
     return NextResponse.json({
       status: 'success',
-      count: allNews.length,
-      news: allNews,
-      source: 'fresh'
+      count: feedNews.length,
+      totalArchiveCount: allNews.length,
+      news: feedNews,
+      source: isStale ? 'fresh' : 'archive'
     });
   } catch (error) {
     console.error('Unified news fetch error:', error);

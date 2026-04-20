@@ -20,6 +20,7 @@ export const redis = redisUrl && redisToken
 // Cache durations (in seconds)
 export const CACHE_TIMES = {
   NEWS: 3600, // 1 hour
+  NEWS_ARCHIVE: 2592000, // 30 days
   MARKET: 1800, // 30 minutes
   FX: 1800, // 30 minutes
 };
