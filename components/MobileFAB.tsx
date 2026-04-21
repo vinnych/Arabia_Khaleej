@@ -16,7 +16,7 @@ export default function MobileFAB({ icon: Icon, onClick, label, className, show 
 
   return (
     <div className={cn(
-      "fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-6 z-50 md:hidden",
+      "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-5 z-50 md:hidden",
       "animate-in fade-in slide-in-from-bottom-10 duration-500",
       className
     )}>
@@ -24,19 +24,19 @@ export default function MobileFAB({ icon: Icon, onClick, label, className, show 
         onClick={onClick}
         style={{ touchAction: 'manipulation' }}
         className={cn(
-          "group relative flex items-center justify-center w-14 h-14 rounded-full",
-          "bg-brand-gold shadow-[0_10px_30px_rgba(212,175,55,0.4)]",
-          "border-2 border-white/10 active:scale-90 transition-all duration-200"
+          "group relative flex items-center justify-center w-12 h-12 rounded-full",
+          "bg-brand-gold shadow-[0_8px_25px_rgba(212,175,55,0.3)]",
+          "border border-white/20 active:scale-95 transition-all duration-200"
         )}
       >
-        <Icon size={24} className="text-background group-active:rotate-45 transition-transform duration-300" />
+        <Icon size={20} className="text-background group-active:rotate-45 transition-transform duration-300" />
         
         {/* Glow Effect */}
-        <div className="absolute inset-0 rounded-full bg-brand-gold/30 blur-xl -z-10 animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-brand-gold/20 blur-lg -z-10 animate-pulse" />
         
-        {/* Label (Optional) */}
+        {/* Label (Optional) - More subtle */}
         {label && (
-          <span className="absolute -top-10 right-0 px-3 py-1 rounded-full bg-background/80 backdrop-blur-md border border-brand-gold/20 text-[10px] font-black uppercase tracking-widest text-brand-gold whitespace-nowrap shadow-xl">
+          <span className="absolute -top-7 right-0 px-2.5 py-0.5 rounded-full bg-background/90 backdrop-blur-md border border-brand-gold/30 text-[8px] font-black uppercase tracking-widest text-brand-gold whitespace-nowrap shadow-lg">
             {label}
           </span>
         )}

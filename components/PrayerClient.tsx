@@ -194,22 +194,20 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
       />
 
       {/* Header */}
-      <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-        <h1 className="text-xs tracking-[0.6em] uppercase font-bold text-accent mb-6 text-center">{t('prayerTimes')}</h1>
-        <div className="flex flex-wrap justify-center gap-2 max-w-3xl mx-auto">
-          {/* Detected City Button (if found) */}
+      <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-1000 text-center">
+        <h1 className="text-[10px] tracking-[0.4em] uppercase font-black text-accent/80 mb-8">{t('prayerTimes')}</h1>
+        <div className="flex flex-wrap justify-center gap-2.5 max-w-2xl mx-auto px-2">
+          {/* Detected City Button */}
           {detectedCity && (
             <button
-              onClick={() => {
-                setSelectedCity((prev: any) => ({ ...prev, isAuto: true }));
-              }}
-              className={`text-[10px] uppercase font-bold tracking-[0.2em] px-4 py-2 rounded-full border transition-all flex items-center gap-2 ${
+              onClick={() => setSelectedCity((prev: any) => ({ ...prev, isAuto: true }))}
+              className={`text-[9px] uppercase font-black tracking-[0.15em] px-5 py-2.5 rounded-full border transition-all flex items-center gap-2 ${
                 selectedCity.isAuto
-                  ? "bg-accent text-white border-accent shadow-xl scale-105"
-                  : "bg-white/50 dark:bg-brand-obsidian/20 border-brand-gold/30 text-foreground/70 dark:text-brand-gold hover:border-brand-gold hover:text-accent"
+                  ? "bg-accent text-white border-accent shadow-lg scale-105"
+                  : "bg-white/50 dark:bg-brand-obsidian/20 border-brand-gold/20 text-foreground/60 dark:text-brand-gold/70 hover:border-brand-gold hover:text-accent"
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${selectedCity.isAuto ? "bg-white animate-pulse" : "bg-accent"}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${selectedCity.isAuto ? "bg-white animate-pulse" : "bg-accent"}`} />
               {detectedCity === "Your Location" ? t('yourLocation') : detectedCity}
             </button>
           )}
@@ -218,10 +216,10 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
             <Link
               key={country.slug}
               href={`/prayer/${country.slug}`}
-              className={`text-[10px] uppercase font-bold tracking-[0.2em] px-4 py-2 rounded-full border transition-all ${
+              className={`text-[9px] uppercase font-black tracking-[0.15em] px-5 py-2.5 rounded-full border transition-all ${
                 selectedCity.slug === country.slug && !selectedCity.isAuto
-                  ? "bg-brand-gold text-brand-obsidian border-brand-gold shadow-xl scale-105"
-                  : "bg-white/50 dark:bg-brand-obsidian/20 border-brand-gold/30 text-foreground/70 dark:text-brand-gold hover:border-brand-gold hover:text-accent"
+                  ? "bg-brand-gold text-brand-obsidian border-brand-gold shadow-lg scale-105"
+                  : "bg-white/50 dark:bg-brand-obsidian/20 border-brand-gold/20 text-foreground/60 dark:text-brand-gold/70 hover:border-brand-gold hover:text-accent"
               }`}
             >
               {getTranslatedCountryName(country.slug, country.name)}
@@ -231,25 +229,27 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
       </div>
 
       {/* Prayer Cards Container */}
-      <div className="w-full max-w-4xl glass p-8 sm:p-12 rounded-[3rem] border-brand-gold/20 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 shadow-2xl">
+      <div className="w-full max-w-4xl glass p-6 sm:p-12 rounded-[2.5rem] border-brand-gold/15 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 shadow-2xl overflow-hidden">
         {!times ? (
           <div className="flex justify-center items-center py-20">
             <div className="w-8 h-8 border-2 border-brand-gold/30 border-t-brand-gold rounded-full animate-spin" />
           </div>
         ) : (
           <>
-            <div className="w-full text-center mb-10 relative">
+            <div className="w-full text-center mb-12 relative">
               <button 
                 onClick={() => setShowCalendar(true)}
-                className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} p-4 rounded-2xl bg-brand-gold/10 text-accent hover:bg-brand-gold hover:text-brand-obsidian transition-all shadow-lg hover:rotate-12`}
+                className={`absolute -top-2 ${isRTL ? 'left-0' : 'right-0'} p-3 rounded-xl bg-brand-gold/10 text-accent hover:bg-brand-gold hover:text-brand-obsidian transition-all shadow-md group`}
                 title={t('viewHijri')}
               >
-                <CalendarIcon size={20} />
+                <CalendarIcon size={18} className="group-hover:rotate-12 transition-transform" />
               </button>
-              <p className="text-[10px] text-accent font-bold uppercase tracking-[0.4em] mb-1">{t('scheduleFor')}</p>
-              <h2 className="text-2xl font-black serif text-foreground">
+              <p className="text-[9px] text-accent/60 font-black uppercase tracking-[0.3em] mb-2">{t('scheduleFor')}</p>
+              <h2 className="text-3xl font-black text-foreground tracking-tight">
                 {selectedCity.slug ? getTranslatedCityName(selectedCity.name) : selectedCity.name} 
-                {selectedCity.slug && ` — ${getTranslatedCountryName(selectedCity.slug, selectedCity.country)}`}
+                <span className="text-foreground/30 font-medium ml-2">
+                  {selectedCity.slug && `| ${getTranslatedCountryName(selectedCity.slug, selectedCity.country)}`}
+                </span>
               </h2>
             </div>
 
