@@ -6,8 +6,9 @@ import NewsArticleClient from "@/components/NewsArticleClient";
 // We'll use dynamic rendering for the individual article pages.
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
   
   // Try to fetch the article to get the title for SEO
   try {
@@ -36,10 +37,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   });
 }
 
-export default function NewsArticlePage({ params }: { params: { slug: string } }) {
+export default async function NewsArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = await params;
+  
   return (
     <main className="min-h-screen pt-20">
-      <NewsArticleClient slug={params.slug} />
+      <NewsArticleClient slug={resolvedParams.slug} />
     </main>
   );
 }

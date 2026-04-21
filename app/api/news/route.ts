@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { redis, CACHE_TIMES } from '@/lib/redis';
+import { getDeterministicFallback } from '@/lib/fallbacks';
+import { toSlug } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -16,18 +18,6 @@ interface NewsItem {
   language: 'en' | 'ar' | 'regional';
   image?: string;
 }
-
-const CATEGORY_IMAGES: Record<string, string> = {
-  QNA: 'https://images.unsplash.com/photo-1590059397633-875f68480356?q=80&w=800&auto=format&fit=crop',
-  WAM: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=800&auto=format&fit=crop',
-  SPA: 'https://images.unsplash.com/photo-1580674285054-bed31e145f59?q=80&w=800&auto=format&fit=crop',
-  BNA: 'https://images.unsplash.com/photo-1549944850-84e00be4203b?q=80&w=800&auto=format&fit=crop',
-  ONA: 'https://images.unsplash.com/photo-1578330132822-01869bb9c1a1?q=80&w=800&auto=format&fit=crop',
-  INDIA: 'https://images.unsplash.com/photo-1524492707947-28a0ff99d1f3?q=80&w=800&auto=format&fit=crop',
-  PAKISTAN: 'https://images.unsplash.com/photo-1527359443443-84a18a1a7410?q=80&w=800&auto=format&fit=crop',
-  BANGLADESH: 'https://images.unsplash.com/photo-1585123334904-845d60e97b29?q=80&w=800&auto=format&fit=crop',
-  PHILIPPINES: 'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?q=80&w=800&auto=format&fit=crop',
-};
 
 const SMART_KEYWORDS: Record<string, string> = {
   finance: 'https://images.unsplash.com/photo-1611974714013-3c834927c390?q=80&w=800&auto=format&fit=crop',
@@ -146,9 +136,8 @@ function parseRSS(xml: string, source: string, category: 'gcc' | 'expat', langua
     }
 
     if (title && link) {
-      // Create a deterministic slug from the link (URL-safe)
-      const slug = link.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0).toString(16) + 
-                   Buffer.from(link).toString('hex').substring(0, 8);
+      // Create an SEO-optimized slug
+      const slug = toSlug(title, link);
 
       items.push({
         id,
@@ -169,7 +158,7 @@ function parseRSS(xml: string, source: string, category: 'gcc' | 'expat', langua
         source,
         category,
         language,
-        image: image || smartImage || CATEGORY_IMAGES[source] || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=800&auto=format&fit=crop',
+        image: image || smartImage || getDeterministicFallback(slug),
       });
     }
   }
@@ -198,22 +187,20 @@ export async function GET(request: Request) {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 4000); // reduced timeout to 4s to prevent vercel 10s 504
           
-          let res;
           try {
-            res = await fetch(url, { 
+            const res = await fetch(url, { 
               next: { revalidate: 3600 },
               headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
               signal: controller.signal
             });
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            const xml = await res.text();
+            const parsed = parseRSS(xml, key, 'gcc', lang);
+            console.log(`Parsed ${parsed.length} items from ${key}`);
+            return parsed;
           } finally {
             clearTimeout(timeoutId);
           }
-          
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          const xml = await res.text();
-          const parsed = parseRSS(xml, key, 'gcc', lang);
-          console.log(`Parsed ${parsed.length} items from ${key}`);
-          return parsed;
         } catch (e) {
           console.error(`Error fetching GCC news from ${key}:`, e);
           return [];
@@ -229,9 +216,8 @@ export async function GET(request: Request) {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-          let enRes, regRes;
           try {
-            [enRes, regRes] = await Promise.all([
+            const [enRes, regRes] = await Promise.all([
               fetch(urls.en, { 
                 next: { revalidate: 3600 }, 
                 headers: { 'User-Agent': 'Mozilla/5.0' },
@@ -243,20 +229,20 @@ export async function GET(request: Request) {
                 signal: controller.signal
               }).catch(e => { console.error(`Error REG ${key}:`, e); return null; })
             ]);
+            
+            const [enXml, regXml] = await Promise.all([
+              enRes?.ok ? enRes.text() : Promise.resolve(''),
+              regRes?.ok ? regRes.text() : Promise.resolve('')
+            ]);
+            
+            const enItems = enXml ? parseRSS(enXml, key, 'expat', 'en') : [];
+            const regItems = regXml ? parseRSS(regXml, key, 'expat', 'regional') : [];
+            
+            console.log(`Parsed ${enItems.length} EN and ${regItems.length} REG items for ${key}`);
+            return [...enItems.slice(0, 5), ...regItems.slice(0, 5)];
           } finally {
             clearTimeout(timeoutId);
           }
-          
-          const [enXml, regXml] = await Promise.all([
-            enRes?.ok ? enRes.text() : Promise.resolve(''),
-            regRes?.ok ? regRes.text() : Promise.resolve('')
-          ]);
-          
-          const enItems = enXml ? parseRSS(enXml, key, 'expat', 'en') : [];
-          const regItems = regXml ? parseRSS(regXml, key, 'expat', 'regional') : [];
-          
-          console.log(`Parsed ${enItems.length} EN and ${regItems.length} REG items for ${key}`);
-          return [...enItems.slice(0, 5), ...regItems.slice(0, 5)];
         } catch (e) {
           console.error(`Error fetching Expat news for ${key}:`, e);
           return [];

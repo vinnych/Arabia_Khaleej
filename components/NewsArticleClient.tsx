@@ -5,6 +5,7 @@ import { useLanguage } from "@/lib/i18n";
 import { Calendar, ChevronLeft, ExternalLink, Globe, Newspaper, Share2, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { getDeterministicFallback } from "@/lib/fallbacks";
 
 interface NewsItem {
   id: string;
@@ -146,6 +147,11 @@ export default function NewsArticleClient({ slug }: { slug: string }) {
               className="object-cover"
               priority
               unoptimized={article.image.includes('http')}
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = getDeterministicFallback(article.slug);
+                target.onerror = null;
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
