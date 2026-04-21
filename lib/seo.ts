@@ -162,7 +162,7 @@ export function pageMeta({
       url: canonical,
       siteName: SITE_NAME,
       locale: "en_US",
-      alternateLocale: ["ar_AR", "en_GB"],
+      alternateLocale: ["ar_QA", "ar_SA", "ar_AE", "ar_KW", "ar_OM", "ar_BH"],
       type,
       publishedTime: published,
       modifiedTime: modified,

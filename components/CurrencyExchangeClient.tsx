@@ -148,10 +148,11 @@ export default function CurrencyExchangeClient() {
     isOpen: boolean,
     onSelect: (code: string) => void,
     currentCode: string,
+    id?: string
   ) => {
     if (!isOpen) return null;
     return (
-      <div className="absolute top-full mt-2 left-0 right-0 z-50 glass rounded-3xl border border-brand-gold/20 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+      <div id={id} role="listbox" className="absolute top-full mt-2 left-0 right-0 z-50 glass rounded-3xl border border-brand-gold/20 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
         {/* Search */}
         <div className="p-4 border-b border-brand-gold/10">
           <div className="relative">
@@ -228,6 +229,11 @@ export default function CurrencyExchangeClient() {
         </p>
       </div>
 
+      {/* ARIA Live Region for results */}
+      <div className="sr-only" aria-live="polite" role="status">
+        {parsedAmount} {fromCode} {isRTL ? "يساوي" : "equals"} {result.toFixed(4)} {toCode}
+      </div>
+
       {/* ═══ MAIN CONVERTER CARD ═══ */}
       <div className="w-full max-w-2xl mb-12 animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
         <div className="glass rounded-[2.5rem] p-6 md:p-10 border-brand-gold/15 relative overflow-visible">
@@ -243,8 +249,11 @@ export default function CurrencyExchangeClient() {
                   id="from-currency-selector"
                   onClick={() => { setShowFromPicker(!showFromPicker); setShowToPicker(false); setSearchQuery(""); }}
                   className={`flex items-center gap-2.5 px-4 py-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-transparent hover:border-brand-gold/20 transition-all min-w-[140px] ${isRTL ? 'flex-row-reverse' : ''}`}
+                  aria-haspopup="listbox"
+                  aria-expanded={showFromPicker}
+                  aria-controls="from-currency-list"
                 >
-                  <span className="text-2xl">{fromCurrency?.flag}</span>
+                  <span className="text-2xl" aria-hidden="true">{fromCurrency?.flag}</span>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="text-sm font-black">{fromCode}</p>
                     <p className="text-[9px] text-foreground/40 font-bold truncate max-w-[80px]">
@@ -253,7 +262,7 @@ export default function CurrencyExchangeClient() {
                   </div>
                   <ChevronDown size={14} className={`text-foreground/30 transition-transform ${showFromPicker ? 'rotate-180' : ''}`} />
                 </button>
-                {renderPicker(showFromPicker, (code) => { setFromCode(code); setShowFromPicker(false); }, fromCode)}
+                {renderPicker(showFromPicker, (code) => { setFromCode(code); setShowFromPicker(false); }, fromCode, "from-currency-list")}
               </div>
               {/* Amount Input */}
               <div className="flex-1 relative">
@@ -300,8 +309,11 @@ export default function CurrencyExchangeClient() {
                   id="to-currency-selector"
                   onClick={() => { setShowToPicker(!showToPicker); setShowFromPicker(false); setSearchQuery(""); }}
                   className={`flex items-center gap-2.5 px-4 py-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-transparent hover:border-brand-gold/20 transition-all min-w-[140px] ${isRTL ? 'flex-row-reverse' : ''}`}
+                  aria-haspopup="listbox"
+                  aria-expanded={showToPicker}
+                  aria-controls="to-currency-list"
                 >
-                  <span className="text-2xl">{toCurrency?.flag}</span>
+                  <span className="text-2xl" aria-hidden="true">{toCurrency?.flag}</span>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="text-sm font-black">{toCode}</p>
                     <p className="text-[9px] text-foreground/40 font-bold truncate max-w-[80px]">
@@ -310,7 +322,7 @@ export default function CurrencyExchangeClient() {
                   </div>
                   <ChevronDown size={14} className={`text-foreground/30 transition-transform ${showToPicker ? 'rotate-180' : ''}`} />
                 </button>
-                {renderPicker(showToPicker, (code) => { setToCode(code); setShowToPicker(false); }, toCode)}
+                {renderPicker(showToPicker, (code) => { setToCode(code); setShowToPicker(false); }, toCode, "to-currency-list")}
               </div>
               {/* Result */}
               <div className={`flex-1 flex flex-col justify-center ${isRTL ? 'text-left' : 'text-right'}`}>

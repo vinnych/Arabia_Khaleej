@@ -348,36 +348,47 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('en');
 
   useEffect(() => {
-    // Priority: URL Param > LocalStorage > Browser Language
+    // Priority: URL Param > Cookie > LocalStorage > Browser Language
     const params = new URLSearchParams(window.location.search);
     const langParam = params.get('lang') as Language;
     
-    if (langParam && (langParam === 'en' || langParam === 'ar')) {
-      setLanguageState(langParam);
-      localStorage.setItem('language', langParam);
-      document.documentElement.lang = langParam;
-      document.documentElement.dir = langParam === 'ar' ? 'rtl' : 'ltr';
-    } else {
-      const savedLang = localStorage.getItem('language') as Language;
-      if (savedLang && (savedLang === 'en' || savedLang === 'ar')) {
-        setLanguageState(savedLang);
-        document.documentElement.lang = savedLang;
-        document.documentElement.dir = savedLang === 'ar' ? 'rtl' : 'ltr';
-      } else if (navigator.language.startsWith('ar')) {
-        setLanguageState('ar');
-        document.documentElement.lang = 'ar';
-        document.documentElement.dir = 'rtl';
-      }
+    const getInitialLang = (): Language => {
+      if (langParam && (langParam === 'en' || langParam === 'ar')) return langParam;
+      
+      const savedLang = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('NEXT_LOCALE='))
+        ?.split('=')[1] as Language;
+        
+      if (savedLang && (savedLang === 'en' || savedLang === 'ar')) return savedLang;
+      
+      const lsLang = localStorage.getItem('language') as Language;
+      if (lsLang && (lsLang === 'en' || lsLang === 'ar')) return lsLang;
+      
+      return navigator.language.startsWith('ar') ? 'ar' : 'en';
+    };
+
+    const initialLang = getInitialLang();
+    setLanguageState(initialLang);
+    
+    // Immediate DOM update to prevent further shifts
+    document.documentElement.lang = initialLang;
+    document.documentElement.dir = initialLang === 'ar' ? 'rtl' : 'ltr';
+    
+    if (initialLang !== langParam) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', initialLang);
+      window.history.replaceState({}, '', url.toString());
     }
   }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
     localStorage.setItem('language', lang);
+    document.cookie = `NEXT_LOCALE=${lang}; path=/; max-age=31536000`;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     
-    // Update URL to maintain SEO parity if desired, or just keep as is
     const url = new URL(window.location.href);
     url.searchParams.set('lang', lang);
     window.history.replaceState({}, '', url.toString());

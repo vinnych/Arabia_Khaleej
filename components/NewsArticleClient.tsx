@@ -20,32 +20,32 @@ interface NewsItem {
   image?: string;
 }
 
-export default function NewsArticleClient({ slug }: { slug: string }) {
+export default function NewsArticleClient({ initialArticle }: { initialArticle: NewsItem }) {
   const { t, isRTL, language } = useLanguage();
-  const [article, setArticle] = useState<NewsItem | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const article = initialArticle;
 
-  useEffect(() => {
-    const fetchArticle = async () => {
-      try {
-        const res = await fetch(`/api/news?slug=${slug}&lang=${language}`);
-        const data = await res.json();
-        if (data.status === 'success' && data.news?.[0]) {
-          setArticle(data.news[0]);
-        } else {
-          setError(true);
-        }
-      } catch (err) {
-        setError(true);
-      } finally {
-        setLoading(false);
-      }
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: article.title,
+      text: article.description.substring(0, 100) + "...",
+      url: window.location.href,
     };
 
-    fetchArticle();
-  }, [slug, language]);
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -62,33 +62,6 @@ export default function NewsArticleClient({ slug }: { slug: string }) {
       return dateStr;
     }
   };
-
-  if (loading) {
-    return (
-      <div className="w-full max-w-4xl mx-auto px-4 py-20 animate-pulse">
-        <div className="h-8 bg-white/5 rounded-full w-1/4 mb-8" />
-        <div className="h-12 bg-white/5 rounded-2xl w-3/4 mb-12" />
-        <div className="h-[400px] bg-white/5 rounded-[2.5rem] mb-12" />
-        <div className="space-y-4">
-          <div className="h-4 bg-white/5 rounded-full w-full" />
-          <div className="h-4 bg-white/5 rounded-full w-full" />
-          <div className="h-4 bg-white/5 rounded-full w-2/3" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !article) {
-    return (
-      <div className="w-full max-w-xl mx-auto px-4 py-32 text-center">
-        <AlertCircle className="mx-auto text-brand-gold mb-6" size={48} />
-        <h2 className="text-2xl font-black text-foreground mb-4">{t('somethingWentWrong')}</h2>
-        <Link href="/news" className="text-accent font-bold uppercase tracking-widest hover:underline">
-          Return to Press Terminal
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div className={`w-full max-w-4xl mx-auto px-4 py-12 ${isRTL ? 'font-serif-ar' : ''}`}>
@@ -132,9 +105,19 @@ export default function NewsArticleClient({ slug }: { slug: string }) {
                 <p className="text-sm font-bold text-foreground">{article.source}</p>
               </div>
             </div>
-            <button className="w-10 h-10 rounded-full glass flex items-center justify-center text-foreground/40 hover:text-accent transition-colors">
-              <Share2 size={18} />
-            </button>
+            <div className="relative">
+              <button 
+                onClick={handleShare}
+                className="w-10 h-10 rounded-full glass flex items-center justify-center text-foreground/40 hover:text-accent transition-all active:scale-95"
+              >
+                <Share2 size={18} />
+              </button>
+              {copied && (
+                <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-accent text-brand-obsidian text-[10px] font-black uppercase tracking-widest rounded-lg animate-in fade-in slide-in-from-bottom-1">
+                  Link Copied
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

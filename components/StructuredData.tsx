@@ -142,6 +142,55 @@ export function WebPageSchema({
   return <StructuredData type="WebPage" data={data} />;
 }
 
+// ─── NewsArticle ─────────────────────────────────────────────────────────────
+export function NewsArticleSchema({
+  title,
+  description,
+  image,
+  datePublished,
+  dateModified,
+  authorName = SITE_NAME,
+  publisherName = SITE_NAME,
+  publisherLogo = `${SITE_URL}/favicon-emblem.png`,
+  url,
+}: {
+  title: string;
+  description: string;
+  image?: string;
+  datePublished: string;
+  dateModified?: string;
+  authorName?: string;
+  publisherName?: string;
+  publisherLogo?: string;
+  url: string;
+}) {
+  const data = {
+    headline: title,
+    description,
+    image: image ? [image] : [`${SITE_URL}/opengraph-image`],
+    datePublished,
+    dateModified: dateModified ?? datePublished,
+    author: {
+      "@type": "Organization",
+      name: authorName,
+      url: SITE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: publisherName,
+      logo: {
+        "@type": "ImageObject",
+        url: publisherLogo,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}${url}`,
+    },
+  };
+  return <StructuredData type="NewsArticle" data={data} />;
+}
+
 // ─── BreadcrumbList ───────────────────────────────────────────────────────────
 export function BreadcrumbSchema({ items }: { items: { name: string; item: string }[] }) {
   const data = {

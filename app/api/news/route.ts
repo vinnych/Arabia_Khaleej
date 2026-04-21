@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { redis, CACHE_TIMES } from '@/lib/redis';
 import { getDeterministicFallback } from '@/lib/fallbacks';
 import { toSlug } from '@/lib/utils';
+import { XMLParser } from 'fast-xml-parser';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -73,73 +74,81 @@ const EXPAT_FEEDS = {
   }
 };
 
+const parser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: "@_",
+  textNodeName: "#text"
+});
+
 function parseRSS(xml: string, source: string, category: 'gcc' | 'expat', language: 'en' | 'ar' | 'regional'): NewsItem[] {
-  const items: NewsItem[] = [];
-  const itemRegex = /<item>([\s\S]*?)<\/item>/g;
-  let match;
+  try {
+    const jsonObj = parser.parse(xml);
+    const channel = jsonObj.rss?.channel;
+    if (!channel) return [];
 
-  while ((match = itemRegex.exec(xml)) !== null) {
-    const content = match[1];
-    
-    const title = content.match(/<title>([\s\S]*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').trim() || '';
-    const description = content.match(/<description>([\s\S]*?)<\/description>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').trim() || '';
-    const link = content.match(/<link>([\s\S]*?)<\/link>/)?.[1]?.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').trim() || '';
-    const pubDateRaw = content.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1]?.trim() || '';
-    
-    // Robust Date Normalization
-    const normalizeDate = (rawDate: string) => {
-      if (!rawDate) return new Date().toISOString();
-      if (/[\u0600-\u06FF]/.test(rawDate)) {
-        const monthsAr: Record<string, string> = {
-          'يناير': 'Jan', 'فبراير': 'Feb', 'مارس': 'Mar', 'أبريل': 'Apr', 
-          'مايو': 'May', 'يونيو': 'Jun', 'يوليو': 'Jul', 'أغسطس': 'Aug', 
-          'سبتمبر': 'Sep', 'أكتوبر': 'Oct', 'نوفمبر': 'Nov', 'ديسمبر': 'Dec'
-        };
-        let normalized = rawDate;
-        normalized = normalized.replace(/^(?:الأحد|الاثنين|الثلاثاء|الأربعاء|الخميس|الجمعة|السبت)،?\s*/, '');
-        Object.keys(monthsAr).forEach(ar => { normalized = normalized.replace(ar, monthsAr[ar]); });
-        const d = new Date(normalized);
-        if (!isNaN(d.getTime())) return d.toISOString();
+    let rawItems = channel.item;
+    if (!rawItems) return [];
+    if (!Array.isArray(rawItems)) rawItems = [rawItems];
+
+    return rawItems.map((item: any) => {
+      const title = (typeof item.title === 'string' ? item.title : item.title?.['#text'] || '').trim();
+      const description = (typeof item.description === 'string' ? item.description : item.description?.['#text'] || '').trim();
+      const link = (typeof item.link === 'string' ? item.link : item.link?.['#text'] || '').trim();
+      const pubDateRaw = (typeof item.pubDate === 'string' ? item.pubDate : item.pubDate?.['#text'] || '').trim();
+      
+      const normalizeDate = (rawDate: string) => {
+        if (!rawDate) return new Date().toISOString();
+        // Handle Arabic dates if present
+        if (/[\u0600-\u06FF]/.test(rawDate)) {
+          const monthsAr: Record<string, string> = {
+            'يناير': 'Jan', 'فبراير': 'Feb', 'مارس': 'Mar', 'أبريل': 'Apr', 
+            'مايو': 'May', 'يونيو': 'Jun', 'يوليو': 'Jul', 'أغسطس': 'Aug', 
+            'سبتمبر': 'Sep', 'أكتوبر': 'Oct', 'نوفمبر': 'Nov', 'ديسمبر': 'Dec'
+          };
+          let normalized = rawDate;
+          normalized = normalized.replace(/^(?:الأحد|الاثنين|الثلاثاء|الأربعاء|الخميس|الجمعة|السبت)،?\s*/, '');
+          Object.keys(monthsAr).forEach(ar => { normalized = normalized.replace(ar, monthsAr[ar]); });
+          const d = new Date(normalized);
+          if (!isNaN(d.getTime())) return d.toISOString();
+        }
+        const d = new Date(rawDate);
+        return !isNaN(d.getTime()) ? d.toISOString() : new Date().toISOString();
+      };
+
+      const finalPubDate = normalizeDate(pubDateRaw);
+      const id = item.guid?.['#text'] || item.guid || link;
+
+      // Smart Keyword Detection
+      const lowerTitle = title.toLowerCase();
+      let smartImage = null;
+      if (lowerTitle.includes('gold')) smartImage = SMART_KEYWORDS.gold;
+      else if (lowerTitle.includes('oil') || lowerTitle.includes('energy') || lowerTitle.includes('gas')) smartImage = SMART_KEYWORDS.oil;
+      else if (lowerTitle.includes('market') || lowerTitle.includes('stock') || lowerTitle.includes('finance') || lowerTitle.includes('bank')) smartImage = SMART_KEYWORDS.finance;
+      else if (lowerTitle.includes('meeting') || lowerTitle.includes('minister') || lowerTitle.includes('summit') || lowerTitle.includes('diplomacy')) smartImage = SMART_KEYWORDS.diplomacy;
+      else if (lowerTitle.includes('football') || lowerTitle.includes('cricket') || lowerTitle.includes('sport') || lowerTitle.includes('stadium')) smartImage = SMART_KEYWORDS.sports;
+      else if (lowerTitle.includes('tech') || lowerTitle.includes('ai') || lowerTitle.includes('space') || lowerTitle.includes('launch')) smartImage = SMART_KEYWORDS.tech;
+      else if (lowerTitle.includes('build') || lowerTitle.includes('project') || lowerTitle.includes('construction') || lowerTitle.includes('city')) smartImage = SMART_KEYWORDS.construction;
+      else if (lowerTitle.includes('flight') || lowerTitle.includes('aviation') || lowerTitle.includes('airport')) smartImage = SMART_KEYWORDS.aviation;
+      else if (lowerTitle.includes('health') || lowerTitle.includes('medical') || lowerTitle.includes('hospital')) smartImage = SMART_KEYWORDS.medical;
+
+      // Robust image extraction using fast-xml-parser attributes
+      let image = item.enclosure?.['@_url'] || 
+                  item['media:content']?.['@_url'] || 
+                  item['media:thumbnail']?.['@_url'];
+
+      // Fallback: search in description if no direct image tag
+      if (!image && description.includes('<img')) {
+        const imgMatch = description.match(/<img[\s\S]*?src=["']([\s\S]*?)["']/);
+        image = imgMatch?.[1];
       }
-      const d = new Date(rawDate);
-      return !isNaN(d.getTime()) ? d.toISOString() : new Date().toISOString();
-    };
 
-    const finalPubDate = normalizeDate(pubDateRaw);
-    const id = content.match(/<guid[\s\S]*?>([\s\S]*?)<\/guid>/)?.[1]?.trim() || link;
+      if (image && !image.startsWith('http') && !image.startsWith('//')) {
+        image = undefined;
+      }
 
-    // Smart Keyword Detection
-    const lowerTitle = title.toLowerCase();
-    let smartImage = null;
-    if (lowerTitle.includes('gold')) smartImage = SMART_KEYWORDS.gold;
-    else if (lowerTitle.includes('oil') || lowerTitle.includes('energy') || lowerTitle.includes('gas')) smartImage = SMART_KEYWORDS.oil;
-    else if (lowerTitle.includes('market') || lowerTitle.includes('stock') || lowerTitle.includes('finance') || lowerTitle.includes('bank')) smartImage = SMART_KEYWORDS.finance;
-    else if (lowerTitle.includes('meeting') || lowerTitle.includes('minister') || lowerTitle.includes('summit') || lowerTitle.includes('diplomacy')) smartImage = SMART_KEYWORDS.diplomacy;
-    else if (lowerTitle.includes('football') || lowerTitle.includes('cricket') || lowerTitle.includes('sport') || lowerTitle.includes('stadium')) smartImage = SMART_KEYWORDS.sports;
-    else if (lowerTitle.includes('tech') || lowerTitle.includes('ai') || lowerTitle.includes('space') || lowerTitle.includes('launch')) smartImage = SMART_KEYWORDS.tech;
-    else if (lowerTitle.includes('build') || lowerTitle.includes('project') || lowerTitle.includes('construction') || lowerTitle.includes('city')) smartImage = SMART_KEYWORDS.construction;
-    else if (lowerTitle.includes('flight') || lowerTitle.includes('aviation') || lowerTitle.includes('airport')) smartImage = SMART_KEYWORDS.aviation;
-    else if (lowerTitle.includes('health') || lowerTitle.includes('medical') || lowerTitle.includes('hospital')) smartImage = SMART_KEYWORDS.medical;
-
-    // Extract image from enclosure, media:content, or img tag
-    let image = content.match(/<enclosure[\s\S]*?url=["']([\s\S]*?)["']/)?.[1] || 
-                content.match(/<media:content[\s\S]*?url=["']([\s\S]*?)["']/)?.[1] ||
-                content.match(/<img[\s\S]*?src=["']([\s\S]*?)["']/)?.[1];
-
-    if (!image && description.includes('<img')) {
-      image = description.match(/<img[\s\S]*?src=["']([\s\S]*?)["']/)?.[1];
-    }
-
-    // Sanitize image URL: If it's a relative path, invalidate it so it uses the premium fallback
-    if (image && !image.startsWith('http') && !image.startsWith('//')) {
-      image = undefined;
-    }
-
-    if (title && link) {
-      // Create an SEO-optimized slug
       const slug = toSlug(title, link);
 
-      items.push({
+      return {
         id,
         slug,
         title: title.substring(0, 150),
@@ -152,18 +161,19 @@ function parseRSS(xml: string, source: string, category: 'gcc' | 'expat', langua
           .replace(/&amp;amp;/g, '&')
           .replace(/&amp;/g, '&')
           .trim()
-          .substring(0, 400) + '...',
+          .substring(0, 400) + (description.length > 400 ? '...' : ''),
         link,
         pubDate: finalPubDate,
         source,
         category,
         language,
         image: image || smartImage || getDeterministicFallback(slug),
-      });
-    }
+      };
+    }).filter((item: any) => item.title && item.link);
+  } catch (e) {
+    console.error(`RSS Parse Error for source ${source}:`, e);
+    return [];
   }
-
-  return items;
 }
 
 export async function GET(request: Request) {
