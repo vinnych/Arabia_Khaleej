@@ -6,12 +6,22 @@ import { notFound } from "next/navigation";
 // Since we use a transient cache for news, we can't easily pre-generate all pages.
 export const dynamic = 'force-dynamic';
 
-async function getArticle(slug: string) {
+async function getArticle(slug: string, lang: string = 'en') {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/news?slug=${slug}`, {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/news?slug=${slug}&lang=${lang}`, {
       next: { revalidate: 3600 }
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      // If not found in requested lang, try the other one as a fallback
+      const fallbackLang = lang === 'en' ? 'ar' : 'en';
+      const fallbackRes = await fetch(`${baseUrl}/api/news?slug=${slug}&lang=${fallbackLang}`, {
+        next: { revalidate: 3600 }
+      });
+      if (!fallbackRes.ok) return null;
+      const fallbackData = await fallbackRes.json();
+      return fallbackData.news?.[0] || null;
+    }
     const data = await res.json();
     if (data.status === 'success' && data.news?.[0]) {
       return data.news[0];
@@ -22,10 +32,18 @@ async function getArticle(slug: string) {
   return null;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const resolvedParams = await params;
+export async function generateMetadata({ 
+  params, 
+  searchParams 
+}: { 
+  params: Promise<{ slug: string }>,
+  searchParams: Promise<{ lang?: string }>
+}) {
+  const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
   const slug = resolvedParams.slug;
-  const article = await getArticle(slug);
+  const lang = resolvedSearch.lang === 'ar' ? 'ar' : 'en';
+  
+  const article = await getArticle(slug, lang);
   
   if (article) {
     // Truncate description to ~160 chars for optimal SEO
@@ -33,10 +51,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       ? article.description.substring(0, 157) + "..." 
       : article.description;
 
+    const isAr = article.language === 'ar' || /[\u0600-\u06FF]/.test(article.title);
+
     return pageMeta({
-      title: `${article.title}`,
+      title: article.title,
+      // If the article is already Arabic, we don't need a separate titleAr for the combined title
+      // unless we have an English translation (which we don't here).
+      // pageMeta will handle the logic.
+      titleAr: isAr ? undefined : undefined, 
       description: seoDescription,
-      path: `/news/${slug}`,
+      path: `/news/${slug}${lang === 'ar' ? '?lang=ar' : ''}`,
       image: article.image,
       type: 'article',
       datePublished: article.pubDate,
@@ -51,9 +75,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   });
 }
 
-export default async function NewsArticlePage({ params }: { params: Promise<{ slug: string }> }) {
-  const resolvedParams = await params;
-  const article = await getArticle(resolvedParams.slug);
+export default async function NewsArticlePage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ slug: string }>,
+  searchParams: Promise<{ lang?: string }>
+}) {
+  const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
+  const lang = resolvedSearch.lang === 'ar' ? 'ar' : 'en';
+  const article = await getArticle(resolvedParams.slug, lang);
 
   if (!article) {
     notFound();
@@ -75,6 +106,7 @@ export default async function NewsArticlePage({ params }: { params: Promise<{ sl
         datePublished={article.pubDate}
         authorName={article.source}
         url={`/news/${resolvedParams.slug}`}
+        language={article.language === 'ar' ? 'ar' : article.language === 'en' ? 'en' : ['en', 'ar']}
       />
       <BreadcrumbSchema items={breadcrumbs} />
       <WebPageSchema 

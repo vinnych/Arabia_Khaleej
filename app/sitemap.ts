@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const countries = ['qatar', 'uae', 'saudi-arabia', 'kuwait', 'oman', 'bahrain'];
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
@@ -24,9 +25,32 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8
   }));
 
-  // Note: For [slug] routes like /news/[slug], we can't easily list all of them
-  // as they are fetched from RSS. In a real production sitemap, we might
-  // fetch them here or use a sitemap index. For now, we'll focus on the main hubs.
+  // Dynamic News Routes — Fetch latest 100 from each language to ensure indexing
+  let newsRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const [enRes, arRes] = await Promise.all([
+      fetch(`${baseUrl}/api/news?lang=en`).then(r => r.json()).catch(() => ({ news: [] })),
+      fetch(`${baseUrl}/api/news?lang=ar`).then(r => r.json()).catch(() => ({ news: [] }))
+    ]);
 
-  return [...staticRoutes, ...countryRoutes];
+    const enNews = (enRes.news || []).map((item: any) => ({
+      url: `${SITE_URL}/news/${item.slug}`,
+      lastModified: new Date(item.pubDate),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7
+    }));
+
+    const arNews = (arRes.news || []).map((item: any) => ({
+      url: `${SITE_URL}/news/${item.slug}?lang=ar`,
+      lastModified: new Date(item.pubDate),
+      changeFrequency: 'monthly' as const,
+      priority: 0.7
+    }));
+
+    newsRoutes = [...enNews, ...arNews];
+  } catch (e) {
+    console.error('Sitemap news fetch error:', e);
+  }
+
+  return [...staticRoutes, ...countryRoutes, ...newsRoutes];
 }

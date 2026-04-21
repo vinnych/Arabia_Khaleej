@@ -153,6 +153,7 @@ export function NewsArticleSchema({
   publisherName = SITE_NAME,
   publisherLogo = `${SITE_URL}/favicon-emblem.png`,
   url,
+  language = ["en", "ar"],
 }: {
   title: string;
   description: string;
@@ -163,6 +164,7 @@ export function NewsArticleSchema({
   publisherName?: string;
   publisherLogo?: string;
   url: string;
+  language?: string | string[];
 }) {
   const data = {
     headline: title,
@@ -170,6 +172,7 @@ export function NewsArticleSchema({
     image: image ? [image] : [`${SITE_URL}/opengraph-image`],
     datePublished,
     dateModified: dateModified ?? datePublished,
+    inLanguage: language,
     author: {
       "@type": "Organization",
       name: authorName,
