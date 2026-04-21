@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Newspaper, ExternalLink, Clock, RefreshCw, AlertCircle, Globe, Users } from "lucide-react";
+import { ExternalLink, RefreshCw, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import Link from "next/link";
 import Image from "next/image";
+import { getDeterministicFallback } from "@/lib/fallbacks";
 
 interface NewsItem {
   id: string;
@@ -64,73 +65,40 @@ export default function NewsClient() {
     PHILIPPINES: t('philippines'),
   };
 
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString(language === 'ar' ? 'ar-QA' : 'en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   return (
-    <div className={`w-full max-w-6xl mx-auto px-4 py-12 ${isRTL ? 'font-serif-ar' : ''}`}>
-      
-      {/* Hero Image Section */}
-      <div className="relative w-full h-[200px] sm:h-[300px] rounded-[2.5rem] overflow-hidden mb-12 border border-brand-gold/20 shadow-2xl group">
-        <Image 
-          src="/press-terminal-hero.png" 
-          alt={t('pressTerminal')} 
-          fill 
-          className="object-cover group-hover:scale-105 transition-transform duration-1000"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-brand-obsidian/40 to-transparent" />
-        <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-brand-gold/20 backdrop-blur-xl border border-brand-gold/30 flex items-center justify-center text-brand-gold">
-              <RefreshCw size={24} className={loading ? 'animate-spin' : ''} />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-brand-gold mb-1">
-                {t('officialUpdates')}
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                {t('pressTerminal')}
-              </h1>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className={`w-full max-w-6xl mx-auto px-4 pt-6 pb-[calc(2rem+env(safe-area-inset-bottom))] ${isRTL ? 'font-serif-ar' : ''}`}>
 
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-        <div className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-gold/10 border border-brand-gold/20 text-accent">
-            <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
-            <span className="text-[10px] font-black uppercase tracking-widest">{t('officialUpdates')}</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-foreground tracking-tight">
-            {t('pressTerminal')}
-          </h1>
-          <p className="text-foreground/50 max-w-xl text-lg">
-            {t('newsDesc')}
+      {/* Header — image clipped inside letterforms */}
+      <div className="text-center mb-6 pt-2">
+        <h1
+          className="font-black uppercase leading-[0.9] tracking-tight select-none"
+          style={{
+            fontSize: 'clamp(3.5rem, 18vw, 9rem)',
+            backgroundImage: "url('/press-terminal-hero.png')",
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            color: 'transparent',
+            fontFamily: 'var(--font-playfair), Georgia, serif',
+          }}
+        >
+          UPDATES
+        </h1>
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.25em] text-foreground/40">
+            {t('officialUpdates')}
           </p>
-        </div>
-        
-      <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={fetchNews}
-            className="glass px-6 py-3 rounded-2xl border-brand-gold/10 hover:border-brand-gold/30 transition-all flex items-center gap-3 group"
             disabled={loading}
+            style={{ touchAction: 'manipulation' }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass border-brand-gold/15 hover:border-brand-gold/35 active:scale-95 transition-all duration-150 select-none"
           >
-            <RefreshCw size={18} className={`${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'} text-accent`} />
-            <span className="text-xs font-bold uppercase tracking-widest">
+            <RefreshCw size={12} className={`${loading ? 'animate-spin' : ''} text-accent`} />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/55">
               {loading ? t('processing') : t('refresh')}
             </span>
           </button>
@@ -138,96 +106,90 @@ export default function NewsClient() {
       </div>
 
       {/* Legal Banner */}
-      <div className="glass p-4 rounded-2xl border-l-4 border-l-brand-gold mb-12 flex items-start gap-4">
-        <AlertCircle className="text-brand-gold mt-1 shrink-0" size={20} />
-        <p className="text-xs md:text-sm text-foreground/60 italic leading-relaxed">
+      <div className="glass px-4 py-3 rounded-xl border-l-2 border-l-brand-gold mb-6 flex items-start gap-3">
+        <AlertCircle className="text-brand-gold mt-0.5 shrink-0" size={14} />
+        <p className="text-[11px] text-foreground/55 italic leading-relaxed">
           {t('newsDisclaimer')}
         </p>
       </div>
 
       {/* Content Grid */}
       {loading && news.length === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="glass h-64 rounded-3xl animate-pulse bg-white/5 border-white/5" />
+            <div key={i} className="glass h-52 rounded-2xl animate-pulse bg-white/5 border-white/5" />
           ))}
         </div>
       ) : error ? (
-        <div className="glass p-12 rounded-[2.5rem] text-center border-brand-gold/10">
-          <p className="text-foreground/40 mb-4">{t('somethingWentWrong')}</p>
-          <button onClick={fetchNews} className="text-accent font-bold uppercase tracking-widest hover:underline">Retry</button>
+        <div className="glass p-10 rounded-2xl text-center border-brand-gold/10">
+          <p className="text-foreground/40 mb-4 text-sm">{t('somethingWentWrong')}</p>
+          <button
+            onClick={fetchNews}
+            style={{ touchAction: 'manipulation' }}
+            className="text-accent font-bold uppercase tracking-widest text-xs hover:underline active:opacity-70"
+          >
+            Retry
+          </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
           {news.map((item, idx) => (
-            <Link 
+            <Link
               key={item.id + idx}
               href={`/news/${item.slug}`}
-              className={`group glass p-0 rounded-[2.5rem] border-brand-gold/5 hover:border-brand-gold/20 transition-all hover:scale-[1.02] flex flex-col h-full shadow-lg hover:shadow-2xl relative overflow-hidden ${
+              style={{ touchAction: 'manipulation' }}
+              className={`group glass p-0 rounded-2xl border-brand-gold/5 hover:border-brand-gold/20 active:scale-[0.98] transition-all duration-150 flex flex-col h-full overflow-hidden select-none ${
                 item.category === 'expat' ? 'border-accent/10' : ''
               }`}
             >
               {/* Article Image */}
-              <div className="relative w-full h-48 overflow-hidden">
+              <div className="relative w-full h-40 sm:h-44 overflow-hidden shrink-0">
                 {item.image && (
-                  <Image 
-                    src={item.image} 
-                    alt={item.title} 
-                    fill 
-                    className="object-cover group-hover:scale-110 transition-transform duration-700"
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                     unoptimized={true}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = 'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=800&auto=format&fit=crop';
-                      target.onerror = null; // Prevent infinite loop if fallback also fails
+                      target.src = getDeterministicFallback(item.slug);
+                      target.onerror = null;
                     }}
                   />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                {/* Source badge overlaid on image */}
+                <div className="absolute bottom-2.5 left-3 flex items-center gap-1.5">
+                  <span className={`text-[9px] font-bold uppercase tracking-wider bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full ${
+                    item.category === 'expat' ? 'text-brand-gold' : 'text-white/90'
+                  }`}>
+                    {sourceLabels[item.source] || item.source}
+                  </span>
+                </div>
               </div>
 
-              <div className="p-8 pt-6 flex flex-col h-full">
-                {/* Source Badge */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-black uppercase tracking-widest bg-brand-gold/10 px-3 py-1 rounded-full border border-brand-gold/10 ${
-                      item.category === 'expat' ? 'text-accent' : 'text-brand-gold'
-                    }`}>
-                      {sourceLabels[item.source] || item.source}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-foreground/30 px-2">
-                      {item.category === 'gcc' ? t('gccNews') : t('expatNews')}
-                    </span>
-                  </div>
-                </div>
-
-                <h2 className={`text-xl font-bold text-foreground leading-tight group-hover:text-accent transition-colors line-clamp-3 ${
-                  item.language === 'regional' ? (item.source === 'PAKISTAN' ? 'font-serif-ur text-2xl' : 'font-serif-hi') : ''
+              <div className="p-4 sm:p-5 flex flex-col flex-1">
+                <h2 className={`text-sm sm:text-base font-semibold text-foreground leading-snug group-hover:text-accent transition-colors duration-150 line-clamp-3 flex-1 ${
+                  item.language === 'regional' ? (item.source === 'PAKISTAN' ? 'font-serif-ur text-base' : 'font-serif-hi') : ''
                 }`}>
                   {item.title}
                 </h2>
-
-                <div className="flex items-center justify-between mt-auto pt-6">
-                  <ExternalLink size={14} className="text-brand-gold/40 group-hover:text-brand-gold transition-colors ml-auto" />
+                <div className="flex items-center justify-end mt-3 pt-3 border-t border-brand-gold/8">
+                  <ExternalLink size={12} className="text-brand-gold/40 group-hover:text-brand-gold transition-colors duration-150" />
                 </div>
-
-              </div>
-
-              {/* Decorative background element */}
-              <div className="absolute -right-4 -bottom-4 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity">
-                {item.category === 'expat' ? <Users size={120} /> : <Newspaper size={120} />}
               </div>
             </Link>
           ))}
         </div>
       )}
 
-      {/* Footer Info */}
-      <div className="mt-16 text-center space-y-4">
-        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.4em]">
+      {/* Footer */}
+      <div className="mt-10 text-center">
+        <p className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.3em]">
           {t('transparencyNotice')}
         </p>
-        <div className="w-12 h-[1px] bg-brand-gold/20 mx-auto" />
+        <div className="w-10 h-[1px] bg-brand-gold/20 mx-auto mt-3" />
       </div>
     </div>
   );
