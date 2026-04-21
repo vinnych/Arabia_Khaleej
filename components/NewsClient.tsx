@@ -75,9 +75,7 @@ export default function NewsClient() {
           className="font-black uppercase leading-[0.9] tracking-tight select-none"
           style={{
             fontSize: 'clamp(3.5rem, 18vw, 9rem)',
-            backgroundImage: "url('/press-terminal-hero.png')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundImage: 'linear-gradient(135deg, #8B6914 0%, #D4AF37 25%, #F5E090 50%, #C5A028 75%, #8B6914 100%)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
