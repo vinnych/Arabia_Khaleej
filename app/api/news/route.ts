@@ -140,6 +140,11 @@ function parseRSS(xml: string, source: string, category: 'gcc' | 'expat', langua
       image = description.match(/<img[\s\S]*?src=["']([\s\S]*?)["']/)?.[1];
     }
 
+    // Sanitize image URL: If it's a relative path, invalidate it so it uses the premium fallback
+    if (image && !image.startsWith('http') && !image.startsWith('//')) {
+      image = undefined;
+    }
+
     if (title && link) {
       // Create a deterministic slug from the link (URL-safe)
       const slug = link.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0).toString(16) + 
