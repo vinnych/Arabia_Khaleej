@@ -15,7 +15,9 @@ export default function FinanceTicker() {
     
     async function fetchData() {
       try {
-        const res = await fetch("/api/market-data");
+        const res = await fetch("/api/market-data", {
+          signal: AbortSignal.timeout(8000) // 8s timeout
+        });
         const json = await res.json();
         if (json.status === 'success') {
           const rateMap = json.currencies.reduce((acc: any, curr: any) => {

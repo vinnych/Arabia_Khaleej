@@ -6,6 +6,7 @@ import { useLanguage } from "@/lib/i18n";
 import Link from "next/link";
 import Image from "next/image";
 import { getDeterministicFallback } from "@/lib/fallbacks";
+import MobileFAB from "./MobileFAB";
 
 interface NewsItem {
   id: string;
@@ -36,7 +37,8 @@ export default function NewsClient() {
     try {
       const res = await fetch(`/api/news?lang=${language}&t=${Date.now()}`, {
         cache: 'no-store',
-        headers: { 'Pragma': 'no-cache' }
+        headers: { 'Pragma': 'no-cache' },
+        signal: AbortSignal.timeout(10000) // 10s timeout
       });
       if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
@@ -71,7 +73,7 @@ export default function NewsClient() {
 
 
   return (
-    <div className={`w-full max-w-6xl mx-auto px-4 pt-6 pb-[calc(2rem+env(safe-area-inset-bottom))] ${isRTL ? 'font-serif-ar' : ''}`}>
+    <div className={`w-full max-w-6xl mx-auto px-4 pt-6 pb-32 md:pb-12 ${isRTL ? 'font-serif-ar' : ''}`}>
 
       {/* Header — image clipped inside letterforms */}
       <div className="text-center mb-6 pt-2">
@@ -97,7 +99,7 @@ export default function NewsClient() {
             onClick={fetchNews}
             disabled={loading}
             style={{ touchAction: 'manipulation' }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass border-brand-gold/15 hover:border-brand-gold/35 active:scale-95 transition-all duration-150 select-none"
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass border-brand-gold/15 hover:border-brand-gold/35 active:scale-95 transition-all duration-150 select-none"
           >
             <RefreshCw size={12} className={`${loading ? 'animate-spin' : ''} text-accent`} />
             <span className="text-[10px] font-semibold uppercase tracking-wider text-foreground/55">
@@ -106,6 +108,14 @@ export default function NewsClient() {
           </button>
         </div>
       </div>
+
+      {/* Mobile Floating Refresh Button - High Reachability */}
+      <MobileFAB 
+        icon={RefreshCw} 
+        onClick={fetchNews} 
+        label={loading ? t('processing') : t('refresh')}
+        className={loading ? "opacity-50 pointer-events-none" : ""}
+      />
 
       {/* Legal Banner */}
       <div className="glass px-4 py-3 rounded-xl border-l-2 border-l-brand-gold mb-6 flex items-start gap-3">
@@ -140,39 +150,51 @@ export default function NewsClient() {
               key={item.id + idx}
               href={`/news/${item.slug}`}
               style={{ touchAction: 'manipulation' }}
-              className={`group glass p-0 rounded-2xl border-brand-gold/5 hover:border-brand-gold/20 active:scale-[0.98] transition-all duration-150 flex flex-col h-full overflow-hidden select-none ${
+              className={`group relative glass p-0 rounded-[2rem] border-brand-gold/10 hover:border-brand-gold/30 active:scale-[0.97] transition-all duration-300 flex flex-col h-full overflow-hidden select-none shadow-[0_10px_30px_rgba(0,0,0,0.1)] active:shadow-none ${
                 item.category === 'expat' ? 'border-accent/10' : ''
               }`}
             >
+              {/* Premium Reflection Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none z-10 opacity-0 group-active:opacity-100 transition-opacity" />
+
               {/* Article Image */}
-              <div className="relative w-full h-40 sm:h-44 overflow-hidden shrink-0">
+              <div className="relative w-full h-48 sm:h-52 overflow-hidden shrink-0">
                 <Image
                   src={failedImages.has(item.id) ? getDeterministicFallback(item.slug) : (item.image || getDeterministicFallback(item.slug))}
                   alt={item.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-110 group-active:scale-105 transition-transform duration-700 ease-out"
                   unoptimized={true}
                   onError={() => markFailed(item.id)}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                
+                {/* Image Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                
                 {/* Source badge overlaid on image */}
-                <div className="absolute bottom-2.5 left-3 flex items-center gap-1.5">
-                  <span className={`text-[9px] font-bold uppercase tracking-wider bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded-full ${
-                    item.category === 'expat' ? 'text-brand-gold' : 'text-white/90'
+                <div className="absolute bottom-4 left-4 flex items-center gap-1.5 z-20">
+                  <span className={`text-[10px] font-black uppercase tracking-widest bg-brand-obsidian/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 ${
+                    item.category === 'expat' ? 'text-accent' : 'text-brand-gold'
                   }`}>
                     {sourceLabels[item.source] || item.source}
                   </span>
                 </div>
               </div>
 
-              <div className="p-4 sm:p-5 flex flex-col flex-1">
-                <h2 className={`text-sm sm:text-base font-semibold text-foreground leading-snug group-hover:text-accent transition-colors duration-150 line-clamp-3 flex-1 ${
-                  item.language === 'regional' ? (item.source === 'PAKISTAN' ? 'font-serif-ur text-base' : 'font-serif-hi') : ''
+              <div className="p-5 sm:p-6 flex flex-col flex-1 relative z-20">
+                <h2 className={`text-base sm:text-lg font-bold text-foreground leading-tight group-hover:text-brand-gold transition-colors duration-300 line-clamp-3 flex-1 ${
+                  item.language === 'regional' ? (item.source === 'PAKISTAN' ? 'font-serif-ur text-lg' : 'font-serif-hi') : ''
                 }`}>
                   {item.title}
                 </h2>
-                <div className="flex items-center justify-end mt-3 pt-3 border-t border-brand-gold/8">
-                  <ExternalLink size={12} className="text-brand-gold/40 group-hover:text-brand-gold transition-colors duration-150" />
+                
+                <div className="flex items-center justify-between mt-5 pt-4 border-t border-brand-gold/10">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-foreground/30">
+                    {new Date(item.pubDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short' })}
+                  </span>
+                  <div className="w-8 h-8 rounded-full bg-brand-gold/5 flex items-center justify-center group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all duration-300">
+                    <ExternalLink size={14} className="opacity-40 group-hover:opacity-100" />
+                  </div>
                 </div>
               </div>
             </Link>

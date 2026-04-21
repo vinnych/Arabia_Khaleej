@@ -10,12 +10,12 @@ export default function ThemeToggle() {
 
   useEffect(() => setMounted(true), []);
 
-  if (!mounted) return <div className="p-2 w-10 h-10" />;
+  if (!mounted) return <div className="p-2 w-12 h-12" />;
 
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="flex items-center justify-center w-10 h-10 rounded-full glass hover:scale-110 active:scale-95 transition-all duration-500 group relative border-brand-gold/20 shadow-lg"
+      className="flex items-center justify-center w-12 h-12 rounded-full glass hover:scale-110 active:scale-90 transition-all duration-500 group relative border-brand-gold/20 shadow-lg"
       aria-label="Toggle Theme"
     >
       <div className="relative w-5 h-5">

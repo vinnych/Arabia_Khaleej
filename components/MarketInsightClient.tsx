@@ -21,7 +21,9 @@ export default function MarketInsightClient() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("/api/market-data");
+        const res = await fetch("/api/market-data", {
+          signal: AbortSignal.timeout(10000) // 10s timeout
+        });
         const json = await res.json();
         if (json.status === 'success') {
           setData(json);
@@ -52,7 +54,7 @@ export default function MarketInsightClient() {
   ];
 
   return (
-    <div className={`flex flex-col items-center justify-start min-h-screen pt-24 pb-20 px-4 max-w-7xl mx-auto w-full ${isRTL ? 'font-serif-ar text-right' : 'text-left'}`}>
+    <div className={`flex flex-col items-center justify-start min-h-screen pt-24 pb-32 px-4 max-w-7xl mx-auto w-full ${isRTL ? 'font-serif-ar text-right' : 'text-left'}`}>
       <div className="w-full mb-8">
         <Breadcrumbs items={breadcrumbItems} isRTL={isRTL} />
       </div>
@@ -117,31 +119,36 @@ export default function MarketInsightClient() {
           {/* Commodities Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8" role="list" aria-label={t('commodities')}>
             {data?.commodities.map((item) => (
-              <div key={item.id} role="listitem" className="glass rounded-[2.5rem] p-8 border-brand-gold/15 group hover:border-brand-gold/30 transition-all">
-                <div className={`flex items-center gap-4 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className="w-12 h-12 rounded-2xl bg-brand-gold/10 flex items-center justify-center text-accent group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all">
-                    {item.id === 'gold' ? <Coins size={24} /> : <Activity size={24} />}
+              <div key={item.id} role="listitem" className="group relative glass rounded-[2.5rem] p-8 border border-brand-gold/15 hover:border-brand-gold/40 active:scale-[0.98] transition-all duration-300 shadow-xl overflow-hidden select-none">
+                {/* Subtle Reflection Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                <div className={`flex items-center gap-4 mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="w-14 h-14 rounded-[1.5rem] bg-brand-gold/10 flex items-center justify-center text-brand-gold group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all duration-500 shadow-inner">
+                    {item.id === 'gold' ? <Coins size={28} /> : <Activity size={28} />}
                   </div>
                   <div className={isRTL ? 'text-right' : ''}>
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-foreground/40">{item.symbol}</p>
-                    <h3 className="text-lg font-black serif">{item.id === 'gold' ? t('gold') : t('brentCrude')}</h3>
+                    <p className="text-[10px] uppercase font-black tracking-[0.3em] text-foreground/40">{item.symbol}</p>
+                    <h3 className="text-xl font-black serif leading-tight">{item.id === 'gold' ? t('gold') : t('brentCrude')}</h3>
                   </div>
                 </div>
+                
                 <div className={`flex items-end justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className={isRTL ? 'text-right' : ''}>
-                    <p className="text-3xl font-black tabular-nums tracking-tighter">
+                    <p className="text-4xl font-black tabular-nums tracking-tighter mb-1">
                       ${item.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </p>
-                    <p className={`text-xs font-bold flex items-center gap-1 mt-1 ${item.change >= 0 ? 'text-green-500' : 'text-red-500'} ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      {item.change >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-                      {Math.abs(item.change).toFixed(2)}%
+                    <p className={`text-[11px] font-black flex items-center gap-1.5 ${item.change >= 0 ? 'text-green-500' : 'text-red-400'} ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      {item.change >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                      <span className="tracking-tight">{Math.abs(item.change).toFixed(2)}%</span>
                     </p>
                   </div>
-                  <div className="h-12 w-24 bg-brand-gold/5 rounded-lg flex items-center justify-center overflow-hidden">
-                     {/* Simplified Chart Placeholder */}
-                     <div className="w-full h-1/2 flex items-end gap-1 px-2">
-                        {[40, 70, 50, 90, 60, 80, 100].map((h, i) => (
-                          <div key={i} className="flex-1 bg-brand-gold/20 rounded-t-sm" style={{ height: `${h}%` }} />
+                  
+                  {/* High-Fidelity Chart Placeholder */}
+                  <div className="h-16 w-28 bg-brand-gold/5 rounded-2xl flex items-center justify-center overflow-hidden border border-brand-gold/10">
+                     <div className="w-full h-1/2 flex items-end gap-1.5 px-3">
+                        {[30, 60, 45, 80, 55, 75, 95].map((h, i) => (
+                          <div key={i} className="flex-1 bg-brand-gold/30 rounded-full animate-in slide-in-from-bottom duration-1000 fill-mode-both" style={{ height: `${h}%`, transitionDelay: `${i * 100}ms` }} />
                         ))}
                      </div>
                   </div>

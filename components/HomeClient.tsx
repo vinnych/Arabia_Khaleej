@@ -20,7 +20,7 @@ export default function HomeClient() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-center px-4 relative py-8 pb-[calc(2rem+env(safe-area-inset-bottom))] ${isRTL ? 'font-serif-ar' : ''}`}>
+    <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-center px-4 relative py-8 pb-32 md:pb-12 ${isRTL ? 'font-serif-ar' : ''}`}>
       
       {/* Visually Hidden H1 for SEO */}
       <h1 className="sr-only">{t('siteName')} — {t('siteSlogan')}</h1>
@@ -73,7 +73,7 @@ export default function HomeClient() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 px-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 px-2">
           {[
             { id: 'saudi-arabia', key: 'saudiArabia', flag: '/flags/saudi_new.png' },
             { id: 'united-arab-emirates', key: 'uae', flag: '/flags/uae_new.png' },
@@ -86,24 +86,32 @@ export default function HomeClient() {
               key={country.id}
               href={`/countries/${country.id}`}
               style={{ touchAction: 'manipulation' }}
-              className="group relative glass rounded-2xl border-brand-gold/10 hover:border-brand-gold/40 active:scale-[0.97] transition-all duration-150 hover:-translate-y-1 hover:z-10 overflow-hidden flex flex-col min-h-[96px] sm:min-h-[140px] select-none"
+              className="group relative glass rounded-[2rem] border border-brand-gold/10 hover:border-brand-gold/50 active:scale-[0.95] transition-all duration-500 overflow-hidden flex flex-col min-h-[130px] sm:min-h-[160px] select-none shadow-xl active:shadow-none"
             >
+              {/* Background Flag with high-fidelity treatment */}
               <div className="absolute inset-0 z-0">
                 <Image
                   src={country.flag}
                   alt={t(country.key)}
                   fill
-                  sizes="(max-width: 768px) 33vw, (max-width: 1024px) 33vw, 16vw"
-                  className="object-cover opacity-20 group-hover:opacity-40 transition-all duration-500 group-hover:scale-105 transform"
+                  sizes="(max-width: 768px) 50vw, 16vw"
+                  className="object-cover opacity-30 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-brand-obsidian/40 to-transparent z-10" />
+                
+                {/* Glossy Reflection Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-15" />
               </div>
 
-              <div className="relative z-20 p-3 sm:p-5 flex flex-col items-center justify-end h-full text-center">
-                <span className="text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-[0.15em] sm:tracking-[0.2em] drop-shadow-md leading-tight">
+              {/* Content */}
+              <div className="relative z-20 p-5 flex flex-col items-center justify-end h-full text-center">
+                <div className="mb-2 w-6 h-[2px] bg-brand-gold/30 group-hover:w-12 group-hover:bg-brand-gold transition-all duration-500" />
+                <span className="text-[10px] sm:text-[11px] font-black text-white uppercase tracking-[0.2em] drop-shadow-lg leading-tight group-hover:text-brand-gold transition-colors duration-300">
                   {t(country.key)}
                 </span>
-                <div className="mt-2 w-3 h-[1px] bg-brand-gold/50 group-hover:w-6 group-hover:bg-brand-gold transition-all duration-300" />
+                
+                {/* Active Indicator (Mobile only visual) */}
+                <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-brand-gold opacity-0 group-active:opacity-100 transition-opacity" />
               </div>
             </Link>
           ))}

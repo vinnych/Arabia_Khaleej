@@ -8,6 +8,9 @@ import HijriCalendar from "@/components/HijriCalendar";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { Breadcrumbs } from "@/lib/seo";
+import MobileFAB from "./MobileFAB";
+import { useRouter, usePathname } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 
 interface PrayerClientProps {
   initialCity?: {
@@ -21,6 +24,8 @@ interface PrayerClientProps {
 
 export default function PrayerClient({ initialCity }: PrayerClientProps) {
   const { t, isRTL, language } = useLanguage();
+  const router = useRouter();
+  const pathname = usePathname();
   
   const [selectedCity, setSelectedCity] = useState<any>(initialCity || {
     name: GCC_COUNTRIES[0].capital,
@@ -42,20 +47,37 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
   useEffect(() => {
     // IP-based Geolocation only if no initialCity was provided
     if (mounted && !initialCity) {
+      let isSubscribed = true;
+
       async function detectLocation() {
         try {
-          const res = await fetch("https://freeipapi.com/api/json");
+          const res = await fetch("https://freeipapi.com/api/json", {
+            signal: AbortSignal.timeout(5000) // 5s timeout
+          });
+          
+          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+          
           const data = await res.json();
-          if (data.latitude && data.longitude) {
+          if (isSubscribed && data.latitude && data.longitude) {
             const name = data.cityName || t('yourLocation');
             setDetectedCity(name);
-            setSelectedCity({ name, lat: data.latitude, lng: data.longitude, isAuto: true });
+            setSelectedCity({ 
+              name, 
+              lat: data.latitude, 
+              lng: data.longitude, 
+              isAuto: true 
+            });
           }
         } catch (e) {
-          console.error("IP detection failed", e);
+          // Only log if it's not a common network/abort error to reduce console noise
+          if (isSubscribed) {
+            console.warn("Prayer Times: IP geolocation unavailable (falling back to default)", e);
+          }
         }
       }
+      
       detectLocation();
+      return () => { isSubscribed = false; };
     }
   }, [mounted, initialCity, t]);
 
@@ -77,7 +99,12 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
 
       try {
         // API 1: Aladhan API (Primary)
-        const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${selectedCity.lat}&longitude=${selectedCity.lng}&method=4`);
+        const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${selectedCity.lat}&longitude=${selectedCity.lng}&method=4`, {
+          signal: AbortSignal.timeout(8000) // 8s timeout
+        });
+        
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        
         const data = await res.json();
         
         if (data && data.code === 200) {
@@ -94,7 +121,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
           return;
         }
       } catch (e) {
-        console.error("Primary API failed, falling back to local engine", e);
+        console.warn("Prayer Times: Aladhan API unavailable, using local engine", e);
       }
 
       // API 2: Adhan Local Engine (Failover)
@@ -142,7 +169,20 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
   }
 
   return (
-    <div className={`flex flex-col items-center justify-start min-h-screen pt-24 pb-20 px-4 relative ${isRTL ? 'font-serif-ar' : ''}`}>
+    <div className={`flex flex-col items-center justify-start min-h-screen pt-24 pb-32 px-4 relative ${isRTL ? 'font-serif-ar' : ''}`}>
+      {/* Mobile Back FAB - Ergonomic */}
+      <MobileFAB 
+        icon={ChevronLeft} 
+        onClick={() => {
+          if (pathname === '/prayer') {
+            router.push('/');
+          } else {
+            router.back();
+          }
+        }} 
+        label={t('back')}
+        className={isRTL ? "[&_svg]:rotate-180" : ""}
+      />
       <div className="w-full max-w-4xl mx-auto mb-8">
         <Breadcrumbs items={breadcrumbItems} isRTL={isRTL} />
       </div>
@@ -222,20 +262,34 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
                   return (
                     <div 
                       key={name} 
-                      className={`flex flex-col items-center p-5 rounded-3xl border transition-all relative overflow-hidden ${
+                      className={`flex flex-col items-center p-6 rounded-[2rem] border transition-all duration-500 relative overflow-hidden select-none active:scale-95 ${
                         isActive 
-                        ? "bg-brand-gold text-brand-obsidian border-brand-gold shadow-xl scale-110 z-10" 
-                        : "bg-white/60 dark:bg-brand-obsidian/20 border-brand-gold/10 hover:border-brand-gold/30 shadow-sm"
+                        ? "bg-brand-gold text-brand-obsidian border-brand-gold shadow-[0_10px_40px_rgba(212,175,55,0.4)] scale-110 z-10" 
+                        : "bg-white/5 dark:bg-brand-obsidian/40 border-brand-gold/10 hover:border-brand-gold/30 shadow-sm"
                       }`}
                     >
+                      {/* Premium Glow for Active Card */}
                       {isActive && (
-                        <div className={`absolute top-2 ${isRTL ? 'left-2' : 'right-2'} flex items-center gap-1.5`}>
-                          <span className="text-[7px] font-black uppercase tracking-tighter opacity-70">NEXT</span>
-                          <div className="w-1.5 h-1.5 rounded-full bg-brand-obsidian/70 animate-pulse" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent pointer-events-none" />
+                      )}
+                      
+                      {isActive && (
+                        <div className={`absolute top-2 ${isRTL ? 'left-3' : 'right-3'} flex items-center gap-1.5`}>
+                          <div className="w-1.5 h-1.5 rounded-full bg-brand-obsidian animate-pulse" />
                         </div>
                       )}
-                      <span className={`text-[10px] uppercase tracking-[0.3em] font-bold mb-3 ${isActive ? "text-brand-obsidian/60" : "text-accent"}`}>{displayName}</span>
-                      <span className="text-xl sm:text-2xl font-black tabular-nums">{time}</span>
+                      
+                      <span className={`text-[9px] uppercase tracking-[0.25em] font-black mb-3 ${isActive ? "text-brand-obsidian/70" : "text-brand-gold"}`}>
+                        {displayName}
+                      </span>
+                      <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tighter">
+                        {time}
+                      </span>
+                      
+                      {/* Active Label (Mobile only) */}
+                      {isActive && (
+                        <span className="absolute bottom-2 text-[6px] font-black uppercase tracking-widest opacity-40">Active</span>
+                      )}
                     </div>
                   );
                 })}

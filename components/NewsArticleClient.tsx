@@ -6,6 +6,8 @@ import { Calendar, ChevronLeft, ExternalLink, Globe, Newspaper, Share2, Clock, A
 import Link from "next/link";
 import Image from "next/image";
 import { getDeterministicFallback } from "@/lib/fallbacks";
+import MobileFAB from "./MobileFAB";
+import { useRouter } from "next/navigation";
 
 interface NewsItem {
   id: string;
@@ -22,6 +24,7 @@ interface NewsItem {
 
 export default function NewsArticleClient({ initialArticle }: { initialArticle: NewsItem }) {
   const { t, isRTL, language } = useLanguage();
+  const router = useRouter();
   const [imgError, setImgError] = useState(false);
   const article = initialArticle;
 
@@ -64,15 +67,23 @@ export default function NewsArticleClient({ initialArticle }: { initialArticle: 
   };
 
   return (
-    <div className={`w-full max-w-4xl mx-auto px-4 py-12 ${isRTL ? 'font-serif-ar' : ''}`}>
+    <div className={`w-full max-w-4xl mx-auto px-4 py-12 pb-32 ${isRTL ? 'font-serif-ar' : ''}`}>
       {/* Navigation */}
       <Link 
         href="/news" 
-        className="inline-flex items-center gap-2 text-foreground/40 hover:text-accent transition-colors mb-12 group"
+        className="hidden md:inline-flex items-center gap-2 text-foreground/40 hover:text-accent transition-colors mb-12 group"
       >
         <ChevronLeft size={20} className={isRTL ? 'rotate-180' : ''} />
         <span className="text-xs font-bold uppercase tracking-widest">{t('back')}</span>
       </Link>
+
+      {/* Mobile Back FAB - Ergonomic */}
+      <MobileFAB 
+        icon={ChevronLeft} 
+        onClick={() => router.back()} 
+        label={t('back')}
+        className={isRTL ? "[&_svg]:rotate-180" : ""}
+      />
 
       <article className="space-y-12">
         {/* Header Metadata */}
