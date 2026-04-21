@@ -11,23 +11,23 @@ export default function HomeClient() {
   const { t, isRTL } = useLanguage();
 
   const NAV_LINKS = [
-    { name: t('prayerTimes'), href: "/prayer", desc: t('prayerDesc'), icon: Clock },
-    { name: t('marketInsights'), href: "/market-insight", desc: t('marketDesc'), icon: TrendingUp },
-    { name: t('pressTerminal'), href: "/news", desc: t('newsDesc'), icon: Newspaper },
-    { name: t('boutiqueEnquiry'), href: "/join", desc: t('boutiqueDesc'), icon: UserPlus },
+    { name: t('prayerTimes'), href: "/prayer", icon: Clock },
+    { name: t('marketInsights'), href: "/market-insight", icon: TrendingUp },
+    { name: t('pressTerminal'), href: "/news", icon: Newspaper },
+    { name: t('boutiqueEnquiry'), href: "/join", icon: UserPlus },
   ];
 
   useEffect(() => setMounted(true), []);
 
   return (
-    <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-center px-4 relative py-6 ${isRTL ? 'font-serif-ar' : ''}`}>
+    <div className={`flex flex-col items-center justify-center min-h-[calc(100vh-80px)] text-center px-4 relative py-8 pb-[calc(2rem+env(safe-area-inset-bottom))] ${isRTL ? 'font-serif-ar' : ''}`}>
       
       {/* Visually Hidden H1 for SEO */}
       <h1 className="sr-only">{t('siteName')} — {t('siteSlogan')}</h1>
       
       {/* Main Branding Section */}
-      <div className="relative mb-12 sm:mb-16 animate-in fade-in zoom-in duration-1000 slide-in-from-top-4">
-        <div className="relative w-48 sm:w-[420px] h-24 sm:h-40 mx-auto mb-6">
+      <div className="relative mb-8 sm:mb-10 animate-in fade-in zoom-in duration-1000 slide-in-from-top-4">
+        <div className="relative w-40 sm:w-[340px] h-20 sm:h-32 mx-auto mb-4">
           <Image 
             src="/logo-premium-gold.png" 
             alt="Arabia Khaleej Logo" 
@@ -37,68 +37,43 @@ export default function HomeClient() {
             priority
           />
         </div>
-        <p className="text-base sm:text-lg font-light italic serif text-foreground/70 px-4 max-w-lg mx-auto leading-relaxed">
+        <p className="text-sm sm:text-base font-light italic serif text-foreground/60 px-6 max-w-sm sm:max-w-lg mx-auto leading-relaxed">
           "{t('siteSlogan')}"
         </p>
       </div>
 
-      {/* 4-Column Vertical Pillar Grid */}
-      <nav className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300 fill-mode-both">
-        {NAV_LINKS.map((link) => (
-          <Link
-            key={link.href}
-            href={link.href}
-            className="group relative glass p-6 sm:p-8 rounded-[2.5rem] border-brand-gold/15 hover:border-brand-gold/40 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-2xl flex flex-col items-center text-center overflow-hidden"
-          >
-            {/* Decorative Background Icon */}
-            <div className={`absolute ${isRTL ? '-left-4' : '-right-4'} -bottom-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500 transform group-hover:scale-110`}>
-              <link.icon size={100} />
-            </div>
-
-            <div className="w-12 h-12 rounded-full bg-brand-gold/10 flex items-center justify-center text-accent mb-6 group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all duration-500 shadow-inner">
-              <link.icon size={20} strokeWidth={2} />
-            </div>
-
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-accent mb-3 group-hover:tracking-[0.5em] transition-all duration-500">
-              {link.name}
-            </h2>
-            
-            <p className="text-[11px] font-bold text-foreground/40 uppercase tracking-widest leading-relaxed">
-              {link.desc}
-            </p>
-
-            <div className="mt-6 opacity-0 group-hover:opacity-100 transition-all translate-y-2 group-hover:translate-y-0 transform duration-500">
-              <div className="w-6 h-[1.5px] bg-accent/40 rounded-full" />
-            </div>
-          </Link>
-        ))}
+      {/* Nav Tabs — 2×2 on mobile, single row on sm+ */}
+      <nav className="w-full max-w-xl px-4 sm:px-0 animate-in fade-in slide-in-from-bottom-6 duration-700 delay-300 fill-mode-both">
+        <div className="glass rounded-2xl border-brand-gold/15 p-1.5 grid grid-cols-2 sm:flex gap-1">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              style={{ touchAction: 'manipulation' }}
+              className="group flex-1 flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 px-3 py-4 sm:py-3 rounded-xl hover:bg-brand-gold/10 active:bg-brand-gold/20 active:scale-[0.96] transition-all duration-150 select-none"
+            >
+              <link.icon size={18} strokeWidth={1.75} className="text-accent shrink-0" />
+              <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.15em] text-foreground/55 group-hover:text-accent transition-colors duration-150 text-center leading-snug">
+                {link.name}
+              </span>
+            </Link>
+          ))}
+        </div>
       </nav>
 
       {/* Regional Guides Section */}
-      <div className="w-full max-w-6xl mt-24 sm:mt-32 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500 fill-mode-both">
-        <div className="flex flex-col items-center mb-16 px-4">
-          <div className="relative inline-block px-12 py-3 mb-6">
-            {/* Elegant Corner Borders */}
-            <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-brand-gold/40" />
-            <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-brand-gold/40" />
-            <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-brand-gold/40" />
-            <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-brand-gold/40" />
-            
-            <h2 className="text-xl sm:text-2xl font-black uppercase tracking-[0.3em] text-accent text-center drop-shadow-sm">
+      <div className="w-full max-w-6xl mt-14 sm:mt-20 animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-500 fill-mode-both">
+        <div className="flex flex-col items-center mb-8 px-4">
+          <div className="flex items-center gap-4 w-full max-w-sm sm:max-w-md">
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-brand-gold/20 to-transparent" />
+            <h2 className="text-[11px] sm:text-xs font-bold text-accent uppercase tracking-[0.3em] whitespace-nowrap">
               {t('regionalGuides')}
             </h2>
-          </div>
-          
-          <div className="flex items-center gap-6 w-full max-w-md">
-            <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-brand-gold/20 to-transparent" />
-            <p className="text-[10px] font-black text-foreground/30 uppercase tracking-[0.6em] whitespace-nowrap">
-              {t('guideDesc')}
-            </p>
             <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-brand-gold/20 to-transparent" />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 px-2">
+        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4 px-2">
           {[
             { id: 'saudi-arabia', key: 'saudiArabia', flag: '/flags/saudi_new.png' },
             { id: 'united-arab-emirates', key: 'uae', flag: '/flags/uae_new.png' },
@@ -110,31 +85,31 @@ export default function HomeClient() {
             <Link
               key={country.id}
               href={`/countries/${country.id}`}
-              className="group relative glass rounded-3xl border-brand-gold/10 hover:border-brand-gold/40 transition-all hover:-translate-y-2 hover:z-10 overflow-hidden flex flex-col min-h-[160px] shadow-lg hover:shadow-2xl"
+              style={{ touchAction: 'manipulation' }}
+              className="group relative glass rounded-2xl border-brand-gold/10 hover:border-brand-gold/40 active:scale-[0.97] transition-all duration-150 hover:-translate-y-1 hover:z-10 overflow-hidden flex flex-col min-h-[96px] sm:min-h-[140px] select-none"
             >
-              {/* Flag Background / Image */}
               <div className="absolute inset-0 z-0">
-                <Image 
-                  src={country.flag} 
+                <Image
+                  src={country.flag}
                   alt={t(country.key)}
                   fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 16vw"
-                  className="object-cover opacity-20 group-hover:opacity-40 transition-all duration-700 group-hover:scale-110 transform"
+                  sizes="(max-width: 768px) 33vw, (max-width: 1024px) 33vw, 16vw"
+                  className="object-cover opacity-20 group-hover:opacity-40 transition-all duration-500 group-hover:scale-105 transform"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 dark:from-brand-obsidian via-black/30 dark:via-brand-obsidian/40 to-transparent z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent z-10" />
               </div>
 
-              <div className="relative z-20 p-6 flex flex-col items-center justify-end h-full text-center">
-                <span className="text-[10px] font-black text-white uppercase tracking-[0.2em] group-hover:tracking-[0.4em] transition-all duration-500 drop-shadow-md">
+              <div className="relative z-20 p-3 sm:p-5 flex flex-col items-center justify-end h-full text-center">
+                <span className="text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-[0.15em] sm:tracking-[0.2em] drop-shadow-md leading-tight">
                   {t(country.key)}
                 </span>
-                <div className="mt-4 w-4 h-[1.5px] bg-brand-gold/40 group-hover:w-8 group-hover:bg-brand-gold transition-all duration-500" />
+                <div className="mt-2 w-3 h-[1px] bg-brand-gold/50 group-hover:w-6 group-hover:bg-brand-gold transition-all duration-300" />
               </div>
             </Link>
           ))}
         </div>
 
-        <div className="mt-16 text-center">
+        <div className="mt-8 text-center">
           <Link 
             href="/transparency"
             className="text-[10px] font-bold text-foreground/30 uppercase tracking-[0.3em] hover:text-brand-gold transition-colors"
