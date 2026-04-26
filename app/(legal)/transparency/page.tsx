@@ -1,5 +1,5 @@
 import { pageMeta } from "@/lib/seo";
-import { BreadcrumbSchema } from "@/components/StructuredData";
+import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 import TransparencyClient from "./TransparencyClient";
 
 export const metadata = pageMeta({

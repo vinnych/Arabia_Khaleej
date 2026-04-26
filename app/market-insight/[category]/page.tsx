@@ -1,6 +1,6 @@
 import { pageMeta, SITE_NAME, Breadcrumbs } from "@/lib/seo";
-import MarketInsightClient from "@/components/MarketInsightClient";
-import { BreadcrumbSchema, DatasetSchema } from "@/components/StructuredData";
+import MarketInsightClient from "@/components/finance/MarketInsightClient";
+import { BreadcrumbSchema, DatasetSchema } from "@/components/seo/StructuredData";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 

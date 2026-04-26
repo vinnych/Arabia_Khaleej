@@ -5,8 +5,8 @@ import {
   DatasetSchema,
   WebPageSchema,
   FAQSchema,
-} from "@/components/StructuredData";
-import HomeClient from "@/components/HomeClient";
+} from "@/components/seo/StructuredData";
+import HomeClient from "@/components/home/HomeClient";
 
 export const metadata = pageMeta({
   title: "Arabia Khaleej | The GCC Standard — Regional Intelligence Portal",
@@ -63,8 +63,6 @@ export default function Home() {
         description="The definitive independent reference for the Gulf Cooperation Council. Prayer times, market data, and country guides for all 6 GCC states."
         url="/"
       />
-      <OrganizationSchema />
-      <WebSiteSchema />
       <DatasetSchema
         name="Arabia Khaleej GCC Regional Intelligence"
         description="Comprehensive structured data platform covering Islamic prayer schedules, GCC equity market indices, gold and commodity prices, GCC currency exchange rates, and sovereign country profiles for Qatar, UAE, Saudi Arabia, Kuwait, Oman, and Bahrain."

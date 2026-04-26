@@ -1,5 +1,5 @@
-import { pageMeta, SITE_NAME, SITE_NAME_AR } from "../../../lib/seo";
-import PrayerClient from "../../../components/PrayerClient";
+import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
+import PrayerClient from "@/components/prayer/PrayerClient";
 import {
   BreadcrumbSchema,
   DatasetSchema,
@@ -7,8 +7,8 @@ import {
   WebPageSchema,
   PrayerServiceSchema,
   FAQSchema,
-} from "../../../components/StructuredData";
-import { GCC_COUNTRIES, getCountryBySlug } from "../../../lib/countries";
+} from "@/components/seo/StructuredData";
+import { GCC_COUNTRIES, getCountryBySlug } from "@/lib/countries";
 import { notFound } from "next/navigation";
 
 export function generateStaticParams() {

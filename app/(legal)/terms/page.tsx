@@ -1,6 +1,6 @@
 import { pageMeta } from "@/lib/seo";
 import TermsClient from "./TermsClient";
-import { BreadcrumbSchema } from "@/components/StructuredData";
+import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: "Terms & Conditions | Arabia Khaleej",

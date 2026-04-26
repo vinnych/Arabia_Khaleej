@@ -1,3 +1,5 @@
+"use client";
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type Language = 'en' | 'ar';
@@ -332,7 +334,12 @@ export const translations: Translations = {
   all: { en: "All News", ar: "كل الأخبار" },
   gcc: { en: "GCC Official", ar: "الرسمية الخليجية" },
   expat: { en: "Community Terminal", ar: "محطة المجتمع" },
-  refresh: { en: "Refresh Feed", ar: "تحديث الخلاصات" }
+  refresh: { en: "Refresh Feed", ar: "تحديث الخلاصات" },
+  politics: { en: "Politics", ar: "سياسة" },
+  tech: { en: "Tech", ar: "تكنولوجيا" },
+  entertainment: { en: "Entertainment", ar: "ترفيه" },
+  sports: { en: "Sports", ar: "رياضة" },
+  loadMore: { en: "Discover More", ar: "اكتشف المزيد" }
 };
 
 interface LanguageContextType {

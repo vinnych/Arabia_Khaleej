@@ -34,7 +34,7 @@ To serve the expat population, the unified terminal integrates the following int
 | Service | Usage | License | Integration Method |
 | :--- | :--- | :--- | :--- |
 | **Unsplash** | Smart Article Images | Free / Open | Keyword-based Dynamic Link |
-| **Google Fonts** | Typography (Inter, Noto) | SIL Open Font | Next.js Local Ingestion |
+| **Typography** | Apple System Stack | OS Native | -apple-system, SF Pro Display |
 | **Lucide React** | UI Iconography | ISC | NPM Library |
 
 ## 5. Security & Legal Compliance

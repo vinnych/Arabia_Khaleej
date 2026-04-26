@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Coins, TrendingUp, TrendingDown, ArrowLeftRight, Globe } from "lucide-react";
-import FinanceTicker from "@/components/FinanceTicker";
+import FinanceTicker from "@/components/finance/FinanceTicker";
 import { useLanguage } from "@/lib/i18n";
 
 export default function FinanceClient() {

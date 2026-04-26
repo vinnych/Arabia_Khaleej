@@ -16,15 +16,16 @@ export default function MobileFAB({ icon: Icon, onClick, label, className, show 
 
   return (
     <div className={cn(
-      "fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-5 z-50 md:hidden",
+      "fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-5 z-50 md:hidden pointer-events-none",
       "animate-in fade-in slide-in-from-bottom-10 duration-500",
       className
     )}>
       <button
         onClick={onClick}
+        aria-label={label || "Go Back"}
         style={{ touchAction: 'manipulation' }}
         className={cn(
-          "group relative flex items-center justify-center w-12 h-12 rounded-full",
+          "group relative flex items-center justify-center w-12 h-12 rounded-full pointer-events-auto",
           "bg-brand-gold shadow-[0_8px_25px_rgba(212,175,55,0.3)]",
           "border border-white/20 active:scale-95 transition-all duration-200"
         )}
@@ -32,11 +33,11 @@ export default function MobileFAB({ icon: Icon, onClick, label, className, show 
         <Icon size={20} className="text-background group-active:rotate-45 transition-transform duration-300" />
         
         {/* Glow Effect */}
-        <div className="absolute inset-0 rounded-full bg-brand-gold/20 blur-lg -z-10 animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-brand-gold/20 blur-lg -z-10 animate-pulse pointer-events-none" />
         
         {/* Label (Optional) - More subtle */}
         {label && (
-          <span className="absolute -top-7 right-0 px-2.5 py-0.5 rounded-full bg-background/90 backdrop-blur-md border border-brand-gold/30 text-[8px] font-black uppercase tracking-widest text-brand-gold whitespace-nowrap shadow-lg">
+          <span className="absolute -top-7 right-0 px-2.5 py-0.5 rounded-full bg-background/90 backdrop-blur-md border border-brand-gold/30 text-[8px] font-black uppercase tracking-widest text-brand-gold whitespace-nowrap shadow-lg" aria-hidden="true">
             {label}
           </span>
         )}

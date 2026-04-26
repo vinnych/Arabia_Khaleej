@@ -1,9 +1,9 @@
 import { pageMeta } from "@/lib/seo";
 import PrivacyClient from "./PrivacyClient";
-import StructuredData from "@/components/StructuredData";
+import StructuredData from "@/components/seo/StructuredData";
 import { SITE_URL } from "@/lib/seo";
 
-import { BreadcrumbSchema } from "@/components/StructuredData";
+import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: "Privacy Policy | Arabia Khaleej",

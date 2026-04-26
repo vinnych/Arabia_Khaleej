@@ -1,11 +1,11 @@
-import { pageMeta } from "../../../lib/seo";
+import { pageMeta } from "@/lib/seo";
 import CountryClient from "./Client";
 import {
   BreadcrumbSchema,
   CountrySchema,
   DatasetSchema,
   WebPageSchema,
-} from "../../../components/StructuredData";
+} from "@/components/seo/StructuredData";
 
 type Props = {
   params: Promise<{ slug: string }>;

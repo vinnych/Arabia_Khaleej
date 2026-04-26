@@ -6,7 +6,7 @@ import { Calendar, ChevronLeft, ExternalLink, Globe, Newspaper, Share2, Clock, A
 import Link from "next/link";
 import Image from "next/image";
 import { getDeterministicFallback } from "@/lib/fallbacks";
-import MobileFAB from "./MobileFAB";
+import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter } from "next/navigation";
 
 interface NewsItem {
@@ -102,7 +102,7 @@ export default function NewsArticleClient({ initialArticle }: { initialArticle: 
             </div>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.1] tracking-tight">
             {article.title}
           </h1>
 
@@ -112,7 +112,7 @@ export default function NewsArticleClient({ initialArticle }: { initialArticle: 
                 <Globe size={18} />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-foreground/30">{t('officialSource')}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/30">{t('officialSource')}</p>
                 <p className="text-sm font-bold text-foreground">{article.source}</p>
               </div>
             </div>
@@ -124,7 +124,7 @@ export default function NewsArticleClient({ initialArticle }: { initialArticle: 
                 <Share2 size={18} />
               </button>
               {copied && (
-                <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-accent text-brand-obsidian text-[10px] font-black uppercase tracking-widest rounded-lg animate-in fade-in slide-in-from-bottom-1">
+                <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-accent text-brand-obsidian text-[10px] font-bold uppercase tracking-widest rounded-lg animate-in fade-in slide-in-from-bottom-1">
                   Link Copied
                 </div>
               )}
@@ -150,7 +150,7 @@ export default function NewsArticleClient({ initialArticle }: { initialArticle: 
 
         {/* Article Content */}
         <div className="max-w-3xl mx-auto space-y-8">
-          <p className="text-xl sm:text-2xl text-foreground/80 leading-relaxed font-medium">
+          <p className="text-xl sm:text-2xl text-foreground/90 leading-relaxed font-normal">
             {article.description}
           </p>
           

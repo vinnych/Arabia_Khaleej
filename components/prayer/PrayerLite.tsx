@@ -78,12 +78,12 @@ export default function PrayerLite() {
   );
 
   return (
-    <div className="flex items-center gap-3 px-5 py-2 rounded-full glass border-brand-gold/15 shadow-sm animate-in fade-in slide-in-from-top-2 duration-700 group hover:border-brand-gold/40 transition-all cursor-default">
-      <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse" />
-      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60">
+    <div className="flex items-center gap-3 px-6 py-2.5 rounded-full glass border-brand-gold/15 shadow-sm animate-in fade-in slide-in-from-top-2 duration-700 group hover:border-brand-gold/40 transition-all cursor-default">
+      <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse shadow-[0_0_8px_rgba(212,175,55,0.4)]" />
+      <span className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/80">
         {state.locationName}: <span className="text-accent">{state.next.name}</span>
       </span>
-      <span className="text-[11px] font-black tracking-tight text-foreground">
+      <span className="text-xs font-black tracking-tight text-foreground bg-brand-gold/10 px-2.5 py-0.5 rounded-md">
         {state.next.time}
       </span>
     </div>

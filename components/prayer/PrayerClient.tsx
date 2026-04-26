@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
 import Link from "next/link";
 import { GCC_COUNTRIES } from "@/lib/countries";
-import HijriCalendar from "@/components/HijriCalendar";
+import HijriCalendar from "@/components/prayer/HijriCalendar";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import { Breadcrumbs } from "@/lib/seo";
-import MobileFAB from "./MobileFAB";
+import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter, usePathname } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 
@@ -169,7 +169,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
   }
 
   return (
-    <div className={`flex flex-col items-center justify-start min-h-screen pt-24 pb-32 px-4 relative ${isRTL ? 'font-serif-ar' : ''}`}>
+    <div className={`flex flex-col items-center justify-start min-h-screen pt-24 pb-16 sm:pb-32 px-4 relative ${isRTL ? 'font-serif-ar' : ''}`}>
       {/* Mobile Back FAB - Ergonomic */}
       <MobileFAB 
         icon={ChevronLeft} 
@@ -229,10 +229,15 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
       </div>
 
       {/* Prayer Cards Container */}
-      <div className="w-full max-w-4xl glass p-6 sm:p-12 rounded-[2.5rem] border-brand-gold/15 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 shadow-2xl overflow-hidden">
+      <div className="w-full max-w-4xl bg-brand-obsidian/90 glass p-6 sm:p-12 rounded-[2.5rem] border-brand-gold/30 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200 shadow-2xl">
         {!times ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="w-8 h-8 border-2 border-brand-gold/30 border-t-brand-gold rounded-full animate-spin" />
+          <div className="w-full flex flex-col items-center py-4">
+            <div className="w-48 h-10 bg-white/5 dark:bg-white/10 animate-pulse rounded-lg mb-12" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 sm:gap-6 w-full">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-[140px] rounded-[2rem] bg-white/5 dark:bg-white/10 animate-pulse border border-brand-gold/10" />
+              ))}
+            </div>
           </div>
         ) : (
           <>
@@ -241,6 +246,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
                 onClick={() => setShowCalendar(true)}
                 className={`absolute -top-2 ${isRTL ? 'left-0' : 'right-0'} p-3 rounded-xl bg-brand-gold/10 text-accent hover:bg-brand-gold hover:text-brand-obsidian transition-all shadow-md group`}
                 title={t('viewHijri')}
+                aria-label={t('viewHijri')}
               >
                 <CalendarIcon size={18} className="group-hover:rotate-12 transition-transform" />
               </button>
@@ -262,10 +268,10 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
                   return (
                     <div 
                       key={name} 
-                      className={`flex flex-col items-center p-6 rounded-[2rem] border transition-all duration-500 relative overflow-hidden select-none active:scale-95 ${
+                      className={`flex flex-col items-center p-6 rounded-[2rem] border transition-all duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] will-change-transform relative overflow-hidden select-none active:scale-95 ${
                         isActive 
-                        ? "bg-brand-gold text-brand-obsidian border-brand-gold shadow-[0_10px_40px_rgba(212,175,55,0.4)] scale-110 z-10" 
-                        : "bg-white/5 dark:bg-brand-obsidian/40 border-brand-gold/10 hover:border-brand-gold/30 shadow-sm"
+                        ? "bg-brand-gold text-brand-obsidian border-brand-gold shadow-[0_0_30px_rgba(212,175,55,0.6)] scale-110 z-10 max-sm:my-2" 
+                        : "bg-white/10 dark:bg-brand-obsidian/70 border-brand-gold/30 hover:border-brand-gold/50 shadow-md"
                       }`}
                     >
                       {/* Premium Glow for Active Card */}
@@ -279,7 +285,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
                         </div>
                       )}
                       
-                      <span className={`text-[9px] uppercase tracking-[0.25em] font-black mb-3 ${isActive ? "text-brand-obsidian/70" : "text-brand-gold"}`}>
+                      <span className={`text-[9px] uppercase tracking-[0.25em] font-black mb-3 ${isActive ? "text-brand-obsidian/70" : "text-[#f3e5d0]/90 dark:text-[#f3e5d0]/90 text-brand-gold"}`}>
                         {displayName}
                       </span>
                       <span className="text-xl sm:text-2xl font-black tabular-nums tracking-tighter">
@@ -307,8 +313,8 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
 
 
       {/* Back to Home */}
-      <div className="mt-16">
-        <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
+      <div className="mt-16 flex items-center justify-center">
+        <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all min-h-[44px] flex items-center justify-center px-4">
           {isRTL ? 'الرئيسية ←' : '← Home'}
         </Link>
       </div>

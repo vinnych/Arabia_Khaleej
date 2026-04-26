@@ -1,6 +1,6 @@
 import { pageMeta } from "@/lib/seo";
 import DisclaimerClient from "./DisclaimerClient";
-import { BreadcrumbSchema } from "@/components/StructuredData";
+import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: "Disclaimer | Arabia Khaleej",

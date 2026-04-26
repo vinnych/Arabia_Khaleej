@@ -90,18 +90,25 @@ export default function CurrencyExchangeClient() {
 
   const handleSwap = () => {
     setIsSwapping(true);
-    setTimeout(() => {
-      setFromCode(toCode);
-      setToCode(fromCode);
-      setIsSwapping(false);
-    }, 300);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setFromCode(toCode);
+        setToCode(fromCode);
+        setIsSwapping(false);
+      });
+    });
   };
 
   const handleCopy = () => {
     const text = `${parsedAmount} ${fromCode} = ${result.toFixed(4)} ${toCode}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const start = performance.now();
+    const reset = (now: number) => {
+      if (now - start >= 2000) { setCopied(false); return; }
+      requestAnimationFrame(reset);
+    };
+    requestAnimationFrame(reset);
   };
 
   const filteredCurrencies = useMemo(() => {

@@ -1,6 +1,6 @@
 import { pageMeta } from "@/lib/seo";
-import { NewsArticleSchema, BreadcrumbSchema, WebPageSchema } from "@/components/StructuredData";
-import NewsArticleClient from "@/components/NewsArticleClient";
+import { NewsArticleSchema, BreadcrumbSchema, WebPageSchema } from "@/components/seo/StructuredData";
+import NewsArticleClient from "@/components/news/NewsArticleClient";
 import { notFound } from "next/navigation";
 
 // Since we use a transient cache for news, we can't easily pre-generate all pages.

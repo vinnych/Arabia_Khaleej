@@ -81,10 +81,15 @@ export default function MarketInsightClient() {
                 <div className="w-10 h-10 rounded-2xl bg-brand-gold/10 flex items-center justify-center text-accent" aria-hidden="true">
                   <BarChart3 size={20} />
                 </div>
-                <h2 className="text-xl font-black serif">{t('stockMarkets')}</h2>
+                <div>
+                  <h2 className="text-xl font-black serif">{t('stockMarkets')}</h2>
+                  <p className="text-[8px] uppercase font-black tracking-[0.2em] text-foreground/30 mt-0.5">
+                    Updated {data ? new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2" aria-live="polite">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
                 <span className="text-[9px] uppercase font-bold tracking-widest text-foreground/40">{t('marketsLive')}</span>
               </div>
             </div>

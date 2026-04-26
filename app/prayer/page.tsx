@@ -1,12 +1,12 @@
 import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
-import PrayerClient from "@/components/PrayerClient";
+import PrayerClient from "@/components/prayer/PrayerClient";
 import {
   BreadcrumbSchema,
   DatasetSchema,
   WebPageSchema,
   FAQSchema,
-} from "@/components/StructuredData";
-import StructuredData from "@/components/StructuredData";
+} from "@/components/seo/StructuredData";
+import StructuredData from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: `Prayer Times GCC — Qatar, UAE, Saudi Arabia, Kuwait, Oman, Bahrain | ${SITE_NAME}`,

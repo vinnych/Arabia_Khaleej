@@ -3,7 +3,7 @@
 import { useLanguage } from "@/lib/i18n";
 import { ShieldCheck, Info, Scale, Globe } from "lucide-react";
 import Image from "next/image";
-import StructuredData from "@/components/StructuredData";
+import StructuredData from "@/components/seo/StructuredData";
 import { SITE_URL, SITE_NAME } from "@/lib/seo";
 
 export default function TransparencyPage() {

@@ -11,11 +11,19 @@ export async function GET(request: Request) {
   }
 
   try {
-    const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${method}`, {
-      next: { revalidate: 3600 } // Cache for 1 hour
-    });
-    const data = await res.json();
-    return NextResponse.json(data);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+    
+    try {
+      const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${method}`, {
+        next: { revalidate: 3600 },
+        signal: controller.signal
+      });
+      const data = await res.json();
+      return NextResponse.json(data);
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } catch (error) {
     return NextResponse.json({ status: 'error' }, { status: 500 });
   }

@@ -64,7 +64,7 @@ export default function MobileNav() {
             >
               {/* Active Indicator Bar - Hidden for Primary */}
               {!isPrimary && isActive && (
-                <div className="absolute -top-2 w-8 h-1 bg-brand-gold rounded-full shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
+                <div className="absolute -top-2 w-10 h-1 bg-brand-gold rounded-full shadow-[0_0_12px_rgba(212,175,55,0.6)]" />
               )}
               
               <div className={cn(
@@ -83,14 +83,14 @@ export default function MobileNav() {
                 
                 {/* Glow for active icon */}
                 {isActive && !isPrimary && (
-                  <div className="absolute inset-0 bg-brand-gold/10 blur-xl rounded-full -z-10" />
+                  <div className="absolute inset-0 bg-brand-gold/15 blur-xl rounded-full -z-10" />
                 )}
               </div>
               
               {!isPrimary && (
                 <span className={cn(
-                  "text-[8px] font-black uppercase tracking-[0.15em] mt-1 transition-all duration-300",
-                  isActive ? "opacity-100 scale-100" : "opacity-40 scale-95",
+                  "text-[9px] font-black uppercase tracking-[0.2em] mt-1 transition-all duration-300",
+                  isActive ? "text-brand-gold opacity-100 scale-100" : "opacity-40 scale-95",
                   isRTL && "text-[10px] tracking-normal font-bold"
                 )}>
                   {item.label}

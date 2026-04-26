@@ -1,6 +1,7 @@
 import { pageMeta } from "@/lib/seo";
-import StructuredData from "@/components/StructuredData";
-import NewsClient from "@/components/NewsClient";
+import StructuredData from "@/components/seo/StructuredData";
+import NewsClient from "@/components/news/NewsClient";
+import PublicSurvey from "@/components/news/PublicSurvey";
 
 export const metadata = pageMeta({
   title: "Press Terminal | Official GCC & Community News",
@@ -13,7 +14,7 @@ export const metadata = pageMeta({
 
 export default function NewsPage() {
   return (
-    <main className="min-h-screen pt-20">
+    <div className="pt-20">
       <StructuredData 
         type="WebPage"
         data={{
@@ -22,6 +23,7 @@ export default function NewsPage() {
         }}
       />
       <NewsClient />
-    </main>
+      <PublicSurvey />
+    </div>
   );
 }

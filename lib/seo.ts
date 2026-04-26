@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 // Re-export the Breadcrumbs UI component from its .tsx home
-export { default as Breadcrumbs } from "@/components/Breadcrumbs";
+export { default as Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export const SITE_URL = "https://arabiakhaleej.com";
 export const SITE_NAME_EN = "Arabia Khaleej";
@@ -94,6 +94,11 @@ export function pageMeta({
     "SPA",
     "BNA",
     "ONA",
+    "Premium GCC Insights",
+    "Luxury Middle East",
+    "Sovereign Wealth News",
+    "Strategic Intelligence Gulf",
+    "High-Fidelity Regional Analysis",
     "expat news GCC",
     "India news Qatar",
     "Pakistan news UAE",

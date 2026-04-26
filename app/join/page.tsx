@@ -1,11 +1,11 @@
 import { pageMeta, SITE_NAME } from "@/lib/seo";
-import JoinClient from "@/components/JoinClient";
+import JoinClient from "@/components/join/JoinClient";
 import {
   BreadcrumbSchema,
   WebPageSchema,
   ContactPageSchema,
-} from "@/components/StructuredData";
-import StructuredData from "@/components/StructuredData";
+} from "@/components/seo/StructuredData";
+import StructuredData from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: `Submit an Inquiry — Arabia Khaleej | ${SITE_NAME}`,

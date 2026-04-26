@@ -49,7 +49,7 @@ export default function FinanceTicker() {
   ];
 
   return (
-    <div className={`w-full max-w-4xl mx-auto px-4 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 fill-mode-both ${isRTL ? 'font-serif-ar' : ''}`}>
+    <div className={`w-full max-w-4xl mx-auto px-4 mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 fill-mode-both ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
       <div className="glass rounded-full py-3 px-6 flex flex-wrap items-center justify-between gap-6 border-brand-gold/15 overflow-hidden shadow-lg">
         
         {/* Gold Section */}
@@ -58,8 +58,8 @@ export default function FinanceTicker() {
             <Coins size={14} strokeWidth={2.5} />
           </div>
           <div className={isRTL ? 'text-right' : ''}>
-            <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-foreground/40">{t('gold')}</p>
-            <p className="text-xs font-black text-foreground tabular-nums">
+            <p className="text-[10px] uppercase font-bold tracking-[0.15em] text-foreground/50 leading-none mb-1">{t('gold')}</p>
+            <p className="text-sm font-bold text-foreground tabular-nums leading-none">
               ${goldPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               <span className={`ml-2 text-[10px] text-green-600 dark:text-green-400 font-bold ${isRTL ? 'mr-2' : 'ml-2'}`}>+0.12%</span>
             </p>
@@ -67,22 +67,22 @@ export default function FinanceTicker() {
         </div>
 
         {/* Currency Scroll/List */}
-        <div className="flex-grow flex items-center gap-8 overflow-x-auto no-scrollbar py-1">
+        <div className="flex-grow flex items-center gap-10 overflow-x-auto no-scrollbar py-2">
           {gccCurrencies.map((curr) => (
             <div key={curr.code} className="flex flex-col min-w-fit">
-              <p className={`text-[9px] uppercase font-bold tracking-[0.2em] text-foreground/40 ${isRTL ? 'text-right' : ''}`}>{curr.code} / USD</p>
-              <p className={`text-xs font-bold text-foreground tabular-nums ${isRTL ? 'text-right' : ''}`}>
+              <p className={`text-[10px] uppercase font-bold tracking-[0.15em] text-foreground/50 ${isRTL ? 'text-right' : ''}`}>{curr.code} / USD</p>
+              <p className={`text-sm font-bold text-foreground tabular-nums ${isRTL ? 'text-right' : ''}`}>
                 {rates[curr.code]?.toFixed(3)}
-                <span className={`${isRTL ? 'mr-1.5' : 'ml-1.5'} text-[8px] opacity-40 font-normal`}>{curr.symbol}</span>
+                <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-[10px] opacity-40 font-medium uppercase`}>{curr.symbol}</span>
               </p>
             </div>
           ))}
         </div>
 
         {/* Market Status */}
-        <div className={`hidden md:flex items-center gap-2 ${isRTL ? 'pr-6 border-r' : 'pl-6 border-l'} border-brand-gold/15`}>
+        <div className={`hidden lg:flex items-center gap-3 ${isRTL ? 'pr-8 border-r' : 'pl-8 border-l'} border-brand-gold/25`}>
           <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[9px] uppercase font-bold tracking-[0.3em] text-foreground/40">{t('marketsLive')}</span>
+          <span className="text-[10px] uppercase font-bold tracking-[0.2em] text-foreground/50">{t('marketsLive')}</span>
         </div>
       </div>
     </div>

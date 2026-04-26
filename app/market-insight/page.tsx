@@ -1,13 +1,13 @@
 import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
-import MarketInsightClient from "@/components/MarketInsightClient";
+import MarketInsightClient from "@/components/finance/MarketInsightClient";
 import {
   BreadcrumbSchema,
   DatasetSchema,
   WebPageSchema,
   ExchangeRateSchema,
   CommoditySchema,
-} from "@/components/StructuredData";
-import StructuredData from "@/components/StructuredData";
+} from "@/components/seo/StructuredData";
+import StructuredData from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: `Market Insight — GCC Stocks, Gold & Currencies | ${SITE_NAME}`,

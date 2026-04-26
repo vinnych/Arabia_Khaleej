@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Amiri } from "next/font/google";
+import { Amiri, Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/Providers";
-import ClientLayout from "@/components/ClientLayout";
+import { Providers } from "@/components/layout/Providers";
+import ClientLayout from "@/components/layout/ClientLayout";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 const amiri = Amiri({ weight: ["400", "700"], subsets: ["arabic"], variable: "--font-amiri" });
+const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 import { pageMeta, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
-import { OrganizationSchema, WebSiteSchema } from "@/components/StructuredData";
-import Header from "@/components/Header";
+import { OrganizationSchema, WebSiteSchema } from "@/components/seo/StructuredData";
+import Header from "@/components/layout/Header";
 
 export const metadata = pageMeta({
   title: "Arabia Khaleej | The GCC Standard — Regional Intelligence Portal",
@@ -33,8 +33,16 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${playfair.variable} ${amiri.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${inter.variable} ${amiri.variable} ${playfair.variable}`}>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://open.er-api.com" />
+        <link rel="preconnect" href="https://api.aladhan.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" strategy="afterInteractive" />
         <Script id="google-analytics" strategy="afterInteractive">{`
           window.dataLayer = window.dataLayer || [];

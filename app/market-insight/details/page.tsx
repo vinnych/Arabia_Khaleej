@@ -1,7 +1,7 @@
 import { pageMeta, SITE_NAME } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp, ShieldCheck, Globe, Zap } from "lucide-react";
-import StructuredData, { BreadcrumbSchema } from "@/components/StructuredData";
+import StructuredData, { BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: `GCC Economic Outlook & Regional Stability Analysis | ${SITE_NAME}`,

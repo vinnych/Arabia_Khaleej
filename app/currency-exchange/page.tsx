@@ -1,6 +1,6 @@
 import { pageMeta } from "@/lib/seo";
-import { WebPageSchema, DatasetSchema } from "@/components/StructuredData";
-import CurrencyExchangeClient from "@/components/CurrencyExchangeClient";
+import { WebPageSchema, DatasetSchema } from "@/components/seo/StructuredData";
+import CurrencyExchangeClient from "@/components/finance/CurrencyExchangeClient";
 
 export const metadata = pageMeta({
   title: "Currency Exchange — Live GCC & World Currency Converter",

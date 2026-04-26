@@ -17,7 +17,7 @@ export default async function Image() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          fontFamily: "Inter",
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
           color: "white",
           padding: "80px",
         }}

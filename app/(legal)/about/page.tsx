@@ -1,7 +1,7 @@
 import { pageMeta } from "@/lib/seo";
 import AboutClient from "./AboutClient";
-import { BreadcrumbSchema, WebPageSchema } from "@/components/StructuredData";
-import StructuredData from "@/components/StructuredData";
+import { BreadcrumbSchema, WebPageSchema } from "@/components/seo/StructuredData";
+import StructuredData from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: "About Arabia Khaleej | The GCC Standard",
