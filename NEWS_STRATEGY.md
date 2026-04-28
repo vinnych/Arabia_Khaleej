@@ -18,8 +18,9 @@ To minimize risk as a hobbyist platform, the following measures are implemented:
 3. **Direct Redirection**:
    - Every headline is a direct link to the official agency's portal. The platform acts as a "terminal" (utility), not a "media outlet" (publisher).
 
-4. **Transient Data**:
-   - No permanent database storage of news content. Data is fetched in real-time or from a short-term cache.
+4. **Transient Archiving**:
+   - News content is not permanently stored in a relational database.
+   - A 30-day transient archive is maintained in Redis (Upstash) to support Search Engine indexing, GSC compliance, and user deep-linking for the "Press Terminal" service.
 
 ## 🔗 Integrated Sources
 | Agency | Country | Format | Status |

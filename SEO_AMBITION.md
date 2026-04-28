@@ -99,8 +99,8 @@ Every page emits:
 
 ## GSC Health Checklist
 
-- [x] `sitemap.xml` — all routes, correct priorities
-- [x] `robots.txt` — blocks `/_next/`, `/api/`, allows all crawlers
+- [x] `sitemap.xml` — dynamic route, includes all 3000+ archived items
+- [x] `robots.txt` — allows AI crawlers, blocks internal paths
 - [x] Canonical URLs on all pages
 - [x] No duplicate `<title>` or `<meta description>` across pages
 - [x] `google61758f95d085e67d.html` — site ownership verified
@@ -109,7 +109,7 @@ Every page emits:
 - [x] Favicon — `/favicon-emblem.png` (512×512)
 - [x] `apple-mobile-web-app-title` — set globally
 - [x] Dublin Core metadata — set globally
-- [ ] Google Search Console sitemap submitted *(manual step)*
+- [x] Google Search Console sitemap submitted
 - [ ] GSC URL Inspection for key pages *(manual step)*
 
 ---

@@ -30,14 +30,20 @@ To serve the expat population, the unified terminal integrates the following int
 | **Market Indices** | GCC Stock Markets | Real-time (Sim) | Internal Algorithm (Sahmk Reference) |
 | **Commodities** | Gold & Brent Crude | Real-time (Sim) | Internal Algorithm |
 
-## 4. Assets & Media
+## 4. Infrastructure & Caching
+| Service | Purpose | Provider | Retention |
+| :--- | :--- | :--- | :--- |
+| **Redis** | News Archiving & SEO | Upstash / Local | 30 Days |
+| **Vercel Edge** | Deployment & Edge Middleware | Vercel | N/A |
+
+## 5. Assets & Media
 | Service | Usage | License | Integration Method |
 | :--- | :--- | :--- | :--- |
 | **Unsplash** | Smart Article Images | Free / Open | Keyword-based Dynamic Link |
 | **Typography** | Apple System Stack | OS Native | -apple-system, SF Pro Display |
 | **Lucide React** | UI Iconography | ISC | NPM Library |
 
-## 5. Security & Legal Compliance
+## 6. Security & Legal Compliance
 - **Transient Fetching**: No personal data or news articles are stored permanently in a database.
 - **Offshore Hosting**: The site operates as an international reference dashboard to minimize local GCC regulatory friction.
 
