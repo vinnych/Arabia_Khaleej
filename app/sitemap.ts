@@ -68,19 +68,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }));
 
-  // 5. Dynamic News Routes (All Archived News)
+  // 5. Dynamic News Routes (Deduplicated & Capped)
   let newsRoutes: MetadataRoute.Sitemap = [];
   try {
-    const allNews = await getAllNewsSlugs();
-    newsRoutes = allNews.map(item => ({
+    const allNewsSlugs = await getAllNewsSlugs();
+    
+    // Deduplicate by slug to prevent "thin" duplicate entries in different languages
+    // We prioritize keeping both if they are distinct, but here we'll ensure 
+    // each slug only appears once as a primary URL, with the other as an alternate.
+    const uniqueSlugs = new Map<string, typeof allNewsSlugs[0]>();
+    allNewsSlugs.forEach(item => {
+      // If we have both, we prefer the English one as primary in the sitemap for better global indexing
+      if (!uniqueSlugs.has(item.slug) || item.lang === 'en') {
+        uniqueSlugs.set(item.slug, item);
+      }
+    });
+
+    // Cap the archive at 500 items to avoid GSC "Sitemap Bloat" which leads to 
+    // "Discovered - currently not indexed" for new sites.
+    const sortedNews = Array.from(uniqueSlugs.values())
+      .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
+      .slice(0, 500);
+
+    newsRoutes = sortedNews.map(item => ({
       url: `${SITE_URL}/news/${item.slug}${item.lang === 'ar' ? '?lang=ar' : ''}`,
       lastModified: new Date(item.pubDate),
       changeFrequency: 'monthly',
       priority: 0.6,
       alternates: {
         languages: {
-          // If it's English, point to Arabic version as alternate, and vice versa
-          [item.lang === 'en' ? 'ar' : 'en']: `${SITE_URL}/news/${item.slug}${item.lang === 'en' ? '?lang=ar' : ''}`
+          'en': `${SITE_URL}/news/${item.slug}`,
+          'ar': `${SITE_URL}/news/${item.slug}?lang=ar`
         }
       }
     }));

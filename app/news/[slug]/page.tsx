@@ -2,7 +2,7 @@ import { pageMeta } from "@/lib/seo";
 import { NewsArticleSchema, BreadcrumbSchema, WebPageSchema } from "@/components/seo/StructuredData";
 import NewsArticleClient from "@/components/news/NewsArticleClient";
 import { notFound } from "next/navigation";
-import { getArticleBySlug } from "@/lib/news";
+import { getArticleBySlug, getUnifiedNews, NewsItem } from "@/lib/news";
 
 // Use direct server-side data access for performance and GSC reliability
 export const dynamic = 'force-dynamic';
@@ -26,6 +26,7 @@ export async function generateMetadata({
       ? article.description.substring(0, 157) + "..." 
       : article.description;
 
+    // Use clean path for pageMeta, it now handles alternates robustly
     return pageMeta({
       title: article.title,
       description: seoDescription,
@@ -33,7 +34,7 @@ export async function generateMetadata({
       image: article.image,
       type: 'article',
       datePublished: article.pubDate,
-      keywords: [article.source, article.category, "GCC news", "Press Terminal", ...article.title.split(' ').filter((w: string) => w.length > 4)]
+      keywords: [article.source, article.category, "GCC news", ...article.title.split(' ').filter((w: string) => w.length > 4)]
     });
   }
 
@@ -59,11 +60,17 @@ export default async function NewsArticlePage({
     notFound();
   }
 
+  // Improved Internal Linking: Fetch related news to keep crawlers moving
+  const moreNews = await getUnifiedNews({ lang, limit: 6 });
+  const filteredMoreNews = moreNews.filter((n: NewsItem) => n.slug !== resolvedParams.slug).slice(0, 4);
+
   const breadcrumbs = [
     { name: "Home", item: "/" },
     { name: "Press Terminal", item: "/news" },
     { name: article.title, item: `/news/${resolvedParams.slug}` }
   ];
+
+  const canonicalUrl = `https://arabiakhaleej.com/news/${resolvedParams.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
 
   return (
     <main className="min-h-screen pt-20">
@@ -74,18 +81,18 @@ export default async function NewsArticlePage({
         image={article.image}
         datePublished={article.pubDate}
         authorName={article.source}
-        url={`/news/${resolvedParams.slug}`}
-        language={article.language === 'ar' ? 'ar' : article.language === 'en' ? 'en' : ['en', 'ar']}
+        url={canonicalUrl}
+        language={article.language === 'ar' ? 'ar' : 'en'}
       />
       <BreadcrumbSchema items={breadcrumbs} />
       <WebPageSchema 
         name={article.title}
         description={article.description}
-        url={`/news/${resolvedParams.slug}`}
+        url={canonicalUrl}
         datePublished={article.pubDate}
       />
 
-      <NewsArticleClient initialArticle={article} />
+      <NewsArticleClient initialArticle={article} moreNews={filteredMoreNews} />
     </main>
   );
 }

@@ -99,7 +99,7 @@ Every page emits:
 
 ## GSC Health Checklist
 
-- [x] `sitemap.xml` — dynamic route, includes all 3000+ archived items
+- [x] `sitemap.xml` — dynamic route, optimized with latest 500 news items (to prevent crawl budget throttling)
 - [x] `robots.txt` — allows AI crawlers, blocks internal paths
 - [x] Canonical URLs on all pages
 - [x] No duplicate `<title>` or `<meta description>` across pages

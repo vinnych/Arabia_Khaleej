@@ -22,7 +22,13 @@ interface NewsItem {
   image?: string;
 }
 
-export default function NewsArticleClient({ initialArticle }: { initialArticle: NewsItem }) {
+export default function NewsArticleClient({ 
+  initialArticle, 
+  moreNews = [] 
+}: { 
+  initialArticle: NewsItem, 
+  moreNews?: NewsItem[] 
+}) {
   const { t, isRTL, language } = useLanguage();
   const router = useRouter();
   const [imgError, setImgError] = useState(false);
@@ -254,11 +260,39 @@ export default function NewsArticleClient({ initialArticle }: { initialArticle: 
       </article>
 
       {/* Footer Disclaimer */}
-      <div className="mt-24 pt-12 border-t border-white/5 text-center">
-        <p className="text-[10px] font-bold text-foreground/20 uppercase tracking-[0.5em] mb-4">
-          {t('transparencyNotice')}
-        </p>
-        <div className="w-12 h-1 bg-brand-gold/10 mx-auto" />
+      <div className="mt-24 pt-12 border-t border-white/5">
+        
+        {/* More News Section - Crucial for GSC internal linking authority */}
+        {moreNews.length > 0 && (
+          <div className="mb-24">
+            <h2 className="text-2xl font-bold mb-8 opacity-60 uppercase tracking-widest text-center">
+              {language === 'ar' ? 'المزيد من الأخبار' : 'More Stories'}
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {moreNews.map((news) => (
+                <Link 
+                  key={news.id} 
+                  href={`/news/${news.slug}${language === 'ar' ? '?lang=ar' : ''}`}
+                  className="glass p-6 rounded-3xl border-white/5 hover:border-brand-gold/30 transition-all group"
+                >
+                  <p className="text-[10px] font-black uppercase tracking-widest text-brand-gold mb-3 opacity-60">
+                    {news.source}
+                  </p>
+                  <h3 className="text-lg font-bold leading-snug group-hover:text-accent transition-colors">
+                    {news.title}
+                  </h3>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="text-center">
+          <p className="text-[10px] font-bold text-foreground/20 uppercase tracking-[0.5em] mb-4">
+            {t('transparencyNotice')}
+          </p>
+          <div className="w-12 h-1 bg-brand-gold/10 mx-auto" />
+        </div>
       </div>
     </div>
   );

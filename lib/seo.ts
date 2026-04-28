@@ -127,14 +127,28 @@ export function pageMeta({
     alternates: {
       canonical,
       languages: {
-        "en-US": `${canonical}?lang=en`,
-        "ar-SA": `${canonical}?lang=ar`,
-        "ar-AE": `${canonical}?lang=ar`,
-        "ar-QA": `${canonical}?lang=ar`,
-        "ar-KW": `${canonical}?lang=ar`,
-        "ar-OM": `${canonical}?lang=ar`,
-        "ar-BH": `${canonical}?lang=ar`,
-        "x-default": canonical,
+        "en-US": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=en` 
+          : `${canonical}?lang=en`,
+        "ar-SA": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=ar` 
+          : `${canonical}?lang=ar`,
+        "ar-AE": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=ar` 
+          : `${canonical}?lang=ar`,
+        "ar-QA": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=ar` 
+          : `${canonical}?lang=ar`,
+        "ar-KW": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=ar` 
+          : `${canonical}?lang=ar`,
+        "ar-OM": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=ar` 
+          : `${canonical}?lang=ar`,
+        "ar-BH": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=ar` 
+          : `${canonical}?lang=ar`,
+        "x-default": canonical.includes('?') ? canonical.split('?')[0] : canonical,
       },
     },
     robots: {
