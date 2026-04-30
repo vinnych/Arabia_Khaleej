@@ -31,16 +31,32 @@ export async function GET(req: NextRequest) {
 
     try {
       const res = await fetch(url, {
-        cache: 'no-store', // CRITICAL: Do not cache IP responses
+        cache: 'no-store',
         signal: controller.signal
       });
       
+      if (!res.ok) throw new Error("FreeIPAPI failed");
+      
       const data = await res.json();
       return NextResponse.json(data);
+    } catch (fetchError) {
+      console.warn("Geolocation fetch failed, returning default UAE fallback");
+      return NextResponse.json({
+        cityName: "Dubai",
+        countryCode: "AE",
+        countryName: "United Arab Emirates",
+        latitude: 25.2048,
+        longitude: 55.2708
+      });
     } finally {
       clearTimeout(timeoutId);
     }
   } catch (error) {
-    return NextResponse.json({ status: 'error' }, { status: 500 });
+    console.error("Geolocation route error:", error);
+    return NextResponse.json({ 
+      cityName: "Dubai", 
+      countryCode: "AE",
+      status: 'fallback' 
+    });
   }
 }

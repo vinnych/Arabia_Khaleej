@@ -1,8 +1,8 @@
 import { pageMeta } from "@/lib/seo";
 import { NewsArticleSchema, BreadcrumbSchema, WebPageSchema } from "@/components/seo/StructuredData";
-import NewsArticleClient from "@/components/news/NewsArticleClient";
+import InsightArticleClient from "@/components/insights/InsightArticleClient";
 import { notFound } from "next/navigation";
-import { getArticleBySlug, getUnifiedNews, NewsItem } from "@/lib/news";
+import { getArticleBySlug, getUnifiedNews, NewsItem } from "@/lib/insights";
 
 // Use direct server-side data access for performance and GSC reliability
 export const dynamic = 'force-dynamic';
@@ -30,22 +30,22 @@ export async function generateMetadata({
     return pageMeta({
       title: article.title,
       description: seoDescription,
-      path: `/news/${slug}${lang === 'ar' ? '?lang=ar' : ''}`,
+      path: `/insights/${slug}${lang === 'ar' ? '?lang=ar' : ''}`,
       image: article.image,
       type: 'article',
       datePublished: article.pubDate,
-      keywords: [article.source, article.category, "GCC news", ...article.title.split(' ').filter((w: string) => w.length > 4)]
+      keywords: [article.source, article.category, "GCC insights", ...article.title.split(' ').filter((w: string) => w.length > 4)]
     });
   }
 
   return pageMeta({
-    title: "News Article | Arabia Khaleej",
-    description: "Detailed news coverage from official GCC and international sources.",
-    path: `/news/${slug}`,
+    title: "Insight | Arabia Khaleej",
+    description: "Detailed editorial coverage and deep dives.",
+    path: `/insights/${slug}`,
   });
 }
 
-export default async function NewsArticlePage({ 
+export default async function InsightArticlePage({ 
   params,
   searchParams
 }: { 
@@ -60,17 +60,17 @@ export default async function NewsArticlePage({
     notFound();
   }
 
-  // Improved Internal Linking: Fetch related news to keep crawlers moving
-  const moreNews = await getUnifiedNews({ lang, limit: 6 });
-  const filteredMoreNews = moreNews.filter((n: NewsItem) => n.slug !== resolvedParams.slug).slice(0, 4);
+  // Improved Internal Linking: Fetch related insights to keep crawlers moving
+  const moreInsights = await getUnifiedNews({ lang, limit: 6 });
+  const filteredMoreInsights = moreInsights.filter((n: NewsItem) => n.slug !== resolvedParams.slug).slice(0, 4);
 
   const breadcrumbs = [
     { name: "Home", item: "/" },
-    { name: "Press Terminal", item: "/news" },
-    { name: article.title, item: `/news/${resolvedParams.slug}` }
+    { name: "Insights", item: "/insights" },
+    { name: article.title, item: `/insights/${resolvedParams.slug}` }
   ];
 
-  const canonicalUrl = `https://arabiakhaleej.com/news/${resolvedParams.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
+  const canonicalUrl = `https://arabiakhaleej.com/insights/${resolvedParams.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
 
   return (
     <main className="min-h-screen pt-20">
@@ -92,7 +92,7 @@ export default async function NewsArticlePage({
         datePublished={article.pubDate}
       />
 
-      <NewsArticleClient initialArticle={article} moreNews={filteredMoreNews} />
+      <InsightArticleClient initialArticle={article} moreNews={filteredMoreInsights} />
     </main>
   );
 }

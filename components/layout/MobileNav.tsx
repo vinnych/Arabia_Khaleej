@@ -23,7 +23,7 @@ export default function MobileNav() {
     },
     {
       label: t("pressTerminal"),
-      href: "/news",
+      href: "/insights",
       icon: Newspaper,
       isPrimary: true,
     },

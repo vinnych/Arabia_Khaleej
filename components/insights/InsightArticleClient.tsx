@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { NewsItem } from "@/lib/insights";
 import { useLanguage } from "@/lib/i18n";
 import { Calendar, ChevronLeft, ExternalLink, Globe, Newspaper, Share2, Clock, AlertCircle, Languages, RefreshCw } from "lucide-react";
 import Link from "next/link";
@@ -10,21 +11,9 @@ import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from 'react-markdown';
 
-interface NewsItem {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  link: string;
-  pubDate: string;
-  source: string;
-  category: 'gcc' | 'expat';
-  language: 'en' | 'ar' | 'regional';
-  image?: string;
-  content?: string;
-}
 
-export default function NewsArticleClient({ 
+
+export default function InsightArticleClient({ 
   initialArticle, 
   moreNews = [] 
 }: { 
@@ -55,7 +44,7 @@ export default function NewsArticleClient({
       setLoadingTranslation(true);
       const targetLang = language === 'en' ? 'ar' : 'en';
       try {
-        const res = await fetch(`/api/news?slug=${article.slug}&lang=${targetLang}`);
+        const res = await fetch(`/api/insights?slug=${article.slug}&lang=${targetLang}`);
         const data = await res.json();
         if (data.status === 'success' && data.news?.[0]) {
           setTranslation(data.news[0]);
@@ -72,7 +61,7 @@ export default function NewsArticleClient({
     const shareData = {
       title: article.title,
       text: article.description.substring(0, 100) + "...",
-      url: window.location.href,
+      url: `${window.location.origin}/insights/${article.slug}`,
     };
 
     try {
@@ -116,7 +105,7 @@ export default function NewsArticleClient({
 
       {/* Navigation */}
       <Link 
-        href="/news" 
+        href="/insights" 
         className="hidden md:inline-flex items-center gap-2 text-foreground/40 hover:text-accent transition-colors mb-12 group"
       >
         <ChevronLeft size={20} className={isRTL ? 'rotate-180' : ''} />
@@ -286,13 +275,13 @@ export default function NewsArticleClient({
         {moreNews.length > 0 && (
           <div className="mb-24">
             <h2 className="text-2xl font-bold mb-8 opacity-60 uppercase tracking-widest text-center">
-              {language === 'ar' ? 'المزيد من الأخبار' : 'More Stories'}
+              {language === 'ar' ? 'المزيد من الرؤى' : 'More Insights'}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {moreNews.map((news) => (
                 <Link 
                   key={news.id} 
-                  href={`/news/${news.slug}${language === 'ar' ? '?lang=ar' : ''}`}
+                  href={`/insights/${news.slug}${language === 'ar' ? '?lang=ar' : ''}`}
                   className="glass p-6 rounded-3xl border-white/5 hover:border-brand-gold/30 transition-all group"
                 >
                   <p className="text-[10px] font-black uppercase tracking-widest text-brand-gold mb-3 opacity-60">

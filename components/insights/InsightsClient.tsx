@@ -8,7 +8,7 @@ import Image from "next/image";
 import { getDeterministicFallback } from "@/lib/fallbacks";
 import MobileFAB from "@/components/layout/MobileFAB";
 
-interface NewsItem {
+interface InsightItem {
   id: string;
   slug: string;
   title: string;
@@ -16,41 +16,29 @@ interface NewsItem {
   link: string;
   pubDate: string;
   source: string;
-  category: 'gcc' | 'expat';
+  category: string;
   language: 'en' | 'ar' | 'regional';
   image?: string;
   isPremium?: boolean;
 }
 
-export default function NewsClient({ category: initialCategory }: { category?: string }) {
+export default function InsightsClient() {
   const { t, isRTL, language } = useLanguage();
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [insights, setInsights] = useState<InsightItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [displayCount, setDisplayCount] = useState(12);
-  const [activeTab, setActiveTab] = useState<string>(initialCategory || 'all');
   const [sharingId, setSharingId] = useState<string | null>(null);
-
-  const categories = [
-    { id: 'all', label: language === 'ar' ? 'الكل' : 'All Updates' },
-    { id: 'gcc', label: language === 'ar' ? 'أخبار الخليج' : 'GCC News' },
-    { id: 'expat', label: language === 'ar' ? 'المجتمعات' : 'Communities' },
-    { id: 'politics', label: language === 'ar' ? 'سياسة' : 'Politics' },
-    { id: 'tech', label: language === 'ar' ? 'تكنولوجيا' : 'Tech' },
-    { id: 'entertainment', label: language === 'ar' ? 'ترفيه' : 'Entertainment' },
-    { id: 'sports', label: language === 'ar' ? 'رياضة' : 'Sports' },
-  ];
 
   const markFailed = (id: string) =>
     setFailedImages(prev => { const s = new Set(prev); s.add(id); return s; });
 
-  const fetchNews = useCallback(async () => {
+  const fetchInsights = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
-      const categoryParam = activeTab !== 'all' ? `&category=${activeTab}` : '';
-      const res = await fetch(`/api/news?lang=${language}${categoryParam}&t=${Date.now()}`, {
+      const res = await fetch(`/api/insights?lang=${language}&t=${Date.now()}`, {
         cache: 'no-store',
         headers: { 'Pragma': 'no-cache' },
         signal: AbortSignal.timeout(10000)
@@ -58,26 +46,26 @@ export default function NewsClient({ category: initialCategory }: { category?: s
       if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
       if (data.status === 'success') {
-        setNews(data.news);
+        setInsights(data.news); // the API still returns { news: [] }
       } else {
         setError(true);
       }
     } catch (err) {
-      console.error("News fetch error:", err);
+      console.error("Insights fetch error:", err);
       setError(true);
     } finally {
       setLoading(false);
     }
-  }, [language, activeTab]);
+  }, [language]);
 
   useEffect(() => {
-    fetchNews();
-  }, [fetchNews]);
+    fetchInsights();
+  }, [fetchInsights]);
 
-  const handleShare = async (e: React.MouseEvent, item: NewsItem) => {
+  const handleShare = async (e: React.MouseEvent, item: InsightItem) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = `${window.location.origin}/news/${item.slug}`;
+    const url = `${window.location.origin}/insights/${item.slug}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: item.title, url });
@@ -91,24 +79,11 @@ export default function NewsClient({ category: initialCategory }: { category?: s
     }
   };
 
-  const sourceLabels: Record<string, string> = {
-    QNA: t('qna'),
-    WAM: t('wam'),
-    SPA: t('spa'),
-    BNA: t('bna'),
-    ONA: t('ona'),
-    INDIA: t('india'),
-    PAKISTAN: t('pakistan'),
-    BANGLADESH: t('bangladesh'),
-    PHILIPPINES: t('philippines'),
-  };
-
-
   return (
     <div className={`w-full max-w-6xl mx-auto px-4 pt-6 pb-12 ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
 
-      {/* Header — image clipped inside letterforms */}
-      <div className="text-center mb-10 pt-2">
+      {/* Header */}
+      <div className="text-center mb-16 pt-2">
         <h1
           className="font-extrabold uppercase leading-[0.95] tracking-tighter select-none"
           style={{
@@ -121,31 +96,18 @@ export default function NewsClient({ category: initialCategory }: { category?: s
             fontFamily: 'var(--font-inter), var(--font-serif)',
           }}
         >
-          {activeTab === 'all' ? 'UPDATES' : activeTab.toUpperCase()}
+          {t('pressTerminal')}
         </h1>
         
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-8">
-          {categories.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 sm:px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-[0.15em] transition-all duration-300 ${
-                  activeTab === tab.id 
-                  ? 'bg-brand-gold text-brand-obsidian shadow-lg scale-105' 
-                  : 'glass text-foreground/60 hover:text-foreground/90'
-                }`}
-              >
-                {tab.label}
-              </button>
-          ))}
-          
           <button
-            onClick={fetchNews}
+            onClick={fetchInsights}
             disabled={loading}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-full glass border-brand-gold/15 hover:border-brand-gold/35 active:scale-95 transition-all duration-150 ml-2"
-            aria-label="Refresh Feed"
+            className="flex items-center gap-2 px-6 py-3 rounded-full glass border-brand-gold/15 hover:border-brand-gold/35 active:scale-95 transition-all duration-150"
+            aria-label="Refresh Insights"
           >
             <RefreshCw size={14} className={`${loading ? 'animate-spin' : ''} text-accent`} />
+            <span className="text-xs font-bold uppercase tracking-widest text-foreground/70">{loading ? t('processing') : t('refresh')}</span>
           </button>
         </div>
       </div>
@@ -153,60 +115,23 @@ export default function NewsClient({ category: initialCategory }: { category?: s
       {/* Mobile Floating Refresh Button */}
       <MobileFAB 
         icon={RefreshCw} 
-        onClick={fetchNews} 
+        onClick={fetchInsights} 
         label={loading ? t('processing') : t('refresh')}
         className={loading ? "opacity-50 pointer-events-none" : ""}
       />
 
-      {/* Trending Now Ticker */}
-      <div className="mb-12 overflow-hidden glass rounded-2xl py-3 border-brand-gold/10 group">
-        <div className="flex items-center gap-4 px-6">
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">{language === 'ar' ? 'الأكثر تداولاً' : 'Trending Now'}</span>
-          </div>
-          <div className="h-4 w-[1px] bg-brand-gold/20 shrink-0" />
-          <div className="flex-1 overflow-hidden whitespace-nowrap relative">
-            <div className="inline-block animate-marquee group-hover:pause-marquee">
-              {news.slice(0, 5).map((item, i) => (
-                <Link 
-                  key={`ticker-${item.id}-${i}`} 
-                  href={`/news/${item.slug}`}
-                  className="inline-flex items-center gap-4 mx-8 text-[11px] font-bold text-foreground/70 hover:text-brand-gold transition-colors"
-                >
-                  <span className="opacity-30">#{i + 1}</span>
-                  {item.title}
-                </Link>
-              ))}
-            </div>
-            <div className="inline-block animate-marquee group-hover:pause-marquee">
-              {news.slice(0, 5).map((item, i) => (
-                <Link 
-                  key={`ticker-loop-${item.id}-${i}`} 
-                  href={`/news/${item.slug}`}
-                  className="inline-flex items-center gap-4 mx-8 text-[11px] font-bold text-foreground/70 hover:text-brand-gold transition-colors"
-                >
-                  <span className="opacity-30">#{i + 1}</span>
-                  {item.title}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Top Stories Section */}
-      {!loading && news.length > 0 && activeTab === 'all' && (
+      {!loading && insights.length > 0 && (
         <div className="mb-20 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <div className="flex items-center gap-4">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-accent">{t('topStories') || 'Top Stories'}</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-gold">Featured Insights</h2>
             <div className="h-px flex-1 bg-brand-gold/10" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {news.filter(n => n.isPremium).slice(0, 2).map((item, idx) => (
+            {insights.filter(n => n.isPremium).slice(0, 2).map((item, idx) => (
               <Link
                 key={`top-${item.id}-${idx}`}
-                href={`/news/${item.slug}`}
+                href={`/insights/${item.slug}`}
                 className="group relative h-[400px] rounded-[3rem] overflow-hidden border border-brand-gold/20 shadow-2xl hover:border-brand-gold/40 transition-all duration-700"
               >
                 <Image
@@ -222,9 +147,6 @@ export default function NewsClient({ category: initialCategory }: { category?: s
                     <span className="px-3 py-1 rounded-full bg-brand-gold text-brand-obsidian text-[8px] font-black uppercase tracking-widest">
                       {t('premium') || 'Premium'}
                     </span>
-                    <span className="text-[8px] font-bold uppercase tracking-widest text-white/60">
-                      {sourceLabels[item.source] || item.source}
-                    </span>
                   </div>
                   <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-brand-gold transition-colors duration-500">
                     {item.title}
@@ -237,7 +159,7 @@ export default function NewsClient({ category: initialCategory }: { category?: s
       )}
 
       {/* Content Grid */}
-      {loading && news.length === 0 ? (
+      {loading && insights.length === 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="glass h-[400px] rounded-[2.5rem] animate-pulse bg-white/5 border-white/5" />
@@ -247,7 +169,7 @@ export default function NewsClient({ category: initialCategory }: { category?: s
         <div className="glass p-16 rounded-[2.5rem] text-center border-brand-gold/10">
           <p className="text-foreground/50 mb-6 text-sm font-medium">{t('somethingWentWrong')}</p>
           <button
-            onClick={fetchNews}
+            onClick={fetchInsights}
             className="px-8 py-3 bg-brand-gold/10 text-brand-gold rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-brand-gold/20 active:scale-95 transition-all"
           >
             {t('retryConnection')}
@@ -256,10 +178,10 @@ export default function NewsClient({ category: initialCategory }: { category?: s
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-            {news.slice(0, displayCount).map((item, idx) => (
+            {insights.slice(0, displayCount).map((item, idx) => (
               <Link
                 key={item.id + idx}
-                href={`/news/${item.slug}`}
+                href={`/insights/${item.slug}`}
                 className={`group relative glass p-0 rounded-[2.5rem] border-brand-gold/10 hover:border-brand-gold/30 active:scale-[0.98] transition-all duration-500 flex flex-col h-full overflow-hidden select-none shadow-xl hover:shadow-2xl ${
                   item.isPremium ? 'ring-1 ring-brand-gold/20' : ''
                 }`}
@@ -301,21 +223,11 @@ export default function NewsClient({ category: initialCategory }: { category?: s
                         </div>
                       </div>
                     )}
-
-                    {/* Source badge */}
-                    <div className="absolute bottom-6 left-6 flex items-center gap-1.5 z-20">
-                      <span className={`text-[10px] font-bold uppercase tracking-[0.25em] bg-white/10 backdrop-blur-xl px-4 py-2 rounded-full border border-white/10 flex items-center gap-2 ${
-                        item.category === 'expat' ? 'text-accent' : 'text-brand-gold'
-                      }`}>
-                        {sourceLabels[item.source] || item.source}
-                        <CheckCircle2 size={10} strokeWidth={3} className="opacity-60" />
-                      </span>
-                    </div>
                   </div>
 
                   <div className="p-8 flex flex-col flex-1 relative z-20">
                     <h2 className={`text-lg sm:text-2xl font-bold text-foreground leading-tight group-hover:text-brand-gold transition-colors duration-500 line-clamp-3 flex-1 ${
-                      item.language === 'regional' ? (item.source === 'PAKISTAN' ? 'font-serif-ur text-2xl' : 'font-serif-hi') : 'font-sans'
+                      item.language === 'regional' ? 'font-serif-hi' : 'font-sans'
                     }`}>
                       {item.title}
                     </h2>
@@ -334,7 +246,7 @@ export default function NewsClient({ category: initialCategory }: { category?: s
             ))}
           </div>
           
-          {displayCount < news.length && (
+          {displayCount < insights.length && (
             <div className="mt-20 flex justify-center">
               <button
                 onClick={() => setDisplayCount(prev => prev + 12)}

@@ -13,6 +13,8 @@ export interface AffiliateProduct {
   affiliateUrl: string;
   retailer: string;
   trendingRank?: number;
+  isBestSeller?: boolean;
+  isTrending?: boolean;
 }
 
 export interface MarketplaceProvider {

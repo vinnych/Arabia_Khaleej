@@ -7,7 +7,7 @@ import { Clock, TrendingUp, UserPlus, Newspaper, ShoppingBag } from "lucide-reac
 import { useLanguage } from "@/lib/i18n";
 import PrayerLite from "@/components/prayer/PrayerLite";
 import FinanceTicker from "@/components/finance/FinanceTicker";
-import PublicSurvey from "@/components/news/PublicSurvey";
+import PublicSurvey from "@/components/insights/PublicSurvey";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function HomeClient() {
@@ -47,7 +47,7 @@ export default function HomeClient() {
     { name: t('prayerTimes'), href: "/prayer", icon: Clock },
     { name: t('marketInsights'), href: "/market-insight", icon: TrendingUp },
     { name: t('marketplace'), href: "/marketplace", icon: ShoppingBag },
-    { name: t('pressTerminal'), href: "/news", icon: Newspaper },
+    { name: t('pressTerminal'), href: "/insights", icon: Newspaper },
     { name: t('boutiqueEnquiry'), href: "/join", icon: UserPlus },
   ];
 

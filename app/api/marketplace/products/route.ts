@@ -11,7 +11,12 @@ export async function GET() {
     // 1. Try to get from cache
     const cached = await redis.get(CACHE_KEY);
     if (cached) {
-      return NextResponse.json(JSON.parse(cached));
+      try {
+        const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
+        return NextResponse.json(data);
+      } catch (e) {
+        console.error("Redis cache parse failed", e);
+      }
     }
 
     // 2. Fetch from providers
@@ -20,13 +25,16 @@ export async function GET() {
       new NoonProvider()
     ];
 
+    console.log("Fetching trending products from providers...");
     const results = await Promise.allSettled(
       providers.map(p => p.getTrendingProducts())
     );
 
-    const products = results.flatMap(res => 
-      res.status === 'fulfilled' ? res.value : []
-    );
+    const products = results.flatMap((res, i) => {
+      if (res.status === 'fulfilled') return res.value;
+      console.error(`Provider ${providers[i].name} failed:`, res.reason);
+      return [];
+    });
 
     const response = {
       status: 'success',
@@ -36,11 +44,18 @@ export async function GET() {
     };
 
     // 3. Cache the result
-    await redis.set(CACHE_KEY, JSON.stringify(response), { ex: CACHE_TTL });
+    try {
+      await redis.set(CACHE_KEY, JSON.stringify(response), { ex: CACHE_TTL });
+    } catch (e) {
+      console.error("Redis cache set failed", e);
+    }
 
     return NextResponse.json(response);
-  } catch (error) {
-    console.error("Marketplace API aggregation failed", error);
-    return NextResponse.json({ status: 'error', message: 'Failed to aggregate products' }, { status: 500 });
+  } catch (error: any) {
+    console.error("Marketplace API aggregation failed:", error.message);
+    return NextResponse.json({ 
+      status: 'error', 
+      message: error.message || 'Failed to aggregate products' 
+    }, { status: 500 });
   }
 }

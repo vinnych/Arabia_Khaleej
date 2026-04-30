@@ -18,16 +18,16 @@ export const translations: Translations = {
     ar: "عربية خليج"
   },
   pressTerminal: {
-    en: "Updates",
-    ar: "تحديثات"
+    en: "Insights",
+    ar: "رؤى"
   },
   officialUpdates: {
-    en: "Official Updates",
-    ar: "تحديثات رسمية"
+    en: "Official Editorials",
+    ar: "افتتاحيات رسمية"
   },
   newsDesc: {
-    en: "Real-time feeds from official regional agencies",
-    ar: "خلاصات فورية من الوكالات الرسمية الإقليمية"
+    en: "Original editorial insights and deep dives",
+    ar: "تحليلات ورؤى تحريرية أصلية"
   },
   siteSlogan: {
     en: "The definitive reference for a refined GCC experience.",

@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
-import { getAllNewsSlugs } from '@/lib/news';
+import { getAllNewsSlugs } from '@/lib/insights';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const countries = ['qatar', 'uae', 'saudi-arabia', 'kuwait', 'oman', 'bahrain'];
@@ -17,7 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 1. Static Base Routes
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
-    { url: `${SITE_URL}/news`, lastModified: new Date(), changeFrequency: 'always', priority: 0.9 },
+    { url: `${SITE_URL}/insights`, lastModified: new Date(), changeFrequency: 'always', priority: 0.9 },
     { url: `${SITE_URL}/prayer`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${SITE_URL}/currency-exchange`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/market-insight`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
@@ -91,14 +91,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .slice(0, 500);
 
     newsRoutes = sortedNews.map(item => ({
-      url: `${SITE_URL}/news/${item.slug}${item.lang === 'ar' ? '?lang=ar' : ''}`,
+      url: `${SITE_URL}/insights/${item.slug}${item.lang === 'ar' ? '?lang=ar' : ''}`,
       lastModified: new Date(item.pubDate),
       changeFrequency: 'monthly',
       priority: 0.6,
       alternates: {
         languages: {
-          'en': `${SITE_URL}/news/${item.slug}`,
-          'ar': `${SITE_URL}/news/${item.slug}?lang=ar`
+          'en': `${SITE_URL}/insights/${item.slug}`,
+          'ar': `${SITE_URL}/insights/${item.slug}?lang=ar`
         }
       }
     }));

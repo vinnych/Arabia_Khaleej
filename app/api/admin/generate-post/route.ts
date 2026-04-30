@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateGCCInsight } from '@/lib/ai';
 import { redis } from '@/lib/redis';
 import { toSlug } from '@/lib/utils';
-import { NewsItem } from '@/lib/news';
+import { NewsItem } from '@/lib/insights';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
       title,
       description: content.substring(0, 300) + '...',
       content,
-      link: `/news/${slug}`,
+      link: `/insights/${slug}`,
       pubDate: new Date().toISOString(),
       source: "Arabia Khaleej Original",
       category: "gcc",
