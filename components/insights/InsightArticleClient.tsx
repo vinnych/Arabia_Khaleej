@@ -226,26 +226,28 @@ export default function InsightArticleClient({
               </div>
             )}
             
-            <div className="glass p-8 rounded-[2rem] border-brand-gold/10 space-y-6">
-              <div className="flex items-start gap-4">
-                <Newspaper className="text-brand-gold shrink-0" size={24} />
-                <div>
-                  <h3 className="text-lg font-bold text-foreground mb-2">{t('readMore')}</h3>
-                  <p className="text-sm text-foreground/50 mb-6 leading-relaxed">
-                    {t('newsDisclaimer')}
-                  </p>
-                  <Link 
-                    href={article.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 bg-brand-gold text-brand-obsidian px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform"
-                  >
-                    <span>{t('officialSource')}</span>
-                    <ExternalLink size={16} />
-                  </Link>
+            {!article.isPremium && (
+              <div className="glass p-8 rounded-[2rem] border-brand-gold/10 space-y-6">
+                <div className="flex items-start gap-4">
+                  <Newspaper className="text-brand-gold shrink-0" size={24} />
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground mb-2">{t('readMore')}</h3>
+                    <p className="text-sm text-foreground/50 mb-6 leading-relaxed">
+                      {t('newsDisclaimer')}
+                    </p>
+                    <Link 
+                      href={article.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-3 bg-brand-gold text-brand-obsidian px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform"
+                    >
+                      <span>{t('officialSource')}</span>
+                      <ExternalLink size={16} />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {perspectiveMode && (
@@ -282,14 +284,27 @@ export default function InsightArticleClient({
                 <Link 
                   key={news.id} 
                   href={`/insights/${news.slug}${language === 'ar' ? '?lang=ar' : ''}`}
-                  className="glass p-6 rounded-3xl border-white/5 hover:border-brand-gold/30 transition-all group"
+                  className="glass overflow-hidden rounded-3xl border-white/5 hover:border-brand-gold/30 transition-all group flex flex-col"
                 >
-                  <p className="text-[10px] font-black uppercase tracking-widest text-brand-gold mb-3 opacity-60">
-                    {news.source}
-                  </p>
-                  <h3 className="text-lg font-bold leading-snug group-hover:text-accent transition-colors">
-                    {news.title}
-                  </h3>
+                  {news.image && (
+                    <div className="relative w-full aspect-video overflow-hidden">
+                      <Image 
+                        src={news.image} 
+                        alt={news.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian/80 to-transparent opacity-60" />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-brand-gold mb-3 opacity-60">
+                      {news.source}
+                    </p>
+                    <h3 className="text-lg font-bold leading-snug group-hover:text-accent transition-colors line-clamp-2">
+                      {news.title}
+                    </h3>
+                  </div>
                 </Link>
               ))}
             </div>

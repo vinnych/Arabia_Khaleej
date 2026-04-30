@@ -10,23 +10,23 @@ This document provides core principles and technical standards for AI assistants
 3. **Quality Assurance:** Recheck every implementation multiple times to ensure it is bug-free and functions exactly as expected.
 
 ## II. PREMIUM DESIGN & EXPERIENCE (UX/UI)
-4. **Premium Aesthetics:** Create an elegant, high-end visual identity. Focus on curated color palettes, modern typography, and a "luxury" feel.
-5. **Subtle Motion:** Use minimal, intentional micro-animations. Transitions should feel smooth and premium.
-6. **Interaction Design:** Ensure the site is highly interactive. Use skeleton loaders and smooth state transitions.
-7. **Mobile-First Excellence:** Perfect responsiveness and optimization for mobile gestures.
+4. **Premium Aesthetics:** Create an elegant, high-end visual identity. Focus on curated color palettes, modern typography, and a "luxury" feel. Avoid generic assets.
+5. **Bespoke Assets:** Use AI-generated images that are high-end, cinematic, and culturally relevant. Store assets locally for maximum performance and reliability.
+6. **Subtle Motion:** Use minimal, intentional micro-animations. Transitions should feel smooth and premium.
+7. **Interaction Design:** Ensure the site is highly interactive. Use skeleton loaders and smooth state transitions.
+8. **Mobile-First Excellence:** Perfect responsiveness and optimization for mobile gestures.
 
 ## III. TECHNICAL STANDARDS
-8. **Extreme Performance:** Lightning-fast load times. Optimize images, minify assets, and use efficient caching.
-9. **SEO & Discoverability:** Advanced Schema markup, Open Graph tags, and semantic HTML for high ranking.
-10. **Clean Architecture:** Modular, scalable, and reusable code. Maintain a clear directory structure.
-11. **Localization & RTL:** Full support for Right-to-Left (RTL) layouts with optimized Arabic typography.
+9. **Extreme Performance:** Lightning-fast load times. Optimize images, minify assets, and use efficient caching.
+10. **SEO & Discoverability:** Advanced Schema markup, Open Graph tags, and semantic HTML for high ranking.
+11. **Clean Architecture:** Modular, scalable, and reusable code. Maintain a clear directory structure.
+12. **Localization & RTL:** Full support for Right-to-Left (RTL) layouts with optimized Arabic typography.
 
 ## IV. CONTENT & ENGAGEMENT STRATEGY
-12. **Mature Platform Balance:** Maintain the tone of a "Mature Premium Platform." Strictly avoid pornographic or explicit material.
-13. **Engagement Variety:** Ensure a balance in content variety and high-quality engagement.
-14. **News Ecosystem:** Dedicated, high-performance pages for Entertainment, Technology, Politics, and Sports.
-15. **Data-Driven Insights:** Use public survey reports and trending metrics to guide content presentation.
-16. **Long-Form Excellence (Groq):** AI-generated articles must be at least 1200 words, authoritative, and formatted in clean Markdown. They must follow a "journalistic-first" approach, avoiding repetitive AI patterns.
+13. **Editorial Excellence:** Maintain the tone of a "Mature Premium Platform." Articles must be authoritative, well-structured, and provide deep insights.
+14. **Bilingual Parity:** Every premium insight must have a high-quality Arabic translation, avoiding robotic AI patterns.
+15. **Premium Insights Section:** Focused, high-performance pages for Entertainment, Technology, Arts, and Lifestyle.
+16. **Long-Form Standards:** Editorial articles must be at least 1000 words, formatted in clean Markdown with proper heading hierarchy. Use a "journalistic-first" approach.
 
 ## V. ACCESSIBILITY & SECURITY
 17. **Inclusive Design:** Adhere to WCAG 2.1 accessibility standards.

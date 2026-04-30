@@ -50,15 +50,15 @@ As an independent digital platform, these rules are **STRICT** and must be revie
 
 ---
 
-## 📰 News Aggregation Strategy
+## 📰 Editorial & Aggregation Strategy
 
 ### 📋 Objective
-To provide real-time regional updates while strictly adhering to the **Cybercrime Prevention Law (No. 14 of 2014)** and local media regulations in Qatar and the GCC.
+To provide high-end regional insights and real-time updates while strictly adhering to the **Cybercrime Prevention Law (No. 14 of 2014)** and local media regulations in Qatar and the GCC.
 
 ### 🛡️ Operational Safeguards
-1. **Official-Only Sourcing**: We aggregate exclusively from official state news agencies.
-2. **Original Insights**: Original, long-form content (1000+ words) is generated to provide unique regional analysis while strictly avoiding sensitive political or religious commentary.
-3. **Verbatim Content (Aggregated)**: External news content is displayed as-is with no editorial commentary.
+1. **Original Premium Content**: The platform prioritizes original, long-form editorial insights (1000+ words) providing deep analysis of regional trends in tech, lifestyle, and business.
+2. **Official Press Terminal**: Real-time updates are aggregated EXCLUSIVELY from official state news agencies (QNA, WAM, SPA) to ensure accuracy and compliance.
+3. **Verbatim Content (Aggregated)**: External news content is displayed as-is with no editorial commentary, maintaining a "static press terminal" approach for compliance.
 4. **Direct Redirection**: Aggregated headlines link directly to the official agency's portal.
 5. **Archive Optimization**: News content is kept in a transient archive (max 100 items per language) to ensure high-quality indexing and system performance.
 6. **Advertising Transparency**: 
@@ -77,15 +77,15 @@ To provide real-time regional updates while strictly adhering to the **Cybercrim
 
 ### 🌏 Community & Expat Feeds
 To serve the diverse demographic of the GCC, the platform includes official national feeds from major expat home countries:
-- **India**: PIB (Official Government) & Regional Hindi feeds.
-- **Pakistan**: APP (Official) & BBC Urdu.
-- **Bangladesh**: BSS (Official) & Bengali feeds.
-- **Philippines**: PNA (Official) & Filipino bulletins.
+- **India**: PIB (Official Government)
+- **Pakistan**: APP (Official)
+- **Bangladesh**: BSS (Official)
+- **Philippines**: PNA (Official)
 
 ---
 
 ## ⚖️ Periodic Audit Checklist
-- [ ] Is the "About" page accurately reflecting my current independent status?
+- [ ] Is the "About" page accurately reflecting the current "Premium Insights" status?
 - [ ] Are all portal links correctly pointing to official .gov.qa domains?
 - [ ] Am I avoiding all sensitive topics (Politics, Religion, Security)?
 - [ ] Are the static utility guides up-to-date with the latest public portal requirements?
