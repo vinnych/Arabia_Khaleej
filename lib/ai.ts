@@ -63,7 +63,7 @@ export async function generateGCCInsight(
           { role: "user", content: prompt }
         ],
         temperature: 0.8,
-        max_tokens: 4096,
+        max_tokens: 8192,
       }),
     });
 

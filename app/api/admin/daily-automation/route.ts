@@ -4,7 +4,7 @@ import { redis } from '@/lib/redis';
 import { toSlug } from '@/lib/utils';
 import { InsightItem } from '@/lib/insights';
 import { getMarketplaceProducts } from '@/lib/marketplace/service';
-import { getRelevantImage } from '@/lib/unsplash';
+import { getRelevantImage } from '@/lib/images';
 
 function cleanAIContent(content: string): string {
   // Remove common AI preambles like "Here is the article:", "Sure, I can write that..."
@@ -51,7 +51,7 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international', t
       
       if (!content || content.length < 500) {
         console.warn(`Content for ${item.topic} too short or empty, skipping.`);
-        continue;
+        return 0;
       }
 
       const firstLine = content.split('\n')[0].replace(/[#*]/g, '').trim();
@@ -121,12 +121,36 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: true, action: 'marketplace_refreshed' });
     }
 
+    // 2. Master Digest (Hobby Plan Friendly)
+    if (searchParams.get('action') === 'master-digest') {
+      console.log("Executing Master Digest...");
+      // a. Refresh Marketplace
+      await getMarketplaceProducts(true);
+      
+      // b. Generate one of each main type (Parallel with safety)
+      const jobs = [
+        generateBatch('en', 'gcc', 0),
+        generateBatch('ar', 'gcc', 0),
+      ];
+      
+      const counts = await Promise.all(jobs);
+      
+      return NextResponse.json({ 
+        success: true, 
+        action: 'master-digest-completed',
+        generated: {
+          en_gcc: counts[0],
+          ar_gcc: counts[1]
+        }
+      });
+    }
+
     const results = {
       gcc: { en: 0, ar: 0 },
       international: { en: 0, ar: 0 }
     };
 
-    // 2. Conditional Batch Execution
+    // 3. Conditional Batch Execution
     const topicIndex = parseInt(searchParams.get('index') || '0');
     
     if (targetType && targetLang) {

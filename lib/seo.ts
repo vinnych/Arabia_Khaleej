@@ -12,6 +12,10 @@ export const SITE_DESCRIPTION_EN = "The definitive reference for a refined GCC e
 export const SITE_DESCRIPTION_AR = "المرجع النهائي لتجربة خليجية متميزة في دول مجلس التعاون.";
 export const SITE_DESCRIPTION = SITE_DESCRIPTION_EN;
 
+export const SITE_TAGLINE_EN = "The GCC Standard";
+export const SITE_TAGLINE_AR = "المعيار الخليجي";
+export const SITE_TAGLINE = SITE_TAGLINE_EN;
+
 interface PageMetaOptions {
   /** Full page title */
   title: string;
@@ -164,6 +168,7 @@ export function pageMeta({
     },
     other: {
       "google-adsense-account": "ca-pub-7212871157824722",
+      "google-site-verification": "61758f95d085e67d",
       "geo.region": geo.region || "QA-DA",
       "geo.placename": geo.placename || "Doha, Qatar",
       "geo.position": `${geo.latitude};${geo.longitude}`,

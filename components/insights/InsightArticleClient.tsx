@@ -189,7 +189,7 @@ export default function InsightArticleClient({
               fill
               className="object-cover"
               priority
-              unoptimized={!article.image?.startsWith('https://images.unsplash.com')}
+              unoptimized={!article.image?.startsWith('https://images.unsplash.com') && !article.image?.startsWith('https://images.pexels.com')}
               onError={() => setImgError(true)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />

@@ -138,7 +138,7 @@ export default function InsightsClient() {
                   alt={item.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
-                  unoptimized={!!item.image && !item.image.startsWith('https://images.unsplash.com')}
+                  unoptimized={!!item.image && !item.image.startsWith('https://images.unsplash.com') && !item.image.startsWith('https://images.pexels.com')}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-brand-obsidian/40 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-10 space-y-4">
@@ -193,7 +193,7 @@ export default function InsightsClient() {
                     alt={item.title}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
-                    unoptimized={!!item.image && !item.image.startsWith('https://images.unsplash.com')}
+                    unoptimized={!!item.image && !item.image.startsWith('https://images.unsplash.com') && !item.image.startsWith('https://images.pexels.com')}
                     onError={() => markFailed(item.id)}
                   />
                   

@@ -73,12 +73,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" 
           strategy="afterInteractive" 
         />
-        <Script id="google-analytics" strategy="afterInteractive">{`
+        <Script id="google-analytics" strategy="afterInteractive" nonce={nonce}>{`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
           gtag('config', 'G-WRXQ5H9Z7K');
         `}</Script>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7212871157824722"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+          nonce={nonce}
+        />
       </body>
     </html>
   );

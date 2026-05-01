@@ -10,6 +10,7 @@ export interface Translations {
 export const translations: Translations = {
   // Navigation & Branding
   siteName: { en: "Arabia Khaleej", ar: "عربية خليج" },
+  siteTagline: { en: "The GCC Standard", ar: "المعيار الخليجي" },
   pressTerminal: { en: "Insights", ar: "رؤى" },
   officialUpdates: { en: "Official Editorials", ar: "افتتاحيات رسمية" },
   insightsDesc: { en: "Original editorial insights and deep dives", ar: "تحليلات ورؤى تحريرية أصلية" },

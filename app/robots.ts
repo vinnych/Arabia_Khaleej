@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 
+export const dynamic = 'force-dynamic';
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
