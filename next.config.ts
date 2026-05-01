@@ -38,8 +38,8 @@ const nextConfig: NextConfig = {
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       img-src 'self' blob: data: https://images.unsplash.com https://images.pexels.com https://*.noon.com https://*.gov.sa https://*.gov.qa https://*.gov.bh https://*.gov.om https://*.ae https://www.google-analytics.com https://pagead2.googlesyndication.com;
       font-src 'self' data: https://fonts.gstatic.com;
-      connect-src 'self' https://api.groq.com https://api.aladhan.com https://open.er-api.com https://*.upstash.io https://*.google-analytics.com https://*.googlesyndication.com https://*.workers.dev https://va.vercel-scripts.com;
-      frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com;
+      connect-src 'self' https://api.groq.com https://api.aladhan.com https://open.er-api.com https://*.upstash.io https://*.google-analytics.com https://*.googlesyndication.com https://*.doubleclick.net https://*.workers.dev https://va.vercel-scripts.com https://ep1.adtrafficquality.google;
+      frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.google.com;
       upgrade-insecure-requests;
     `.replace(/\s{2,}/g, ' ').trim();
 

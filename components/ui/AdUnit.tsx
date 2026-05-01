@@ -26,14 +26,38 @@ export default function AdUnit({
   const pushed = useRef(false);
 
   useEffect(() => {
+    // 1. Skip if it's a placeholder (don't push for non-existent ads)
+    if (slot.startsWith("REPLACE_")) return;
+
+    // 2. Skip if already pushed for this instance
     if (pushed.current) return;
-    pushed.current = true;
+
     try {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
-    } catch {
-      // AdSense script not yet loaded — will auto-init on next load
+      if (typeof window !== "undefined") {
+        const adsbygoogle = (window.adsbygoogle = window.adsbygoogle || []);
+        
+        // Wait a tiny bit for the DOM element to be available
+        // especially important in Next.js/React transitions
+        const timeoutId = setTimeout(() => {
+          try {
+            // Check if there are any 'ins' elements that haven't been filled yet
+            const unfilledAds = document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status="done"])');
+            
+            if (unfilledAds.length > 0) {
+              adsbygoogle.push({});
+              pushed.current = true;
+            }
+          } catch (e) {
+            console.error("AdSense push error:", e);
+          }
+        }, 100);
+
+        return () => clearTimeout(timeoutId);
+      }
+    } catch (e) {
+      // AdSense script not yet loaded or blocked
     }
-  }, []);
+  }, [slot]);
 
   // Don't render placeholder slots in production
   if (slot.startsWith("REPLACE_")) return null;

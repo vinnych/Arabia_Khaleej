@@ -26,7 +26,8 @@ export default function middleware(request: NextRequest) {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com data:;
     img-src 'self' https: data: blob:;
-    connect-src 'self' https://va.vercel-scripts.com https://arabiakhaleej-contact.asishchilakapati.workers.dev https://freeipapi.com https://api.aladhan.com https://open.er-api.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com;
+    connect-src 'self' https://va.vercel-scripts.com https://arabiakhaleej-contact.asishchilakapati.workers.dev https://freeipapi.com https://api.aladhan.com https://open.er-api.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.googlesyndication.com https://*.doubleclick.net https://ep1.adtrafficquality.google;
+    frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.google.com;
     media-src 'self';
     object-src 'none';
     base-uri 'self';

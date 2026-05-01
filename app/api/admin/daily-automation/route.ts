@@ -124,13 +124,21 @@ export async function GET(request: Request) {
     // 2. Master Digest (Hobby Plan Friendly)
     if (searchParams.get('action') === 'master-digest') {
       console.log("Executing Master Digest...");
+      
+      // Determine topic index based on search param or current UTC hour
+      const providedIndex = searchParams.get('index');
+      const hourIndex = new Date().getUTCHours();
+      const topicIndex = providedIndex ? parseInt(providedIndex) : hourIndex;
+      
+      console.log(`Using Topic Index: ${topicIndex} (Source: ${providedIndex ? 'Param' : 'UTC Hour'})`);
+
       // a. Refresh Marketplace
       await getMarketplaceProducts(true);
       
       // b. Generate one of each main type (Parallel with safety)
       const jobs = [
-        generateBatch('en', 'gcc', 0),
-        generateBatch('ar', 'gcc', 0),
+        generateBatch('en', 'gcc', topicIndex),
+        generateBatch('ar', 'gcc', topicIndex),
       ];
       
       const counts = await Promise.all(jobs);

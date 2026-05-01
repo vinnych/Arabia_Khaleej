@@ -72,6 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           async 
           src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" 
           strategy="afterInteractive" 
+          nonce={nonce}
         />
         <Script id="google-analytics" strategy="afterInteractive" nonce={nonce}>{`
           window.dataLayer = window.dataLayer || [];
