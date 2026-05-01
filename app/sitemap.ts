@@ -85,7 +85,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Capping for performance
     const sortedInsights = Array.from(uniqueSlugs.values())
       .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
-      .slice(0, 500);
+      .slice(0, 2000);
 
     insightRoutes = sortedInsights.map(item => ({
       url: `${SITE_URL}/insights/${item.slug}${item.lang === 'ar' ? '?lang=ar' : ''}`,

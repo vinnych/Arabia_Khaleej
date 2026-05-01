@@ -4,18 +4,19 @@ import { BreadcrumbSchema, DatasetSchema } from "@/components/seo/StructuredData
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { getT, getServerLanguage } from "@/lib/i18n-server";
+
 export async function generateMetadata({ params }: { params: Promise<{ category: string }> }) {
   const { category: rawCategory } = await params;
-  const category = rawCategory.charAt(0).toUpperCase() + rawCategory.slice(1);
+  const t = await getT();
+  const categoryLabel = t(rawCategory as any) !== rawCategory ? t(rawCategory as any) : rawCategory;
   
   return pageMeta({
-    title: `${category} Insights — GCC Market Data | ${SITE_NAME}`,
-    description: `Detailed market analysis and real-time data for GCC ${category}.`,
+    title: `${categoryLabel} ${t('marketInsights')} | ${SITE_NAME}`,
+    description: `${t('guideDesc')} ${categoryLabel}.`,
     path: `/market-insight/${rawCategory}`,
   });
 }
-
-import { getT, getServerLanguage } from "@/lib/i18n-server";
 
 export default async function CategoryInsightPage({ params }: { params: Promise<{ category: string }> }) {
   const { category: rawCategory } = await params;
@@ -40,8 +41,8 @@ export default async function CategoryInsightPage({ params }: { params: Promise<
     <div className="min-h-screen">
       <BreadcrumbSchema items={breadcrumbItems} />
       <DatasetSchema 
-        name={`GCC ${category} Market Intelligence`}
-        description={`Real-time data and analysis for GCC ${category} markets.`}
+        name={`GCC ${categoryLabel} ${t('regionalIntelligence')}`}
+        description={`${t('guideDesc')} GCC ${categoryLabel}.`}
         url={`/market-insight/${rawCategory}`}
       />
       

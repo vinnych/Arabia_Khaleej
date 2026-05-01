@@ -2,32 +2,18 @@ import { pageMeta, SITE_NAME } from "@/lib/seo";
 import Link from "next/link";
 import { ArrowLeft, TrendingUp, ShieldCheck, Globe, Zap } from "lucide-react";
 import StructuredData, { BreadcrumbSchema } from "@/components/seo/StructuredData";
-
-export const metadata = pageMeta({
-  title: `GCC Economic Outlook & Regional Stability Analysis | ${SITE_NAME}`,
-  titleAr: `Ø§Ù„ØªÙˆÙ‚Ø¹Ø§Øª Ø§Ù„Ø§Ù‚ØªØµØ§Ø¯ÙŠØ© Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠØ© ÙˆØªØ­Ù„ÙŠÙ„ Ø§Ù„Ø§Ø³ØªÙ‚Ø±Ø§Ø± Ø§Ù„Ø¥Ù‚Ù„ÙŠÙ…ÙŠ | ${SITE_NAME}`,
-  description:
-    "In-depth analysis of GCC regional economic stability, energy resilience, non-oil sector growth, and equity market outlook for investors and residents.",
-  descriptionAr:
-    "ØªØ­Ù„ÙŠÙ„ Ù…Ø¹Ù…Ù‚ Ù„Ù„Ø§Ø³ØªÙ‚Ø±Ø§Ø± Ø§Ù„Ø§Ù‚ØªØµØ§Ø¯ÙŠ Ø§Ù„Ø¥Ù‚Ù„ÙŠÙ…ÙŠ Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠ ÙˆÙ…Ø±ÙˆÙ†Ø© Ø§Ù„Ø·Ø§Ù‚Ø© ÙˆÙ†Ù…Ùˆ Ø§Ù„Ù‚Ø·Ø§Ø¹ ØºÙŠØ± Ø§Ù„Ù†ÙØ·ÙŠ ÙˆØªÙˆÙ‚Ø¹Ø§Øª Ø³ÙˆÙ‚ Ø§Ù„Ø£Ø³Ù‡Ù… Ù„Ù„Ù…Ø³ØªØ«Ù…Ø±ÙŠÙ† ÙˆØ§Ù„Ù…Ù‚ÙŠÙ…ÙŠÙ†.",
-  path: "/market-insight/details",
-  keywords: [
-    "GCC economy",
-    "GCC stability",
-    "GCC market outlook",
-    "Vision 2030",
-    "Saudi economy",
-    "UAE growth",
-    "energy resilience",
-    "non-oil sector",
-    "Ø§Ù‚ØªØµØ§Ø¯ Ø§Ù„Ø®Ù„ÙŠØ¬",
-    "Ø§Ø³ØªÙ‚Ø±Ø§Ø± Ø¥Ù‚Ù„ÙŠÙ…ÙŠ",
-  ],
-  type: "article",
-  datePublished: "2024-01-01T00:00:00Z",
-});
-
 import { getT, getServerLanguage } from "@/lib/i18n-server";
+
+export async function generateMetadata() {
+  const t = await getT();
+  return pageMeta({
+    title: `${t('economicOutlook')} | ${SITE_NAME}`,
+    description: t('sentimentDesc'),
+    path: "/market-insight/details",
+    type: "article",
+    datePublished: "2024-01-01T00:00:00Z",
+  });
+}
 
 export default async function SentimentDetailsPage() {
   const t = await getT();

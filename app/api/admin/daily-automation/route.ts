@@ -4,14 +4,22 @@ import { redis } from '@/lib/redis';
 import { toSlug } from '@/lib/utils';
 import { InsightItem } from '@/lib/insights';
 import { getMarketplaceProducts } from '@/lib/marketplace/service';
-import { getDeterministicFallback } from '@/lib/fallbacks';
+import { getRelevantImage } from '@/lib/unsplash';
+
+function cleanAIContent(content: string): string {
+  // Remove common AI preambles like "Here is the article:", "Sure, I can write that..."
+  return content
+    .replace(/^(Here is|Sure|Certainly|I've|This article|As requested).*\n+/i, '')
+    .trim();
+}
 
 function extractDescription(content: string): string {
-  const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
-  // Skip heading lines (start with #) and find first real paragraph
-  const paragraph = lines.find(l => !l.startsWith('#') && l.length > 60);
-  if (!paragraph) return lines[0]?.replace(/[#*_]/g, '').trim().substring(0, 200) + '...' || '';
-  return paragraph.replace(/[#*_]/g, '').trim().substring(0, 200) + '...';
+  const cleaned = cleanAIContent(content);
+  const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
+  // Find first real paragraph that isn't a heading
+  const paragraph = lines.find(l => !l.startsWith('#') && l.length > 80);
+  if (!paragraph) return lines[0]?.replace(/[#*_]/g, '').trim().substring(0, 180) + '...' || '';
+  return paragraph.replace(/[#*_]/g, '').trim().substring(0, 180) + '...';
 }
 
 export const dynamic = 'force-dynamic';
@@ -37,11 +45,21 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international') {
       // Use Llama 70B for GCC (Premium) and Llama 8B for International (Efficiency) to save tokens
       const model = type === 'gcc' ? "llama-3.3-70b-versatile" : "llama-3.1-8b-instant";
       
-      const content = await generateGCCInsight(item.country, item.topic, lang, model);
+      const rawContent = await generateGCCInsight(item.country, item.topic, lang, model);
+      const content = cleanAIContent(rawContent);
       
+      if (!content || content.length < 500) {
+        console.warn(`Content for ${item.topic} too short or empty, skipping.`);
+        continue;
+      }
+
       const firstLine = content.split('\n')[0].replace(/[#*]/g, '').trim();
-      const title = firstLine || `${item.country}: ${item.topic}`;
+      const title = firstLine.length > 10 ? firstLine : `${item.country}: ${item.topic}`;
       const slug = toSlug(title, `${type === 'gcc' ? 'v' : 'int'}-${Date.now()}`);
+
+      // Fetch a relevant image from Unsplash based on the topic
+      const imageSearchQuery = `${item.topic} ${item.country}`;
+      const imageUrl = await getRelevantImage(imageSearchQuery, slug);
 
       const newInsight: InsightItem = {
         id: `daily-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -55,13 +73,13 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international') {
         category: "gcc",
         language: lang,
         tags: [type, 'trending', 'premium'],
-        image: getDeterministicFallback(slug),
+        image: imageUrl,
       };
 
       generatedInsights.push(newInsight);
       
-      // Safety delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Safety delay (Increased to 6s for Groq Free Tier TPM limits)
+      await new Promise(resolve => setTimeout(resolve, 6000));
     } catch (err) {
       console.error(`Failed to generate ${type} article:`, err);
     }
@@ -69,10 +87,15 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international') {
 
   const archiveKey = `insights_archive_${lang}`;
   const currentArchive = (await redis.get(archiveKey) as InsightItem[] | null) || [];
-  const updatedArchive = [...generatedInsights, ...currentArchive].slice(0, 300);
+  
+  // Prevent duplicate generation (check if slug already exists in archive)
+  const existingSlugs = new Set(currentArchive.map(a => a.slug));
+  const uniqueGenerated = generatedInsights.filter(g => !existingSlugs.has(g.slug));
+
+  const updatedArchive = [...uniqueGenerated, ...currentArchive].slice(0, 1500);
   await redis.set(archiveKey, updatedArchive);
 
-  return generatedInsights.length;
+  return uniqueGenerated.length;
 }
 
 export async function GET(request: Request) {

@@ -1,4 +1,4 @@
-import { pageMeta } from "@/lib/seo";
+import { pageMeta, SITE_NAME } from "@/lib/seo";
 import CountryClient from "./Client";
 import {
   BreadcrumbSchema,
@@ -117,21 +117,33 @@ const COUNTRY_INFO: Record<
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
+  const t = await getT();
   const info = COUNTRY_INFO[slug] ?? COUNTRY_INFO["qatar"];
+  
+  const countryName = t(
+    slug === 'saudi-arabia' ? 'saudiArabia' : 
+    slug === 'united-arab-emirates' ? 'uae' : 
+    slug === 'qatar' ? 'qatar' : 
+    slug === 'kuwait' ? 'kuwait' : 
+    slug === 'oman' ? 'oman' : 
+    slug === 'bahrain' ? 'bahrain' : slug as any
+  );
+
+  const capitalName = t(
+    slug === 'saudi-arabia' ? 'riyadh' : 
+    slug === 'united-arab-emirates' ? 'abuDhabi' : 
+    slug === 'qatar' ? 'doha' : 
+    slug === 'kuwait' ? 'kuwaitCity' : 
+    slug === 'oman' ? 'muscat' : 
+    slug === 'bahrain' ? 'manama' : 'doha'
+  );
+
+  const keyPrefix = slug === 'united-arab-emirates' ? 'uae' : slug.split('-')[0];
 
   return pageMeta({
-    title: `${info.name} | Regional Guide | The GCC Standard`,
-    titleAr: `${info.nameAr} | دليل إقليمي | المعيار الخليجي`,
-    description: `The definitive reference for ${info.name}. Population: ${info.population}. Capital: ${info.capital}. Currency: ${info.currency} (${info.currencyCode}). National vision: ${info.nationalVision}.`,
-    descriptionAr: `المرجع النهائي لـ ${info.nameAr}. السكان: ${info.population}. العاصمة: ${info.capital}. العملة: ${info.currency}. الرؤية الوطنية: ${info.nationalVision}.`,
+    title: `${countryName} | ${t('regionalGuides')} | ${SITE_NAME}`,
+    description: `${t('guideDesc')}: ${countryName}. ${t('capital')}: ${capitalName}. ${t('vision')}: ${t(keyPrefix + 'Vision' as any)}.`,
     path: `/countries/${slug}`,
-    keywords: [
-      info.name, info.nameAr, info.capital, info.currency, info.currencyCode,
-      info.nationalVision, "GCC", "Middle East", "Regional Guide", "Economy",
-      "Sovereign Vision", "Infrastructure", "Market Intelligence",
-      "دليل إقليمي", "اقتصاد", "مجلس التعاون",
-    ],
-    geo: info.geo,
     type: "article",
   });
 }
@@ -141,27 +153,37 @@ export default async function Page({ params }: Props) {
   const info = COUNTRY_INFO[slug] ?? COUNTRY_INFO["qatar"];
   const t = await getT();
 
+  const countryName = t(
+    slug === 'saudi-arabia' ? 'saudiArabia' : 
+    slug === 'united-arab-emirates' ? 'uae' : 
+    slug === 'qatar' ? 'qatar' : 
+    slug === 'kuwait' ? 'kuwait' : 
+    slug === 'oman' ? 'oman' : 
+    slug === 'bahrain' ? 'bahrain' : slug as any
+  );
+
+  const capitalName = t(
+    slug === 'saudi-arabia' ? 'riyadh' : 
+    slug === 'united-arab-emirates' ? 'abuDhabi' : 
+    slug === 'qatar' ? 'doha' : 
+    slug === 'kuwait' ? 'kuwaitCity' : 
+    slug === 'oman' ? 'muscat' : 
+    slug === 'bahrain' ? 'manama' : 'doha'
+  );
+
   const breadcrumbItems = [
     { name: t('home'), item: "/" },
     { name: t('countries'), item: "/#countries" },
-    { 
-      name: t(
-        slug === 'saudi-arabia' ? 'saudiArabia' : 
-        slug === 'united-arab-emirates' ? 'uae' : 
-        slug === 'qatar' ? 'qatar' : 
-        slug === 'kuwait' ? 'kuwait' : 
-        slug === 'oman' ? 'oman' : 
-        slug === 'bahrain' ? 'bahrain' : slug
-      ), 
-      item: `/countries/${slug}` 
-    },
+    { name: countryName, item: `/countries/${slug}` },
   ];
+
+  const keyPrefix = slug === 'united-arab-emirates' ? 'uae' : slug.split('-')[0];
 
   return (
     <>
       <WebPageSchema
-        name={`${info.name} Regional Guide | Arabia Khaleej`}
-        description={`Definitive regional guide for ${info.name}. Population ${info.population}, GDP ${info.gdp}, capital ${info.capital}, currency ${info.currency} (${info.currencyCode}), national vision: ${info.nationalVision}.`}
+        name={`${countryName} ${t('regionalGuides')} | ${SITE_NAME}`}
+        description={`${t('guideDesc')} for ${countryName}. ${t('population')} ${t(keyPrefix + 'Pop' as any)}, ${t('economy')} ${t(keyPrefix + 'Gdp' as any)}, ${t('capital')} ${capitalName}.`}
         url={`/countries/${slug}`}
         datePublished="2024-01-01T00:00:00Z"
       />
@@ -169,24 +191,23 @@ export default async function Page({ params }: Props) {
       <CountrySchema
         name={info.name}
         nameAr={info.nameAr}
-        description={`${info.name} is a sovereign GCC member state with a population of ${info.population} and a GDP of ${info.gdp}. Capital: ${info.capital}. Official currency: ${info.currency} (${info.currencyCode}). National development vision: ${info.nationalVision}.`}
-        capital={info.capital}
+        description={`${countryName} ${t(keyPrefix + 'Intro' as any)}`}
+        capital={capitalName}
         iso2={info.iso2}
-        population={info.population}
-        gdp={info.gdp}
-        currency={info.currency}
+        population={t(keyPrefix + 'Pop' as any)}
+        gdp={t(keyPrefix + 'Gdp' as any)}
+        currency={t(keyPrefix + 'CurrencyName' as any)}
         currencyCode={info.currencyCode}
-        officialLanguage={info.officialLanguage}
-        nationalVision={info.nationalVision}
+        officialLanguage={t('language')}
+        nationalVision={t(keyPrefix + 'Vision' as any)}
         geo={info.geo}
         url={`/countries/${slug}`}
         wikidata={info.wikidata}
       />
       <DatasetSchema
-        name={`${info.name} National Intelligence Data`}
-        description={`Structured sovereign data for ${info.name}: population ${info.population}, GDP ${info.gdp}, capital ${info.capital}, currency ${info.currency} (${info.currencyCode}), national vision ${info.nationalVision}.`}
+        name={`${countryName} ${t('regionalIntelligence')}`}
+        description={`${t('guideDesc')} for ${countryName}: ${t('population')} ${t(keyPrefix + 'Pop' as any)}, ${t('economy')} ${t(keyPrefix + 'Gdp' as any)}.`}
         url={`/countries/${slug}`}
-        keywords={[info.name, info.nameAr, info.capital, info.currencyCode, "GCC", "Sovereign Data"]}
       />
       <CountryClient />
     </>

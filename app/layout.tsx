@@ -51,20 +51,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
-        <Script 
-          async 
-          src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" 
-          strategy="afterInteractive" 
-          nonce={nonce}
-        />
-        <Script id="google-analytics" strategy="afterInteractive" nonce={nonce}>{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-WRXQ5H9Z7K');
-        `}</Script>
-        <OrganizationSchema />
-        <WebSiteSchema />
+        <OrganizationSchema nonce={nonce} />
+        <WebSiteSchema nonce={nonce} />
       </head>
       <body className="font-sans min-h-screen flex flex-col antialiased">
         <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[200] focus:px-6 focus:py-3 focus:bg-brand-gold focus:text-brand-obsidian focus:rounded-2xl focus:font-bold focus:shadow-2xl transition-all">
@@ -80,6 +68,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </ClientLayout>
           <CookieConsent />
         </Providers>
+        <Script 
+          async 
+          src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" 
+          strategy="afterInteractive" 
+        />
+        <Script id="google-analytics" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-WRXQ5H9Z7K');
+        `}</Script>
       </body>
     </html>
   );

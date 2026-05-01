@@ -1,13 +1,13 @@
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
-import Script from "next/script";
 
 interface StructuredDataProps {
   type: string;
   data: Record<string, unknown>;
   id?: string;
+  nonce?: string;
 }
 
-export default function StructuredData({ type, data, id }: StructuredDataProps) {
+export default function StructuredData({ type, data, id, nonce }: StructuredDataProps) {
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": type,
@@ -15,21 +15,18 @@ export default function StructuredData({ type, data, id }: StructuredDataProps) 
     ...data,
   };
 
-  const schemaId = id
-    ? `schema-${id.replace(/[^a-zA-Z0-9]/g, '-')}`
-    : `schema-${type}`;
-
   return (
-    <Script
-      id={schemaId}
+    <script
       type="application/ld+json"
+      nonce={nonce}
+      suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
     />
   );
 }
 
 // ─── Organization (full) ────────────────────────────────────────────────────
-export function OrganizationSchema() {
+export function OrganizationSchema({ nonce }: { nonce?: string } = {}) {
   const data = {
     "@id": `${SITE_URL}/#organization`,
     name: SITE_NAME,
@@ -93,11 +90,11 @@ export function OrganizationSchema() {
     },
   };
 
-  return <StructuredData type="Organization" data={data} />;
+  return <StructuredData type="Organization" data={data} nonce={nonce} />;
 }
 
 // ─── WebSite ─────────────────────────────────────────────────────────────────
-export function WebSiteSchema() {
+export function WebSiteSchema({ nonce }: { nonce?: string } = {}) {
   const data = {
     "@id": `${SITE_URL}/#website`,
     name: SITE_NAME,
@@ -110,7 +107,7 @@ export function WebSiteSchema() {
     copyrightHolder: { "@id": `${SITE_URL}/#organization` },
   };
 
-  return <StructuredData type="WebSite" data={data} />;
+  return <StructuredData type="WebSite" data={data} nonce={nonce} />;
 }
 
 // ─── WebPage (use on every page) ─────────────────────────────────────────────
@@ -121,6 +118,7 @@ export function WebPageSchema({
   datePublished = "2024-01-01T00:00:00Z",
   dateModified,
   breadcrumb,
+  nonce,
 }: {
   name: string;
   description: string;
@@ -128,6 +126,7 @@ export function WebPageSchema({
   datePublished?: string;
   dateModified?: string;
   breadcrumb?: string;
+  nonce?: string;
 }) {
   const data: Record<string, unknown> = {
     "@id": `${SITE_URL}${url}#webpage`,
@@ -145,7 +144,7 @@ export function WebPageSchema({
     },
   };
   if (breadcrumb) data.breadcrumb = breadcrumb;
-  return <StructuredData type="WebPage" data={data} />;
+  return <StructuredData type="WebPage" data={data} nonce={nonce} />;
 }
 
 // ─── InsightArticle ───────────────────────────────────────────────────────────
@@ -160,6 +159,7 @@ export function InsightArticleSchema({
   publisherLogo = `${SITE_URL}/favicon-emblem.png`,
   url,
   language = ["en", "ar"],
+  nonce,
 }: {
   title: string;
   description: string;
@@ -171,6 +171,7 @@ export function InsightArticleSchema({
   publisherLogo?: string;
   url: string;
   language?: string | string[];
+  nonce?: string;
 }) {
   const data = {
     headline: title,
@@ -197,7 +198,7 @@ export function InsightArticleSchema({
       "@id": `${SITE_URL}${url}`,
     },
   };
-  return <StructuredData type="Article" data={data} />;
+  return <StructuredData type="Article" data={data} nonce={nonce} />;
 }
 
 // ─── BreadcrumbList ───────────────────────────────────────────────────────────

@@ -67,6 +67,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           {t('disclaimer')}
         </Link>
         <Link 
+          href="/transparency" 
+          className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
+        >
+          {t('transparency')}
+        </Link>
+        <Link 
           href="/contact" 
           className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
           aria-label={t('ariaContact')}

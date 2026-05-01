@@ -216,6 +216,38 @@ export const translations: Translations = {
     ar: "عربية خليج هي منصة استخبارات إقليمية مستقلة احترافية - وليست بوابة حكومية أو مكتب محاماة أو خدمة استشارية. يتم توفير جميع المعلومات 'كما هي' للإرشاد فقط. تحقق من كل شيء من المصادر الرسمية قبل اتخاذ أي إجراء." 
   },
 
+  // Privacy Policy Detailed Sections
+  ppSection1Title: { en: "Information Collection", ar: "جمع المعلومات" },
+  ppSection1Body: { 
+    en: "We collect minimal information required to provide our services. This includes device information, browser type, and interaction data to optimize the regional experience for our users.", 
+    ar: "نحن نجمع الحد الأدنى من المعلومات المطلوبة لتقديم خدماتنا. يتضمن ذلك معلومات الجهاز ونوع المتصفح وبيانات التفاعل لتحسين التجربة الإقليمية لمستخدمينا." 
+  },
+  ppSection2Title: { en: "Google AdSense & Cookies", ar: "Google AdSense وملفات تعريف الارتباط" },
+  ppSection2Body: { 
+    en: "Arabia Khaleej uses Google AdSense to serve advertisements. Google uses cookies to serve ads based on your prior visits to our website or other websites. You may opt out of personalized advertising by visiting Ads Settings.", 
+    ar: "تستخدم عربية خليج Google AdSense لتقديم الإعلانات. يستخدم Google ملفات تعريف الارتباط لتقديم الإعلانات بناءً على زياراتك السابقة لموقعنا أو مواقع الويب الأخرى. يمكنك اختيار عدم تلقي الإعلانات الشخصية من خلال زيارة إعدادات الإعلانات." 
+  },
+  ppSection3Title: { en: "Regional Data Sovereignty", ar: "سيادة البيانات الإقليمية" },
+  ppSection3Body: { 
+    en: "We respect the data protection regulations of all GCC member states. Your data is handled with the highest level of security and in compliance with regional digital governance standards.", 
+    ar: "نحن نحترم لوائح حماية البيانات لجميع الدول الأعضاء في مجلس التعاون الخليجي. يتم التعامل مع بياناتك بأعلى مستوى من الأمان ووفقاً لمعايير الحوكمة الرقمية الإقليمية." 
+  },
+  ppSection4Title: { en: "Third-Party Analytics", ar: "تحليلات الطرف الثالث" },
+  ppSection4Body: { 
+    en: "We use Google Analytics to understand traffic patterns and improve content relevance. These tools collect anonymous data such as page views and session duration.", 
+    ar: "نحن نستخدم Google Analytics لفهم أنماط الحركة وتحسين ملاءمة المحتوى. تجمع هذه الأدوات بيانات مجهولة الهوية مثل مشاهدات الصفحة ومدة الجلسة." 
+  },
+  ppSection5Title: { en: "Affiliate Disclosure", ar: "إفصاح الروابط التابعة" },
+  ppSection5Body: { 
+    en: "Our marketplace features curated products from partners like Noon.com. We may earn a commission from qualifying purchases, which supports our independent editorial mission.", 
+    ar: "يتميز سوقنا بمنتجات مختارة من شركاء مثل نون. قد نربح عمولة من المشتريات المؤهلة، مما يدعم مهمتنا التحريرية المستقلة." 
+  },
+  ppSection6Title: { en: "Your Rights", ar: "حقوقك" },
+  ppSection6Body: { 
+    en: "You have the right to access, correct, or request the deletion of any personal information you have shared with us through our contact forms or join requests.", 
+    ar: "لديك الحق في الوصول إلى أي معلومات شخصية شاركتها معنا من خلال نماذج الاتصال أو طلبات الانضمام، أو تصحيحها أو طلب حذفها." 
+  },
+
   // About Page
   aboutDesc: { 
     en: "Arabia Khaleej is the definitive independent reference for a refined GCC experience. We aggregate, simplify, and surface authoritative regional information.", 
@@ -408,7 +440,6 @@ export const translations: Translations = {
 
   // UI Strings
   featuredInsights: { en: "Featured Insights", ar: "رؤى مختارة" },
-  systemLive: { en: "System Live", ar: "النظام نشط" },
   regionalIntelligence: { en: "Regional Intelligence", ar: "الاستخبارات الإقليمية" },
   today: { en: "Today", ar: "اليوم" },
   close: { en: "Close", ar: "إغلاق" },
