@@ -1,8 +1,49 @@
 {
   "crons": [
-    {
-      "path": "/api/admin/daily-automation",
-      "schedule": "0 0,12 * * *"
-    }
+    { "path": "/api/admin/daily-automation?action=marketplace", "schedule": "0 0 * * *" },
+
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=0", "schedule": "0 1 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=1", "schedule": "20 1 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=2", "schedule": "40 1 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=3", "schedule": "0 5 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=4", "schedule": "20 5 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=5", "schedule": "40 5 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=6", "schedule": "0 9 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=7", "schedule": "20 9 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=8", "schedule": "40 9 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=en&index=9", "schedule": "0 13 * * *" },
+
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=0", "schedule": "0 2 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=1", "schedule": "20 2 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=2", "schedule": "40 2 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=3", "schedule": "0 6 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=4", "schedule": "20 6 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=5", "schedule": "40 6 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=6", "schedule": "0 10 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=7", "schedule": "20 10 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=8", "schedule": "40 10 * * *" },
+    { "path": "/api/admin/daily-automation?type=gcc&lang=ar&index=9", "schedule": "0 14 * * *" },
+
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=0", "schedule": "0 3 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=1", "schedule": "20 3 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=2", "schedule": "40 3 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=3", "schedule": "0 7 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=4", "schedule": "20 7 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=5", "schedule": "40 7 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=6", "schedule": "0 11 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=7", "schedule": "20 11 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=8", "schedule": "40 11 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=en&index=9", "schedule": "0 15 * * *" },
+
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=0", "schedule": "0 4 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=1", "schedule": "20 4 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=2", "schedule": "40 4 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=3", "schedule": "0 8 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=4", "schedule": "20 8 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=5", "schedule": "40 8 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=6", "schedule": "0 12 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=7", "schedule": "20 12 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=8", "schedule": "40 12 * * *" },
+    { "path": "/api/admin/daily-automation?type=international&lang=ar&index=9", "schedule": "0 16 * * *" }
   ]
 }

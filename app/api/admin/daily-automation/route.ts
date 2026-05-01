@@ -22,14 +22,14 @@ function extractDescription(content: string): string {
   return paragraph.replace(/[#*_]/g, '').trim().substring(0, 180) + '...';
 }
 
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300; 
 
 /**
  * Enhanced generation logic that balances quality and free-tier token limits.
  */
-async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international') {
-  console.log(`Starting ${type.toUpperCase()} Batch for ${lang}...`);
+async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international', topicIndex: number = 0) {
+  console.log(`Starting ${type.toUpperCase()} Batch for ${lang} (Topic Index: ${topicIndex})...`);
   
   // Use specialized topic generation based on type
   const topics = await generateTrendingTopics(lang, type);
@@ -37,11 +37,12 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international') {
 
   const generatedInsights: InsightItem[] = [];
 
-  // Batch size control: 5 GCC (High Detail) + 5 International (Standard Detail)
-  const batchLimit = 5;
+  // Hard limit to 1 article per trigger for 100% stability on Hobby Edge runtime
+  const batchLimit = 1;
+  const targetTopic = topics[topicIndex % topics.length];
 
-  for (const item of topics.slice(0, batchLimit)) {
-    try {
+  const item = targetTopic;
+  try {
       // Use Llama 70B for GCC (Premium) and Llama 8B for International (Efficiency) to save tokens
       const model = type === 'gcc' ? "llama-3.3-70b-versatile" : "llama-3.1-8b-instant";
       
@@ -79,11 +80,9 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international') {
       generatedInsights.push(newInsight);
       
       // Safety delay (Increased to 6s for Groq Free Tier TPM limits)
-      await new Promise(resolve => setTimeout(resolve, 6000));
     } catch (err) {
       console.error(`Failed to generate ${type} article:`, err);
     }
-  }
 
   const archiveKey = `insights_archive_${lang}`;
   const currentArchive = (await redis.get(archiveKey) as InsightItem[] | null) || [];
@@ -102,30 +101,40 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization');
   const { searchParams } = new URL(request.url);
   const cronSecret = searchParams.get('secret');
+  
+  // New: Targeted batch parameters
+  const targetType = searchParams.get('type') as 'gcc' | 'international' | null;
+  const targetLang = searchParams.get('lang') as 'en' | 'ar' | null;
 
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}` && cronSecret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const startTime = Date.now();
-  console.log("Starting Daily Automation Pipeline...");
+  console.log(`Starting Daily Automation [${targetType || 'all'}:${targetLang || 'all'}]...`);
 
   try {
-    // 1. Refresh Marketplace FIRST (Priority)
-    console.log("Refreshing Marketplace...");
-    await getMarketplaceProducts(true);
+    // 1. Dedicated Marketplace Refresh
+    if (searchParams.get('action') === 'marketplace') {
+      console.log("Refreshing Marketplace...");
+      await getMarketplaceProducts(true);
+      return NextResponse.json({ success: true, action: 'marketplace_refreshed' });
+    }
 
-    // 2. Generate Batches (Reduced to 5 each to fit 300s limit)
-    // Total 20 high-fidelity articles
     const results = {
       gcc: { en: 0, ar: 0 },
       international: { en: 0, ar: 0 }
     };
 
-    results.gcc.en = await generateBatch('en', 'gcc');
-    results.gcc.ar = await generateBatch('ar', 'gcc');
-    results.international.en = await generateBatch('en', 'international');
-    results.international.ar = await generateBatch('ar', 'international');
+    // 2. Conditional Batch Execution
+    const topicIndex = parseInt(searchParams.get('index') || '0');
+    
+    if (targetType && targetLang) {
+      results[targetType][targetLang] = await generateBatch(targetLang, targetType, topicIndex);
+    } else {
+      // Manual/Fallback
+      results.gcc.en = await generateBatch('en', 'gcc', 0);
+    }
 
     const duration = Math.floor((Date.now() - startTime) / 1000);
     console.log(`Daily Automation Completed in ${duration}s`);
@@ -134,7 +143,8 @@ export async function GET(request: Request) {
       success: true, 
       automated: true,
       duration: `${duration}s`,
-      counts: results
+      counts: results,
+      batch: targetType ? `${targetType}:${targetLang}` : 'default'
     });
   } catch (error: any) {
     console.error("Daily Automation Failed:", error.message);
