@@ -1,29 +1,48 @@
 import { AffiliateProduct, MarketplaceProvider } from "../types";
-import jwt from "jsonwebtoken";
 
 export class NoonProvider implements MarketplaceProvider {
   name = "Noon.com";
 
   private async generateToken(): Promise<string | null> {
     const keyId = process.env.NOON_KEY_ID;
-    const privateKey = process.env.NOON_PRIVATE_KEY;
+    const privateKeyPem = process.env.NOON_PRIVATE_KEY;
 
-    if (!keyId || !privateKey) return null;
+    if (!keyId || !privateKeyPem) return null;
 
     try {
-      const payload = {
-        iss: keyId,
-        aud: "noon-partners",
-        iat: Math.floor(Date.now() / 1000),
-        exp: Math.floor(Date.now() / 1000) + (60 * 15), // 15 mins
-      };
+      const encode = (obj: object) =>
+        btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
 
-      // Ensure private key is correctly formatted
-      const formattedKey = privateKey.includes('-----BEGIN') 
-        ? privateKey 
-        : `-----BEGIN PRIVATE KEY-----\n${privateKey}\n-----END PRIVATE KEY-----`;
+      const now = Math.floor(Date.now() / 1000);
+      const header = { alg: 'RS256', typ: 'JWT' };
+      const payload = { iss: keyId, aud: 'noon-partners', iat: now, exp: now + 900 };
+      const signingInput = `${encode(header)}.${encode(payload)}`;
 
-      return jwt.sign(payload, formattedKey, { algorithm: 'RS256' });
+      const pemContent = privateKeyPem
+        .replace(/-----BEGIN.*?-----/g, '')
+        .replace(/-----END.*?-----/g, '')
+        .replace(/\s/g, '');
+
+      const binaryKey = Uint8Array.from(atob(pemContent), c => c.charCodeAt(0));
+
+      const cryptoKey = await crypto.subtle.importKey(
+        'pkcs8',
+        binaryKey,
+        { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+        false,
+        ['sign']
+      );
+
+      const signature = await crypto.subtle.sign(
+        'RSASSA-PKCS1-v1_5',
+        cryptoKey,
+        new TextEncoder().encode(signingInput)
+      );
+
+      const sigB64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+
+      return `${signingInput}.${sigB64}`;
     } catch (error) {
       console.error("Noon JWT generation failed", error);
       return null;

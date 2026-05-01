@@ -39,7 +39,6 @@ export default function middleware(request: NextRequest) {
   // Set the nonce in the request headers so it can be read by Server Components
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
-  console.log('Middleware: Generated nonce:', nonce);
 
   // Create the response
   const response = NextResponse.next({

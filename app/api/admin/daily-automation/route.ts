@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { generateGCCInsight, generateTrendingTopics } from '@/lib/ai';
-import { redis } from '@/lib/redis';
+import { redis, CACHE_TIMES } from '@/lib/redis';
 import { toSlug } from '@/lib/utils';
 import { InsightItem } from '@/lib/insights';
 import { getMarketplaceProducts } from '@/lib/marketplace/service';
@@ -37,8 +37,6 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international', t
 
   const generatedInsights: InsightItem[] = [];
 
-  // Hard limit to 1 article per trigger for 100% stability on Hobby Edge runtime
-  const batchLimit = 1;
   const targetTopic = topics[topicIndex % topics.length];
 
   const item = targetTopic;
@@ -79,7 +77,6 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international', t
 
       generatedInsights.push(newInsight);
       
-      // Safety delay (Increased to 6s for Groq Free Tier TPM limits)
     } catch (err) {
       console.error(`Failed to generate ${type} article:`, err);
     }
@@ -92,7 +89,7 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international', t
   const uniqueGenerated = generatedInsights.filter(g => !existingSlugs.has(g.slug));
 
   const updatedArchive = [...uniqueGenerated, ...currentArchive].slice(0, 1500);
-  await redis.set(archiveKey, updatedArchive);
+  await redis.set(archiveKey, updatedArchive, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
 
   return uniqueGenerated.length;
 }
@@ -121,35 +118,23 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: true, action: 'marketplace_refreshed' });
     }
 
-    // 2. Master Digest (Hobby Plan Friendly)
+    // 2. Master Digest — sequential to stay within Vercel Hobby 30s edge limit
     if (searchParams.get('action') === 'master-digest') {
       console.log("Executing Master Digest...");
-      
-      // Determine topic index based on search param or current UTC hour
+
       const providedIndex = searchParams.get('index');
       const hourIndex = new Date().getUTCHours();
       const topicIndex = providedIndex ? parseInt(providedIndex) : hourIndex;
-      
+
       console.log(`Using Topic Index: ${topicIndex} (Source: ${providedIndex ? 'Param' : 'UTC Hour'})`);
 
-      // a. Refresh Marketplace
-      await getMarketplaceProducts(true);
-      
-      // b. Generate one of each main type (Parallel with safety)
-      const jobs = [
-        generateBatch('en', 'gcc', topicIndex),
-        generateBatch('ar', 'gcc', topicIndex),
-      ];
-      
-      const counts = await Promise.all(jobs);
-      
-      return NextResponse.json({ 
-        success: true, 
+      const en_gcc = await generateBatch('en', 'gcc', topicIndex);
+      const ar_gcc = await generateBatch('ar', 'gcc', topicIndex);
+
+      return NextResponse.json({
+        success: true,
         action: 'master-digest-completed',
-        generated: {
-          en_gcc: counts[0],
-          ar_gcc: counts[1]
-        }
+        generated: { en_gcc, ar_gcc }
       });
     }
 

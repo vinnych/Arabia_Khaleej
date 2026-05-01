@@ -44,8 +44,8 @@ export const redis = redisUrl && redisToken
       }
     } as unknown as Redis;
 
-export async function rateLimit(ip: string, limit: number = 10, windowSeconds: number = 60) {
-  const key = `ratelimit:${ip}`;
+export async function rateLimit(ip: string, limit: number = 10, windowSeconds: number = 60, route = 'global') {
+  const key = `ratelimit:${route}:${ip}`;
   const current = await redis.incr(key);
   if (current === 1) {
     await redis.expire(key, windowSeconds);
