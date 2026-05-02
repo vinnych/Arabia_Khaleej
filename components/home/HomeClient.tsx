@@ -77,7 +77,7 @@ export default function HomeClient() {
           />
         </div>
         <p className="text-lg sm:text-xl font-semibold italic text-foreground/80 px-6 max-w-sm sm:max-w-2xl mx-auto leading-relaxed tracking-tight">
-          "{t('siteSlogan')}"
+          &quot;{t('siteSlogan')}&quot;
         </p>
       </div>
 

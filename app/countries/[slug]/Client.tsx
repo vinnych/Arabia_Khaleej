@@ -233,7 +233,7 @@ export default function CountryClient() {
             </h1>
             <div className="w-24 h-1.5 bg-brand-gold mx-auto rounded-full mb-8 shadow-glow" />
             <p className="max-w-3xl mx-auto text-xl text-white/90 serif italic leading-relaxed drop-shadow-lg">
-              "{t(data.introKey)}"
+              &quot;{t(data.introKey)}&quot;
             </p>
           </div>
         </div>

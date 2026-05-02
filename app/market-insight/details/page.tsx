@@ -133,7 +133,7 @@ export default async function SentimentDetailsPage() {
             {t('outlookSummary')}
           </h3>
           <p className="text-lg serif italic text-foreground/80 leading-relaxed">
-            "{t('outlookSummaryBody')}"
+            &quot;{t('outlookSummaryBody')}&quot;
           </p>
         </div>
 

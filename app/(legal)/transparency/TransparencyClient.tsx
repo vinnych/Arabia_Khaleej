@@ -89,7 +89,7 @@ export default function TransparencyPage() {
         </div>
 
         <p className="text-xl text-foreground/70 leading-relaxed serif italic max-w-3xl mx-auto">
-          "{t('transparencyBody')}"
+          &quot;{t('transparencyBody')}&quot;
         </p>
       </div>
 
