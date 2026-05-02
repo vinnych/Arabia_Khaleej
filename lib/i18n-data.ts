@@ -196,11 +196,8 @@ export const translations: Translations = {
     en: "We welcome dialogue with regional regulatory bodies. For official inquiries, please use our primary communication channel.", 
     ar: "نرحب بالحوار مع الهيئات التنظيمية الإقليمية. للاستفسارات الرسمية، يرجى استخدام قناة الاتصال الرئيسية لدينا." 
   },
-  active: { en: "Active", ar: "نشط" },
-  calculationMethod: { 
-    en: "Calculation Method: Umm Al-Qura University, Makkah", 
-    ar: "طريقة الحساب: جامعة أم القرى، مكة المكرمة" 
-  },
+  statusActive: { en: "Active", ar: "نشط" },
+
 
 
   // Common UI
@@ -214,8 +211,8 @@ export const translations: Translations = {
   backHome: { en: "Back to Home", ar: "العودة للرئيسية" },
   submit: { en: "Submit", ar: "إرسال" },
   yourLocation: { en: "Your Location", ar: "موقعك" },
-  scheduleFor: { en: "Schedule for", ar: "جدول" },
-  viewHijri: { en: "View Hijri Calendar", ar: "عرض التقويم الهجري" },
+  genericScheduleFor: { en: "Schedule for", ar: "جدول" },
+
 
   // Forms & Contact
   fullName: { en: "Full Name", ar: "الاسم الكامل" },
@@ -293,7 +290,7 @@ export const translations: Translations = {
   simplicityDesc: { en: "Premium design that removes noise and surfaces value.", ar: "تصميم متميز يزيل الضوضاء ويظهر القيمة." },
   transparency: { en: "Transparency", ar: "الشفافية" },
   transparencyDesc: { en: "Clear attribution and ethical content guidelines.", ar: "إسناد واضح وإرشادات محتوى أخلاقية." },
-  passionProject: { en: "A regional intelligence project dedicated to the GCC.", ar: "مشروع استخبارات إقليمي مخصص لدول مجلس التعاون الخليجي." },
+  intelligenceProject: { en: "A regional intelligence project dedicated to the GCC.", ar: "مشروع استخبارات إقليمي مخصص لدول مجلس التعاون الخليجي." },
 
   // Legal
   legal: { en: "Legal", ar: "قانوني" },
@@ -559,12 +556,12 @@ export const translations: Translations = {
   translationUnavailable: { en: "No translation available for this article.", ar: "لا توجد ترجمة متاحة لهذا المقال." },
   moreInsights: { en: "More Insights", ar: "المزيد من الرؤى" },
   linkCopied: { en: "Link Copied", ar: "تم نسخ الرابط" },
-  updatedLabel: { en: "Updated %s", ar: "تحديث %s" },
-  indicativeData: { en: "Indicative Data", ar: "بيانات استرشادية" },
-  marketsLive: { en: "Markets Live", ar: "الأسواق مباشرة" },
-  closedSession: { en: "Closed Session", ar: "جلسة مغلقة" },
-  sentimentTitle: { en: "GCC Stability with Positive Outlook", ar: "الاستقرار الخليجي مع نظرة إيجابية" },
-  sentimentDesc: { 
+  shortUpdatedLabel: { en: "Updated %s", ar: "تحديث %s" },
+
+  marketsLiveLabel: { en: "Markets Live", ar: "الأسواق مباشرة" },
+  closedSessionLabel: { en: "Closed Session", ar: "جلسة مغلقة" },
+  marketOutlookTitle: { en: "GCC Stability with Positive Outlook", ar: "الاستقرار الخليجي مع نظرة إيجابية" },
+  marketOutlookDesc: { 
     en: "GCC markets continue to show resilience amid global volatility, supported by strong energy prices.", 
     ar: "تواصل الأسواق الخليجية إظهار المرونة وسط التقلبات العالمية، بدعم من أسعار الطاقة القوية." 
   },
