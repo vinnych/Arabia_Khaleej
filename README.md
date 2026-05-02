@@ -45,7 +45,7 @@ Vercel: Settings → Env Vars · GitHub: repo → Settings → Secrets (`PRODUCT
 
 ## Architecture
 - No DB — Redis is transient cache only
-- `proxy.ts` --> CSP nonce + language cookie sync (Next.js 16+)
+- `middleware.ts` --> CSP nonce + language cookie sync (Next.js 15+)
 - CSP middleware-only; `next.config.ts` has non-CSP headers only
 - Rate limit keys: `ratelimit:{route}:{ip}`
 - Real client IP from `x-forwarded-for` (split before use)

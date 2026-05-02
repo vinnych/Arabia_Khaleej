@@ -53,7 +53,11 @@ async function generateBatch(lang: 'en' | 'ar', type: 'gcc' | 'international', t
 
       const firstLine = content.split('\n')[0].replace(/[#*]/g, '').trim();
       const title = firstLine.length > 10 ? firstLine : `${item.country}: ${item.topic}`;
-      const slug = toSlug(title, `${type === 'gcc' ? 'v' : 'int'}-${Date.now()}`);
+      
+      // Use the English topic for the slug base to ensure EN and AR versions share the same slug
+      // This fixes the 404 issue when switching languages
+      const slugBase = item.topic;
+      const slug = toSlug(slugBase, `${type === 'gcc' ? 'v' : 'int'}-${new Date().getUTCDate()}-${new Date().getUTCMonth()}`);
 
       // Fetch a relevant image from Pexels (with Unsplash/fallback chain) based on the topic
       const imageSearchQuery = `${item.topic} ${item.country}`;
@@ -111,23 +115,27 @@ export async function GET(request: Request) {
 
   try {
 
-    // 2. Master Digest — sequential to stay within Vercel Hobby 30s edge limit
+    // 2. Master Digest — Optimized for Vercel Hobby 10s limit
+    // Instead of doing both sequentially, we pick one based on the hour or a param
     if (searchParams.get('action') === 'master-digest') {
-      console.log("Executing Master Digest...");
-
       const providedIndex = searchParams.get('index');
       const hourIndex = new Date().getUTCHours();
       const topicIndex = providedIndex ? parseInt(providedIndex) : hourIndex;
+      
+      // Toggle language based on parity of the hour to ensure both are generated over time
+      // or allow explicit override
+      const lang = (searchParams.get('lang') as 'en' | 'ar') || (hourIndex % 2 === 0 ? 'en' : 'ar');
+      const type = (searchParams.get('type') as 'gcc' | 'international') || 'gcc';
 
-      console.log(`Using Topic Index: ${topicIndex} (Source: ${providedIndex ? 'Param' : 'UTC Hour'})`);
+      console.log(`Executing Master Digest for [${lang}:${type}] Topic Index: ${topicIndex}`);
 
-      const en_gcc = await generateBatch('en', 'gcc', topicIndex);
-      const ar_gcc = await generateBatch('ar', 'gcc', topicIndex);
+      const count = await generateBatch(lang, type, topicIndex);
 
       return NextResponse.json({
         success: true,
-        action: 'master-digest-completed',
-        generated: { en_gcc, ar_gcc }
+        action: 'master-digest-task-completed',
+        batch: `${type}:${lang}`,
+        generated: count
       });
     }
 

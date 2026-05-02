@@ -90,7 +90,8 @@ export async function generateTrendingTopics(
     ? "GCC region (Saudi, UAE, Qatar, etc.) focusing on Vision 2030, NEOM, and Luxury."
     : "International tourism, Global AI trends, and western products/luxuries popular with Arabs (e.g., European watchmaking, Swiss wellness, London real estate).";
 
-  const prompt = `Generate 10 trending article topics for ${lang === 'en' ? 'English' : 'Arabic'} readers. 
+  // Always generate topics in English to serve as a consistent cross-language seed/slug base
+  const prompt = `Generate 10 trending article topics for English readers. 
   Current Reference Time: ${new Date().toISOString()} (Use this to ensure variety from previous runs).
   Context: ${context}
   

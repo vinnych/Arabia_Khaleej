@@ -15,13 +15,13 @@ GitHub Actions (hourly) --> `GET /api/admin/daily-automation?action=master-diges
 Keys: `ratelimit:{route}:{ip}` · Routes: `prayer`, `geo`, `invite` · Always pass route as 4th arg to `rateLimit()`
 
 ## CSP
-`proxy.ts` is the sole CSP source. **Never** add CSP to `next.config.ts`.
+`middleware.ts` is the sole CSP source. **Never** add CSP to `next.config.ts`.
 
 ## Redis TTL Rule
 Always `redis.set(key, val, { ex: CACHE_TIMES.X })` — no TTL-less writes ever.
 
 ## Key Files
-- `proxy.ts` — CSP nonce + language cookie
+- `middleware.ts` — CSP nonce + language cookie sync (Next.js 15+)
 - `lib/ai.ts` — Groq
 - `lib/redis.ts` — Upstash client + `rateLimit(ip, limit, window, route)`
 - `lib/insights.ts` — hardcoded + Redis archive fetcher
@@ -34,4 +34,4 @@ Always `redis.set(key, val, { ex: CACHE_TIMES.X })` — no TTL-less writes ever.
 - Parallel Groq calls
 - `redis.set()` without TTL
 - CSP in `next.config.ts`
-- Rename `proxy.ts` — Next.js 16 requires this exact filename
+- Rename `middleware.ts` — Next.js 15 requires this exact filename
