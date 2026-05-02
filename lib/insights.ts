@@ -508,14 +508,38 @@ export async function getUnifiedInsights(options: {
 }
 
 export async function getArticleBySlug(slug: string, lang: 'en' | 'ar'): Promise<InsightItem | null> {
-  const allInsights = await getUnifiedInsights({ lang, limit: 1000 });
-  const article = allInsights.find(p => p.slug === slug);
-  if (article) return article;
+  // 1. Check hardcoded base first (O(N) where N is small, very fast)
+  const baseItems = PREMIUM_ARTICLES[lang] || [];
+  const baseArticle = baseItems.find(p => p.slug === slug);
+  if (baseArticle) return baseArticle;
 
-  // Check other language as fallback
+  // 2. Check dynamic archive from Redis
+  try {
+    const archiveKey = `insights_archive_${lang}`;
+    const dynamicItems = await redis.get(archiveKey) as InsightItem[] | null;
+    if (dynamicItems && Array.isArray(dynamicItems)) {
+      const dynamicArticle = dynamicItems.find(p => p.slug === slug);
+      if (dynamicArticle) return dynamicArticle;
+    }
+  } catch (e) {
+    console.error(`Failed to fetch dynamic insight for slug: ${slug}`, e);
+  }
+
+  // 3. Check other language as fallback
   const otherLang = lang === 'en' ? 'ar' : 'en';
-  const allOther = await getUnifiedInsights({ lang: otherLang, limit: 1000 });
-  return allOther.find(p => p.slug === slug) || null;
+  const otherBase = PREMIUM_ARTICLES[otherLang] || [];
+  const otherBaseArticle = otherBase.find(p => p.slug === slug);
+  if (otherBaseArticle) return otherBaseArticle;
+
+  try {
+    const otherArchiveKey = `insights_archive_${otherLang}`;
+    const otherDynamic = await redis.get(otherArchiveKey) as InsightItem[] | null;
+    if (otherDynamic && Array.isArray(otherDynamic)) {
+      return otherDynamic.find(p => p.slug === slug) || null;
+    }
+  } catch (e) {}
+
+  return null;
 }
 
 export async function getAllInsightSlugs(): Promise<{ slug: string, lang: 'en' | 'ar', pubDate: string }[]> {

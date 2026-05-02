@@ -130,7 +130,7 @@ export default function InsightsClient() {
             {insights.slice(0, 2).map((item, idx) => (
               <Link
                 key={`top-${item.id}-${idx}`}
-                href={`/insights/${item.slug}`}
+                href={`/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`}
                 className="group relative h-[400px] rounded-[3rem] overflow-hidden border border-brand-gold/20 shadow-2xl hover:border-brand-gold/40 transition-all duration-700"
               >
                 <Image
@@ -180,7 +180,7 @@ export default function InsightsClient() {
             {insights.slice(0, displayCount).map((item, idx) => (
               <Link
                 key={item.id + idx}
-                href={`/insights/${item.slug}`}
+                href={`/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`}
                 className="group relative glass p-0 rounded-[2.5rem] border-brand-gold/10 hover:border-brand-gold/30 active:scale-[0.98] transition-all duration-500 flex flex-col h-full overflow-hidden select-none shadow-xl hover:shadow-2xl ring-1 ring-brand-gold/20"
               >
                 {/* Premium Reflection Overlay */}

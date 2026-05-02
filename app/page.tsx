@@ -1,4 +1,4 @@
-﻿import { pageMeta, SITE_DESCRIPTION, SITE_DESCRIPTION_AR } from "@/lib/seo";
+import { pageMeta, SITE_DESCRIPTION, SITE_DESCRIPTION_AR } from "@/lib/seo";
 import {
   DatasetSchema,
   WebPageSchema,
@@ -9,8 +9,8 @@ import { translations } from "@/lib/i18n-data";
 import { getServerLanguage } from "@/lib/i18n-server";
 
 export const metadata = pageMeta({
-  title: "Arabia Khaleej | The GCC Standard â€” Regional Intelligence Portal",
-  titleAr: "Ø¹Ø±Ø¨ÙŠØ© Ø®Ù„ÙŠØ¬ | Ø§Ù„Ù…Ø¹ÙŠØ§Ø± Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠ â€” Ø¨ÙˆØ§Ø¨Ø© Ø§Ù„Ø§Ø³ØªØ®Ø¨Ø§Ø±Ø§Øª Ø§Ù„Ø¥Ù‚Ù„ÙŠÙ…ÙŠØ©",
+  title: "Arabia Khaleej | The GCC Standard — Regional Intelligence Portal",
+  titleAr: "عربية خليج | المعيار الخليجي — بوابة الاستخبارات الإقليمية",
   description: SITE_DESCRIPTION,
   descriptionAr: SITE_DESCRIPTION_AR,
   path: "/",
@@ -20,8 +20,8 @@ export const metadata = pageMeta({
     "Qatar guide", "UAE guide", "Saudi Arabia guide",
     "Kuwait guide", "Oman guide", "Bahrain guide",
     "expat GCC", "GCC regional intelligence",
-    "Ø¹Ø±Ø¨ÙŠØ© Ø®Ù„ÙŠØ¬", "Ø¯Ù„ÙŠÙ„ Ø§Ù„Ø®Ù„ÙŠØ¬", "Ù…ÙˆØ§Ù‚ÙŠØª Ø§Ù„ØµÙ„Ø§Ø©", "Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø°Ù‡Ø¨",
-    "Ù…Ø¬Ù„Ø³ Ø§Ù„ØªØ¹Ø§ÙˆÙ† Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠ",
+    "عربية خليج", "دليل الخليج", "مواقيت الصلاة", "أسعار الذهب",
+    "مجلس التعاون الخليجي",
   ],
 });
 

@@ -1,4 +1,4 @@
-﻿import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
+import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
 import PrayerClient from "@/components/prayer/PrayerClient";
 import {
   BreadcrumbSchema,
@@ -10,19 +10,19 @@ import StructuredData from "@/components/seo/StructuredData";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = pageMeta({
-  title: `Prayer Times GCC â€” Qatar, UAE, Saudi Arabia, Kuwait, Oman, Bahrain | ${SITE_NAME}`,
-  titleAr: `Ù…ÙˆØ§Ù‚ÙŠØª Ø§Ù„ØµÙ„Ø§Ø© ÙÙŠ Ø¯ÙˆÙ„ Ø§Ù„Ø®Ù„ÙŠØ¬ â€” Ù‚Ø·Ø±ØŒ Ø§Ù„Ø¥Ù…Ø§Ø±Ø§ØªØŒ Ø§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©ØŒ Ø§Ù„ÙƒÙˆÙŠØªØŒ Ø¹Ù…Ø§Ù†ØŒ Ø§Ù„Ø¨Ø­Ø±ÙŠÙ† | ${SITE_NAME_AR}`,
+  title: `Prayer Times GCC — Qatar, UAE, Saudi Arabia, Kuwait, Oman, Bahrain | ${SITE_NAME}`,
+  titleAr: `مواقيت الصلاة في دول الخليج — قطر، الإمارات، السعودية، الكويت، عمان، البحرين | ${SITE_NAME_AR}`,
   description:
     "Accurate daily prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) for all 6 GCC countries. Calculated using the Umm Al-Qura University method. Covers Doha, Dubai, Riyadh, Kuwait City, Muscat, and Manama.",
   descriptionAr:
-    "Ù…ÙˆØ§Ù‚ÙŠØª Ø§Ù„ØµÙ„Ø§Ø© Ø§Ù„ÙŠÙˆÙ…ÙŠØ© Ø§Ù„Ø¯Ù‚ÙŠÙ‚Ø© (Ø§Ù„ÙØ¬Ø±ØŒ Ø§Ù„Ø¸Ù‡Ø±ØŒ Ø§Ù„Ø¹ØµØ±ØŒ Ø§Ù„Ù…ØºØ±Ø¨ØŒ Ø§Ù„Ø¹Ø´Ø§Ø¡) Ù„Ø¬Ù…ÙŠØ¹ Ø¯ÙˆÙ„ Ù…Ø¬Ù„Ø³ Ø§Ù„ØªØ¹Ø§ÙˆÙ† Ø§Ù„Ø³ØªØ©. Ù…Ø­Ø³ÙˆØ¨Ø© Ø¨Ø·Ø±ÙŠÙ‚Ø© Ø¬Ø§Ù…Ø¹Ø© Ø£Ù… Ø§Ù„Ù‚Ø±Ù‰. ØªØ´Ù…Ù„ Ø§Ù„Ø¯ÙˆØ­Ø© ÙˆØ¯Ø¨ÙŠ ÙˆØ§Ù„Ø±ÙŠØ§Ø¶ ÙˆÙ…Ø¯ÙŠÙ†Ø© Ø§Ù„ÙƒÙˆÙŠØª ÙˆÙ…Ø³Ù‚Ø· ÙˆØ§Ù„Ù…Ù†Ø§Ù…Ø©.",
+    "مواقيت الصلاة اليومية الدقيقة (الفجر، الظهر، العصر، المغرب، العشاء) لجميع دول مجلس التعاون الستة. محسوبة بطريقة جامعة أم القرى. تشمل الدوحة ودبي والرياض ومدينة الكويت ومسقط والمنامة.",
   path: "/prayer",
   keywords: [
     "prayer times", "salat times", "adhan", "GCC prayer times",
     "Fajr time Doha", "Dhuhr Dubai", "Asr Riyadh", "Maghrib Kuwait",
     "Isha Muscat", "prayer times Manama", "Umm Al-Qura calculation",
     "hijri calendar", "Islamic dates GCC",
-    "Ù…ÙˆØ§Ù‚ÙŠØª Ø§Ù„ØµÙ„Ø§Ø©", "Ø§Ù„Ø£Ø°Ø§Ù†", "Ø§Ù„ØªÙ‚ÙˆÙŠÙ… Ø§Ù„Ù‡Ø¬Ø±ÙŠ", "ØµÙ„Ø§Ø© Ø§Ù„ÙØ¬Ø± Ø§Ù„Ø¯ÙˆØ­Ø©",
+    "مواقيت الصلاة", "الأذان", "التقويم الهجري", "صلاة الفجر الدوحة",
   ],
   geo: {
     latitude: 25.2854,
@@ -70,7 +70,7 @@ export default async function PrayerPage() {
   return (
     <>
       <WebPageSchema
-        name="GCC Prayer Times Portal â€” Arabia Khaleej"
+        name="GCC Prayer Times Portal — Arabia Khaleej"
         description="Daily Islamic prayer times for all 6 GCC countries. Fajr, Dhuhr, Asr, Maghrib, Isha. Calculated by Umm Al-Qura method."
         url="/prayer"
       />
@@ -82,14 +82,14 @@ export default async function PrayerPage() {
         keywords={[
           "prayer times", "salat", "adhan", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha",
           "Hijri calendar", "Islamic dates", "Doha", "Dubai", "Riyadh", "Kuwait City", "Muscat", "Manama",
-          "Ù…ÙˆØ§Ù‚ÙŠØª Ø§Ù„ØµÙ„Ø§Ø©", "Ø§Ù„ØªÙ‚ÙˆÙŠÙ… Ø§Ù„Ù‡Ø¬Ø±ÙŠ",
+          "مواقيت الصلاة", "التقويم الهجري",
         ]}
       />
       <StructuredData
         type="Service"
         data={{
           name: "GCC Prayer Information Portal",
-          alternateName: "Ø¨ÙˆØ§Ø¨Ø© Ù…ÙˆØ§Ù‚ÙŠØª Ø§Ù„ØµÙ„Ø§Ø© Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠØ©",
+          alternateName: "بوابة مواقيت الصلاة الخليجية",
           description:
             "Comprehensive daily Islamic prayer time service for all Gulf Cooperation Council countries. Covers Qatar, UAE, Saudi Arabia, Kuwait, Oman, and Bahrain.",
           serviceType: "Religious Information Service",
@@ -104,7 +104,7 @@ export default async function PrayerPage() {
           ],
           availableLanguage: [
             { "@type": "Language", name: "English" },
-            { "@type": "Language", name: "Arabic", alternateName: "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©" },
+            { "@type": "Language", name: "Arabic", alternateName: "العربية" },
           ],
           additionalProperty: [
             { "@type": "PropertyValue", name: "Calculation Method", value: "Umm Al-Qura University, Makkah" },
@@ -122,4 +122,3 @@ export default async function PrayerPage() {
     </>
   );
 }
-

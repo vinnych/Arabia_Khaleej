@@ -49,6 +49,21 @@ export default function MarketInsightClient() {
     };
   }, []);
 
+  const getTranslatedCountry = (country: string) => {
+    const map: Record<string, string> = {
+      "Qatar": "qatar",
+      "Saudi Arabia": "saudiArabia",
+      "UAE": "uae",
+      "United Arab Emirates": "uae",
+      "Kuwait": "kuwait",
+      "Oman": "oman",
+      "Bahrain": "bahrain"
+    };
+    const key = map[country] || country.toLowerCase();
+    const translated = t(key);
+    return translated !== key ? translated : country;
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
@@ -133,7 +148,7 @@ export default function MarketInsightClient() {
                     </div>
                     <div>
                       <p className="font-black text-sm">{stock.name}</p>
-                      <p className="text-[10px] uppercase font-bold text-foreground/30 tracking-wider">{stock.country}</p>
+                      <p className="text-[10px] uppercase font-bold text-foreground/30 tracking-wider">{getTranslatedCountry(stock.country)}</p>
                     </div>
                   </div>
                   <div className={`flex items-center gap-8 ${isRTL ? 'flex-row-reverse' : ''}`}>

@@ -1,4 +1,4 @@
-﻿import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
+import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
 import MarketInsightClient from "@/components/finance/MarketInsightClient";
 import {
   BreadcrumbSchema,
@@ -11,29 +11,28 @@ import StructuredData from "@/components/seo/StructuredData";
 import { getT } from "@/lib/i18n-server";
 
 export const metadata = pageMeta({
-  title: `Market Insight â€” GCC Stocks, Gold & Currencies | ${SITE_NAME}`,
-  titleAr: `Ø±Ø¤Ù‰ Ø§Ù„Ø³ÙˆÙ‚ â€” Ø§Ù„Ø£Ø³Ù‡Ù… Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠØ© ÙˆØ§Ù„Ø°Ù‡Ø¨ ÙˆØ§Ù„Ø¹Ù…Ù„Ø§Øª | ${SITE_NAME_AR}`,
+  title: `Market Insight — GCC Stocks, Gold & Currencies | ${SITE_NAME}`,
+  titleAr: `رؤى السوق — الأسهم الخليجية والذهب والعملات | ${SITE_NAME_AR}`,
   description:
-    "Real-time GCC market data: Tadawul (TASI) 12,450 pts, ADX 9,230 pts, DFM 4,210 pts, QE Index 10,150 pts. Gold XAU/USD ~$2,385. GCC currency rates vs USD. Updated every 30 seconds.",
+    "Real-time GCC market data: Tadawul (TASI), ADX, DFM, QE Index. Gold XAU/USD spot prices. GCC currency rates vs USD. Updated every 30 seconds for executive precision.",
   descriptionAr:
-    "Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ù„Ø³ÙˆÙ‚ Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠ Ø§Ù„ÙÙˆØ±ÙŠØ©: ØªØ¯Ø§ÙˆÙ„ (ØªØ§Ø³ÙŠ)ØŒ Ø³ÙˆÙ‚ Ø£Ø¨ÙˆØ¸Ø¨ÙŠØŒ Ø³ÙˆÙ‚ Ø¯Ø¨ÙŠ Ø§Ù„Ù…Ø§Ù„ÙŠØŒ Ù…Ø¤Ø´Ø± Ù‚Ø·Ø±. Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø°Ù‡Ø¨ ÙˆØ§Ù„Ø¹Ù…Ù„Ø§Øª. ØªØ­Ø¯ÙŠØ« ÙƒÙ„ 30 Ø«Ø§Ù†ÙŠØ©.",
+    "بيانات السوق الخليجي الفورية: تداول (تاسي)، سوق أبوظبي، سوق دبي المالي، مؤشر قطر. أسعار الذهب والعملات. تحديث كل 30 ثانية لدقة التنفيذيين.",
   path: "/market-insight",
   keywords: [
     "GCC stocks", "Tadawul", "TASI", "ADX", "DFM", "QE Index", "Boursa Kuwait",
     "gold rates", "XAU/USD", "GCC currencies", "AED USD", "SAR USD", "QAR USD",
     "KWD USD", "OMR USD", "BHD USD", "Brent crude", "GCC economy",
-    "Ø£Ø³Ù‡Ù… Ø§Ù„Ø®Ù„ÙŠØ¬", "ØªØ¯Ø§ÙˆÙ„", "Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø°Ù‡Ø¨", "Ø£Ø³Ø¹Ø§Ø± Ø§Ù„ØµØ±Ù",
+    "أسهم الخليج", "تداول", "أسعار الذهب", "أسعار الصرف",
   ],
 });
 
-// Static currency data (used for schema â€” live data loads client-side)
 const STATIC_CURRENCIES = [
-  { code: "AED", name: "UAE Dirham", nameAr: "Ø¯Ø±Ù‡Ù… Ø¥Ù…Ø§Ø±Ø§ØªÙŠ", rate: 3.6725, country: "United Arab Emirates" },
-  { code: "SAR", name: "Saudi Riyal", nameAr: "Ø±ÙŠØ§Ù„ Ø³Ø¹ÙˆØ¯ÙŠ", rate: 3.7500, country: "Saudi Arabia" },
-  { code: "QAR", name: "Qatari Riyal", nameAr: "Ø±ÙŠØ§Ù„ Ù‚Ø·Ø±ÙŠ", rate: 3.6400, country: "Qatar" },
-  { code: "KWD", name: "Kuwaiti Dinar", nameAr: "Ø¯ÙŠÙ†Ø§Ø± ÙƒÙˆÙŠØªÙŠ", rate: 0.3070, country: "Kuwait" },
-  { code: "OMR", name: "Omani Rial", nameAr: "Ø±ÙŠØ§Ù„ Ø¹Ù…Ø§Ù†ÙŠ", rate: 0.3850, country: "Oman" },
-  { code: "BHD", name: "Bahraini Dinar", nameAr: "Ø¯ÙŠÙ†Ø§Ø± Ø¨Ø­Ø±ÙŠÙ†ÙŠ", rate: 0.3770, country: "Bahrain" },
+  { code: "AED", name: "UAE Dirham", nameAr: "درهم إماراتي", rate: 3.6725, country: "United Arab Emirates" },
+  { code: "SAR", name: "Saudi Riyal", nameAr: "ريال سعودي", rate: 3.7500, country: "Saudi Arabia" },
+  { code: "QAR", name: "Qatari Riyal", nameAr: "ريال قطري", rate: 3.6400, country: "Qatar" },
+  { code: "KWD", name: "Kuwaiti Dinar", nameAr: "دينار كويتي", rate: 0.3070, country: "Kuwait" },
+  { code: "OMR", name: "Omani Rial", nameAr: "ريال عماني", rate: 0.3850, country: "Oman" },
+  { code: "BHD", name: "Bahraini Dinar", nameAr: "دينار بحريني", rate: 0.3770, country: "Bahrain" },
 ];
 
 export default async function MarketInsightPage() {
@@ -46,7 +45,7 @@ export default async function MarketInsightPage() {
   return (
     <>
       <WebPageSchema
-        name="GCC Market Insight â€” Stocks, Gold & Currencies"
+        name="GCC Market Insight — Stocks, Gold & Currencies"
         description="Live GCC equity indices, gold spot price, Brent crude, and all GCC currency exchange rates vs USD."
         url="/market-insight"
       />
@@ -57,12 +56,11 @@ export default async function MarketInsightPage() {
         url="/market-insight"
         keywords={["Tadawul", "ADX", "DFM", "QE Index", "gold", "Brent crude", "AED", "SAR", "QAR", "KWD", "OMR", "BHD"]}
       />
-      {/* Stock Exchanges as ItemList */}
       <StructuredData
         type="ItemList"
         data={{
           name: "GCC Stock Market Indices",
-          alternateName: "Ù…Ø¤Ø´Ø±Ø§Øª Ø£Ø³ÙˆØ§Ù‚ Ø§Ù„Ø£Ø³Ù‡Ù… Ø§Ù„Ø®Ù„ÙŠØ¬ÙŠØ©",
+          alternateName: "مؤشرات أسواق الأسهم الخليجية",
           description: "Major stock exchange indices across the Gulf Cooperation Council region.",
           numberOfItems: 5,
           itemListElement: [
@@ -134,10 +132,9 @@ export default async function MarketInsightPage() {
           ],
         }}
       />
-      {/* Commodities */}
       <CommoditySchema
         name="Gold Spot Price"
-        nameAr="Ø³Ø¹Ø± Ø§Ù„Ø°Ù‡Ø¨ Ø§Ù„ÙÙˆØ±ÙŠ"
+        nameAr="سعر الذهب الفوري"
         symbol="XAU/USD"
         priceCurrency="USD"
         price={2385.40}
@@ -145,16 +142,14 @@ export default async function MarketInsightPage() {
       />
       <CommoditySchema
         name="Brent Crude Oil"
-        nameAr="Ø®Ø§Ù… Ø¨Ø±Ù†Øª"
+        nameAr="خام برنت"
         symbol="OIL/USD"
         priceCurrency="USD"
         price={87.50}
         change={-0.45}
       />
-      {/* GCC Currency Rates */}
       <ExchangeRateSchema currencies={STATIC_CURRENCIES} />
       <MarketInsightClient />
     </>
   );
 }
-

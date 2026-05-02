@@ -17,23 +17,23 @@ export default function MobileNav() {
       icon: Home,
     },
     {
-      label: t("marketInsights"),
+      label: t("navMarket"),
       href: "/market-insight",
       icon: TrendingUp,
     },
     {
-      label: t("pressTerminal"),
+      label: t("navInsights"),
       href: "/insights",
       icon: Sparkles,
       isPrimary: true,
     },
     {
-      label: t("prayerTimes"),
+      label: t("navPrayer"),
       href: "/prayer",
       icon: Clock,
     },
     {
-      label: t("boutiqueEnquiry"),
+      label: t("navJoin"),
       href: "/join",
       icon: UserPlus,
     },
@@ -90,7 +90,7 @@ export default function MobileNav() {
               {!isPrimary && (
                 <span className={cn(
                   "text-[9px] font-black uppercase tracking-[0.2em] mt-1 transition-all duration-300",
-                  isActive ? "text-brand-gold opacity-100 scale-100" : "opacity-40 scale-95",
+                  isActive ? "text-brand-gold opacity-100 scale-100" : "opacity-0 h-0 overflow-hidden translate-y-2",
                   isRTL && "text-[10px] tracking-normal font-bold"
                 )}>
                   {item.label}
