@@ -22,6 +22,6 @@ jobs:
           fi
           
           # Hit the endpoint and log status
-          curl -f -X GET \
+          curl -f --max-time 55 -X GET \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
             "${{ secrets.PRODUCTION_URL }}/api/admin/daily-automation?action=master-digest"
