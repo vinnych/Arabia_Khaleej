@@ -10,10 +10,10 @@ Live: [arabiakhaleej.com](https://arabiakhaleej.com)
 | Cache | Upstash Redis — 30-day TTL archive + rate limiting |
 | Images | Pexels → Unsplash → deterministic fallback |
 | Email | Cloudflare Worker (`worker/`) |
-| Deploy | Vercel Hobby + GitHub Actions |
+| Deploy | Vercel (Cron + Serverless) |
 
 ## Automation
-GitHub Actions (hourly) --> `GET /api/admin/daily-automation?action=master-digest` --> 1 EN + 1 AR article
+Vercel Cron (Daily 12 AM) --> `GET /api/admin/daily-automation?action=batch-10` --> 5 EN + 5 AR articles
 Auth: `Authorization: Bearer CRON_SECRET`
 
 ## API Routes
