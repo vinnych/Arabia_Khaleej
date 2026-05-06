@@ -1,4 +1,5 @@
 import { pageMeta, SITE_DESCRIPTION, SITE_DESCRIPTION_AR } from "@/lib/seo";
+export const runtime = 'edge';
 import {
   DatasetSchema,
   WebPageSchema,
