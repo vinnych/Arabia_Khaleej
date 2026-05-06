@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -18,3 +19,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ status: 'error', message: 'Failed to fetch Hijri data' }, { status: 500 });
   }
 }
+
+

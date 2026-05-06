@@ -17,6 +17,8 @@ import { OrganizationSchema, WebSiteSchema } from "@/components/seo/StructuredDa
 import { Language } from "@/lib/i18n";
 import CookieConsent from "@/components/ui/CookieConsent";
 
+export const runtime = 'edge';
+
 export const metadata = pageMeta({
   title: "Arabia Khaleej — The GCC Standard",
   titleAr: "عربية خليج — المعيار الخليجي",

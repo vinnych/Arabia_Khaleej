@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { generateGCCInsight, generateTrendingTopics } from '@/lib/ai';
 import { redis, CACHE_TIMES } from '@/lib/redis';
@@ -24,7 +25,6 @@ function extractDescription(content: string): string {
   return paragraph.replace(/[#*_]/g, '').trim().substring(0, 180) + '...';
 }
 
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300; 
 
@@ -141,3 +141,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+

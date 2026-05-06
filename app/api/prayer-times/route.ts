@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/redis';
 
@@ -44,3 +45,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ status: 'error' }, { status: 500 });
   }
 }
+
+

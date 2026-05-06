@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { getUnifiedInsights, getArticleBySlug } from '@/lib/insights';
 
@@ -27,3 +28,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ status: 'error', insights: [] }, { status: 500 });
   }
 }
+
+

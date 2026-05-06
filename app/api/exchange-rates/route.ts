@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 
 // Popular world currencies with metadata
@@ -79,3 +80,5 @@ export async function GET() {
     return NextResponse.json({ status: 'error', message: 'Failed to fetch exchange rates' }, { status: 500 });
   }
 }
+
+

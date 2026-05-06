@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/redis';
 
@@ -60,3 +61,5 @@ export async function GET(req: NextRequest) {
     });
   }
 }
+
+

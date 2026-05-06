@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 
 // GCC Market Data (Mocked for premium feel, could be replaced with real APIs like Sahmk)
@@ -77,3 +78,5 @@ export async function GET() {
     return NextResponse.json({ status: 'error', message: 'Failed to fetch market data' }, { status: 500 });
   }
 }
+
+
