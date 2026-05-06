@@ -10,7 +10,7 @@
     "test": "bun test",
     "pages:build": "npx @cloudflare/next-on-pages",
     "pages:deploy": "npm run pages:build && wrangler pages deploy .vercel/output",
-    "worker:deploy": "wrangler deploy worker/daily-automation.js"
+    "worker:deploy": "wrangler deploy worker/daily-automation.js --config worker/wrangler.toml"
   },
   "dependencies": {
     "@upstash/redis": "^1.37.0",
