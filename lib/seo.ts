@@ -71,12 +71,7 @@ export function pageMeta({
   image,
   datePublished,
   dateModified,
-  geo = {
-    latitude: 25.2854,
-    longitude: 51.5310,
-    region: "QA-DA",
-    placename: "Doha, Qatar",
-  },
+  geo,
 }: PageMetaOptions): Metadata {
   const og = ogTitle ?? title;
   const ogDesc = ogDescription ?? description;
@@ -169,10 +164,12 @@ export function pageMeta({
     other: {
       "google-adsense-account": "ca-pub-7212871157824722",
       "google-site-verification": "61758f95d085e67d",
-      "geo.region": geo.region || "QA-DA",
-      "geo.placename": geo.placename || "Doha, Qatar",
-      "geo.position": `${geo.latitude};${geo.longitude}`,
-      "ICBM": `${geo.latitude}, ${geo.longitude}`,
+      ...(geo ? {
+        "geo.region": geo.region,
+        "geo.placename": geo.placename,
+        "geo.position": `${geo.latitude};${geo.longitude}`,
+        "ICBM": `${geo.latitude}, ${geo.longitude}`,
+      } : {}),
       "DC.title": combinedTitle,
       "DC.description": combinedDescription,
       "DC.date.issued": published,

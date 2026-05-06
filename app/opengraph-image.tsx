@@ -35,9 +35,6 @@ export default async function Image() {
           marginTop: "60px" 
         }}>
           <div style={{ background: "rgba(255,255,255,0.1)", padding: "12px 24px", borderRadius: "100px", fontSize: 18, border: "1px solid rgba(255,255,255,0.2)" }}>
-            📍 Doha, Qatar
-          </div>
-          <div style={{ background: "rgba(255,255,255,0.1)", padding: "12px 24px", borderRadius: "100px", fontSize: 18, border: "1px solid rgba(255,255,255,0.2)" }}>
             ⚡ Public Services
           </div>
         </div>

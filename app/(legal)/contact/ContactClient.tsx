@@ -80,19 +80,10 @@ export default function ContactClient() {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{t('email')}</p>
-              <p className="text-lg font-bold">press@arabiakhaleej.com</p>
+              <p className="text-lg font-bold">connect@arabiakhaleej.com</p>
             </div>
           </div>
 
-          <div className={`glass rounded-2xl p-8 border border-brand-gold/10 flex ${isRTL ? 'flex-row-reverse text-right' : ''} gap-6 items-center`}>
-            <div className="w-12 h-12 rounded-xl bg-brand-gold/10 flex items-center justify-center text-brand-gold flex-shrink-0">
-              <MapPin size={24} />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{t('hq')}</p>
-              <p className="text-lg font-bold">{t('dohaQatar')}</p>
-            </div>
-          </div>
 
           <div className={`glass rounded-2xl p-8 border border-brand-gold/10 flex ${isRTL ? 'flex-row-reverse text-right' : ''} gap-6 items-center`}>
             <div className="w-12 h-12 rounded-xl bg-brand-gold/10 flex items-center justify-center text-brand-gold flex-shrink-0">

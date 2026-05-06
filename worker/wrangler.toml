@@ -3,7 +3,7 @@ main = "worker/daily-automation.js"
 compatibility_date = "2024-04-01"
 
 [triggers]
-crons = ["0 0 * * *"] # Run daily at midnight UTC
+crons = ["0 */12 * * *"] # Run every 12 hours (midnight and noon UTC)
 
 # Environment Variables (Non-sensitive)
 [vars]

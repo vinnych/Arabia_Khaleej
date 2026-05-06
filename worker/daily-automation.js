@@ -5,7 +5,7 @@
  * which exceeds Vercel Hobby's 10s timeout limit.
  * 
  * Features:
- * - Generates 5 high-fidelity articles (3 EN, 2 AR) sequentially.
+ * - Generates 10 high-fidelity articles (5 EN, 5 AR) sequentially.
  * - Respects Groq rate limits (TPM/RPM).
  * - Saves directly to Upstash Redis.
  * - Zero-cost on Cloudflare Free tier.
@@ -40,8 +40,8 @@ async function handleAutomation(env) {
     const generatedEn = [];
     const generatedAr = [];
 
-    // 2. Generate 3 English Articles (Sequential)
-    for (let i = 0; i < 3; i++) {
+    // 2. Generate 5 English Articles (Sequential)
+    for (let i = 0; i < 5; i++) {
       if (topics[i]) {
         console.log(`Generating EN: ${topics[i].topic}`);
         const res = await generateSingleArticle('en', 'gcc', topics[i], env);
@@ -51,8 +51,8 @@ async function handleAutomation(env) {
       }
     }
 
-    // 3. Generate 2 Arabic Articles (Sequential)
-    for (let i = 3; i < 5; i++) {
+    // 3. Generate 5 Arabic Articles (Sequential)
+    for (let i = 5; i < 10; i++) {
       if (topics[i]) {
         console.log(`Generating AR: ${topics[i].topic}`);
         const res = await generateSingleArticle('ar', 'gcc', topics[i], env);

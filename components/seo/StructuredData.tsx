@@ -42,15 +42,6 @@ export function OrganizationSchema({ nonce }: { nonce?: string } = {}) {
     },
     image: `${SITE_URL}/opengraph-image`,
     foundingDate: "2024",
-    foundingLocation: {
-      "@type": "Place",
-      name: "Doha, Qatar",
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "Doha",
-        addressCountry: "QA",
-      },
-    },
     areaServed: [
       { "@type": "Country", name: "Qatar", sameAs: "https://www.wikidata.org/wiki/Q846" },
       { "@type": "Country", name: "Saudi Arabia", sameAs: "https://www.wikidata.org/wiki/Q851" },
