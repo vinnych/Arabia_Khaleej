@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { email, name } = body;
+    const { email, name, message } = body;
 
     // Server-side validation
     if (!email || typeof email !== 'string' || !/.+@.+\..+/.test(email)) {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const res = await fetch(workerUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, name }),
+      body: JSON.stringify({ email, name, message }),
     });
 
     if (!res.ok) {

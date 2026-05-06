@@ -1,0 +1,18 @@
+name = "arabiakhaleej-automation"
+main = "worker/daily-automation.js"
+compatibility_date = "2024-04-01"
+
+[triggers]
+crons = ["0 0 * * *"] # Run daily at midnight UTC
+
+# Environment Variables (Non-sensitive)
+[vars]
+# Add any non-sensitive variables here
+
+# Secrets (Sensitive)
+# Use 'wrangler secret put <KEY>' to add these:
+# - UPSTASH_REDIS_REST_URL
+# - UPSTASH_REDIS_REST_TOKEN
+# - GROQ_API_KEY
+# - PEXELS_API_KEY
+# - CRON_SECRET

@@ -9,13 +9,30 @@ export default function ContactClient() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const name = formData.get('name') as string;
+    const message = formData.get('message') as string;
+
     setLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    setLoading(false);
-    setSubmitted(true);
+    try {
+      const res = await fetch("/api/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, name, message }),
+      });
+      if (res.ok) {
+        setSubmitted(true);
+      } else {
+        alert(t('systemError'));
+      }
+    } catch (err) {
+      alert(t('systemError'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -96,7 +113,7 @@ export default function ContactClient() {
             </label>
             <input 
               required
-              type="text"
+              name="name"
               className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors ${isRTL ? 'text-right' : ''}`}
             />
           </div>
@@ -107,7 +124,7 @@ export default function ContactClient() {
             </label>
             <input 
               required
-              type="email"
+              name="email"
               className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors ${isRTL ? 'text-right' : ''}`}
             />
           </div>
@@ -118,7 +135,7 @@ export default function ContactClient() {
             </label>
             <textarea 
               required
-              rows={4}
+              name="message"
               placeholder={t('messagePlaceholder')}
               className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors resize-none ${isRTL ? 'text-right' : ''}`}
             />

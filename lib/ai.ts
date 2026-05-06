@@ -67,7 +67,10 @@ export async function generateGCCInsight(
       }),
     });
 
-    if (!response.ok) throw new Error("Groq API Error");
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Groq API Error: ${response.status} ${JSON.stringify(errorData)}`);
+    }
     const data: GroqResponse = await response.json();
     return data.choices[0].message.content;
   } catch (error) {

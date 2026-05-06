@@ -1,8 +1,0 @@
-{
-  "crons": [
-    {
-      "path": "/api/admin/daily-automation?action=batch-10",
-      "schedule": "0 0 * * *"
-    }
-  ]
-}

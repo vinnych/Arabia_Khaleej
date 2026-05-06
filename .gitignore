@@ -2,7 +2,6 @@ node_modules/
 .next/
 .env*
 next-env.d.ts
-
 .vercel
 tsconfig.tsbuildinfo
 AGENT.md
@@ -10,3 +9,4 @@ fix.md
 .claude/
 .wrangler/
 .vscode/
+.dev.vars
