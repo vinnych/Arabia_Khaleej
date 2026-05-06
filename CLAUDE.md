@@ -20,8 +20,8 @@ Next.js 15 (App Router) project optimized for Cloudflare Pages (Edge runtime).
 
 ## 🤖 Automation Details
 - **Worker**: `worker/daily-automation.js` (Cloudflare Worker)
-- **Schedule**: Daily at 00:00 UTC (Cron Trigger).
-- **Behavior**: Generates 3 English and 2 Arabic articles sequentially.
+- **Schedule**: Every 12 hours (00:00 and 12:00 UTC).
+- **Behavior**: Generates 5 English and 5 Arabic articles (1500+ words) sequentially.
 - **Storage**: Updates `insights_archive_{lang}` keys in Redis.
 
 ## 📁 Critical File Map
@@ -36,3 +36,5 @@ Next.js 15 (App Router) project optimized for Cloudflare Pages (Edge runtime).
 - Do not perform `redis.set()` without an expiry time.
 - Do not add CSP headers to `next.config.ts`.
 - Do not rename `middleware.ts`.
+
+© 2026 Arabia Khaleej. All rights reserved.
