@@ -5,7 +5,13 @@ export default function middleware(request: NextRequest) {
   // Generate a cryptographically secure nonce
   const nonce = btoa(crypto.randomUUID());
   
-  const { searchParams } = new URL(request.url);
+  const { searchParams, hostname, pathname } = new URL(request.url);
+  
+  // Redirect from .pages.dev to the main domain
+  if (hostname.endsWith('.pages.dev')) {
+    return NextResponse.redirect(`https://arabiakhaleej.com${pathname}`, 301);
+  }
+
   const langParam = searchParams.get('lang');
   const cookieLang = request.cookies.get('NEXT_LOCALE')?.value;
 
