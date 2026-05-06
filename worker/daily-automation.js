@@ -103,8 +103,26 @@ async function generateSingleArticle(lang, type, item, env) {
   try {
     const model = "llama-3.3-70b-versatile";
     const prompt = lang === 'en' 
-      ? `Write a comprehensive, well-researched article about ${item.country} focusing on ${item.topic}. MIN 1500 words. Markdown format. Start with # Title.`
-      : `اكتب مقالاً شاملاً ومعمّقاً عن ${item.country} مع التركيز على ${item.topic}. لا يقل عن 1500 كلمة. تنسيق Markdown. ابدأ بـ # العنوان.`;
+      ? `Write an extremely detailed, 1500-word long-form analysis about ${item.country} focusing on ${item.topic}. 
+         The article MUST include:
+         - A catchy, professional title
+         - Detailed Executive Summary
+         - Historical Context & Background
+         - Key Current Developments
+         - In-depth Economic and Social Impact Analysis
+         - Strategic Future Outlook & Regional Implications
+         - Comprehensive Conclusion
+         Use multiple descriptive subheadings (H2, H3). Aim for extreme depth, professional regional analysis tone, and exhaustive detail. Markdown format. Start with # Title.`
+      : `اكتب تحليلاً طويلاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} مع التركيز على ${item.topic}. 
+         يجب أن يتضمن المقال:
+         - عنوان جذاب ومهني
+         - ملخص تنفيذي مفصل
+         - السياق التاريخي والخلفية
+         - التطورات الحالية الرئيسية
+         - تحليل معمق للتأثير الاقتصادي والاجتماعي
+         - التوقعات المستقبلية الاستراتيجية والآثار الإقليمية
+         - خاتمة شاملة
+         استخدم عناوين فرعية وصفية متعددة. استهدف العمق الشديد وأسلوب التحليل الإقليمي المهني والتفاصيل الشاملة. تنسيق Markdown. ابدأ بـ # العنوان.`;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -128,7 +146,10 @@ async function generateSingleArticle(lang, type, item, env) {
     const rawContent = data.choices[0].message.content;
     const content = cleanAIContent(rawContent);
     
-    if (content.length < 500) return null;
+    if (content.length < 5000) {
+      console.log(`Article too short (${content.length} chars), skipping...`);
+      return null;
+    }
 
     const firstLine = content.split('\n')[0].replace(/[#*]/g, '').trim();
     const title = firstLine.length > 10 ? firstLine : `${item.country}: ${item.topic}`;
