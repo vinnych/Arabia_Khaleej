@@ -37,9 +37,8 @@ export default function InsightsClient() {
     setLoading(true);
     setError(false);
     try {
-      const res = await fetch(`/api/insights?lang=${language}&t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: { 'Pragma': 'no-cache' },
+      const res = await fetch(`/api/insights?lang=${language}`, {
+        next: { revalidate: 300 },
         signal: AbortSignal.timeout(10000)
       });
       if (!res.ok) throw new Error('Network response was not ok');
@@ -138,7 +137,8 @@ export default function InsightsClient() {
                   alt={item.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
-                  unoptimized={!!item.image && !item.image.startsWith('/') && !item.image.startsWith('https://images.unsplash.com') && !item.image.startsWith('https://images.pexels.com')}
+                  priority={idx === 0}
+                  unoptimized={!!item.image && !item.image.startsWith('/') && !['unsplash.com', 'pexels.com', 'qna.org.qa', 'wam.ae', 'spa.gov.sa', 'bna.bh', 'omannews.gov.om', 'app.com.pk', 'pna.gov.ph'].some(d => item.image?.includes(d))}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-brand-obsidian/40 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-10 space-y-4">
@@ -193,7 +193,7 @@ export default function InsightsClient() {
                     alt={item.title}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
-                    unoptimized={!!item.image && !item.image.startsWith('/') && !item.image.startsWith('https://images.unsplash.com') && !item.image.startsWith('https://images.pexels.com')}
+                    unoptimized={!!item.image && !item.image.startsWith('/') && !['unsplash.com', 'pexels.com', 'qna.org.qa', 'wam.ae', 'spa.gov.sa', 'bna.bh', 'omannews.gov.om', 'app.com.pk', 'pna.gov.ph'].some(d => item.image?.includes(d))}
                     onError={() => markFailed(item.id)}
                   />
                   

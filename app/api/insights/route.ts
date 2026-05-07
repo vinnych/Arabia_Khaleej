@@ -2,8 +2,7 @@ export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { getUnifiedInsights, getArticleBySlug } from '@/lib/insights';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 300; // Cache for 5 minutes
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
