@@ -15,6 +15,8 @@ Next.js 15 (App Router) project optimized for Cloudflare Pages (Edge runtime).
 - **Runtime**: Prefer `edge` for API routes to ensure Cloudflare compatibility.
 - **Redis**: **ALWAYS** set TTL on every write (`{ ex: CACHE_TIMES.X }`).
 - **Groq**: Never call Groq in parallel to avoid rate limits (TPM/RPM).
+- **Caching**: **ALWAYS** use `revalidate` on API routes (default 300s) to enable edge caching.
+- **Images**: Ensure all external hostnames are added to `next.config.ts` remotePatterns to allow optimization.
 - **CSP**: `middleware.ts` is the single source of truth for CSP.
 - **Naming**: Use camelCase for functions/variables, PascalCase for components.
 

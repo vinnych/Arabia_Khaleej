@@ -75,6 +75,9 @@ Required Keys: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `GROQ_API_K
 ---
 
 ## 🛡️ Security & Performance
+- **Edge Caching**: Optimized with Next.js 15 ISR/SWR (5-minute revalidation) for near-instant loading.
+- **Image Optimization**: High-performance delivery for regional news sources (WAM, QNA, SPA, etc.) via Next.js Image Optimizer.
+- **Free-Tier Optimized**: Specifically architected to stay within Cloudflare Free and Upstash Redis Free limits.
 - **CSP**: Strict Content Security Policy managed via `middleware.ts`.
 - **Rate Limiting**: Intelligent IP-based throttling on sensitive utility routes.
 - **No-DB Strategy**: Legal-optimized transient storage using Redis with aggressive TTLs.
