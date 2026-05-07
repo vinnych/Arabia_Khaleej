@@ -15,16 +15,11 @@ export default function Header() {
         <Link 
           href="/" 
           aria-label={t('home')}
-          className="group flex items-center gap-3 glass px-4 py-2 rounded-2xl border-brand-gold/10 hover:border-brand-gold/30 transition-all duration-500 hover:scale-105 active:scale-95 shadow-xl"
+          className="group flex items-center glass px-5 py-2.5 sm:px-4 sm:py-2 rounded-2xl border-brand-gold/10 hover:border-brand-gold/30 transition-all duration-500 hover:scale-105 active:scale-95 shadow-xl min-h-[48px] sm:min-h-[auto]"
         >
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-gold to-brand-accent flex items-center justify-center text-brand-obsidian shadow-lg group-hover:rotate-12 transition-transform duration-500">
-                <span className="text-xs font-black tracking-tighter">AK</span>
-              </div>
-            </div>
-            <div className={`hidden sm:flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-gold leading-none mb-1">
+            <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
+              <span className="text-[11px] sm:text-[10px] font-black uppercase tracking-[0.25em] text-brand-gold leading-none mb-1.5 sm:mb-1">
                 {t('siteName')}
               </span>
               <span className="text-[9px] font-bold text-foreground/40 uppercase tracking-widest leading-none">

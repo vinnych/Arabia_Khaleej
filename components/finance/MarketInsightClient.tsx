@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, Activity, Coins, Globe, ArrowUpRight, BarChart3, Wallet } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { getMarketData } from "@/lib/api";
 import Link from "next/link";
 import { Breadcrumbs } from "@/lib/seo";
 
@@ -22,10 +23,7 @@ export default function MarketInsightClient() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("/api/market-data", {
-          signal: AbortSignal.timeout(10000) // 10s timeout
-        });
-        const json = await res.json();
+        const json = await getMarketData();
         if (json.status === 'success') {
           setData(json);
         }

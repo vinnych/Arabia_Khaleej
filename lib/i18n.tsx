@@ -52,9 +52,9 @@ export function LanguageProvider({
   }, [language, setLanguage]);
 
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     return translations[key]?.[language] || key;
-  };
+  }, [language]);
 
   const isRTL = language === 'ar';
 

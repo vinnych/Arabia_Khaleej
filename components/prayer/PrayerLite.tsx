@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
 
 import { useLanguage } from "@/lib/i18n";
+import { getGeolocation } from "@/lib/api";
 
 export default function PrayerLite() {
   const { t, isRTL } = useLanguage();
@@ -61,20 +62,19 @@ export default function PrayerLite() {
     // 2. IP-based Geolocation (No popup)
     async function fetchIPLocation() {
       try {
-        const res = await fetch("/api/geolocation");
-        const data = await res.json();
+        const data = await getGeolocation();
         if (data.latitude && data.longitude) {
           calculate(data.latitude, data.longitude, data.cityName || t('yourLocation'));
         }
       } catch (e) {
-        console.error("IP Geolocation failed, staying with default", e);
+        console.error("IP Geolocation unavailable, staying with default");
       }
     }
     
     fetchIPLocation();
 
     return () => { isMounted = false; };
-  }, [t]);
+  }, []);
 
   if (!state.mounted || !state.next) return (
     <div className="h-9 w-40 bg-brand-gold/5 animate-pulse rounded-full border border-brand-gold/10" />

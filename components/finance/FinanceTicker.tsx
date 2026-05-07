@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { TrendingUp, TrendingDown, Coins } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { getMarketData } from "@/lib/api";
 
 export default function FinanceTicker() {
   const [rates, setRates] = useState<any>(null);
@@ -16,10 +17,7 @@ export default function FinanceTicker() {
     
     async function fetchData() {
       try {
-        const res = await fetch("/api/market-data", {
-          signal: AbortSignal.timeout(8000) // 8s timeout
-        });
-        const json = await res.json();
+        const json = await getMarketData();
         if (json.status === 'success') {
           const rateMap = json.currencies.reduce((acc: any, curr: any) => {
             acc[curr.code] = curr.rate;

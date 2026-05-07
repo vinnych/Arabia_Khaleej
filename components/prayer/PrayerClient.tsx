@@ -7,6 +7,7 @@ import { GCC_COUNTRIES } from "@/lib/countries";
 import HijriCalendar from "@/components/prayer/HijriCalendar";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
+import { getGeolocation } from "@/lib/api";
 import { Breadcrumbs } from "@/lib/seo";
 import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter, usePathname } from "next/navigation";
@@ -51,13 +52,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
 
       async function detectLocation() {
         try {
-          const res = await fetch("/api/geolocation", {
-            signal: AbortSignal.timeout(5000) // 5s timeout
-          });
-          
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          
-          const data = await res.json();
+          const data = await getGeolocation();
           if (isSubscribed && data.latitude && data.longitude) {
             const name = data.cityName || t('yourLocation');
             setDetectedCity(name);
@@ -69,9 +64,8 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
             });
           }
         } catch (e) {
-          // Only log if it's not a common network/abort error to reduce console noise
           if (isSubscribed) {
-            console.warn("Prayer Times: IP geolocation unavailable (falling back to default)", e);
+            console.warn("Prayer Times: IP geolocation unavailable");
           }
         }
       }
@@ -79,7 +73,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
       detectLocation();
       return () => { isSubscribed = false; };
     }
-  }, [mounted, initialCity, t]);
+  }, [mounted, initialCity]); // Removed t to prevent re-fetching on language change
 
   useEffect(() => {
     if (!mounted) return;
