@@ -45,7 +45,7 @@ async function generateSingleArticle(
 
     const firstLine = content.split('\n')[0].replace(/[#*]/g, '').trim();
     const title = firstLine.length > 10 ? firstLine : `${item.country}: ${item.topic}`;
-    const slug = toSlug(item.topic, `${type === 'gcc' ? 'v' : 'int'}-${new Date().getUTCDate()}-${new Date().getUTCMonth()}`);
+    const slug = toSlug(title, `${type}-${item.topic}`);
     const imageUrl = await getRelevantImage(`${item.topic} ${item.country}`, slug);
 
     return {

@@ -76,7 +76,22 @@ export function pageMeta({
   const og = ogTitle ?? title;
   const ogDesc = ogDescription ?? description;
   const img = image ?? `${SITE_URL}/opengraph-image`;
-  const canonical = path === "/" ? SITE_URL : `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  
+  // Sanitize path: remove tracking query params, keep only 'lang'
+  let cleanPath = path;
+  if (path.includes('?')) {
+    const [base, query] = path.split('?');
+    const params = new URLSearchParams(query);
+    const newParams = new URLSearchParams();
+    if (params.has('lang')) {
+      const l = params.get('lang');
+      if (l === 'ar' || l === 'en') newParams.set('lang', l);
+    }
+    const qs = newParams.toString();
+    cleanPath = qs ? `${base}?${qs}` : base;
+  }
+  
+  const canonical = cleanPath === "/" ? SITE_URL : `${SITE_URL}${cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`}`;
   const now = new Date().toISOString();
   const published = datePublished ?? "2024-01-01T00:00:00Z";
   const modified = dateModified ?? now;
@@ -126,9 +141,7 @@ export function pageMeta({
     alternates: {
       canonical,
       languages: {
-        "en-US": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=en` 
-          : `${canonical}?lang=en`,
+        "en-US": canonical.includes('?') ? canonical.split('?')[0] : canonical,
         "ar-SA": canonical.includes('?') 
           ? `${canonical.split('?')[0]}?lang=ar` 
           : `${canonical}?lang=ar`,

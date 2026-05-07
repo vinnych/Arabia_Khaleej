@@ -15,12 +15,12 @@ export function isValidHttpUrl(str: string): boolean {
 }
 
 /**
- * Converts a title + url into a readable SEO slug.
+ * Converts a title + optional seed into a readable SEO slug.
  * Supports both English and Arabic characters.
  * e.g. "Qatar Raises Fuel Prices" → "qatar-raises-fuel-prices-a3f9"
  * The hash suffix guarantees uniqueness across same-title articles.
  */
-export function toSlug(title: string, url: string): string {
+export function toSlug(title: string, seed?: string): string {
   const base = title
     .toLowerCase()
     // Keep Arabic characters (\u0600-\u06FF), English alphanumeric, spaces and dashes
@@ -33,9 +33,14 @@ export function toSlug(title: string, url: string): string {
   // If base resulted in nothing (e.g. only symbols), use "insight"
   const slugBase = base || "insight";
   
-  // 6-char hash from url for strong uniqueness in large archives
+  // Use provided seed or fallback to the title for deterministic hashing
+  const hashSource = seed || title;
+  
+  // 6-char hash for strong uniqueness in large archives
   let h = 0;
-  for (let i = 0; i < url.length; i++) h = (Math.imul(31, h) + url.charCodeAt(i)) | 0;
+  for (let i = 0; i < hashSource.length; i++) {
+    h = (Math.imul(31, h) + hashSource.charCodeAt(i)) | 0;
+  }
   const hash = Math.abs(h).toString(36).slice(0, 6).padStart(6, "0");
   
   return `${slugBase}-${hash}`;

@@ -10,7 +10,10 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/_next/', '/static/'],
+        disallow: [
+          '/api/', 
+          '/_next/data/', // Block JSON data for client-side transitions
+        ],
       },
       {
         // Explicitly allow AI crawlers for GCC Knowledge Graph indexing

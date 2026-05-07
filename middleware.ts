@@ -9,7 +9,9 @@ export default function middleware(request: NextRequest) {
   
   // Redirect from .pages.dev to the main domain
   if (hostname.endsWith('.pages.dev')) {
-    return NextResponse.redirect(`https://arabiakhaleej.com${pathname}`, 301);
+    const destination = new URL(`https://arabiakhaleej.com${pathname}`);
+    destination.search = searchParams.toString();
+    return NextResponse.redirect(destination.toString(), 301);
   }
 
   const langParam = searchParams.get('lang');

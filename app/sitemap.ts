@@ -74,6 +74,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // 5. Dynamic Insights Routes (Deduplicated & Capped)
   let insightRoutes: MetadataRoute.Sitemap = [];
+  let latestDate = new Date();
+  
   try {
     const allInsightSlugs = await getAllInsightSlugs();
     
@@ -89,6 +91,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const sortedInsights = Array.from(uniqueSlugs.values())
       .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
       .slice(0, 2000);
+
+    if (sortedInsights.length > 0) {
+      latestDate = new Date(sortedInsights[0].pubDate);
+    }
 
     insightRoutes = sortedInsights.map(item => ({
       url: `${SITE_URL}/insights/${item.slug}${item.lang === 'ar' ? '?lang=ar' : ''}`,
@@ -108,7 +114,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Combine everything
   const allRoutes = [
-    ...staticRoutes, 
+    { ...staticRoutes[0], lastModified: latestDate }, // Home
+    { ...staticRoutes[1], lastModified: latestDate }, // Insights list
+    ...staticRoutes.slice(2), 
     ...prayerRoutes, 
     ...countryRoutes, 
     ...marketRoutes, 

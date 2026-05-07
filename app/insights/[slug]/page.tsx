@@ -31,7 +31,7 @@ export async function generateMetadata({
     return pageMeta({
       title: article.title,
       description: seoDescription,
-      path: `/insights/${slug}${lang === 'ar' ? '?lang=ar' : ''}`,
+      path: `/insights/${article.slug}${lang === 'ar' ? '?lang=ar' : ''}`,
       image: article.image,
       type: 'article',
       datePublished: article.pubDate,
@@ -72,7 +72,7 @@ export default async function InsightArticlePage({
     { name: article.title, item: `/insights/${resolvedParams.slug}` }
   ];
 
-  const canonicalUrl = `https://arabiakhaleej.com/insights/${resolvedParams.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
+  const canonicalUrl = `https://arabiakhaleej.com/insights/${article.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
 
   return (
     <main className="min-h-screen pt-20">

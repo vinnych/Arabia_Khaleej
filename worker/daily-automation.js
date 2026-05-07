@@ -153,7 +153,7 @@ async function generateSingleArticle(lang, type, item, env) {
 
     const firstLine = content.split('\n')[0].replace(/[#*]/g, '').trim();
     const title = firstLine.length > 10 ? firstLine : `${item.country}: ${item.topic}`;
-    const slug = toSlug(item.topic, `${Date.now()}`);
+    const slug = toSlug(item.topic);
     const imageUrl = await getRelevantImage(`${item.topic} ${item.country}`, env);
 
     return {
@@ -220,8 +220,12 @@ function extractDescription(content) {
   return (paragraph || lines[0] || '').replace(/[#*_]/g, '').trim().substring(0, 180) + '...';
 }
 
-function toSlug(title, salt) {
-  const base = title.toLowerCase().replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "").trim().replace(/\s+/g, "-").slice(0, 80);
-  const hash = Math.random().toString(36).slice(2, 8);
-  return `${base}-${hash}`;
+function toSlug(title) {
+  return title
+    .toLowerCase()
+    .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "") // Keep Arabic, alphanumeric, space, hyphen
+    .trim()
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-")  // Collapse multiple hyphens
+    .slice(0, 100);       // Limit length
 }

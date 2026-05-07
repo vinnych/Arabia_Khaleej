@@ -508,9 +508,23 @@ export async function getUnifiedInsights(options: {
 }
 
 export async function getArticleBySlug(slug: string, lang: 'en' | 'ar'): Promise<InsightItem | null> {
-  // 1. Check hardcoded base first (O(N) where N is small, very fast)
+  const normalizedSlug = slug.toLowerCase();
+  
+  // 1. Check hardcoded base first
   const baseItems = PREMIUM_ARTICLES[lang] || [];
-  const baseArticle = baseItems.find(p => p.slug === slug);
+  let baseArticle = baseItems.find(p => p.slug.toLowerCase() === normalizedSlug);
+  
+  // Fallback for old hashed slugs or clean slugs (e.g. "slug-abc123" -> "slug" or vice-versa)
+  if (!baseArticle) {
+    const basePart = normalizedSlug.includes('-') 
+      ? normalizedSlug.split('-').slice(0, -1).join('-') 
+      : normalizedSlug;
+      
+    baseArticle = baseItems.find(p => {
+      const pSlug = p.slug.toLowerCase();
+      return pSlug === basePart || pSlug.startsWith(basePart + '-');
+    });
+  }
   if (baseArticle) return baseArticle;
 
   // 2. Check dynamic archive from Redis
@@ -518,7 +532,20 @@ export async function getArticleBySlug(slug: string, lang: 'en' | 'ar'): Promise
     const archiveKey = `insights_archive_${lang}`;
     const dynamicItems = await redis.get(archiveKey) as InsightItem[] | null;
     if (dynamicItems && Array.isArray(dynamicItems)) {
-      const dynamicArticle = dynamicItems.find(p => p.slug === slug);
+      let dynamicArticle = dynamicItems.find(p => p.slug.toLowerCase() === normalizedSlug);
+      
+      // Fallback for old hashed slugs or clean slugs
+      if (!dynamicArticle) {
+        const basePart = normalizedSlug.includes('-') 
+          ? normalizedSlug.split('-').slice(0, -1).join('-') 
+          : normalizedSlug;
+          
+        dynamicArticle = dynamicItems.find(p => {
+          const pSlug = p.slug.toLowerCase();
+          return pSlug === basePart || pSlug.startsWith(basePart + '-');
+        });
+      }
+      
       if (dynamicArticle) return dynamicArticle;
     }
   } catch (e) {
@@ -528,14 +555,33 @@ export async function getArticleBySlug(slug: string, lang: 'en' | 'ar'): Promise
   // 3. Check other language as fallback
   const otherLang = lang === 'en' ? 'ar' : 'en';
   const otherBase = PREMIUM_ARTICLES[otherLang] || [];
-  const otherBaseArticle = otherBase.find(p => p.slug === slug);
+  let otherBaseArticle = otherBase.find(p => p.slug.toLowerCase() === normalizedSlug);
+  if (!otherBaseArticle) {
+    const basePart = normalizedSlug.includes('-') 
+      ? normalizedSlug.split('-').slice(0, -1).join('-') 
+      : normalizedSlug;
+    otherBaseArticle = otherBase.find(p => {
+      const pSlug = p.slug.toLowerCase();
+      return pSlug === basePart || pSlug.startsWith(basePart + '-');
+    });
+  }
   if (otherBaseArticle) return otherBaseArticle;
 
   try {
     const otherArchiveKey = `insights_archive_${otherLang}`;
     const otherDynamic = await redis.get(otherArchiveKey) as InsightItem[] | null;
     if (otherDynamic && Array.isArray(otherDynamic)) {
-      return otherDynamic.find(p => p.slug === slug) || null;
+      let otherDynamicArticle = otherDynamic.find(p => p.slug.toLowerCase() === normalizedSlug);
+      if (!otherDynamicArticle) {
+        const basePart = normalizedSlug.includes('-') 
+          ? normalizedSlug.split('-').slice(0, -1).join('-') 
+          : normalizedSlug;
+        otherDynamicArticle = otherDynamic.find(p => {
+          const pSlug = p.slug.toLowerCase();
+          return pSlug === basePart || pSlug.startsWith(basePart + '-');
+        });
+      }
+      return otherDynamicArticle || null;
     }
   } catch (e) {}
 
