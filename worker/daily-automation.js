@@ -28,6 +28,48 @@ export default {
   }
 };
 
+/**
+ * Compression Helpers (GZIP + Base64)
+ */
+async function compress(data) {
+  const encoder = new TextEncoder();
+  const uint8 = encoder.encode(typeof data === 'string' ? data : JSON.stringify(data));
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(uint8);
+      controller.close();
+    },
+  }).pipeThrough(new CompressionStream('gzip'));
+  const buffer = await new Response(stream).arrayBuffer();
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return 'compressed:' + btoa(binary);
+}
+
+async function decompress(compressedStr) {
+  if (typeof compressedStr !== 'string' || !compressedStr.startsWith('compressed:')) {
+    return typeof compressedStr === 'string' ? JSON.parse(compressedStr) : compressedStr;
+  }
+  const base64 = compressedStr.replace('compressed:', '');
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(bytes);
+      controller.close();
+    },
+  }).pipeThrough(new DecompressionStream('gzip'));
+  const text = await new Response(stream).text();
+  return JSON.parse(text);
+}
+
+
 async function handleAutomation(env) {
   console.log("Starting Cloudflare Automation...");
   const startTime = Date.now();
@@ -73,19 +115,31 @@ async function handleAutomation(env) {
         headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}` }
       });
       const currentData = await currentRes.json();
-      const currentArchive = currentData.result ? JSON.parse(currentData.result) : [];
+      let currentArchive = [];
+      if (currentData.result) {
+        try {
+          currentArchive = await decompress(currentData.result);
+        } catch (e) {
+          console.error("Decompression failed, falling back to raw parse:", e);
+          currentArchive = typeof currentData.result === 'string' ? JSON.parse(currentData.result) : currentData.result;
+        }
+      }
+
       
       const existingSlugs = new Set(currentArchive.map(a => a.slug));
       const uniqueBatch = batch.filter(g => !existingSlugs.has(g.slug));
 
       if (uniqueBatch.length > 0) {
         const updatedArchive = [...uniqueBatch, ...currentArchive].slice(0, 1500);
+        const compressedBody = await compress(updatedArchive);
+        
         // Set with EX (30 days)
         await fetch(`${env.UPSTASH_REDIS_REST_URL}/set/${archiveKey}?ex=2592000`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}` },
-          body: JSON.stringify(updatedArchive)
+          body: compressedBody
         });
+
       }
     }
 

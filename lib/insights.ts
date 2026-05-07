@@ -1,4 +1,4 @@
-import { redis } from './redis';
+import { redis, getWithCompression } from './redis';
 
 export interface InsightItem {
   id: string;
@@ -472,7 +472,7 @@ export async function getUnifiedInsights(options: {
   let dynamicItems: InsightItem[] = [];
   try {
     const archiveKey = `insights_archive_${lang}`;
-    const stored = await redis.get(archiveKey) as InsightItem[] | null;
+    const stored = await getWithCompression<InsightItem[]>(archiveKey);
     if (stored && Array.isArray(stored)) {
       dynamicItems = stored;
     }
@@ -530,7 +530,7 @@ export async function getArticleBySlug(slug: string, lang: 'en' | 'ar'): Promise
   // 2. Check dynamic archive from Redis
   try {
     const archiveKey = `insights_archive_${lang}`;
-    const dynamicItems = await redis.get(archiveKey) as InsightItem[] | null;
+    const dynamicItems = await getWithCompression<InsightItem[]>(archiveKey);
     if (dynamicItems && Array.isArray(dynamicItems)) {
       let dynamicArticle = dynamicItems.find(p => p.slug.toLowerCase() === normalizedSlug);
       
@@ -569,7 +569,7 @@ export async function getArticleBySlug(slug: string, lang: 'en' | 'ar'): Promise
 
   try {
     const otherArchiveKey = `insights_archive_${otherLang}`;
-    const otherDynamic = await redis.get(otherArchiveKey) as InsightItem[] | null;
+    const otherDynamic = await getWithCompression<InsightItem[]>(otherArchiveKey);
     if (otherDynamic && Array.isArray(otherDynamic)) {
       let otherDynamicArticle = otherDynamic.find(p => p.slug.toLowerCase() === normalizedSlug);
       if (!otherDynamicArticle) {

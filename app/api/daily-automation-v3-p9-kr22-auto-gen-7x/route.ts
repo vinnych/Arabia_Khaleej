@@ -1,7 +1,7 @@
 export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { generateGCCInsight, generateTrendingTopics } from '@/lib/ai';
-import { redis, CACHE_TIMES } from '@/lib/redis';
+import { redis, CACHE_TIMES, getWithCompression, setWithCompression } from '@/lib/redis';
 import { toSlug } from '@/lib/utils';
 import { InsightItem } from '@/lib/insights';
 import { getRelevantImage } from '@/lib/images';
@@ -115,13 +115,13 @@ export async function GET(request: Request) {
       if (batch.length === 0) continue;
 
       const archiveKey = `insights_archive_${lang}`;
-      const currentArchive = (await redis.get(archiveKey) as InsightItem[] | null) || [];
+      const currentArchive = (await getWithCompression<InsightItem[]>(archiveKey)) || [];
       const existingSlugs = new Set(currentArchive.map(a => a.slug));
       const uniqueBatch = batch.filter(g => !existingSlugs.has(g.slug));
 
       if (uniqueBatch.length > 0) {
         const updatedArchive = [...uniqueBatch, ...currentArchive].slice(0, 1500);
-        await redis.set(archiveKey, updatedArchive, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        await setWithCompression(archiveKey, updatedArchive, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
       }
     }
 
