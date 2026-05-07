@@ -21,16 +21,17 @@ export default {
 
     try {
       const body = await request.json();
-      const { email, name } = body;
+      const { email, name, message } = body;
 
       if (!email) {
+        console.error("Worker Error: Email missing from request body");
         return new Response(JSON.stringify({ error: "Email is required" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      console.log(`Processing inquiry for: ${email} (Name: ${name || 'N/A'})`);
+      console.log(`Processing contact form: ${email} | Name: ${name || 'N/A'} | Message length: ${message?.length || 0}`);
 
       // Create a professional MIME email
       const msg = createMimeMessage();
@@ -46,7 +47,11 @@ export default {
               <p>A new request has been received for the <strong>Arabia Khaleej</strong> reference portal.</p>
               <div style="margin: 30px 0; padding: 20px; background: #fafafa; border-radius: 8px; border-left: 4px solid #D4AF37;">
                 <p style="margin: 0 0 10px 0; font-size: 16px;"><strong>Name:</strong> ${name || 'Not provided'}</p>
-                <p style="margin: 0; font-size: 16px;"><strong>Email:</strong> ${email}</p>
+                <p style="margin: 0 0 10px 0; font-size: 16px;"><strong>Email:</strong> ${email}</p>
+                <p style="margin: 0; font-size: 16px;"><strong>Message:</strong></p>
+                <div style="margin-top: 10px; padding: 15px; background: white; border-radius: 6px; border: 1px solid #eee; white-space: pre-wrap;">
+                  ${message || 'No message provided'}
+                </div>
               </div>
               <p style="font-size: 12px; color: #999;">Date: ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Dubai' })} GST</p>
               <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
@@ -63,7 +68,7 @@ export default {
         if (env.SEND_EMAIL) {
           const encoder = new TextEncoder();
           const rawMessage = encoder.encode(msg.asRaw());
-          
+
           const emailMsg = new EmailMessage(
             "connect@arabiakhaleej.com",
             "asishchilakapati@gmail.com",
@@ -169,9 +174,9 @@ export default {
 
     } catch (err) {
       console.error('Worker General Error:', err.message);
-      return new Response(JSON.stringify({ 
-        error: "Internal Server Error", 
-        message: err.message 
+      return new Response(JSON.stringify({
+        error: "Internal Server Error",
+        message: err.message
       }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
