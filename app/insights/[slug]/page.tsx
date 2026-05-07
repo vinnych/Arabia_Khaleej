@@ -1,5 +1,5 @@
 import { pageMeta } from "@/lib/seo";
-import { InsightArticleSchema, BreadcrumbSchema, WebPageSchema } from "@/components/seo/StructuredData";
+import { InsightArticleSchema, BreadcrumbSchema, WebPageSchema, HowToSchema, ReviewSchema, FAQSchema } from "@/components/seo/StructuredData";
 import InsightArticleClient from "@/components/insights/InsightArticleClient";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getUnifiedInsights, InsightItem } from "@/lib/insights";
@@ -76,22 +76,58 @@ export default async function InsightArticlePage({
 
   return (
     <main className="min-h-screen pt-20">
-      {/* SEO Schemas */}
+      {/* Primary Article Schema */}
       <InsightArticleSchema 
         title={article.title}
         description={article.description}
         image={article.image}
         datePublished={article.pubDate}
+        dateModified={article.pubDate} // Using pubDate for now, update if your API provides modifiedDate
         authorName={article.source}
         url={canonicalUrl}
         language={article.language === 'ar' ? 'ar' : 'en'}
       />
+
+      {/* Supplemental Rich Results based on content type */}
+      {(article.title.toLowerCase().includes('how to') || article.content?.toLowerCase().includes('step-by-step')) && article.content ? (
+        <HowToSchema 
+          name={article.title}
+          description={article.description}
+          image={article.image}
+          url={canonicalUrl}
+          steps={article.content.split('\n')
+            .filter(l => /^\d+\./.test(l.trim()))
+            .map(l => ({ name: l.replace(/^\d+\.\s*/, '').split(':')[0], text: l.replace(/^\d+\.\s*/, '') }))
+            .slice(0, 10)}
+        />
+      ) : null}
+
+      {(article.title.toLowerCase().includes('review') || article.tags?.includes('review')) && (
+        <ReviewSchema 
+          itemReviewed={{ name: article.title.replace(/review/i, '').trim() }}
+          reviewRating={5} // Default to 5 for premium insights
+          author={article.source}
+          datePublished={article.pubDate}
+          reviewBody={article.description}
+          url={canonicalUrl}
+        />
+      )}
+
+      {(article.title.toLowerCase().includes('why') || article.content?.includes('?')) && (
+        <FAQSchema 
+          questions={[
+            { question: article.title, answer: article.description }
+          ]}
+        />
+      )}
+
       <BreadcrumbSchema items={breadcrumbs} />
       <WebPageSchema 
         name={article.title}
         description={article.description}
         url={canonicalUrl}
         datePublished={article.pubDate}
+        dateModified={article.pubDate}
       />
 
       <InsightArticleClient initialArticle={article} moreInsights={filteredMoreInsights} />

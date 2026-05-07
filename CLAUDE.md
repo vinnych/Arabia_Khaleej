@@ -21,7 +21,7 @@ Next.js 15 (App Router) project optimized for Cloudflare Pages (Edge runtime).
 ## 🤖 Automation Details
 - **Worker**: `worker/daily-automation.js` (Cloudflare Worker)
 - **Schedule**: Every 12 hours (00:00 and 12:00 UTC).
-- **Behavior**: Generates 5 English and 5 Arabic articles (1500+ words) sequentially.
+- **Behavior**: Generates 10 articles (5 EN, 5 AR) with a 90/10 mix of Helpful Content (How-To/Why/Review) and specialized Women-centric Analysis.
 - **Storage**: Updates `insights_archive_{lang}` keys in Redis.
 
 ## 📁 Critical File Map

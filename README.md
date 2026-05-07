@@ -31,7 +31,9 @@ The platform features a fully automated content pipeline:
 - **Trigger**: Cloudflare Cron Trigger (Every 12 hours at 00:00 and 12:00 UTC).
 - **Worker**: `worker/daily-automation.js`
 - **Output**: 10 High-fidelity articles (5 English, 5 Arabic) per run.
+- **Mix (90/10)**: 90% High-Utility (How-To Guides, Reviews, Explainers) and 10% Specialized Women-centric Analysis.
 - **Quality**: Long-form 1500+ word professional regional analysis.
+- **Advanced SEO**: Automated schema injection (HowTo, Review, FAQ, Article) based on content type.
 - **Strategy**: Sequential generation to maintain peak quality and respect API constraints.
 
 ---

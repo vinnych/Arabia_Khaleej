@@ -102,25 +102,65 @@ async function handleAutomation(env) {
 async function generateSingleArticle(lang, type, item, env) {
   try {
     const model = "llama-3.3-70b-versatile";
+    
+    // 90/10 Content Type Split
+    const rand = Math.random();
+    let contentStyle = "";
+    let specificPrompt = "";
+    
+    if (rand < 0.1) {
+      // 10% Niche Analysis: Women-centric
+      contentStyle = "women-centric-analysis";
+      specificPrompt = lang === 'en'
+        ? `Write a professional regional analysis focused on Women's Interests, Achievements, and Perspectives in ${item.country} and the broader international context. Focus on leadership, entrepreneurship, and social impact.`
+        : `اكتب تحليلاً مهنياً إقليمياً يركز على اهتمامات المرأة وإنجازاتها ومنظورها في ${item.country} والسياق الدولي الأوسع. ركز على القيادة وريادة الأعمال والتأثير الاجتماعي.`;
+    } else {
+      // 90% Primary Helpful Content (Rotate between How-To, Why, Review, Experience)
+      const subRand = Math.random();
+      if (subRand < 0.3) {
+        contentStyle = "how-to";
+        specificPrompt = lang === 'en'
+          ? `Write a comprehensive, step-by-step How-To Guide about ${item.topic} in ${item.country}. Use "How To" in the title. Focus on practical, actionable advice for residents or visitors.`
+          : `اكتب دليلاً شاملاً خطوة بخطوة (How-To) عن ${item.topic} في ${item.country}. استخدم "كيفية" في العنوان. ركز على نصائح عملية وقابلة للتنفيذ للمقيمين أو الزوار.`;
+      } else if (subRand < 0.6) {
+        contentStyle = "why-explainer";
+        specificPrompt = lang === 'en'
+          ? `Write a detailed "Why" explainer about ${item.topic} in ${item.country}. Address the underlying reasons, regional trends, and strategic decisions. Use a question-based heading.`
+          : `اكتب مقالاً تفسيرياً مفصلاً (لماذا) عن ${item.topic} في ${item.country}. تناول الأسباب الكامنة والتوجهات الإقليمية والقرارات الاستراتيجية. استخدم عنواناً قائماً على سؤال.`;
+      } else if (subRand < 0.8) {
+        contentStyle = "expert-review";
+        specificPrompt = lang === 'en'
+          ? `Write an objective Expert Review of ${item.topic} in ${item.country}. Provide pros, cons, and a final verdict based on regional standards and quality expectations.`
+          : `اكتب مراجعة خبير موضوعية لـ ${item.topic} في ${item.country}. قدم الإيجابيات والسلبيات وحكماً نهائياً بناءً على المعايير الإقليمية وتوقعات الجودة.`;
+      } else {
+        contentStyle = "experience-guide";
+        specificPrompt = lang === 'en'
+          ? `Write a narrative-driven Experience Guide about ${item.topic} in ${item.country}. Focus on first-hand insights, hidden gems, and expertise-based recommendations.`
+          : `اكتب دليلاً قائماً على الخبرة والتجربة عن ${item.topic} في ${item.country}. ركز على الرؤى المباشرة والجواهر الخفية والتوصيات القائمة على الخبرة.`;
+      }
+    }
+
     const prompt = lang === 'en' 
-      ? `Write an extremely detailed, 1500-word long-form analysis about ${item.country} focusing on ${item.topic}. 
+      ? `Write an extremely detailed, 1500-word long-form article about ${item.country} regarding ${item.topic}.
+         STYLE: ${specificPrompt}
          The article MUST include:
-         - A catchy, professional title
+         - A catchy, professional title (relevant to the STYLE)
          - Detailed Executive Summary
          - Historical Context & Background
          - Key Current Developments
-         - In-depth Economic and Social Impact Analysis
-         - Strategic Future Outlook & Regional Implications
+         - In-depth Impact Analysis
+         - Strategic Future Outlook
          - Comprehensive Conclusion
-         Use multiple descriptive subheadings (H2, H3). Aim for extreme depth, professional regional analysis tone, and exhaustive detail. Markdown format. Start with # Title.`
-      : `اكتب تحليلاً طويلاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} مع التركيز على ${item.topic}. 
+         Use multiple descriptive subheadings (H2, H3). Aim for extreme depth and professional regional analysis tone. Markdown format. Start with # Title.`
+      : `اكتب مقالاً طويلاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} بخصوص ${item.topic}.
+         الأسلوب: ${specificPrompt}
          يجب أن يتضمن المقال:
-         - عنوان جذاب ومهني
+         - عنوان جذاب ومهني (مناسب للأسلوب)
          - ملخص تنفيذي مفصل
          - السياق التاريخي والخلفية
          - التطورات الحالية الرئيسية
-         - تحليل معمق للتأثير الاقتصادي والاجتماعي
-         - التوقعات المستقبلية الاستراتيجية والآثار الإقليمية
+         - تحليل معمق للتأثير
+         - التوقعات المستقبلية الاستراتيجية
          - خاتمة شاملة
          استخدم عناوين فرعية وصفية متعددة. استهدف العمق الشديد وأسلوب التحليل الإقليمي المهني والتفاصيل الشاملة. تنسيق Markdown. ابدأ بـ # العنوان.`;
 
@@ -167,7 +207,7 @@ async function generateSingleArticle(lang, type, item, env) {
       source: "Arabia Khaleej Editorial",
       category: "gcc",
       language: lang,
-      tags: [type, 'trending', 'premium'],
+      tags: [type, 'trending', 'premium', contentStyle],
       image: imageUrl,
     };
   } catch (err) {

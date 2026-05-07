@@ -41,7 +41,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
     alternates: {
       languages: {
-        'ar': `${SITE_URL}/prayer/${country}?lang=ar`
+        'en': `${SITE_URL}/prayer/${country}`,
+        'en-US': `${SITE_URL}/prayer/${country}`,
+        'en-GB': `${SITE_URL}/prayer/${country}`,
+        'ar': `${SITE_URL}/prayer/${country}?lang=ar`,
+        'ar-SA': `${SITE_URL}/prayer/${country}?lang=ar`,
+        'ar-AE': `${SITE_URL}/prayer/${country}?lang=ar`,
+        'ar-QA': `${SITE_URL}/prayer/${country}?lang=ar`,
+        'ar-KW': `${SITE_URL}/prayer/${country}?lang=ar`,
+        'ar-OM': `${SITE_URL}/prayer/${country}?lang=ar`,
+        'ar-BH': `${SITE_URL}/prayer/${country}?lang=ar`,
       }
     }
   }));
@@ -54,7 +63,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
     alternates: {
       languages: {
-        'ar': `${SITE_URL}/countries/${slug}?lang=ar`
+        'en': `${SITE_URL}/countries/${slug}`,
+        'en-US': `${SITE_URL}/countries/${slug}`,
+        'ar': `${SITE_URL}/countries/${slug}?lang=ar`,
+        'ar-SA': `${SITE_URL}/countries/${slug}?lang=ar`,
+        'ar-AE': `${SITE_URL}/countries/${slug}?lang=ar`,
+        'ar-QA': `${SITE_URL}/countries/${slug}?lang=ar`,
       }
     }
   }));
@@ -67,7 +81,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
     alternates: {
       languages: {
-        'ar': `${SITE_URL}/market-insight/${cat}?lang=ar`
+        'en': `${SITE_URL}/market-insight/${cat}`,
+        'ar': `${SITE_URL}/market-insight/${cat}?lang=ar`,
+        'ar-SA': `${SITE_URL}/market-insight/${cat}?lang=ar`,
+        'ar-AE': `${SITE_URL}/market-insight/${cat}?lang=ar`,
+        'ar-QA': `${SITE_URL}/market-insight/${cat}?lang=ar`,
       }
     }
   }));
@@ -104,7 +122,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: {
         languages: {
           'en': `${SITE_URL}/insights/${item.slug}`,
-          'ar': `${SITE_URL}/insights/${item.slug}?lang=ar`
+          'en-US': `${SITE_URL}/insights/${item.slug}`,
+          'ar': `${SITE_URL}/insights/${item.slug}?lang=ar`,
+          'ar-SA': `${SITE_URL}/insights/${item.slug}?lang=ar`,
+          'ar-AE': `${SITE_URL}/insights/${item.slug}?lang=ar`,
+          'ar-QA': `${SITE_URL}/insights/${item.slug}?lang=ar`,
+          'ar-KW': `${SITE_URL}/insights/${item.slug}?lang=ar`,
+          'ar-OM': `${SITE_URL}/insights/${item.slug}?lang=ar`,
+          'ar-BH': `${SITE_URL}/insights/${item.slug}?lang=ar`,
         }
       }
     }));

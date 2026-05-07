@@ -176,6 +176,10 @@ export function InsightArticleSchema({
       "@type": "Organization",
       name: authorName,
       url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: publisherLogo,
+      }
     },
     publisher: {
       "@type": "Organization",
@@ -191,6 +195,88 @@ export function InsightArticleSchema({
     },
   };
   return <StructuredData type="Article" data={data} nonce={nonce} />;
+}
+
+// ─── How-To Guide ────────────────────────────────────────────────────────────
+export function HowToSchema({
+  name,
+  description,
+  image,
+  steps,
+  totalTime,
+  url,
+}: {
+  name: string;
+  description: string;
+  image?: string;
+  steps: { name: string; text: string; image?: string }[];
+  totalTime?: string;
+  url: string;
+}) {
+  const data = {
+    name,
+    description,
+    image: image ? [image] : [`${SITE_URL}/opengraph-image`],
+    step: steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.name,
+      itemListElement: [{
+        "@type": "HowToDirection",
+        text: s.text
+      }],
+      ...(s.image ? { image: s.image } : {})
+    })),
+    ...(totalTime ? { totalTime } : {}),
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}${url}`,
+    }
+  };
+  return <StructuredData type="HowTo" data={data} />;
+}
+
+// ─── Review ──────────────────────────────────────────────────────────────────
+export function ReviewSchema({
+  itemReviewed,
+  reviewRating,
+  author,
+  datePublished,
+  reviewBody,
+  url,
+}: {
+  itemReviewed: { name: string; image?: string };
+  reviewRating: number;
+  author: string;
+  datePublished: string;
+  reviewBody: string;
+  url: string;
+}) {
+  const data = {
+    itemReviewed: {
+      "@type": "Thing",
+      name: itemReviewed.name,
+      ...(itemReviewed.image ? { image: itemReviewed.image } : {})
+    },
+    reviewRating: {
+      "@type": "Rating",
+      ratingValue: reviewRating,
+      bestRating: 5,
+      worstRating: 1
+    },
+    author: {
+      "@type": "Person",
+      name: author
+    },
+    datePublished,
+    reviewBody,
+    publisher: { "@id": `${SITE_URL}/#organization` },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${SITE_URL}${url}`,
+    }
+  };
+  return <StructuredData type="Review" data={data} />;
 }
 
 // ─── BreadcrumbList ───────────────────────────────────────────────────────────

@@ -103,28 +103,19 @@ export function pageMeta({
   const defaultKeywords = [
     "GCC insights",
     "official editorials",
-    "QNA",
-    "WAM",
-    "SPA",
-    "BNA",
-    "ONA",
-    "Premium GCC Insights",
-    "Luxury Middle East",
+    "Gulf news",
+    "Middle East business",
     "Sovereign Wealth Intelligence",
     "Strategic Intelligence Gulf",
-    "High-Fidelity Regional Analysis",
-    "expat insights GCC",
-    "regional analysis Qatar",
-    "Pakistan editorials UAE",
-    "Bangladesh insights Saudi",
-    "Philippines insights GCC",
-    "regional press terminal",
+    "Doha",
+    "Dubai",
+    "Riyadh",
+    "Muscat",
+    "Manama",
+    "Kuwait City",
     "دليل الخليج",
     "عربية خليج",
     "رؤى الخليج",
-    "وكالة الأنباء القطرية",
-    "واس",
-    "وام",
     "مواقيت الصلاة",
     "أسعار الذهب",
   ];
@@ -141,7 +132,12 @@ export function pageMeta({
     alternates: {
       canonical,
       languages: {
+        "en": canonical.includes('?') ? canonical.split('?')[0] : canonical,
         "en-US": canonical.includes('?') ? canonical.split('?')[0] : canonical,
+        "en-GB": canonical.includes('?') ? canonical.split('?')[0] : canonical,
+        "ar": canonical.includes('?') 
+          ? `${canonical.split('?')[0]}?lang=ar` 
+          : `${canonical}?lang=ar`,
         "ar-SA": canonical.includes('?') 
           ? `${canonical.split('?')[0]}?lang=ar` 
           : `${canonical}?lang=ar`,
