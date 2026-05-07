@@ -64,11 +64,10 @@ export default {
 
       // Internal Notification (To Owner)
       if (env.SEND_EMAIL) {
-        const rawMessage = new TextEncoder().encode(msg.asRaw());
         const emailMsg = new EmailMessage(
           "connect@arabiakhaleej.com",
           "asishchilakapati@gmail.com",
-          rawMessage
+          msg.asRaw()
         );
         await env.SEND_EMAIL.send(emailMsg);
         console.log("Internal notification sent successfully.");
