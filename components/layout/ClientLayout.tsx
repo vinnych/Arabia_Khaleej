@@ -34,51 +34,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       <AdUnit slot={AD_SLOTS.footer} className="w-full max-w-5xl mx-auto px-4" />
 
-      <footer className="p-10 border-t border-brand-gold/15 flex flex-wrap justify-center gap-6 text-xs md:text-sm font-black uppercase tracking-widest mb-32 md:mb-0 relative overflow-hidden">
-        {/* Subtle decorative glow for the footer */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-brand-gold/30 to-transparent" />
-        
-        <Link 
-          href="/about" 
-          className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
-          aria-label={t('ariaLearn')}
-        >
-          {t('about')}
-        </Link>
-        <Link 
-          href="/privacy" 
-          className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
-          aria-label={t('ariaPrivacy')}
-        >
-          {t('privacy')}
-        </Link>
-        <Link 
-          href="/terms" 
-          className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
-          aria-label={t('ariaTerms')}
-        >
-          {t('terms')}
-        </Link>
-        <Link 
-          href="/disclaimer" 
-          className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
-          aria-label={t('ariaDisclaimer')}
-        >
-          {t('disclaimer')}
-        </Link>
-        <Link 
-          href="/transparency" 
-          className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
-        >
-          {t('transparency')}
-        </Link>
-        <Link 
-          href="/contact" 
-          className="px-6 py-2.5 rounded-full glass border-brand-gold/20 hover:border-brand-gold/60 text-foreground/40 hover:text-brand-gold transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-xl focus-visible:ring-2 focus-visible:ring-brand-gold outline-none"
-          aria-label={t('ariaContact')}
-        >
-          {t('contact')}
-        </Link>
+        <div className="w-full flex flex-col items-center gap-6 mt-8">
+          <div className="flex flex-wrap justify-center gap-4">
+            <Link href="/about" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('about')}</Link>
+            <Link href="/privacy" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('privacy')}</Link>
+            <Link href="/terms" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('terms')}</Link>
+            <Link href="/disclaimer" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('disclaimer')}</Link>
+            <Link href="/contact" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('contact')}</Link>
+          </div>
+          <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-[0.4em] text-center">
+            © {new Date().getFullYear()} {t('siteName')}. {t('passionProject')}
+          </p>
+        </div>
       </footer>
     </div>
   );

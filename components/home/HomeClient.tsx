@@ -108,6 +108,26 @@ export default function HomeClient() {
       {/* Between-Sections Ad */}
       <AdUnit slot={AD_SLOTS.home} className="w-full max-w-5xl mt-12" />
 
+      {/* Welcome & Mission Section - Substantive Content for AdSense */}
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="w-full max-w-4xl mt-24 px-6 text-center"
+      >
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-gold mb-8 tracking-tight">
+          {t('welcomeSectionTitle')}
+        </h2>
+        <div className="space-y-6">
+          {t('welcomeSectionBody').split('\n\n').map((paragraph, index) => (
+            <p key={index} className="text-base sm:text-lg text-foreground/70 leading-relaxed text-center">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </motion.section>
+
       {/* Regional Guides Section */}
       <motion.div
         variants={containerVariants}

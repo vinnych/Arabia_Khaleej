@@ -9,22 +9,27 @@ import HomeClient from "@/components/home/HomeClient";
 import { translations } from "@/lib/i18n-data";
 import { getServerLanguage } from "@/lib/i18n-server";
 
-export const metadata = pageMeta({
-  title: "Arabia Khaleej | The GCC Standard — Regional Intelligence Portal",
-  titleAr: "عربية خليج | المعيار الخليجي — بوابة الاستخبارات الإقليمية",
-  description: SITE_DESCRIPTION,
-  descriptionAr: SITE_DESCRIPTION_AR,
-  path: "/",
-  keywords: [
-    "Arabia Khaleej", "GCC guide", "Gulf Cooperation Council",
-    "prayer times GCC", "GCC gold rates", "GCC stock markets",
-    "Qatar guide", "UAE guide", "Saudi Arabia guide",
-    "Kuwait guide", "Oman guide", "Bahrain guide",
-    "expat GCC", "GCC regional intelligence",
-    "عربية خليج", "دليل الخليج", "مواقيت الصلاة", "أسعار الذهب",
-    "مجلس التعاون الخليجي",
-  ],
-});
+export async function generateMetadata() {
+  const lang = await getServerLanguage();
+  
+  return pageMeta({
+    title: "Arabia Khaleej | The GCC Standard — Regional Intelligence Portal",
+    titleAr: "عربية خليج | المعيار الخليجي — بوابة الاستخبارات الإقليمية",
+    description: SITE_DESCRIPTION,
+    descriptionAr: SITE_DESCRIPTION_AR,
+    path: "/",
+    lang,
+    keywords: [
+      "Arabia Khaleej", "GCC guide", "Gulf Cooperation Council",
+      "prayer times GCC", "GCC gold rates", "GCC stock markets",
+      "Qatar guide", "UAE guide", "Saudi Arabia guide",
+      "Kuwait guide", "Oman guide", "Bahrain guide",
+      "expat GCC", "GCC regional intelligence",
+      "عربية خليج", "دليل الخليج", "مواقيت الصلاة", "أسعار الذهب",
+      "مجلس التعاون الخليجي",
+    ],
+  });
+}
 
 import { getT } from "@/lib/i18n-server";
 
@@ -69,7 +74,7 @@ export default async function Home() {
         keywords={[
           "GCC", "prayer times", "gold rates", "stock markets", "currencies",
           "Qatar", "UAE", "Saudi Arabia", "Kuwait", "Oman", "Bahrain",
-          "Ù…Ø¬Ù„Ø³ Ø§Ù„ØªØ¹Ø§ÙˆÙ†", "Ù…ÙˆØ§Ù‚ÙŠØª Ø§Ù„ØµÙ„Ø§Ø©", "Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø°Ù‡Ø¨",
+          "مجلس التعاون", "مواقيت الصلاة", "أسعار الذهب",
         ]}
       />
       <FAQSchema questions={faqQuestions} />

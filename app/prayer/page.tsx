@@ -7,30 +7,35 @@ import {
   FAQSchema,
 } from "@/components/seo/StructuredData";
 import StructuredData from "@/components/seo/StructuredData";
-import { getT } from "@/lib/i18n-server";
+export async function generateMetadata() {
+  const lang = await getServerLanguage();
+  
+  return pageMeta({
+    title: `Prayer Times GCC — Qatar, UAE, Saudi Arabia, Kuwait, Oman, Bahrain | ${SITE_NAME}`,
+    titleAr: `مواقيت الصلاة في دول الخليج — قطر، الإمارات، السعودية، الكويت، عمان، البحرين | ${SITE_NAME_AR}`,
+    description:
+      "Accurate daily prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) for all 6 GCC countries. Calculated using the Umm Al-Qura University method. Covers Doha, Dubai, Riyadh, Kuwait City, Muscat, and Manama.",
+    descriptionAr:
+      "مواقيت الصلاة اليومية الدقيقة (الفجر، الظهر، العصر، المغرب، العشاء) لجميع دول مجلس التعاون الستة. محسوبة بطريقة جامعة أم القرى. تشمل الدوحة ودبي والرياض ومدينة الكويت ومسقط والمنامة.",
+    path: "/prayer",
+    lang,
+    keywords: [
+      "prayer times", "salat times", "adhan", "GCC prayer times",
+      "Fajr time Doha", "Dhuhr Dubai", "Asr Riyadh", "Maghrib Kuwait",
+      "Isha Muscat", "prayer times Manama", "Umm Al-Qura calculation",
+      "hijri calendar", "Islamic dates GCC",
+      "مواقيت الصلاة", "الأذان", "التقويم الهجري", "صلاة الفجر الدوحة",
+    ],
+    geo: {
+      latitude: 25.2854,
+      longitude: 51.5310,
+      region: "GCC",
+      placename: "Gulf Cooperation Council",
+    },
+  });
+}
 
-export const metadata = pageMeta({
-  title: `Prayer Times GCC — Qatar, UAE, Saudi Arabia, Kuwait, Oman, Bahrain | ${SITE_NAME}`,
-  titleAr: `مواقيت الصلاة في دول الخليج — قطر، الإمارات، السعودية، الكويت، عمان، البحرين | ${SITE_NAME_AR}`,
-  description:
-    "Accurate daily prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) for all 6 GCC countries. Calculated using the Umm Al-Qura University method. Covers Doha, Dubai, Riyadh, Kuwait City, Muscat, and Manama.",
-  descriptionAr:
-    "مواقيت الصلاة اليومية الدقيقة (الفجر، الظهر، العصر، المغرب، العشاء) لجميع دول مجلس التعاون الستة. محسوبة بطريقة جامعة أم القرى. تشمل الدوحة ودبي والرياض ومدينة الكويت ومسقط والمنامة.",
-  path: "/prayer",
-  keywords: [
-    "prayer times", "salat times", "adhan", "GCC prayer times",
-    "Fajr time Doha", "Dhuhr Dubai", "Asr Riyadh", "Maghrib Kuwait",
-    "Isha Muscat", "prayer times Manama", "Umm Al-Qura calculation",
-    "hijri calendar", "Islamic dates GCC",
-    "مواقيت الصلاة", "الأذان", "التقويم الهجري", "صلاة الفجر الدوحة",
-  ],
-  geo: {
-    latitude: 25.2854,
-    longitude: 51.5310,
-    region: "GCC",
-    placename: "Gulf Cooperation Council",
-  },
-});
+import { getServerLanguage } from "@/lib/i18n-server";
 
 export default async function PrayerPage() {
   const t = await getT();

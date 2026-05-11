@@ -155,10 +155,9 @@ export default async function SentimentDetailsPage() {
           href="/"
           className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all"
         >
-          {isRTL ? `â† ${t('returnHome')}` : `â† ${t('returnHome')}`}
+          {isRTL ? `← ${t('returnHome')}` : `← ${t('returnHome')}`}
         </Link>
       </div>
     </div>
   );
 }
-

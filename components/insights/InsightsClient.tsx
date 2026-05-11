@@ -110,6 +110,21 @@ export default function InsightsClient() {
         </div>
       </div>
 
+      {/* Editorial Intro Section - Substantive Content for AdSense */}
+      <div className="w-full max-w-4xl mx-auto mb-24 px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-gold mb-8 tracking-tight uppercase tracking-[0.1em]">
+          {t('insightsIntroTitle')}
+        </h2>
+        <div className="space-y-6">
+          {t('insightsIntroBody').split('\n\n').map((paragraph, index) => (
+            <p key={index} className="text-base sm:text-lg text-foreground/70 leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+        <div className="mt-12 h-px w-24 bg-brand-gold/20 mx-auto" />
+      </div>
+
       {/* Mobile Floating Refresh Button */}
       <MobileFAB 
         icon={RefreshCw} 

@@ -439,6 +439,20 @@ export default function CurrencyExchangeClient() {
         </div>
       </div>
 
+      {/* Currency Peg Detail - Substantive Content for AdSense */}
+      <div className="w-full max-w-4xl mx-auto mt-24 px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-gold mb-8 tracking-tight">
+          {t('currencyDetailTitle')}
+        </h2>
+        <div className="space-y-6">
+          {t('currencyDetailBody').split('\n\n').map((paragraph, index) => (
+            <p key={index} className="text-base sm:text-lg text-foreground/70 leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </div>
+
       {/* Last Updated & Disclaimer */}
       <div className="text-center max-w-xl mb-12">
         {lastUpdated && (

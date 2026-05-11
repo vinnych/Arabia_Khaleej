@@ -34,8 +34,16 @@ export async function generateMetadata({
       path: `/insights/${article.slug}${lang === 'ar' ? '?lang=ar' : ''}`,
       image: article.image,
       type: 'article',
+      lang,
       datePublished: article.pubDate,
-      keywords: [article.source, article.category, "GCC insights", ...article.title.split(' ').filter((w: string) => w.length > 4)]
+      keywords: [
+        article.source, 
+        article.category, 
+        "GCC intelligence", 
+        "regional analysis",
+        ...(article.tags || []),
+        ...article.title.split(' ').filter((w: string) => w.length > 4)
+      ]
     });
   }
 
@@ -43,6 +51,7 @@ export async function generateMetadata({
     title: "Insight | Arabia Khaleej",
     description: "Detailed editorial coverage and deep dives.",
     path: `/insights/${slug}`,
+    lang,
   });
 }
 

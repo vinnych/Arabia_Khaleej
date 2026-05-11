@@ -323,6 +323,20 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
         </div>
       </div>
 
+      {/* Prayer Calculation Detail - Substantive Content for AdSense */}
+      <div className="w-full max-w-4xl mx-auto mt-24 px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-gold mb-8 tracking-tight">
+          {t('prayerDetailTitle')}
+        </h2>
+        <div className="space-y-6">
+          {t('prayerDetailBody').split('\n\n').map((paragraph, index) => (
+            <p key={index} className="text-base sm:text-lg text-foreground/70 leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </div>
+
 
 
       {/* Back to Home */}

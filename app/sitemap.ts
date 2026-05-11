@@ -15,7 +15,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'oman', 
     'bahrain'
   ];
-  const marketCategories = ['stocks', 'gold', 'currencies', 'oil'];
   
   // 1. Static Base Routes
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -73,22 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }));
 
-  // 4. Market Insights (Categories)
-  const marketRoutes: MetadataRoute.Sitemap = marketCategories.map(cat => ({
-    url: `${SITE_URL}/market-insight/${cat}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
-    priority: 0.7,
-    alternates: {
-      languages: {
-        'en': `${SITE_URL}/market-insight/${cat}`,
-        'ar': `${SITE_URL}/market-insight/${cat}?lang=ar`,
-        'ar-SA': `${SITE_URL}/market-insight/${cat}?lang=ar`,
-        'ar-AE': `${SITE_URL}/market-insight/${cat}?lang=ar`,
-        'ar-QA': `${SITE_URL}/market-insight/${cat}?lang=ar`,
-      }
-    }
-  }));
 
   // 5. Dynamic Insights Routes (Deduplicated & Capped)
   let insightRoutes: MetadataRoute.Sitemap = [];
@@ -144,7 +127,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticRoutes.slice(2), 
     ...prayerRoutes, 
     ...countryRoutes, 
-    ...marketRoutes, 
     ...insightRoutes
   ];
 

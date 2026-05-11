@@ -47,6 +47,8 @@ interface PageMetaOptions {
     region?: string;
     placename?: string;
   };
+  /** Current language context */
+  lang?: "en" | "ar";
 }
 
 /**
@@ -72,9 +74,10 @@ export function pageMeta({
   datePublished,
   dateModified,
   geo,
+  lang = "en",
 }: PageMetaOptions): Metadata {
-  const og = ogTitle ?? title;
-  const ogDesc = ogDescription ?? description;
+  const og = ogTitle ?? (lang === "ar" && titleAr ? titleAr : title);
+  const ogDesc = ogDescription ?? (lang === "ar" && descriptionAr ? descriptionAr : description);
   const img = image ?? `${SITE_URL}/opengraph-image`;
   
   // Sanitize path: remove tracking query params, keep only 'lang'
@@ -96,9 +99,9 @@ export function pageMeta({
   const published = datePublished ?? "2024-01-01T00:00:00Z";
   const modified = dateModified ?? now;
 
-  // Combine English and Arabic for maximum SEO reach on a single URL
-  const combinedTitle = titleAr ? `${title} | ${titleAr}` : title;
-  const combinedDescription = descriptionAr ? `${description} ${descriptionAr}` : description;
+  // Select language-specific version instead of combining
+  const finalTitle = lang === "ar" && titleAr ? titleAr : title;
+  const finalDescription = lang === "ar" && descriptionAr ? descriptionAr : description;
 
   const defaultKeywords = [
     "GCC insights",
@@ -121,8 +124,8 @@ export function pageMeta({
   ];
 
   return {
-    title: combinedTitle,
-    description: combinedDescription,
+    title: finalTitle,
+    description: finalDescription,
     keywords: keywords ? [...keywords, ...defaultKeywords] : defaultKeywords,
     metadataBase: new URL(SITE_URL),
     icons: {
@@ -179,8 +182,8 @@ export function pageMeta({
         "geo.position": `${geo.latitude};${geo.longitude}`,
         "ICBM": `${geo.latitude}, ${geo.longitude}`,
       } : {}),
-      "DC.title": combinedTitle,
-      "DC.description": combinedDescription,
+      "DC.title": finalTitle,
+      "DC.description": finalDescription,
       "DC.date.issued": published,
       "DC.date.modified": modified,
       "apple-mobile-web-app-title": SITE_NAME,

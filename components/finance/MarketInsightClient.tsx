@@ -64,9 +64,25 @@ export default function MarketInsightClient() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <div className="w-12 h-12 rounded-full border-2 border-brand-gold/20 border-t-brand-gold animate-spin mb-4" />
-        <p className="text-[10px] uppercase font-bold tracking-[0.4em] text-accent animate-pulse">{t('loading')}</p>
+      <div className={`flex flex-col items-center justify-start min-h-screen pt-24 pb-32 px-4 max-w-7xl mx-auto w-full ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className="w-full mb-16 space-y-4">
+          <div className="h-4 w-24 bg-foreground/5 rounded-full shimmer-bg" />
+          <div className="h-12 w-64 bg-foreground/5 rounded-2xl shimmer-bg" />
+          <div className="h-4 w-full max-w-xl bg-foreground/5 rounded-full shimmer-bg" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full">
+          <div className="lg:col-span-8 space-y-8">
+            <div className="h-96 w-full glass rounded-[2.5rem] border-brand-gold/10 shimmer-bg" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="h-48 w-full glass rounded-[2.5rem] border-brand-gold/10 shimmer-bg" />
+              <div className="h-48 w-full glass rounded-[2.5rem] border-brand-gold/10 shimmer-bg" />
+            </div>
+          </div>
+          <div className="lg:col-span-4 space-y-8">
+            <div className="h-80 w-full glass rounded-[2.5rem] border-brand-gold/10 shimmer-bg" />
+            <div className="h-64 w-full bg-brand-gold/20 rounded-[2.5rem] shimmer-bg" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -100,9 +116,19 @@ export default function MarketInsightClient() {
         <h1 className="text-4xl md:text-5xl font-black serif text-foreground mb-6">
           {t('marketOverview')}
         </h1>
-        <p className="text-foreground/60 max-w-2xl text-sm md:text-base leading-relaxed font-medium">
-          {t('marketSummary')}
-        </p>
+        <div className="flex flex-wrap items-center gap-6 mt-8 p-4 rounded-2xl bg-brand-gold/5 border border-brand-gold/10">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold text-[10px] font-bold">FA</div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-wider text-brand-gold">{t('analyst1Name')}</p>
+              <p className="text-[8px] font-bold uppercase tracking-widest text-foreground/40">{t('analyst1Role')}</p>
+            </div>
+          </div>
+          <div className="h-4 w-[1px] bg-brand-gold/20 hidden md:block" />
+          <p className="text-[10px] italic text-foreground/50 max-w-md">
+            "{t('sentimentTitle')}"
+          </p>
+        </div>
       </div>
 
       {/* Main Grid */}

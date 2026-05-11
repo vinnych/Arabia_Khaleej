@@ -18,12 +18,58 @@ const nextConfig: NextConfig = {
     unoptimized: false,
   },
 
+  trailingSlash: false,
   async redirects() {
     return [
       {
         source: "/:path*",
         has: [{ type: "host", value: "www.arabiakhaleej.com" }],
         destination: "https://arabiakhaleej.com/:path*",
+        permanent: true,
+      },
+      {
+        source: "/market-insight/((?!details).*)",
+        destination: "/market-insight",
+        permanent: true,
+      },
+      {
+        source: "/market-insight/stocks",
+        destination: "/market-insight",
+        permanent: true,
+      },
+      {
+        source: "/market-insight/gold",
+        destination: "/market-insight",
+        permanent: true,
+      },
+      {
+        source: "/market-insight/crypto",
+        destination: "/market-insight",
+        permanent: true,
+      },
+      {
+        source: "/market-insight/forex",
+        destination: "/market-insight",
+        permanent: true,
+      },
+      {
+        source: "/market-insight/details/:path*",
+        destination: "/market-insight",
+        permanent: false,
+      },
+      {
+        source: "/countries/uae",
+        destination: "/countries/united-arab-emirates",
+        permanent: true,
+      },
+      {
+        source: "/prayer/united-arab-emirates",
+        destination: "/prayer/uae",
+        permanent: true,
+      },
+      {
+        source: "/finance/:path*",
+        destination: "/market-insight",
         permanent: true,
       },
     ];

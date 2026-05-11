@@ -89,9 +89,9 @@ export default function MobileNav() {
               
               {!isPrimary && (
                 <span className={cn(
-                  "text-[9px] font-black uppercase tracking-[0.2em] mt-1 transition-all duration-300",
+                  "text-[10px] font-black uppercase tracking-[0.2em] mt-1 transition-all duration-300",
                   isActive ? "text-brand-gold opacity-100 scale-100" : "opacity-0 h-0 overflow-hidden translate-y-2",
-                  isRTL && "text-[10px] tracking-normal font-bold"
+                  isRTL && "text-[11px] tracking-normal font-bold"
                 )}>
                   {item.label}
                 </span>
@@ -99,8 +99,8 @@ export default function MobileNav() {
 
               {isPrimary && (
                 <span className={cn(
-                  "absolute -bottom-5 text-[8px] font-black uppercase tracking-[0.2em] text-brand-gold whitespace-nowrap",
-                  isRTL && "text-[10px] tracking-normal font-bold"
+                  "absolute -bottom-5 text-[10px] font-black uppercase tracking-[0.2em] text-brand-gold whitespace-nowrap",
+                  isRTL && "text-[11px] tracking-normal font-bold"
                 )}>
                   {item.label}
                 </span>
