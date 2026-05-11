@@ -155,13 +155,35 @@ export default function InsightArticleClient({
           </h1>
 
           <div className="flex items-center justify-between py-6 border-y border-white/5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-brand-gold/10 flex items-center justify-center text-brand-gold">
-                <Globe size={18} />
+            <div className="flex items-center gap-4">
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border border-brand-gold/30">
+                <Image 
+                  src={
+                    article.source.includes('Amna') ? "https://arabiakhaleej.com/analysts/amna-al-hashimi.png" :
+                    article.source.includes('Marcus') ? "https://arabiakhaleej.com/analysts/marcus-thorne.png" :
+                    "https://arabiakhaleej.com/analysts/faisal-al-saud.png"
+                  }
+                  alt={article.source}
+                  fill
+                  className="object-cover"
+                />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/30">{t('officialSource')}</p>
-                <p className="text-sm font-bold text-foreground">{article.source}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/30">{t('editorialLeadership')}</p>
+                <p className="text-sm font-bold text-foreground">
+                  {
+                    article.source.includes('Amna') ? "Amna Al-Hashimi" :
+                    article.source.includes('Marcus') ? "Marcus Thorne" :
+                    "Dr. Faisal Al-Saud"
+                  }
+                </p>
+                <p className="text-[10px] font-medium opacity-50 uppercase tracking-tight">
+                  {
+                    article.source.includes('Amna') ? "Director of Cultural Intelligence" :
+                    article.source.includes('Marcus') ? "Head of Market Dynamics" :
+                    "Chief Regional Strategist"
+                  }
+                </p>
               </div>
             </div>
             <div className="relative">

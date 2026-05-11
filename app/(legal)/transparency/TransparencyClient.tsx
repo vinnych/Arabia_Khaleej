@@ -29,24 +29,24 @@ export default function TransparencyPage() {
 
   const sections = [
     {
-      title: t('independence'),
-      desc: t('independenceDesc'),
+      title: t('dataProvenance'),
+      desc: t('dataProvenanceDesc'),
+      icon: Globe
+    },
+    {
+      title: t('editorialIntegrity'),
+      desc: t('editorialIntegrityDesc'),
       icon: ShieldCheck
     },
     {
-      title: t('transparency'),
-      desc: t('transparencyDesc'),
+      title: t('ethicalIntelligence'),
+      desc: t('ethicalIntelligenceDesc'),
       icon: Info
     },
     {
       title: t('regCompliance'),
       desc: t('regComplianceDesc'),
       icon: Scale
-    },
-    {
-      title: t('globalStandards'),
-      desc: t('globalStandardsDesc'),
-      icon: Globe
     }
   ];
 

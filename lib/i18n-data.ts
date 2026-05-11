@@ -175,8 +175,19 @@ export const translations: Translations = {
     en: "Arabia Khaleej is a professional regional intelligence reference. We aggregate, simplify, and surface authoritative information from official sources across the GCC to provide high-fidelity insights and economic transparency.", 
     ar: "عربية خليج هي مرجع استخبارات إقليمي احترافي. نحن نجمع ونبسط ونظهر المعلومات الموثوقة من المصادر الرسمية عبر دول مجلس التعاون الخليجي لتوفير رؤى عالية الدقة وشفافية اقتصادية." 
   },
-
-  // Country Detail Titles
+  dataProvenance: { en: "Data Provenance & Verification", ar: "أصل البيانات والتحقق منها" },
+  dataProvenanceDesc: { en: "Our market indicators and utility data are sourced directly from official GCC ministry APIs and authorized financial exchanges, verified by our automated systems every 60 seconds.", ar: "يتم الحصول على مؤشرات السوق وبياناتنا من واجهات برمجة التطبيقات الرسمية للوزارات الخليجية والبورصات المالية المعتمدة، ويتم التحقق منها بواسطة أنظمتنا الآلية كل 60 ثانية." },
+  editorialIntegrity: { en: "Editorial Integrity", ar: "النزاهة التحريرية" },
+  editorialIntegrityDesc: { en: "All analysis is subject to a multi-stage human-led verification process. We ensure that AI-augmented insights are strictly governed by our senior regional analysts.", ar: "تخضع جميع التحليلات لعملية تحقق متعددة المراحل يقودها البشر. نحن نضمن أن الرؤى المعززة بالذكاء الاصطناعي تخضع لإشراف صارم من قبل كبار المحللين الإقليميين لدينا." },
+  ethicalIntelligence: { en: "Ethical Intelligence", ar: "الذكاء الاصطناعي الأخلاقي" },
+  ethicalIntelligenceDesc: { en: "We utilize advanced language models as analytical tools to synthesize large datasets, not as autonomous authors. Every strategic conclusion is validated for cultural and regional accuracy.", ar: "نحن نستخدم نماذج لغوية متقدمة كأدوات تحليلية لتلخيص مجموعات البيانات الكبيرة، وليس كمؤلفين مستقلين. يتم التحقق من كل استنتاج استراتيجي من حيث الدقة الثقافية والإقليمية." },
+  regCompliance: { en: "Regulatory Compliance", ar: "الامتثال التنظيمي" },
+  regComplianceDesc: { en: "Arabia Khaleej adheres to international digital publishing standards and regional media regulations within the GCC framework.", ar: "تلتزم عربية خليج بمعايير النشر الرقمي الدولية واللوائح الإعلامية الإقليمية ضمن إطار مجلس التعاون الخليجي." },
+  globalStandards: { en: "Global Standards", ar: "المعايير العالمية" },
+  globalStandardsDesc: { en: "Our reporting follows the highest ethical standards of financial journalism and economic transparency.", ar: "تتبع تقاريرنا أعلى المعايير الأخلاقية للصحافة المالية والشفافية الاقتصادية." },
+  regInquiry: { en: "Institutional Inquiries", ar: "الاستفسارات المؤسسية" },
+  regInquiryDesc: { en: "For sovereign entities or institutional stakeholders seeking detailed data methodologies or collaboration.", ar: "للكيانات السيادية أو أصحاب المصلحة المؤسسيين الذين يبحثون عن منهجيات بيانات مفصلة أو تعاون." },
+  boutiqueEnquiry: { en: "Boutique Enquiry", ar: "استفسار خاص" },
   econPower: { en: "Economic Powerhouse", ar: "القوة الاقتصادية" },
   globalLead: { en: "Global Leadership", ar: "القيادة العالمية" },
   megaProj: { en: "Mega Projects", ar: "المشاريع العملاقة" },
@@ -690,6 +701,7 @@ export const translations: Translations = {
 
   // Editorial Team
   editorialTeam: { en: "Editorial Leadership", ar: "القيادة التحريرية" },
+  editorialLeadership: { en: "Editorial Leadership", ar: "القيادة التحريرية" },
   editorialTeamDesc: { en: "The specialists shaping the regional narrative.", ar: "المتخصصون الذين يشكلون الرواية الإقليمية." },
   
   analyst1Name: { en: "Dr. Faisal Al-Saud", ar: "د. فيصل آل سعود" },

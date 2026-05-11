@@ -83,16 +83,44 @@ export default async function InsightArticlePage({
 
   const canonicalUrl = `https://arabiakhaleej.com/insights/${article.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
 
+  // High-Fidelity Author Mapping for E-E-A-T
+  const getRichAuthor = (source: string) => {
+    if (source.includes('Editorial') || source.includes('Editorial Leadership') || source.includes('Arabia Khaleej')) {
+      return {
+        name: "Dr. Faisal Al-Saud",
+        role: "Chief Regional Strategist",
+        image: "https://arabiakhaleej.com/analysts/faisal-al-saud.png",
+        social: ["https://twitter.com/arabiakhaleej", "https://linkedin.com/company/arabiakhaleej"]
+      };
+    }
+    if (source.includes('Amna') || source.includes('Cultural')) {
+      return {
+        name: "Amna Al-Hashimi",
+        role: "Director of Cultural Intelligence",
+        image: "https://arabiakhaleej.com/analysts/amna-al-hashimi.png",
+        social: ["https://instagram.com/arabiakhaleej"]
+      };
+    }
+    return {
+      name: source || "Marcus Thorne",
+      role: "Head of Market Dynamics",
+      image: "https://arabiakhaleej.com/analysts/marcus-thorne.png",
+      social: ["https://twitter.com/arabiakhaleej"]
+    };
+  };
+
+  const richAuthor = getRichAuthor(article.source);
+
   return (
     <main className="min-h-screen pt-20">
-      {/* Primary Article Schema */}
+      {/* Primary Article Schema with Person Author */}
       <InsightArticleSchema 
         title={article.title}
         description={article.description}
         image={article.image}
         datePublished={article.pubDate}
-        dateModified={article.pubDate} // Using pubDate for now, update if your API provides modifiedDate
-        authorName={article.source}
+        dateModified={article.pubDate}
+        author={richAuthor}
         url={canonicalUrl}
         language={article.language === 'ar' ? 'ar' : 'en'}
       />
@@ -115,7 +143,7 @@ export default async function InsightArticlePage({
         <ReviewSchema 
           itemReviewed={{ name: article.title.replace(/review/i, '').trim() }}
           reviewRating={5} // Default to 5 for premium insights
-          author={article.source}
+          author={richAuthor.name}
           datePublished={article.pubDate}
           reviewBody={article.description}
           url={canonicalUrl}

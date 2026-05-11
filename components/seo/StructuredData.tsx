@@ -146,7 +146,7 @@ export function InsightArticleSchema({
   image,
   datePublished,
   dateModified,
-  authorName = SITE_NAME,
+  author,
   publisherName = SITE_NAME,
   publisherLogo = `${SITE_URL}/favicon-emblem.png`,
   url,
@@ -158,7 +158,12 @@ export function InsightArticleSchema({
   image?: string;
   datePublished: string;
   dateModified?: string;
-  authorName?: string;
+  author: {
+    name: string;
+    role?: string;
+    image?: string;
+    social?: string[];
+  };
   publisherName?: string;
   publisherLogo?: string;
   url: string;
@@ -173,13 +178,12 @@ export function InsightArticleSchema({
     dateModified: dateModified ?? datePublished,
     inLanguage: language,
     author: {
-      "@type": "Organization",
-      name: authorName,
-      url: SITE_URL,
-      logo: {
-        "@type": "ImageObject",
-        url: publisherLogo,
-      }
+      "@type": "Person",
+      name: author.name,
+      ...(author.role ? { jobTitle: author.role } : {}),
+      ...(author.image ? { image: author.image } : {}),
+      ...(author.social?.length ? { sameAs: author.social } : {}),
+      url: `${SITE_URL}/about`, // Link to their bio on the about page
     },
     publisher: {
       "@type": "Organization",
