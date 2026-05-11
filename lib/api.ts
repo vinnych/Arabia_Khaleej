@@ -1,6 +1,8 @@
 /**
- * Centralized API client for Arabia Khaleej
- * Handles request de-duplication and caching for critical edge data
+ * Arabia Khaleej — Core API Client
+ * 
+ * Standardized data fetching layer for client-side interactions.
+ * Handles request de-duplication, caching, and edge-native performance.
  */
 
 type GeoData = {

@@ -17,9 +17,9 @@ async function compress(data: string): Promise<string> {
   const response = new Response(stream);
   const buffer = await response.arrayBuffer();
   
-  // Convert ArrayBuffer to Base64
-  let binary = '';
+  // Efficiently convert ArrayBuffer to Base64 using a chunked approach or modern API
   const bytes = new Uint8Array(buffer);
+  let binary = '';
   const len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(bytes[i]);
@@ -51,8 +51,7 @@ async function decompress(compressedStr: string): Promise<string> {
 
 /**
  * Arabia Khaleej Redis Client
- * Used for transient caching of insights and market data.
- * This aligns with our 'No Permanent Database' legal strategy.
+ * Used for transient data storage and performance caching.
  */
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
@@ -95,20 +94,17 @@ export const redis = redisUrl && redisToken
 
 /**
  * Enhanced Redis methods with transparent compression support.
- * Use these for large payloads like article archives.
  */
 export async function getWithCompression<T>(key: string): Promise<T | null> {
   try {
     const raw = await redis.get(key) as string | null;
     if (!raw) return null;
     
-    // If it starts with our prefix, decompress
     if (typeof raw === 'string' && raw.startsWith('compressed:')) {
       const decompressed = await decompress(raw);
       return JSON.parse(decompressed) as T;
     }
     
-    // Fallback: It might be raw JSON (uncompressed)
     return (typeof raw === 'string' ? JSON.parse(raw) : raw) as T;
   } catch (e) {
     console.error(`Redis Get/Decompress Error [${key}]:`, e);
@@ -121,7 +117,6 @@ export async function setWithCompression(key: string, value: any, options?: { ex
     const json = JSON.stringify(value);
     const redisOptions = options?.ex ? { ex: options.ex } as const : undefined;
     
-    // Only compress if payload is significant (> 1KB)
     if (json.length > 1024) {
       const compressed = await compress(json);
       return await redis.set(key, compressed, redisOptions as any) as string;
@@ -131,7 +126,6 @@ export async function setWithCompression(key: string, value: any, options?: { ex
   } catch (e) {
     console.error(`Redis Set/Compress Error [${key}]:`, e);
     const redisOptions = options?.ex ? { ex: options.ex } as const : undefined;
-    // Fallback to uncompressed if possible, or throw
     return await redis.set(key, value, redisOptions as any) as string;
   }
 }

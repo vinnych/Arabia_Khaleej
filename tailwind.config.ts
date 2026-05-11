@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "var(--font-sans)", "system-ui", "sans-serif"],
-        serif: ["var(--font-inter)", "var(--font-serif)", "Georgia", "serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-playfair)", "Georgia", "Times New Roman", "serif"],
         arabic: ["var(--font-amiri)", "serif"],
       },
       colors: {
@@ -49,13 +49,12 @@ const config: Config = {
         },
         brand: {
           obsidian: "#0A0C10",
-          gold: "#D4AF37",
+          gold: "#C5951A",
           champagne: "#F3E5D0",
           slate: "#0F172A",
-          accent: "#F5C75D",
-          // Light Mode Palette
+          accent: "#D4AF37",
           sand: "#F5F2EB",
-          burnished: "#C5A028",
+          burnished: "#A07A12",
           charcoal: "#1A1C20",
         },
       },

@@ -4,92 +4,97 @@
 
 @layer base {
   :root {
-    --background: 50 20% 96%;
-    --foreground: 0 0% 7%;
-    --card: 50 20% 96%;
-    --card-foreground: 0 0% 7%;
-    --popover: 50 20% 96%;
-    --popover-foreground: 0 0% 7%;
-    --primary: 45 74% 28%;
+    /* Clean white/neutral palette — gold is accent only */
+    --background: 0 0% 99%;
+    --foreground: 220 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+    --primary: 45 74% 35%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 45 24% 91%;
-    --secondary-foreground: 0 0% 7%;
-    --muted: 45 24% 91%;
-    --muted-foreground: 0 0% 40%;
-    --accent: 45 74% 28%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 10%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 45 74% 35%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 45 20% 85%;
-    --input: 45 20% 85%;
-    --ring: 45 74% 28%;
-    --radius: 0.5rem;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 45 74% 35%;
+    --radius: 0.75rem;
 
-    --glass-bg: rgba(255, 255, 255, 0.9);
-    --glass-border: rgba(124, 94, 18, 0.4);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.18);
-    --shadow-lg: 0 20px 50px -15px rgba(0, 0, 0, 0.25);
-    
-    /* Absolute Clarity Stack - Apple Inspired */
-    --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-serif: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+    --surface: rgba(255, 255, 255, 0.97);
+    --surface-elevated: rgba(255, 255, 255, 1);
+    --surface-border: rgba(0, 0, 0, 0.07);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+
+    --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-serif: var(--font-playfair), Georgia, "Times New Roman", serif;
   }
 
   .dark {
-    --background: 220 23% 5%;
-    --foreground: 0 0% 100%;
-    --card: 220 23% 5%;
-    --card-foreground: 0 0% 100%;
-    --popover: 220 23% 5%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 46 65% 52%;
-    --primary-foreground: 0 0% 10%;
-    --secondary: 222 47% 11%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 222 47% 11%;
-    --muted-foreground: 0 0% 65%;
-    --accent: 46 65% 52%;
-    --accent-foreground: 0 0% 10%;
+    --background: 224 20% 8%;
+    --foreground: 220 15% 95%;
+    --card: 224 20% 11%;
+    --card-foreground: 220 15% 95%;
+    --popover: 224 20% 11%;
+    --popover-foreground: 220 15% 95%;
+    --primary: 45 65% 52%;
+    --primary-foreground: 220 20% 8%;
+    --secondary: 224 20% 15%;
+    --secondary-foreground: 220 15% 95%;
+    --muted: 224 20% 15%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 45 65% 52%;
+    --accent-foreground: 220 20% 8%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 222 47% 11%;
-    --input: 222 47% 11%;
-    --ring: 46 65% 52%;
+    --border: 224 20% 18%;
+    --input: 224 20% 18%;
+    --ring: 45 65% 52%;
 
-    --glass-bg: rgba(15, 23, 42, 0.85);
-    --glass-border: rgba(212, 175, 55, 0.3);
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow: 0 15px 40px -12px rgba(0, 0, 0, 0.7), 0 0 15px rgba(212, 175, 55, 0.05);
-    --shadow-lg: 0 25px 60px -20px rgba(0, 0, 0, 0.9), 0 0 25px rgba(212, 175, 55, 0.1);
+    --surface: rgba(18, 22, 34, 0.97);
+    --surface-elevated: rgba(24, 28, 42, 1);
+    --surface-border: rgba(255, 255, 255, 0.07);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
   }
 
   * {
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-family: var(--font-sans);
-    font-size: 16px; /* Optimized base for clarity */
-    line-height: 1.6; /* Balanced for reading */
-    @apply antialiased selection:bg-brand-gold/40 selection:text-black overflow-x-hidden;
+    font-size: 16px;
+    line-height: 1.6;
+    @apply antialiased selection:bg-amber-200 selection:text-amber-900 overflow-x-hidden;
     font-feature-settings: "ss01", "ss02", "cv01", "cv11";
-    letter-spacing: -0.011em; /* Apple-style tracking */
+    letter-spacing: -0.011em;
   }
 
-  /* Headlines standardized for maximum impact and readability */
   h1, h2, h3, h4, h5, h6 {
     color: hsl(var(--foreground));
-    font-family: var(--font-serif);
-    @apply tracking-tight font-black leading-[1.15];
+    font-family: var(--font-playfair), Georgia, serif;
+    @apply tracking-tight font-bold leading-tight;
   }
 
-  /* RTL Specific Readability Boosts */
+  /* RTL readability */
   [dir="rtl"] {
-    font-size: 1.1rem; /* Global boost for Arabic script */
-    line-height: 1.7;
+    font-size: 1.05rem;
+    line-height: 1.75;
     letter-spacing: 0;
   }
 
@@ -97,18 +102,6 @@
     font-family: var(--font-amiri), serif;
     word-spacing: 0.05em;
   }
-
-  /* Hardening Light Mode Visibility - No more faded text */
-  html:not(.dark) .text-foreground\/30 { color: rgba(17, 17, 17, 0.7) !important; }
-  html:not(.dark) .text-foreground\/40 { color: rgba(17, 17, 17, 0.8) !important; }
-  html:not(.dark) .text-foreground\/50 { color: rgba(17, 17, 17, 0.85) !important; }
-  html:not(.dark) .text-foreground\/60 { color: rgba(17, 17, 17, 0.95) !important; }
-
-  /* Dark mode overrides for contrast */
-  .dark .text-foreground\/30 { color: rgba(255, 255, 255, 0.65) !important; }
-  .dark .text-foreground\/40 { color: rgba(255, 255, 255, 0.75) !important; }
-  .dark .text-foreground\/50 { color: rgba(255, 255, 255, 0.85) !important; }
-  .dark .text-foreground\/60 { color: rgba(255, 255, 255, 0.95) !important; }
 }
 
 @layer utilities {
@@ -121,36 +114,61 @@
     @apply leading-relaxed;
   }
 
+  /* --- Card surface — clean, solid, not glass --- */
+  .card-surface {
+    background-color: var(--surface-elevated);
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--shadow-sm);
+    @apply transition-shadow duration-200;
+  }
+
+  .card-surface:hover {
+    box-shadow: var(--shadow);
+  }
+
+  /* --- Glass surface — used in header, cards, and overlay panels --- */
   .glass {
-    background-color: var(--glass-bg);
-    backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-      var(--shadow),
-      inset 0 1px 1px rgba(255, 255, 255, 0.1),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-    @apply transition-all duration-300;
+    background-color: var(--surface);
+    backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid var(--surface-border);
+    box-shadow: var(--shadow-sm);
+    @apply transition-shadow duration-200;
   }
 
   .glass:hover {
-    box-shadow: 
-      var(--shadow-lg),
-      inset 0 1px 2px rgba(255, 255, 255, 0.2),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-    border-color: rgba(212, 175, 55, 0.5);
-  }
-  
-  .premium-drop-shadow {
-    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.15));
+    box-shadow: var(--shadow);
   }
 
-  .shadow-glow {
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3), 0 0 30px rgba(212, 175, 55, 0.1);
+  /* --- Gold accent — used only for CTAs and key highlights --- */
+  .gold-accent {
+    color: hsl(var(--primary));
   }
 
-  @keyframes reveal {
-    from { opacity: 0; transform: translateY(20px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+  .gold-accent-bg {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  /* --- Divider line --- */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, hsl(var(--border)), transparent);
+  }
+
+  /* --- Simple gold text for key headings --- */
+  .text-gold {
+    color: hsl(var(--primary));
+  }
+
+  /* --- Animations: simple and purposeful --- */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 
   @keyframes shimmer {
@@ -158,91 +176,17 @@
     100% { background-position: 200% 0; }
   }
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-
-  .animate-reveal {
-    animation: reveal 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-  }
-
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .shimmer-bg {
-    background: linear-gradient(
-      90deg,
-      rgba(212, 175, 55, 0) 0%,
-      rgba(212, 175, 55, 0.05) 50%,
-      rgba(212, 175, 55, 0) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 3s infinite linear;
-  }
-
-  .glass {
-    background-color: var(--glass-bg);
-    backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    box-shadow: 
-      var(--shadow),
-      inset 0 1px 1px rgba(255, 255, 255, 0.1),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-    @apply transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)];
-  }
-
-  .glass:hover {
-    box-shadow: 
-      var(--shadow-lg),
-      inset 0 1px 2px rgba(255, 255, 255, 0.2),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-    border-color: rgba(212, 175, 55, 0.6);
-    transform: translateY(-2px);
-  }
-  
-  .premium-drop-shadow {
-    filter: drop-shadow(0 15px 25px rgba(0, 0, 0, 0.15));
-  }
-
-  .shadow-glow {
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2), 0 0 40px rgba(212, 175, 55, 0.1);
-  }
-
-  @keyframes liquid-flow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  .gold-gradient {
-    @apply bg-gradient-to-br from-[#D4AF37] via-[#F5C75D] to-[#C5A028];
-    background-size: 200% 200%;
-    animation: liquid-flow 8s ease-in-out infinite;
-  }
-
-  .text-gold-gradient {
-    @apply bg-gradient-to-br from-[#D4AF37] via-[#F5C75D] to-[#C5A028] bg-clip-text text-transparent font-bold;
-    background-size: 200% 200%;
-    animation: liquid-flow 8s ease-in-out infinite;
-  }
-
-  /* Fluid Gold Background */
-  .fluid-gold-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
   @keyframes marquee {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease forwards;
   }
 
   .animate-marquee {
@@ -253,4 +197,47 @@
   .pause-marquee {
     animation-play-state: paused;
   }
+
+  /* Skeleton loader */
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--secondary)) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+  }
+
+  .badge-gold {
+    background: hsl(45 74% 35% / 0.1);
+    color: hsl(45 74% 30%);
+  }
+
+  .dark .badge-gold {
+    background: hsl(45 65% 52% / 0.15);
+    color: hsl(45 65% 65%);
+  }
+
+  /* Light mode text contrast fixes */
+  html:not(.dark) .text-foreground\/30 { color: rgba(17, 17, 17, 0.55) !important; }
+  html:not(.dark) .text-foreground\/40 { color: rgba(17, 17, 17, 0.65) !important; }
+  html:not(.dark) .text-foreground\/50 { color: rgba(17, 17, 17, 0.75) !important; }
+  html:not(.dark) .text-foreground\/60 { color: rgba(17, 17, 17, 0.85) !important; }
+  html:not(.dark) .text-foreground\/70 { color: rgba(17, 17, 17, 0.90) !important; }
+
+  /* Dark mode text contrast */
+  .dark .text-foreground\/30 { color: rgba(240, 240, 250, 0.55) !important; }
+  .dark .text-foreground\/40 { color: rgba(240, 240, 250, 0.65) !important; }
+  .dark .text-foreground\/50 { color: rgba(240, 240, 250, 0.75) !important; }
+  .dark .text-foreground\/60 { color: rgba(240, 240, 250, 0.85) !important; }
+  .dark .text-foreground\/70 { color: rgba(240, 240, 250, 0.90) !important; }
 }

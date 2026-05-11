@@ -1,4 +1,4 @@
-﻿import { pageMeta } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import PrivacyClient from "./PrivacyClient";
 import StructuredData from "@/components/seo/StructuredData";
 import { SITE_URL } from "@/lib/seo";
@@ -7,9 +7,9 @@ import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: "Privacy Policy | Arabia Khaleej",
-  titleAr: "Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø®ØµÙˆØµÙŠØ© | Ø¹Ø±Ø¨ÙŠØ© Ø®Ù„ÙŠØ¬",
+  titleAr: "سياسة الخصوصية | عربية خليج",
   description: "Transparency regarding our use of cookies, Google AdSense, and analytics to provide a premium, secure regional experience.",
-  descriptionAr: "Ø§Ù„Ø´ÙØ§ÙÙŠØ© Ø¨Ø´Ø£Ù† Ø§Ø³ØªØ®Ø¯Ø§Ù…Ù†Ø§ Ù„Ù…Ù„ÙØ§Øª ØªØ¹Ø±ÙŠÙ Ø§Ù„Ø§Ø±ØªØ¨Ø§Ø· Ùˆ Google AdSense ÙˆØ§Ù„ØªØ­Ù„ÙŠÙ„Ø§Øª Ù„ØªÙˆÙÙŠØ± ØªØ¬Ø±Ø¨Ø© Ø¥Ù‚Ù„ÙŠÙ…ÙŠØ© Ù…ØªÙ…ÙŠØ²Ø© ÙˆØ¢Ù…Ù†Ø©.",
+  descriptionAr: "الشفافية بشأن استخدامنا لملفات تعريف الارتباط و Google AdSense والتحليلات لتوفير تجربة إقليمية متميزة وآمنة.",
   path: "/privacy",
 });
 

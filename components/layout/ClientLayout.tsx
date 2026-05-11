@@ -34,15 +34,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       <AdUnit slot={AD_SLOTS.footer} className="w-full max-w-5xl mx-auto px-4" />
 
-        <div className="w-full flex flex-col items-center gap-6 mt-8">
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/about" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('about')}</Link>
-            <Link href="/privacy" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('privacy')}</Link>
-            <Link href="/terms" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('terms')}</Link>
-            <Link href="/disclaimer" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('disclaimer')}</Link>
-            <Link href="/contact" className="text-foreground/40 hover:text-brand-gold transition-colors">{t('contact')}</Link>
+      <footer className="w-full py-12 border-t border-brand-gold/5 bg-brand-obsidian/20 backdrop-blur-sm">
+        <div className="w-full flex flex-col items-center gap-6">
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
+            <Link href="/about" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('about')}</Link>
+            <Link href="/privacy" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('privacy')}</Link>
+            <Link href="/terms" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('terms')}</Link>
+            <Link href="/disclaimer" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('disclaimer')}</Link>
+            <Link href="/contact" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('contact')}</Link>
           </div>
-          <p className="text-[10px] text-foreground/30 font-bold uppercase tracking-[0.4em] text-center">
+          <p className="text-xs text-foreground/50 font-medium uppercase tracking-[0.3em] text-center">
             © {new Date().getFullYear()} {t('siteName')}. {t('passionProject')}
           </p>
         </div>

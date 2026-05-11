@@ -73,7 +73,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
       detectLocation();
       return () => { isSubscribed = false; };
     }
-  }, [mounted, initialCity]); // Removed t to prevent re-fetching on language change
+  }, [mounted, initialCity, t]);
 
   useEffect(() => {
     if (!mounted) return;

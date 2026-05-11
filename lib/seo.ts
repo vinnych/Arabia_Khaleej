@@ -1,6 +1,12 @@
+/**
+ * Arabia Khaleej — SEO & Metadata Engine
+ * 
+ * Centralized utility for generating meta tags, structured data,
+ * and search engine optimization configurations.
+ */
+
 import type { Metadata } from "next";
 
-// Re-export the Breadcrumbs UI component from its .tsx home
 export { default as Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export const SITE_URL = "https://arabiakhaleej.com";
@@ -14,51 +20,31 @@ export const SITE_DESCRIPTION = SITE_DESCRIPTION_EN;
 
 export const SITE_TAGLINE_EN = "The GCC Standard";
 export const SITE_TAGLINE_AR = "المعيار الخليجي";
-export const SITE_TAGLINE = SITE_TAGLINE_EN;
 
 interface PageMetaOptions {
-  /** Full page title */
   title: string;
-  /** Arabic page title */
   titleAr?: string;
-  /** Meta description, max ~160 chars */
   description: string;
-  /** Arabic meta description */
   descriptionAr?: string;
-  /** URL path, e.g. "/qatar-metro" */
   path: string;
   keywords?: string[];
-  /** OG/Twitter title — defaults to title */
   ogTitle?: string;
-  /** OG/Twitter description — defaults to description */
   ogDescription?: string;
-  /** Page type — defaults to "website" */
   type?: "website" | "article";
-  /** Custom OG image URL — defaults to /opengraph-image */
   image?: string;
-  /** Content publication date */
   datePublished?: string;
-  /** Content last modification date */
   dateModified?: string;
-  /** Geographic coordinates for local SEO */
   geo?: {
     latitude: number;
     longitude: number;
     region?: string;
     placename?: string;
   };
-  /** Current language context */
   lang?: "en" | "ar";
 }
 
 /**
- * Generate complete page metadata with automatic:
- * - canonical URL
- * - Open Graph tags + image
- * - Twitter card
- * - Regional Geo tags
- * - Arabic/English alternates
- * - AI Crawler instructions
+ * Generate complete page metadata with automatic canonicals, OG tags, and regional alternates.
  */
 export function pageMeta({
   title,
@@ -80,47 +66,20 @@ export function pageMeta({
   const ogDesc = ogDescription ?? (lang === "ar" && descriptionAr ? descriptionAr : description);
   const img = image ?? `${SITE_URL}/opengraph-image`;
   
-  // Sanitize path: remove tracking query params, keep only 'lang'
-  let cleanPath = path;
-  if (path.includes('?')) {
-    const [base, query] = path.split('?');
-    const params = new URLSearchParams(query);
-    const newParams = new URLSearchParams();
-    if (params.has('lang')) {
-      const l = params.get('lang');
-      if (l === 'ar' || l === 'en') newParams.set('lang', l);
-    }
-    const qs = newParams.toString();
-    cleanPath = qs ? `${base}?${qs}` : base;
-  }
-  
+  // Sanitize path
+  const cleanPath = path.split('?')[0];
   const canonical = cleanPath === "/" ? SITE_URL : `${SITE_URL}${cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`}`;
+  
   const now = new Date().toISOString();
   const published = datePublished ?? "2024-01-01T00:00:00Z";
   const modified = dateModified ?? now;
 
-  // Select language-specific version instead of combining
   const finalTitle = lang === "ar" && titleAr ? titleAr : title;
   const finalDescription = lang === "ar" && descriptionAr ? descriptionAr : description;
 
   const defaultKeywords = [
-    "GCC insights",
-    "official editorials",
-    "Gulf news",
-    "Middle East business",
-    "Sovereign Wealth Intelligence",
-    "Strategic Intelligence Gulf",
-    "Doha",
-    "Dubai",
-    "Riyadh",
-    "Muscat",
-    "Manama",
-    "Kuwait City",
-    "دليل الخليج",
-    "عربية خليج",
-    "رؤى الخليج",
-    "مواقيت الصلاة",
-    "أسعار الذهب",
+    "GCC insights", "Gulf news", "Middle East business",
+    "دليل الخليج", "عربية خليج", "مواقيت الصلاة", "أسعار الذهب"
   ];
 
   return {
@@ -135,81 +94,39 @@ export function pageMeta({
     alternates: {
       canonical,
       languages: {
-        "en": canonical.includes('?') ? canonical.split('?')[0] : canonical,
-        "en-US": canonical.includes('?') ? canonical.split('?')[0] : canonical,
-        "en-GB": canonical.includes('?') ? canonical.split('?')[0] : canonical,
-        "ar": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=ar` 
-          : `${canonical}?lang=ar`,
-        "ar-SA": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=ar` 
-          : `${canonical}?lang=ar`,
-        "ar-AE": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=ar` 
-          : `${canonical}?lang=ar`,
-        "ar-QA": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=ar` 
-          : `${canonical}?lang=ar`,
-        "ar-KW": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=ar` 
-          : `${canonical}?lang=ar`,
-        "ar-OM": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=ar` 
-          : `${canonical}?lang=ar`,
-        "ar-BH": canonical.includes('?') 
-          ? `${canonical.split('?')[0]}?lang=ar` 
-          : `${canonical}?lang=ar`,
-        "x-default": canonical.includes('?') ? canonical.split('?')[0] : canonical,
+        "en": canonical,
+        "ar": `${canonical}?lang=ar`,
+        "x-default": canonical,
       },
     },
     robots: {
       index: true,
       follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        'max-video-preview': -1,
-        'max-image-preview': 'large',
-        'max-snippet': -1,
-      },
     },
     other: {
-      "google-adsense-account": "ca-pub-7212871157824722",
-      "google-site-verification": "61758f95d085e67d",
+      "google-adsense-account": process.env.NEXT_PUBLIC_ADSENSE_ID || "",
+      "google-site-verification": process.env.NEXT_PUBLIC_SITE_VERIFICATION || "",
       ...(geo ? {
         "geo.region": geo.region,
         "geo.placename": geo.placename,
         "geo.position": `${geo.latitude};${geo.longitude}`,
-        "ICBM": `${geo.latitude}, ${geo.longitude}`,
       } : {}),
       "DC.title": finalTitle,
       "DC.description": finalDescription,
-      "DC.date.issued": published,
-      "DC.date.modified": modified,
-      "apple-mobile-web-app-title": SITE_NAME,
       "format-detection": "telephone=no",
-      "google": "notranslate", // We provide our own translations
+      "google": "notranslate",
     },
     openGraph: {
       title: og,
       description: ogDesc,
       url: canonical,
       siteName: SITE_NAME,
-      locale: canonical.includes('lang=ar') ? "ar_QA" : "en_US",
-      alternateLocale: canonical.includes('lang=ar') ? ["en_US"] : ["ar_QA", "ar_SA", "ar_AE", "ar_KW", "ar_OM", "ar_BH"],
+      locale: lang === 'ar' ? "ar_QA" : "en_US",
       type,
       publishedTime: published,
       modifiedTime: modified,
-      images: [
-        {
-          url: img,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
+      images: [{ url: img, width: 1200, height: 630, alt: title }],
     },
-    publisher: SITE_NAME,
     twitter: {
       card: "summary_large_image",
       title: og,
@@ -219,4 +136,3 @@ export function pageMeta({
     },
   };
 }
-

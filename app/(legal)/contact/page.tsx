@@ -1,12 +1,12 @@
-﻿import { pageMeta } from "@/lib/seo";
+import { pageMeta } from "@/lib/seo";
 import ContactClient from "./ContactClient";
 import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: "Contact Us | Arabia Khaleej",
-  titleAr: "Ø§ØªØµÙ„ Ø¨Ù†Ø§ | Ø¹Ø±Ø¨ÙŠØ© Ø®Ù„ÙŠØ¬",
+  titleAr: "اتصل بنا | عربية خليج",
   description: "Get in touch with Arabia Khaleej for editorial inquiries, strategic partnerships, and regional regulatory dialogue.",
-  descriptionAr: "ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ø¹Ø±Ø¨ÙŠØ© Ø®Ù„ÙŠØ¬ Ù„Ù„Ø§Ø³ØªÙØ³Ø§Ø±Ø§Øª Ø§Ù„ØªØ­Ø±ÙŠØ±ÙŠØ© ÙˆØ§Ù„Ø´Ø±Ø§ÙƒØ§Øª Ø§Ù„Ø§Ø³ØªØ±Ø§ØªÙŠØ¬ÙŠØ© ÙˆØ§Ù„Ø­ÙˆØ§Ø± Ø§Ù„ØªÙ†Ø¸ÙŠÙ…ÙŠ Ø§Ù„Ø¥Ù‚Ù„ÙŠÙ…ÙŠ.",
+  descriptionAr: "تواصل مع عربية خليج للاستفسارات التحريرية والشراكات الاستراتيجية والحوار التنظيمي الإقليمي.",
   path: "/contact",
 });
 

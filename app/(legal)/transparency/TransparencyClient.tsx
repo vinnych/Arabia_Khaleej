@@ -1,13 +1,45 @@
+/**
+ * @file app/(legal)/transparency/TransparencyClient.tsx
+ * @description Arabia Khaleej — Transparency & Ethical Content Page (Client Component)
+ *
+ * Renders the `/transparency` page, which discloses the platform's editorial
+ * methodology, data provenance standards, and regulatory compliance posture.
+ *
+ * ## Section Order
+ * Sections are intentionally ordered with "AI-Assisted Editorial Process" first.
+ * Leading with AI disclosure (rather than burying it) is an active trust signal
+ * for Google's quality raters and satisfies AdSense's content transparency requirements.
+ *
+ * ## Sections
+ * 1. AI-Assisted Editorial Process  — discloses LLM-assisted drafting methodology
+ * 2. Data Provenance                — describes how utility data (prayer, FX, market) is sourced
+ * 3. Editorial Integrity            — outlines the editorial standards and review process
+ * 4. Ethical Intelligence           — covers content ethics and regional sensitivity guidelines
+ * 5. Regulatory Compliance          — summarises adherence to applicable publishing standards
+ *
+ * @see lib/i18n/editorial.ts for `aiEditorialDisclosure` and `aiEditorialDisclosureDesc` strings
+ * @see lib/i18n/legal.ts for all other section string keys used here
+ */
+
 "use client";
 
 import { useLanguage } from "@/lib/i18n";
-import { ShieldCheck, Info, Scale, Globe } from "lucide-react";
+import { ShieldCheck, Info, Scale, Globe, Bot } from "lucide-react";
 import Image from "next/image";
 import { SITE_URL, SITE_NAME } from "@/lib/seo";
 
+/**
+ * Client component for the Transparency page.
+ * Consumes i18n strings via `useLanguage()` to support EN/AR switching.
+ */
 export default function TransparencyPage() {
   const { t, isRTL } = useLanguage();
 
+  /**
+   * Schema.org Article structured data for this page.
+   * Used by the parent server component (`page.tsx`) to inject a JSON-LD script tag.
+   * `dateModified` is set to the current request time so crawlers always see a fresh signal.
+   */
   const articleData = {
     "headline": t('transparencyTitle'),
     "description": t('transparencyBody'),
@@ -28,6 +60,11 @@ export default function TransparencyPage() {
   };
 
   const sections = [
+    {
+      title: t('aiEditorialDisclosure'),
+      desc: t('aiEditorialDisclosureDesc'),
+      icon: Bot
+    },
     {
       title: t('dataProvenance'),
       desc: t('dataProvenanceDesc'),

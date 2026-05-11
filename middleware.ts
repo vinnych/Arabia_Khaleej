@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getCSPHeader } from './lib/csp';
 
 export default function middleware(request: NextRequest) {
   // Generate a cryptographically secure nonce
@@ -26,23 +27,7 @@ export default function middleware(request: NextRequest) {
   }
   
   const isDev = process.env.NODE_ENV === 'development';
-
-  // Define CSP directives
-  const cspHeader = `
-    default-src 'self';
-    script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''};
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-    font-src 'self' https://fonts.gstatic.com data:;
-    img-src 'self' https: data: blob:;
-    connect-src 'self' https://va.vercel-scripts.com https://arabiakhaleej-contact.asishchilakapati.workers.dev https://freeipapi.com https://api.aladhan.com https://open.er-api.com https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google;
-    frame-src 'self' https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.google.com https://*.adtrafficquality.google;
-    media-src 'self';
-    object-src 'none';
-    base-uri 'self';
-    form-action 'self';
-    frame-ancestors 'none';
-    upgrade-insecure-requests;
-  `.replace(/\s{2,}/g, ' ').trim();
+  const cspHeader = getCSPHeader(nonce, isDev);
 
   // Set the nonce in the request headers so it can be read by Server Components
   const requestHeaders = new Headers(request.headers);

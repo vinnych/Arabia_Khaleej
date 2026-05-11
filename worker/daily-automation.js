@@ -2,13 +2,7 @@
  * Arabia Khaleej — Daily Automation Worker (Cloudflare)
  * 
  * This worker handles the long-running AI article generation process
- * which exceeds Vercel Hobby's 10s timeout limit.
- * 
- * Features:
- * - Generates 10 high-fidelity articles (5 EN, 5 AR) sequentially.
- * - Respects Groq rate limits (TPM/RPM).
- * - Saves directly to Upstash Redis.
- * - Zero-cost on Cloudflare Free tier.
+ * with real-time news grounding and optimized decoupled storage.
  */
 
 export default {
@@ -16,7 +10,6 @@ export default {
     ctx.waitUntil(handleAutomation(env));
   },
   
-  // Also allow manual trigger via HTTP GET (secured by secret)
   async fetch(request, env) {
     const { searchParams } = new URL(request.url);
     if (searchParams.get('secret') !== env.CRON_SECRET) {
@@ -69,82 +62,100 @@ async function decompress(compressedStr) {
   return JSON.parse(text);
 }
 
+/**
+ * Grounding: Fetch recent news context from Google News RSS
+ */
+async function fetchNewsContext() {
+  try {
+    const res = await fetch("https://news.google.com/rss/search?q=GCC+business+economy+technology&hl=en-US&gl=US&ceid=US:en");
+    const xml = await res.text();
+    // Simple regex to extract titles (don't need a full XML parser in a worker)
+    const titles = [...xml.matchAll(/<title>(.*?)<\/title>/g)].map(m => m[1]).slice(1, 15);
+    return titles.join("\n");
+  } catch (e) {
+    return "GCC regional development and economic trends";
+  }
+}
 
 async function handleAutomation(env) {
-  console.log("Starting Cloudflare Automation...");
+  console.log("Starting Optimized Arabia Khaleej Automation...");
   const startTime = Date.now();
   
   try {
-    // 1. Generate Topics
-    const topics = await generateTrendingTopics(env);
+    // 1. Fetch Real-time Context
+    const newsContext = await fetchNewsContext();
+
+    // 2. Generate Topics with Context
+    const topics = await generateTrendingTopics(newsContext, env);
     if (!topics || topics.length === 0) throw new Error("No topics generated");
 
     const generatedEn = [];
     const generatedAr = [];
 
-    // 2. Generate 5 English Articles (Sequential)
+    // 3. Generate Articles (Sequential to respect Groq limits)
     for (let i = 0; i < 5; i++) {
       if (topics[i]) {
         console.log(`Generating EN: ${topics[i].topic}`);
         const res = await generateSingleArticle('en', 'gcc', topics[i], env);
         if (res) generatedEn.push(res);
-        // Small delay to avoid aggressive rate limits
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 3000));
       }
     }
 
-    // 3. Generate 5 Arabic Articles (Sequential)
     for (let i = 5; i < 10; i++) {
       if (topics[i]) {
         console.log(`Generating AR: ${topics[i].topic}`);
         const res = await generateSingleArticle('ar', 'gcc', topics[i], env);
         if (res) generatedAr.push(res);
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 3000));
       }
     }
 
-    // 4. Save to Upstash Redis
+    // 4. Save to Upstash Redis (Decoupled Model)
     for (const lang of ['en', 'ar']) {
       const batch = lang === 'en' ? generatedEn : generatedAr;
       if (batch.length === 0) continue;
 
-      const archiveKey = `insights_archive_${lang}`;
+      const listKey = `insights:list:${lang}`;
       
-      // Get current archive
-      const currentRes = await fetch(`${env.UPSTASH_REDIS_REST_URL}/get/${archiveKey}`, {
+      // Get current list
+      const currentRes = await fetch(`${env.UPSTASH_REDIS_REST_URL}/get/${listKey}`, {
         headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}` }
       });
       const currentData = await currentRes.json();
-      let currentArchive = [];
+      let currentList = [];
       if (currentData.result) {
-        try {
-          currentArchive = await decompress(currentData.result);
-        } catch (e) {
-          console.error("Decompression failed, falling back to raw parse:", e);
-          currentArchive = typeof currentData.result === 'string' ? JSON.parse(currentData.result) : currentData.result;
-        }
+        currentList = await decompress(currentData.result);
       }
 
-      
-      const existingSlugs = new Set(currentArchive.map(a => a.slug));
-      const uniqueBatch = batch.filter(g => !existingSlugs.has(g.slug));
-
-      if (uniqueBatch.length > 0) {
-        const updatedArchive = [...uniqueBatch, ...currentArchive].slice(0, 1500);
-        const compressedBody = await compress(updatedArchive);
-        
-        // Set with EX (30 days)
-        await fetch(`${env.UPSTASH_REDIS_REST_URL}/set/${archiveKey}?ex=2592000`, {
+      const newMetadata = [];
+      for (const article of batch) {
+        // Save full article content individually
+        const articleKey = `insights:article:${article.slug}`;
+        const compressedContent = await compress(article);
+        await fetch(`${env.UPSTASH_REDIS_REST_URL}/set/${articleKey}?ex=31536000`, { // 1 year
           method: 'POST',
           headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}` },
-          body: compressedBody
+          body: compressedContent
         });
 
+        // Extract metadata for the list
+        const { content, ...metadata } = article;
+        newMetadata.push(metadata);
       }
+
+      // Update the metadata list
+      const updatedList = [...newMetadata, ...currentList].slice(0, 1000);
+      const compressedList = await compress(updatedList);
+      
+      await fetch(`${env.UPSTASH_REDIS_REST_URL}/set/${listKey}?ex=31536000`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}` },
+        body: compressedList
+      });
     }
 
     const duration = Math.floor((Date.now() - startTime) / 1000);
-    console.log(`Automation Completed in ${duration}s`);
     return { success: true, duration: `${duration}s`, generated: { en: generatedEn.length, ar: generatedAr.length } };
 
   } catch (error) {
@@ -157,66 +168,48 @@ async function generateSingleArticle(lang, type, item, env) {
   try {
     const model = "llama-3.3-70b-versatile";
     
-    // 90/10 Content Type Split
+    // Weighted Content Rotation
     const rand = Math.random();
-    let contentStyle = "";
     let specificPrompt = "";
+    let contentStyle = "";
     
-    if (rand < 0.1) {
-      // 10% Niche Analysis: Women-centric
-      contentStyle = "women-centric-analysis";
+    if (rand < 0.15) {
+      contentStyle = "strategic-analysis";
       specificPrompt = lang === 'en'
-        ? `Write a professional regional analysis focused on Women's Interests, Achievements, and Perspectives in ${item.country} and the broader international context. Focus on leadership, entrepreneurship, and social impact.`
-        : `اكتب تحليلاً مهنياً إقليمياً يركز على اهتمامات المرأة وإنجازاتها ومنظورها في ${item.country} والسياق الدولي الأوسع. ركز على القيادة وريادة الأعمال والتأثير الاجتماعي.`;
+        ? "Focus on high-level strategic implications, market entry barriers, and long-term economic forecasting."
+        : "ركز على الآثار الاستراتيجية رفيعة المستوى، وعوائق دخول السوق، والتوقعات الاقتصادية طويلة المدى.";
     } else {
-      // 90% Primary Helpful Content (Rotate between How-To, Why, Review, Experience)
-      const subRand = Math.random();
-      if (subRand < 0.3) {
-        contentStyle = "how-to";
-        specificPrompt = lang === 'en'
-          ? `Write a comprehensive, step-by-step How-To Guide about ${item.topic} in ${item.country}. Use "How To" in the title. Focus on practical, actionable advice for residents or visitors.`
-          : `اكتب دليلاً شاملاً خطوة بخطوة (How-To) عن ${item.topic} في ${item.country}. استخدم "كيفية" في العنوان. ركز على نصائح عملية وقابلة للتنفيذ للمقيمين أو الزوار.`;
-      } else if (subRand < 0.6) {
-        contentStyle = "why-explainer";
-        specificPrompt = lang === 'en'
-          ? `Write a detailed "Why" explainer about ${item.topic} in ${item.country}. Address the underlying reasons, regional trends, and strategic decisions. Use a question-based heading.`
-          : `اكتب مقالاً تفسيرياً مفصلاً (لماذا) عن ${item.topic} في ${item.country}. تناول الأسباب الكامنة والتوجهات الإقليمية والقرارات الاستراتيجية. استخدم عنواناً قائماً على سؤال.`;
-      } else if (subRand < 0.8) {
-        contentStyle = "expert-review";
-        specificPrompt = lang === 'en'
-          ? `Write an objective Expert Review of ${item.topic} in ${item.country}. Provide pros, cons, and a final verdict based on regional standards and quality expectations.`
-          : `اكتب مراجعة خبير موضوعية لـ ${item.topic} في ${item.country}. قدم الإيجابيات والسلبيات وحكماً نهائياً بناءً على المعايير الإقليمية وتوقعات الجودة.`;
-      } else {
-        contentStyle = "experience-guide";
-        specificPrompt = lang === 'en'
-          ? `Write a narrative-driven Experience Guide about ${item.topic} in ${item.country}. Focus on first-hand insights, hidden gems, and expertise-based recommendations.`
-          : `اكتب دليلاً قائماً على الخبرة والتجربة عن ${item.topic} في ${item.country}. ركز على الرؤى المباشرة والجواهر الخفية والتوصيات القائمة على الخبرة.`;
-      }
+      const styles = [
+        { name: "how-to", en: "Write a practical 'How-To' guide with actionable steps for regional professionals.", ar: "اكتب دليلاً عملياً 'كيفية' يتضمن خطوات قابلة للتنفيذ للمهنيين الإقليميين." },
+        { name: "why-explainer", en: "Write a deep-dive 'Why' explainer addressing the root causes and regional drivers.", ar: "اكتب مقالاً تفسيرياً 'لماذا' يتناول الأسباب الجذرية والمحركات الإقليمية." },
+        { name: "expert-review", en: "Write an objective expert review with pros, cons, and a definitive verdict.", ar: "اكتب مراجعة خبير موضوعية مع الإيجابيات والسلبيات وحكم نهائي." }
+      ];
+      const style = styles[Math.floor(Math.random() * styles.length)];
+      contentStyle = style.name;
+      specificPrompt = lang === 'en' ? style.en : style.ar;
     }
 
     const prompt = lang === 'en' 
-      ? `Write an extremely detailed, 1500-word long-form article about ${item.country} regarding ${item.topic}.
+      ? `Write an extremely detailed, 1500-word authoritative regional analysis about ${item.country} regarding: ${item.topic}.
          STYLE: ${specificPrompt}
          The article MUST include:
-         - A catchy, professional title (relevant to the STYLE)
-         - Detailed Executive Summary
-         - Historical Context & Background
-         - Key Current Developments
+         - A professional, SEO-optimized title
+         - Executive Summary
+         - Detailed Context & Background
+         - Current Market Trends & Data
          - In-depth Impact Analysis
-         - Strategic Future Outlook
-         - Comprehensive Conclusion
-         Use multiple descriptive subheadings (H2, H3). Aim for extreme depth and professional regional analysis tone. Markdown format. Start with # Title.`
-      : `اكتب مقالاً طويلاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} بخصوص ${item.topic}.
+         - Future Outlook & Recommendations
+         Format in Markdown. Start with # Title.`
+      : `اكتب تحليلاً إقليمياً موثوقاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} بخصوص: ${item.topic}.
          الأسلوب: ${specificPrompt}
          يجب أن يتضمن المقال:
-         - عنوان جذاب ومهني (مناسب للأسلوب)
-         - ملخص تنفيذي مفصل
-         - السياق التاريخي والخلفية
-         - التطورات الحالية الرئيسية
+         - عنوان مهني مُحسن لمحركات البحث
+         - ملخص تنفيذي
+         - السياق والخلفية التفصيلية
+         - اتجاهات السوق والبيانات الحالية
          - تحليل معمق للتأثير
-         - التوقعات المستقبلية الاستراتيجية
-         - خاتمة شاملة
-         استخدم عناوين فرعية وصفية متعددة. استهدف العمق الشديد وأسلوب التحليل الإقليمي المهني والتفاصيل الشاملة. تنسيق Markdown. ابدأ بـ # العنوان.`;
+         - التوقعات المستقبلية والتوصيات
+         تنسيق Markdown. ابدأ بـ # العنوان.`;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
@@ -227,23 +220,19 @@ async function generateSingleArticle(lang, type, item, env) {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: "You are a regional analyst for Arabia Khaleej." },
+          { role: "system", content: "You are a senior regional analyst for Arabia Khaleej, providing institutional-grade intelligence." },
           { role: "user", content: prompt }
         ],
-        temperature: 0.8,
+        temperature: 0.7,
         max_tokens: 8192,
       }),
     });
 
     if (!response.ok) return null;
     const data = await response.json();
-    const rawContent = data.choices[0].message.content;
-    const content = cleanAIContent(rawContent);
+    const content = cleanAIContent(data.choices[0].message.content);
     
-    if (content.length < 5000) {
-      console.log(`Article too short (${content.length} chars), skipping...`);
-      return null;
-    }
+    if (content.length < 3000) return null;
 
     const firstLine = content.split('\n')[0].replace(/[#*]/g, '').trim();
     const title = firstLine.length > 10 ? firstLine : `${item.country}: ${item.topic}`;
@@ -251,7 +240,7 @@ async function generateSingleArticle(lang, type, item, env) {
     const imageUrl = await getRelevantImage(`${item.topic} ${item.country}`, env);
 
     return {
-      id: `daily-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      id: `ai-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
       slug,
       title,
       description: extractDescription(content),
@@ -261,7 +250,7 @@ async function generateSingleArticle(lang, type, item, env) {
       source: "Arabia Khaleej Editorial",
       category: "gcc",
       language: lang,
-      tags: [type, 'trending', 'premium', contentStyle],
+      tags: [type, 'intelligence', contentStyle],
       image: imageUrl,
     };
   } catch (err) {
@@ -269,8 +258,11 @@ async function generateSingleArticle(lang, type, item, env) {
   }
 }
 
-async function generateTrendingTopics(env) {
-  const prompt = `Generate 10 trending GCC article topics. Return ONLY a JSON array of objects with keys "country" and "topic".`;
+async function generateTrendingTopics(newsContext, env) {
+  const prompt = `Based on these current GCC news headlines:\n${newsContext}\n\nGenerate 10 trending and authoritative article topics for the GCC region. 
+  Focus on economics, tech, policy, and business. 
+  Return ONLY a JSON array of objects with keys "country" and "topic".`;
+  
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -317,9 +309,10 @@ function extractDescription(content) {
 function toSlug(title) {
   return title
     .toLowerCase()
-    .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "") // Keep Arabic, alphanumeric, space, hyphen
+    .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-")  // Collapse multiple hyphens
-    .slice(0, 100);       // Limit length
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 100);
 }
+

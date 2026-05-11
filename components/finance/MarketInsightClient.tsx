@@ -126,7 +126,7 @@ export default function MarketInsightClient() {
           </div>
           <div className="h-4 w-[1px] bg-brand-gold/20 hidden md:block" />
           <p className="text-[10px] italic text-foreground/50 max-w-md">
-            "{t('sentimentTitle')}"
+            &quot;{t('sentimentTitle')}&quot;
           </p>
         </div>
       </div>

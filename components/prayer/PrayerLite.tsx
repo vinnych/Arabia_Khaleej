@@ -74,7 +74,7 @@ export default function PrayerLite() {
     fetchIPLocation();
 
     return () => { isMounted = false; };
-  }, []);
+  }, [t]);
 
   if (!state.mounted || !state.next) return (
     <div className="h-9 w-40 bg-brand-gold/5 animate-pulse rounded-full border border-brand-gold/10" />

@@ -1,3 +1,35 @@
+/**
+ * @file app/sitemap.ts
+ * @description Arabia Khaleej — XML Sitemap Generator
+ *
+ * Dynamically generates the full XML sitemap at request time using Next.js's
+ * `MetadataRoute.Sitemap` type. Runs on the Edge runtime for low-latency delivery.
+ *
+ * ## Route Groups
+ *
+ * | Group           | Count     | Source               | Priority |
+ * |-----------------|-----------|----------------------|----------|
+ * | Static routes   | ~10 URLs  | Hardcoded            | 0.3–1.0  |
+ * | Prayer pages    | 6 URLs    | `countries` array    | 0.8      |
+ * | Country guides  | 6 URLs    | `fullCountrySlugs`   | 0.8      |
+ * | Insight articles| ≤2000 URLs| Redis via `getAllInsightSlugs()` | 0.6 |
+ *
+ * ## Priority Logic
+ * - Homepage and `/insights` dynamically inherit `lastModified` from the most
+ *   recently published article, keeping Google's freshness signal up to date.
+ * - All other static routes use `new Date()` (current request time) as `lastModified`.
+ *
+ * ## Deduplication & Cap
+ * Insight slugs are deduplicated (English variant preferred) and capped at 2000
+ * entries to remain within Google's recommended sitemap size limit.
+ *
+ * ## hreflang Alternates
+ * All insight, prayer, and country routes include `alternates.languages` entries
+ * for the full set of relevant regional locales to support GCC-targeted SEO.
+ *
+ * @requires lib/insights.getAllInsightSlugs — fetches slug list from Upstash Redis
+ * @requires lib/seo.SITE_URL              — canonical base URL for all entries
+ */
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 import { getAllInsightSlugs } from '@/lib/insights';
@@ -23,7 +55,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/prayer`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
     { url: `${SITE_URL}/currency-exchange`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/market-insight`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${SITE_URL}/market-insight/details`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.7 },
     { url: `${SITE_URL}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: `${SITE_URL}/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },

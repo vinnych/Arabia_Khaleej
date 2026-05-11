@@ -89,9 +89,9 @@ export default function MobileNav() {
               
               {!isPrimary && (
                 <span className={cn(
-                  "text-[10px] font-black uppercase tracking-[0.2em] mt-1 transition-all duration-300",
-                  isActive ? "text-brand-gold opacity-100 scale-100" : "opacity-0 h-0 overflow-hidden translate-y-2",
-                  isRTL && "text-[11px] tracking-normal font-bold"
+                  "text-[10px] font-black uppercase tracking-[0.15em] mt-1 transition-all duration-300",
+                  isActive ? "text-brand-gold visible opacity-100" : "invisible opacity-0",
+                  isRTL && "text-xs tracking-normal font-bold"
                 )}>
                   {item.label}
                 </span>

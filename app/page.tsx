@@ -6,8 +6,8 @@ import {
   FAQSchema,
 } from "@/components/seo/StructuredData";
 import HomeClient from "@/components/home/HomeClient";
-import { translations } from "@/lib/i18n-data";
 import { getServerLanguage } from "@/lib/i18n-server";
+import { getT } from "@/lib/i18n-server";
 
 export async function generateMetadata() {
   const lang = await getServerLanguage();
@@ -31,32 +31,29 @@ export async function generateMetadata() {
   });
 }
 
-import { getT } from "@/lib/i18n-server";
-
 export default async function Home() {
-  const lang = await getServerLanguage();
   const t = await getT();
   
   const faqQuestions = [
     {
-      question: translations.faqWhatIsTitle[lang],
-      answer: translations.faqWhatIsBody[lang],
+      question: t("faqWhatIsTitle"),
+      answer: t("faqWhatIsBody"),
     },
     {
-      question: translations.faqCountriesTitle[lang],
-      answer: translations.faqCountriesBody[lang],
+      question: t("faqCountriesTitle"),
+      answer: t("faqCountriesBody"),
     },
     {
-      question: translations.faqPrayerTitle[lang],
-      answer: translations.faqPrayerBody[lang],
+      question: t("faqPrayerTitle"),
+      answer: t("faqPrayerBody"),
     },
     {
-      question: translations.faqBilingualTitle[lang],
-      answer: translations.faqBilingualBody[lang],
+      question: t("faqBilingualTitle"),
+      answer: t("faqBilingualBody"),
     },
     {
-      question: translations.faqMarketTitle[lang],
-      answer: translations.faqMarketBody[lang],
+      question: t("faqMarketTitle"),
+      answer: t("faqMarketBody"),
     },
   ];
 
@@ -82,4 +79,3 @@ export default async function Home() {
     </>
   );
 }
-

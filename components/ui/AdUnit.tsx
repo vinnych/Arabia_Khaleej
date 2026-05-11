@@ -16,50 +16,57 @@ export const AD_SLOTS = {
   home:    "REPLACE_HOME_SLOT",     // responsive between-sections unit
 } as const;
 
+import { useLanguage } from "@/lib/i18n";
+
 export default function AdUnit({
   slot,
   className = "",
+  variant = "standard",
 }: {
   slot: string;
   className?: string;
+  variant?: "standard" | "premium";
 }) {
+  const { t } = useLanguage();
   const pushed = useRef(false);
 
   useEffect(() => {
-    // 1. Skip if it's a placeholder (don't push for non-existent ads)
+    if (variant === "premium") return;
     if (slot.startsWith("REPLACE_")) return;
-
-    // 2. Skip if already pushed for this instance
     if (pushed.current) return;
 
     try {
       if (typeof window !== "undefined") {
-        const adsbygoogle = (window.adsbygoogle = window.adsbygoogle || []);
-        
-        // Wait a tiny bit for the DOM element to be available
-        // especially important in Next.js/React transitions
         const timeoutId = setTimeout(() => {
           try {
-            // Check if there are any 'ins' elements that haven't been filled yet
             const unfilledAds = document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status="done"])');
-            
-            if (unfilledAds.length > 0) {
-              adsbygoogle.push({});
+            if (unfilledAds.length > 0 && !pushed.current) {
+              (window.adsbygoogle = window.adsbygoogle || []).push({});
               pushed.current = true;
             }
           } catch (e) {
             console.error("AdSense push error:", e);
           }
-        }, 100);
-
+        }, 150);
         return () => clearTimeout(timeoutId);
       }
-    } catch (e) {
-      // AdSense script not yet loaded or blocked
-    }
-  }, [slot]);
+    } catch (e) {}
+  }, [slot, variant]);
 
-  // Don't render placeholder slots in production
+  if (variant === "premium") {
+    return (
+      <div className={`relative overflow-hidden rounded-xl border border-border bg-secondary p-10 text-center ${className}`}>
+        <div className="relative z-10">
+          <h3 className="mb-2 text-xl font-bold text-gold uppercase tracking-widest">{t('premium')} Intelligence</h3>
+          <p className="mb-8 text-muted-foreground text-sm max-w-md mx-auto leading-relaxed">{t('siteSlogan')}</p>
+          <button className="rounded-full bg-amber-600 dark:bg-amber-500 px-10 py-3 text-sm font-bold text-white transition-all hover:opacity-80 active:scale-95">
+            {t('boutiqueEnquiry')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (slot.startsWith("REPLACE_")) return null;
 
   return (

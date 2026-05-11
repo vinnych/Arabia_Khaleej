@@ -94,7 +94,7 @@ export default function InsightsClient() {
             fontFamily: 'var(--font-inter), var(--font-serif)',
           }}
         >
-          {t('pressTerminal')}
+          {t('intelligenceTerminal')}
         </h1>
         
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-8">
@@ -137,7 +137,7 @@ export default function InsightsClient() {
       {!loading && insights.length > 0 && (
         <div className="mb-20 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
           <div className="flex items-center gap-4">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-gold">{t('featuredInsights')}</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-brand-gold">{t('intelligenceBriefing')}</h2>
             <div className="h-px flex-1 bg-brand-gold/10" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -226,11 +226,15 @@ export default function InsightsClient() {
                     </button>
                   </div>
 
-                  {/* Premium Badge */}
-                  <div className="absolute top-6 left-6 z-20">
-                    <div className="px-4 py-1.5 rounded-full bg-brand-gold text-brand-obsidian text-xs font-bold uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
+                  {/* Badges Container */}
+                  <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
+                    <div className="px-4 py-1.5 rounded-full bg-brand-gold text-brand-obsidian text-[9px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-brand-obsidian animate-pulse" />
                       {t('premium')}
+                    </div>
+                    <div className="px-4 py-1.5 rounded-full glass border-white/20 text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
+                      {t('analystPerspective')}
                     </div>
                   </div>
                 </div>

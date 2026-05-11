@@ -35,7 +35,7 @@ export async function generateMetadata() {
   });
 }
 
-import { getServerLanguage } from "@/lib/i18n-server";
+import { getServerLanguage, getT } from "@/lib/i18n-server";
 
 export default async function PrayerPage() {
   const t = await getT();

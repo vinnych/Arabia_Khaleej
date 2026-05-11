@@ -45,7 +45,8 @@ The platform features a sophisticated editorial pipeline:
 | `GET /api/prayer-times` | `lat`, `lng` | Location-based prayer timings |
 | `GET /api/exchange-rates` | — | Real-time GCC currency dynamics |
 | `GET /api/market-data` | — | GCC stock and commodity indices |
-| `GET /api/daily-automation-v3-p9-kr22-auto-gen-7x` | — | Automated content pipeline |
+
+The editorial content pipeline is managed via a Cloudflare Worker scheduled trigger. The Worker endpoint is authenticated via `CRON_SECRET` and is not publicly accessible.
 
 ---
 
