@@ -152,6 +152,8 @@ export function InsightArticleSchema({
   url,
   language = ["en", "ar"],
   nonce,
+  articleSection,
+  keywords,
 }: {
   title: string;
   description: string;
@@ -169,6 +171,8 @@ export function InsightArticleSchema({
   url: string;
   language?: string | string[];
   nonce?: string;
+  articleSection?: string;
+  keywords?: string[];
 }) {
   const data = {
     headline: title,
@@ -177,6 +181,8 @@ export function InsightArticleSchema({
     datePublished,
     dateModified: dateModified ?? datePublished,
     inLanguage: language,
+    ...(articleSection ? { articleSection } : {}),
+    ...(keywords?.length ? { keywords: keywords.join(", ") } : {}),
     author: {
       "@type": "Person",
       name: author.name,
