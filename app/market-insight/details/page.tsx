@@ -11,7 +11,7 @@ export async function generateMetadata() {
     description: t('sentimentDesc'),
     path: "/market-insight/details",
     type: "article",
-    datePublished: "2024-01-01T00:00:00Z",
+    datePublished: "2026-01-01T00:00:00Z",
   });
 }
 
@@ -30,7 +30,7 @@ export default async function SentimentDetailsPage() {
     description: t('sentimentDesc'),
     author: { "@type": "Organization", name: SITE_NAME },
     publisher: { "@type": "Organization", name: SITE_NAME },
-    datePublished: "2024-01-01T00:00:00Z",
+    datePublished: "2026-01-01T00:00:00Z",
     url: "https://arabiakhaleej.com/market-insight/details",
     about: [
       { "@type": "Thing", name: "GCC Economy" },

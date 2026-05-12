@@ -88,7 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 3. Country Guides
   const countryRoutes: MetadataRoute.Sitemap = fullCountrySlugs.map(slug => ({
     url: `${SITE_URL}/countries/${slug}`,
-    lastModified: new Date('2024-01-01'),
+    lastModified: new Date('2026-01-01'),
     changeFrequency: 'monthly',
     priority: 0.8,
     alternates: {

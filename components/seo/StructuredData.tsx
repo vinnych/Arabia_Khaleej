@@ -41,7 +41,7 @@ export function OrganizationSchema({ nonce }: { nonce?: string } = {}) {
       height: 512,
     },
     image: `${SITE_URL}/opengraph-image`,
-    foundingDate: "2024",
+    foundingDate: "2026",
     areaServed: [
       { "@type": "Country", name: "Qatar", sameAs: "https://www.wikidata.org/wiki/Q846" },
       { "@type": "Country", name: "Saudi Arabia", sameAs: "https://www.wikidata.org/wiki/Q851" },
@@ -95,7 +95,7 @@ export function WebSiteSchema({ nonce }: { nonce?: string } = {}) {
     description: SITE_DESCRIPTION,
     inLanguage: ["en", "ar"],
     publisher: { "@id": `${SITE_URL}/#organization` },
-    copyrightYear: 2024,
+    copyrightYear: 2026,
     copyrightHolder: { "@id": `${SITE_URL}/#organization` },
   };
 
@@ -107,7 +107,7 @@ export function WebPageSchema({
   name,
   description,
   url,
-  datePublished = "2024-01-01T00:00:00Z",
+  datePublished = "2026-01-01T00:00:00Z",
   dateModified,
   breadcrumb,
   nonce,

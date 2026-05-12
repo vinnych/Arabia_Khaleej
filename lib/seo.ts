@@ -71,7 +71,7 @@ export function pageMeta({
   const canonical = cleanPath === "/" ? SITE_URL : `${SITE_URL}${cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`}`;
   
   const now = new Date().toISOString();
-  const published = datePublished ?? "2024-01-01T00:00:00Z";
+  const published = datePublished ?? "2026-01-01T00:00:00Z";
   const modified = dateModified ?? now;
 
   const finalTitle = lang === "ar" && titleAr ? titleAr : title;

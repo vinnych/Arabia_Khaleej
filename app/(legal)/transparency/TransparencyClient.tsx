@@ -55,7 +55,7 @@ export default function TransparencyPage() {
         "url": `${SITE_URL}/logo-premium-gold.png`
       }
     },
-    "datePublished": "2024-04-18T00:00:00Z",
+    "datePublished": "2026-04-18T00:00:00Z",
     "dateModified": new Date().toISOString()
   };
 

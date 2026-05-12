@@ -185,7 +185,7 @@ export default async function Page({ params }: Props) {
         name={`${countryName} ${t('regionalGuides')} | ${SITE_NAME}`}
         description={`${t('guideDesc')} for ${countryName}. ${t('population')} ${t(keyPrefix + 'Pop' as any)}, ${t('economy')} ${t(keyPrefix + 'Gdp' as any)}, ${t('capital')} ${capitalName}.`}
         url={`/countries/${slug}`}
-        datePublished="2024-01-01T00:00:00Z"
+        datePublished="2026-01-01T00:00:00Z"
       />
       <BreadcrumbSchema items={breadcrumbItems} />
       <CountrySchema
