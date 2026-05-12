@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n-server";
 import { pageMeta } from "@/lib/seo";
 import AboutClient from "./AboutClient";
 import { BreadcrumbSchema, WebPageSchema } from "@/components/seo/StructuredData";
@@ -13,7 +14,7 @@ export const metadata = pageMeta({
   path: "/about",
 });
 
-import { getT } from "@/lib/i18n-server";
+
 
 export default async function Page() {
   const t = await getT();

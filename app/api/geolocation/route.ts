@@ -1,6 +1,7 @@
-export const runtime = 'edge';
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/redis';
+
+export const runtime = 'edge';
 
 export async function GET(req: NextRequest) {
   // Use Cloudflare's connecting IP or fallback to x-forwarded-for

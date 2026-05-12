@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n-server";
 import { pageMeta } from "@/lib/seo";
 import ContactClient from "./ContactClient";
 import { BreadcrumbSchema } from "@/components/seo/StructuredData";
@@ -10,7 +11,7 @@ export const metadata = pageMeta({
   path: "/contact",
 });
 
-import { getT } from "@/lib/i18n-server";
+
 
 export default async function ContactPage() {
   const t = await getT();

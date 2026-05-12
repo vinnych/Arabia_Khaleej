@@ -6,16 +6,17 @@ import ClientLayout from "@/components/layout/ClientLayout";
 import Script from "next/script";
 import { headers } from "next/headers";
 import Header from "@/components/layout/Header";
+import { pageMeta, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
+import { OrganizationSchema, WebSiteSchema } from "@/components/seo/StructuredData";
+import { Language } from "@/lib/i18n";
+import CookieConsent from "@/components/ui/CookieConsent";
 
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const amiri = Amiri({ weight: ["400", "700"], subsets: ["arabic"], variable: "--font-amiri" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
-import { pageMeta, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
-import { OrganizationSchema, WebSiteSchema } from "@/components/seo/StructuredData";
-import { Language } from "@/lib/i18n";
-import CookieConsent from "@/components/ui/CookieConsent";
+
 
 export const runtime = 'edge';
 

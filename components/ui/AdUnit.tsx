@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLanguage } from "@/lib/i18n";
 
 declare global {
   interface Window {
@@ -16,7 +17,7 @@ export const AD_SLOTS = {
   home:    "REPLACE_HOME_SLOT",     // responsive between-sections unit
 } as const;
 
-import { useLanguage } from "@/lib/i18n";
+
 
 export default function AdUnit({
   slot,

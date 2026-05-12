@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { useLanguage } from "@/lib/i18n";
 
 interface BreadcrumbItem {
   name: string;
@@ -13,7 +14,7 @@ interface BreadcrumbsProps {
   isRTL?: boolean;
 }
 
-import { useLanguage } from "@/lib/i18n";
+
 
 /**
  * Visual Breadcrumbs component for SEO and UX.

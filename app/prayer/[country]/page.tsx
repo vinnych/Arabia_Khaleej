@@ -10,6 +10,7 @@ import {
 } from "@/components/seo/StructuredData";
 import { GCC_COUNTRIES, getCountryBySlug } from "@/lib/countries";
 import { notFound } from "next/navigation";
+import { getT } from "@/lib/i18n-server";
 
 export function generateStaticParams() {
   return GCC_COUNTRIES.map((country) => ({ country: country.slug }));
@@ -71,7 +72,7 @@ export async function generateMetadata({
   });
 }
 
-import { getT } from "@/lib/i18n-server";
+
 
 export default async function CountryPrayerPage({
   params,

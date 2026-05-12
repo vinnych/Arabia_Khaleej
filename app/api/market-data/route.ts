@@ -6,10 +6,10 @@
  * Optimized for Edge Runtime.
  */
 
-export const runtime = 'edge';
 import { NextResponse } from 'next/server';
-
 import { FinanceService } from '@/lib/finance-service';
+
+export const runtime = 'edge';
 
 export async function GET() {
   try {

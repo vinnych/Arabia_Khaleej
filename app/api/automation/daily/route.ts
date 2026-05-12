@@ -5,16 +5,16 @@
  * Optimized for Edge Runtime with structured AI metadata.
  */
 
-export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
-export const maxDuration = 300; 
-
 import { NextResponse } from 'next/server';
 import { generateGCCInsight, generateTrendingTopics } from '@/lib/ai';
 import { redis, CACHE_TIMES, getWithCompression, setWithCompression } from '@/lib/redis';
 import { toSlug } from '@/lib/utils';
 import { InsightItem } from '@/lib/insights';
 import { getRelevantImage } from '@/lib/images';
+
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 300;
 
 async function generateSingleArticle(
   lang: 'en' | 'ar', 

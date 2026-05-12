@@ -1,6 +1,7 @@
-export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { getUnifiedInsights, getArticleBySlug } from '@/lib/insights';
+
+export const runtime = 'edge';
 
 export const revalidate = 300; // Cache for 5 minutes
 

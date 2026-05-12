@@ -1,13 +1,13 @@
 import { pageMeta, SITE_DESCRIPTION, SITE_DESCRIPTION_AR } from "@/lib/seo";
-export const runtime = 'edge';
 import {
   DatasetSchema,
   WebPageSchema,
   FAQSchema,
 } from "@/components/seo/StructuredData";
 import HomeClient from "@/components/home/HomeClient";
-import { getServerLanguage } from "@/lib/i18n-server";
-import { getT } from "@/lib/i18n-server";
+import { getServerLanguage, getT } from "@/lib/i18n-server";
+
+export const runtime = 'edge';
 
 export async function generateMetadata() {
   const lang = await getServerLanguage();

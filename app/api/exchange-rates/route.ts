@@ -1,5 +1,6 @@
-export const runtime = 'edge';
 import { NextResponse } from 'next/server';
+
+export const runtime = 'edge';
 
 // Popular world currencies with metadata
 const CURRENCY_META: Record<string, { name: string; nameAr: string; symbol: string; flag: string; region: string }> = {

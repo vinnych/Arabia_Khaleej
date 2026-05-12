@@ -1,3 +1,4 @@
+import { getServerLanguage, getT } from "@/lib/i18n-server";
 import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
 import PrayerClient from "@/components/prayer/PrayerClient";
 import {
@@ -35,7 +36,7 @@ export async function generateMetadata() {
   });
 }
 
-import { getServerLanguage, getT } from "@/lib/i18n-server";
+
 
 export default async function PrayerPage() {
   const t = await getT();

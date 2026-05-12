@@ -1,6 +1,7 @@
-import { pageMeta } from "@/lib/seo";
-import { WebPageSchema, DatasetSchema, BreadcrumbSchema } from "@/components/seo/StructuredData";
+import { getT } from "@/lib/i18n-server";
+import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
 import CurrencyExchangeClient from "@/components/finance/CurrencyExchangeClient";
+import { WebPageSchema, DatasetSchema, BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
   title: "Currency Exchange — Live GCC & World Currency Converter",
@@ -19,7 +20,7 @@ export const metadata = pageMeta({
   ],
 });
 
-import { getT } from "@/lib/i18n-server";
+
 
 export default async function CurrencyExchangePage() {
   const t = await getT();

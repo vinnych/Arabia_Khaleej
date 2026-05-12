@@ -1,3 +1,4 @@
+import { getT } from "@/lib/i18n-server";
 import { pageMeta } from "@/lib/seo";
 import DisclaimerClient from "./DisclaimerClient";
 import { BreadcrumbSchema } from "@/components/seo/StructuredData";
@@ -12,7 +13,7 @@ export const metadata = pageMeta({
   path: "/disclaimer",
 });
 
-import { getT } from "@/lib/i18n-server";
+
 
 export default async function Page() {
   const t = await getT();

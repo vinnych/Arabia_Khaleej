@@ -1,6 +1,7 @@
-export const runtime = 'edge';
 import { NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/redis';
+
+export const runtime = 'edge';
 
 export async function GET(request: Request) {
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() || '127.0.0.1';

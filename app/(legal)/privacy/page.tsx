@@ -1,8 +1,7 @@
-import { pageMeta } from "@/lib/seo";
+import { getT } from "@/lib/i18n-server";
+import { pageMeta, SITE_URL } from "@/lib/seo";
 import PrivacyClient from "./PrivacyClient";
 import StructuredData from "@/components/seo/StructuredData";
-import { SITE_URL } from "@/lib/seo";
-
 import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 
 export const metadata = pageMeta({
@@ -13,7 +12,7 @@ export const metadata = pageMeta({
   path: "/privacy",
 });
 
-import { getT } from "@/lib/i18n-server";
+
 
 export default async function Page() {
   const t = await getT();
