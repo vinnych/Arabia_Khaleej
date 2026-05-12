@@ -96,7 +96,7 @@ async function handleAutomation(env) {
     for (let i = 0; i < 5; i++) {
       if (topics[i]) {
         console.log(`Generating EN: ${topics[i].topic}`);
-        const res = await generateSingleArticle('en', 'gcc', topics[i], env);
+        const res = await generateSingleArticle(topics[i], 'en', 'gcc', 'analytical', env);
         if (res) generatedEn.push(res);
         await new Promise(r => setTimeout(r, 3000));
       }
@@ -105,7 +105,7 @@ async function handleAutomation(env) {
     for (let i = 5; i < 10; i++) {
       if (topics[i]) {
         console.log(`Generating AR: ${topics[i].topic}`);
-        const res = await generateSingleArticle('ar', 'gcc', topics[i], env);
+        const res = await generateSingleArticle(topics[i], 'ar', 'gcc', 'analytical', env);
         if (res) generatedAr.push(res);
         await new Promise(r => setTimeout(r, 3000));
       }
@@ -163,7 +163,8 @@ async function handleAutomation(env) {
     return { success: false, error: error.message };
   }
 }
-
+async function generateSingleArticle(item, lang, type, contentStyle, env) {
+  try {
     const author = getRandomAuthor();
     const prompt = lang === 'en' 
       ? `Write an extremely detailed, 1500-word authoritative regional analysis about ${item.country} regarding: ${item.topic}.
@@ -205,6 +206,7 @@ async function handleAutomation(env) {
          - رؤية مستقبلية وتوصيات استراتيجية.
          تنسيق Markdown. ابدأ بـ # العنوان.`;
 
+    const model = "llama-3.3-70b-versatile";
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {

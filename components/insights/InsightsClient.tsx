@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ExternalLink, RefreshCw, Share2, CheckCircle2 } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import Link from "next/link";
 import Image from "next/image";
 import { getDeterministicFallback } from "@/lib/fallbacks";
 import MobileFAB from "@/components/layout/MobileFAB";
+import InsightCard from "./InsightCard";
 
 interface InsightItem {
   id: string;
@@ -31,12 +32,7 @@ export default function InsightsClient() {
   const [insights, setInsights] = useState<InsightItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const [displayCount, setDisplayCount] = useState(12);
-  const [sharingId, setSharingId] = useState<string | null>(null);
-
-  const markFailed = (id: string) =>
-    setFailedImages(prev => { const s = new Set(prev); s.add(id); return s; });
 
   const fetchInsights = useCallback(async () => {
     setLoading(true);
@@ -64,23 +60,6 @@ export default function InsightsClient() {
   useEffect(() => {
     fetchInsights();
   }, [fetchInsights]);
-
-  const handleShare = async (e: React.MouseEvent, item: InsightItem) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const url = `${window.location.origin}/insights/${item.slug}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: item.title, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-        setSharingId(item.id);
-        setTimeout(() => setSharingId(null), 2000);
-      }
-    } catch (err) {
-      console.warn("Share failed or was cancelled:", err);
-    }
-  };
 
   return (
     <div className={`w-full max-w-6xl mx-auto px-4 pt-6 pb-12 ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
@@ -115,7 +94,7 @@ export default function InsightsClient() {
         </div>
       </div>
 
-      {/* Editorial Intro Section - Substantive Content for AdSense */}
+      {/* Editorial Intro Section */}
       <div className="w-full max-w-4xl mx-auto mb-24 px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-gold mb-8 tracking-tight uppercase tracking-[0.1em]">
           {t('insightsIntroTitle')}
@@ -153,12 +132,12 @@ export default function InsightsClient() {
                 className="group relative h-[400px] rounded-[3rem] overflow-hidden border border-brand-gold/20 shadow-2xl hover:border-brand-gold/40 transition-all duration-700"
               >
                 <Image
-                  src={failedImages.has(item.id) ? getDeterministicFallback(item.slug) : (item.image || getDeterministicFallback(item.slug))}
+                  src={item.image || getDeterministicFallback(item.slug)}
                   alt={item.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
                   priority={idx === 0}
-                  unoptimized={!!item.image && !item.image.startsWith('/') && !['unsplash.com', 'pexels.com', 'qna.org.qa', 'wam.ae', 'spa.gov.sa', 'bna.bh', 'omannews.gov.om', 'app.com.pk', 'pna.gov.ph'].some(d => item.image?.includes(d))}
+                  unoptimized={!!item.image && !item.image.startsWith('/')}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-brand-obsidian/40 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-10 space-y-4">
@@ -198,75 +177,13 @@ export default function InsightsClient() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
             {insights.slice(0, displayCount).map((item, idx) => (
-              <Link
-                key={item.id + idx}
-                href={`/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`}
-                className="group relative glass p-0 rounded-[2.5rem] border-brand-gold/10 hover:border-brand-gold/30 active:scale-[0.98] transition-all duration-500 flex flex-col h-full overflow-hidden select-none shadow-xl hover:shadow-2xl ring-1 ring-brand-gold/20"
-              >
-                {/* Premium Reflection Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                {/* Article Image Container */}
-                <div className="relative w-full h-56 sm:h-64 overflow-hidden shrink-0">
-                  <Image
-                    src={failedImages.has(item.id) ? getDeterministicFallback(item.slug) : (item.image || getDeterministicFallback(item.slug))}
-                    alt={item.title}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-1000 ease-out"
-                    unoptimized={!!item.image && !item.image.startsWith('/') && !['unsplash.com', 'pexels.com', 'qna.org.qa', 'wam.ae', 'spa.gov.sa', 'bna.bh', 'omannews.gov.om', 'app.com.pk', 'pna.gov.ph'].some(d => item.image?.includes(d))}
-                    onError={() => markFailed(item.id)}
-                  />
-                  
-                  {/* Image Overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-brand-obsidian/20 to-transparent opacity-80" />
-                  
-                  {/* Action Bar Overlaid on Image */}
-                  <div className="absolute top-6 right-6 flex flex-col gap-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button 
-                      onClick={(e) => handleShare(e, item)}
-                      className="w-10 h-10 rounded-full glass border-white/20 flex items-center justify-center text-white hover:bg-brand-gold hover:text-brand-obsidian transition-all shadow-xl"
-                      aria-label={t('shareArticle')}
-                    >
-                      {sharingId === item.id ? <CheckCircle2 size={18} /> : <Share2 size={18} />}
-                    </button>
-                  </div>
-
-                  {/* Badges Container */}
-                  <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
-                    <div className="px-4 py-1.5 rounded-full bg-brand-gold text-brand-obsidian text-[9px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-obsidian animate-pulse" />
-                      {t('premium')}
-                    </div>
-                    <div className="px-4 py-1.5 rounded-full glass border-white/20 text-white text-[9px] font-black uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
-                      {t('analystPerspective')}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-8 flex flex-col flex-1 relative z-20">
-                  <h2 className={`text-lg sm:text-2xl font-bold text-foreground leading-tight group-hover:text-brand-gold transition-colors duration-500 line-clamp-3 flex-1 ${
-                    item.language === 'regional' ? 'font-serif-hi' : 'font-sans'
-                  }`}>
-                    {item.title}
-                  </h2>
-                  
-                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-brand-gold/10">
-                    <div className="flex flex-col gap-1">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50 flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-brand-gold/50" />
-                        {new Date(item.pubDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
-                      </span>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-brand-gold/70">
-                        {item.author?.name || item.source}
-                      </span>
-                    </div>
-                    <div className="w-11 h-11 rounded-2xl bg-brand-gold/5 flex items-center justify-center group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all duration-500 shadow-inner">
-                      <ExternalLink size={18} className="opacity-40 group-hover:opacity-100" />
-                    </div>
-                  </div>
-                </div>
-              </Link>
+              <InsightCard 
+                key={item.id + idx} 
+                item={item} 
+                language={language} 
+                isRTL={isRTL} 
+                t={t} 
+              />
             ))}
           </div>
           

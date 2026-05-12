@@ -4,66 +4,48 @@
 
 @layer base {
   :root {
-    /* Clean white/neutral palette — gold is accent only */
-    --background: 0 0% 99%;
-    --foreground: 220 20% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
-    --primary: 45 74% 35%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 220 20% 10%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 10% 45%;
-    --accent: 45 74% 35%;
-    --accent-foreground: 0 0% 100%;
+    /* Premium 2026 Palette — Deep Obsidian & Liquid Gold */
+    --background: 224 40% 2%;
+    --foreground: 220 15% 98%;
+    --card: 224 40% 4%;
+    --card-foreground: 220 15% 98%;
+    --popover: 224 40% 4%;
+    --popover-foreground: 220 15% 98%;
+    --primary: 45 74% 55%;
+    --primary-foreground: 224 40% 2%;
+    --secondary: 224 20% 10%;
+    --secondary-foreground: 220 15% 98%;
+    --muted: 224 20% 10%;
+    --muted-foreground: 220 10% 65%;
+    --accent: 45 74% 55%;
+    --accent-foreground: 224 40% 2%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 45 74% 35%;
-    --radius: 0.75rem;
+    --border: 224 20% 12%;
+    --input: 224 20% 12%;
+    --ring: 45 74% 55%;
+    --radius: 1.25rem;
 
-    --surface: rgba(255, 255, 255, 0.97);
-    --surface-elevated: rgba(255, 255, 255, 1);
-    --surface-border: rgba(0, 0, 0, 0.07);
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+    --surface: rgba(4, 7, 14, 0.7);
+    --surface-elevated: rgba(10, 15, 25, 0.8);
+    --surface-border: rgba(255, 255, 255, 0.08);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.8);
 
     --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --font-serif: var(--font-playfair), Georgia, "Times New Roman", serif;
+    --font-serif: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
+    
+    /* 2026 Typography Tokens */
+    --font-display: var(--font-playfair);
+    --letter-spacing-tight: -0.04em;
+    --letter-spacing-loose: 0.4em;
   }
 
   .dark {
-    --background: 224 20% 8%;
+    /* In 2026, 'Dark Mode' is the standard for Premium Intelligence */
+    --background: 224 40% 1%;
     --foreground: 220 15% 95%;
-    --card: 224 20% 11%;
-    --card-foreground: 220 15% 95%;
-    --popover: 224 20% 11%;
-    --popover-foreground: 220 15% 95%;
-    --primary: 45 65% 52%;
-    --primary-foreground: 220 20% 8%;
-    --secondary: 224 20% 15%;
-    --secondary-foreground: 220 15% 95%;
-    --muted: 224 20% 15%;
-    --muted-foreground: 220 10% 55%;
-    --accent: 45 65% 52%;
-    --accent-foreground: 220 20% 8%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 224 20% 18%;
-    --input: 224 20% 18%;
-    --ring: 45 65% 52%;
-
-    --surface: rgba(18, 22, 34, 0.97);
-    --surface-elevated: rgba(24, 28, 42, 1);
-    --surface-border: rgba(255, 255, 255, 0.07);
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
   }
 
   * {
@@ -72,6 +54,7 @@
 
   html {
     scroll-behavior: smooth;
+    cursor: default;
   }
 
   body {
@@ -80,18 +63,20 @@
     font-family: var(--font-sans);
     font-size: 16px;
     line-height: 1.6;
-    @apply antialiased selection:bg-amber-200 selection:text-amber-900 overflow-x-hidden;
+    @apply antialiased selection:bg-brand-gold/30 selection:text-white overflow-x-hidden;
     font-feature-settings: "ss01", "ss02", "cv01", "cv11";
-    letter-spacing: -0.011em;
+    letter-spacing: -0.01em;
+    background-image: 
+      radial-gradient(at 0% 0%, hsla(250, 60%, 15%, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(45, 70%, 10%, 0.1) 0px, transparent 50%);
   }
 
   h1, h2, h3, h4, h5, h6 {
     color: hsl(var(--foreground));
-    font-family: var(--font-playfair), Georgia, serif;
-    @apply tracking-tight font-bold leading-tight;
+    font-family: var(--font-display);
+    @apply tracking-tighter font-bold leading-[1.1];
   }
 
-  /* RTL readability */
   [dir="rtl"] {
     font-size: 1.05rem;
     line-height: 1.75;
@@ -109,135 +94,75 @@
     font-family: var(--font-serif);
   }
 
-  .font-serif-ar {
-    font-family: var(--font-amiri), var(--font-serif);
-    @apply leading-relaxed;
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: var(--letter-spacing-tight);
   }
 
-  /* --- Card surface — clean, solid, not glass --- */
-  .card-surface {
-    background-color: var(--surface-elevated);
+  /* --- 2026 Mesh Surface --- */
+  .mesh-surface {
+    position: relative;
+    background: hsla(224, 40%, 4%, 0.8);
+    backdrop-filter: blur(24px) saturate(180%);
     border: 1px solid var(--surface-border);
-    box-shadow: var(--shadow-sm);
-    @apply transition-shadow duration-200;
+    overflow: hidden;
   }
 
-  .card-surface:hover {
-    box-shadow: var(--shadow);
+  .mesh-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.04;
+    pointer-events: none;
   }
 
-  /* --- Glass surface — used in header, cards, and overlay panels --- */
+  /* --- Glass surface — 2026 refinement --- */
   .glass {
     background-color: var(--surface);
-    backdrop-filter: blur(12px) saturate(160%);
+    backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid var(--surface-border);
     box-shadow: var(--shadow-sm);
-    @apply transition-shadow duration-200;
+    @apply transition-all duration-300;
   }
 
   .glass:hover {
     box-shadow: var(--shadow);
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
-  /* --- Gold accent — used only for CTAs and key highlights --- */
-  .gold-accent {
-    color: hsl(var(--primary));
-  }
-
-  .gold-accent-bg {
-    background-color: hsl(var(--primary));
+  /* --- Gold Liquid CTA --- */
+  .gold-liquid {
+    background: linear-gradient(135deg, hsl(45 74% 55%), hsl(45 74% 35%));
     color: hsl(var(--primary-foreground));
+    @apply relative overflow-hidden transition-all duration-300;
   }
 
-  /* --- Divider line --- */
-  .divider {
-    height: 1px;
-    background: linear-gradient(to right, transparent, hsl(var(--border)), transparent);
+  .gold-liquid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
   }
 
-  /* --- Simple gold text for key headings --- */
-  .text-gold {
-    color: hsl(var(--primary));
+  .gold-liquid:hover::after {
+    transform: translateX(100%);
   }
 
-  /* --- Animations: simple and purposeful --- */
-  @keyframes fade-up {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
+  /* --- Animations --- */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
   }
 
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
-
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 
   .animate-fade-up {
-    animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
-
-  .animate-fade-in {
-    animation: fade-in 0.4s ease forwards;
-  }
-
-  .animate-marquee {
-    display: inline-block;
-    animation: marquee 40s linear infinite;
-  }
-
-  .pause-marquee {
-    animation-play-state: paused;
-  }
-
-  /* Skeleton loader */
-  .shimmer-bg {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--muted)) 0%,
-      hsl(var(--secondary)) 50%,
-      hsl(var(--muted)) 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite linear;
-  }
-
-  /* Badge */
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
-    background: hsl(var(--muted));
-    color: hsl(var(--muted-foreground));
-  }
-
-  .badge-gold {
-    background: hsl(45 74% 35% / 0.1);
-    color: hsl(45 74% 30%);
-  }
-
-  .dark .badge-gold {
-    background: hsl(45 65% 52% / 0.15);
-    color: hsl(45 65% 65%);
-  }
-
-  /* Light mode text contrast fixes */
-  html:not(.dark) .text-foreground\/30 { color: rgba(17, 17, 17, 0.55) !important; }
-  html:not(.dark) .text-foreground\/40 { color: rgba(17, 17, 17, 0.65) !important; }
-  html:not(.dark) .text-foreground\/50 { color: rgba(17, 17, 17, 0.75) !important; }
-  html:not(.dark) .text-foreground\/60 { color: rgba(17, 17, 17, 0.85) !important; }
-  html:not(.dark) .text-foreground\/70 { color: rgba(17, 17, 17, 0.90) !important; }
-
-  /* Dark mode text contrast */
-  .dark .text-foreground\/30 { color: rgba(240, 240, 250, 0.55) !important; }
-  .dark .text-foreground\/40 { color: rgba(240, 240, 250, 0.65) !important; }
-  .dark .text-foreground\/50 { color: rgba(240, 240, 250, 0.75) !important; }
-  .dark .text-foreground\/60 { color: rgba(240, 240, 250, 0.85) !important; }
-  .dark .text-foreground\/70 { color: rgba(240, 240, 250, 0.90) !important; }
 }
+
