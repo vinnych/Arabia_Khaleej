@@ -4,6 +4,7 @@ import InsightArticleClient from "@/components/insights/InsightArticleClient";
 import { notFound } from "next/navigation";
 import { getArticleBySlug, getUnifiedInsights, InsightItem } from "@/lib/insights";
 import { getT } from "@/lib/i18n-server";
+import { getAuthorById, EDITORIAL_AUTHORS } from "@/lib/authors";
 
 // Use direct server-side data access for performance and GSC reliability
 export const dynamic = 'force-dynamic';
@@ -84,32 +85,44 @@ export default async function InsightArticlePage({
   const canonicalUrl = `https://arabiakhaleej.com/insights/${article.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
 
   // High-Fidelity Author Mapping for E-E-A-T
-  const getRichAuthor = (source: string) => {
+  const getRichAuthor = (article: InsightItem) => {
+    // 1. Try to use the author metadata from the article object (if set by the worker)
+    if (article.author?.id) {
+      const matched = getAuthorById(article.author.id);
+      if (matched) {
+        return {
+          name: lang === 'ar' ? matched.nameAr : matched.name,
+          role: lang === 'ar' ? matched.roleAr : matched.role,
+          image: matched.image,
+          social: matched.social,
+          bio: lang === 'ar' ? matched.bioAr : matched.bio
+        };
+      }
+    }
+
+    // 2. Legacy fallback based on source strings
+    const source = article.source || "";
     if (source.includes('Editorial') || source.includes('Editorial Leadership') || source.includes('Arabia Khaleej')) {
+      const defaultAuthor = EDITORIAL_AUTHORS[0]; // Zaid Al-Harbi
       return {
-        name: "Dr. Faisal Al-Saud",
-        role: "Chief Regional Strategist",
-        image: "https://arabiakhaleej.com/analysts/faisal-al-saud.png",
-        social: ["https://twitter.com/arabiakhaleej", "https://linkedin.com/company/arabiakhaleej"]
+        name: lang === 'ar' ? defaultAuthor.nameAr : defaultAuthor.name,
+        role: lang === 'ar' ? defaultAuthor.roleAr : defaultAuthor.role,
+        image: defaultAuthor.image,
+        social: defaultAuthor.social
       };
     }
-    if (source.includes('Amna') || source.includes('Cultural')) {
-      return {
-        name: "Amna Al-Hashimi",
-        role: "Director of Cultural Intelligence",
-        image: "https://arabiakhaleej.com/analysts/amna-al-hashimi.png",
-        social: ["https://instagram.com/arabiakhaleej"]
-      };
-    }
+    
+    // 3. Absolute fallback
+    const fallbackAuthor = EDITORIAL_AUTHORS[1]; // Layla Mansour
     return {
-      name: source || "Marcus Thorne",
-      role: "Head of Market Dynamics",
-      image: "https://arabiakhaleej.com/analysts/marcus-thorne.png",
-      social: ["https://twitter.com/arabiakhaleej"]
+      name: lang === 'ar' ? fallbackAuthor.nameAr : fallbackAuthor.name,
+      role: lang === 'ar' ? fallbackAuthor.roleAr : fallbackAuthor.role,
+      image: fallbackAuthor.image,
+      social: fallbackAuthor.social
     };
   };
 
-  const richAuthor = getRichAuthor(article.source);
+  const richAuthor = getRichAuthor(article);
 
   return (
     <main className="min-h-screen pt-20">

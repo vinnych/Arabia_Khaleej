@@ -164,51 +164,45 @@ async function handleAutomation(env) {
   }
 }
 
-async function generateSingleArticle(lang, type, item, env) {
-  try {
-    const model = "llama-3.3-70b-versatile";
-    
-    // Weighted Content Rotation
-    const rand = Math.random();
-    let specificPrompt = "";
-    let contentStyle = "";
-    
-    if (rand < 0.15) {
-      contentStyle = "strategic-analysis";
-      specificPrompt = lang === 'en'
-        ? "Focus on high-level strategic implications, market entry barriers, and long-term economic forecasting."
-        : "ركز على الآثار الاستراتيجية رفيعة المستوى، وعوائق دخول السوق، والتوقعات الاقتصادية طويلة المدى.";
-    } else {
-      const styles = [
-        { name: "how-to", en: "Write a practical 'How-To' guide with actionable steps for regional professionals.", ar: "اكتب دليلاً عملياً 'كيفية' يتضمن خطوات قابلة للتنفيذ للمهنيين الإقليميين." },
-        { name: "why-explainer", en: "Write a deep-dive 'Why' explainer addressing the root causes and regional drivers.", ar: "اكتب مقالاً تفسيرياً 'لماذا' يتناول الأسباب الجذرية والمحركات الإقليمية." },
-        { name: "expert-review", en: "Write an objective expert review with pros, cons, and a definitive verdict.", ar: "اكتب مراجعة خبير موضوعية مع الإيجابيات والسلبيات وحكم نهائي." }
-      ];
-      const style = styles[Math.floor(Math.random() * styles.length)];
-      contentStyle = style.name;
-      specificPrompt = lang === 'en' ? style.en : style.ar;
-    }
-
+    const author = getRandomAuthor();
     const prompt = lang === 'en' 
       ? `Write an extremely detailed, 1500-word authoritative regional analysis about ${item.country} regarding: ${item.topic}.
-         STYLE: ${specificPrompt}
-         The article MUST include:
+         
+         EDITORIAL IDENTITY: You are writing as ${author.name}, ${author.role}. 
+         ${author.bio}
+
+         STYLE & TONE:
+         - PROFESSIONAL & OBSERVATIONAL: Avoid "encyclopedic" or "robotic" tones. 
+         - HUMAN TOUCH: Include at least one specific regional detail, local nuance, or "on-the-ground" observation (e.g., a specific landmark, a cultural habit, or a local market sentiment).
+         - NO AI-ISMS: Do NOT use phrases like "In conclusion", "It is important to note", "Furthermore", "As a senior analyst", or "Certainly".
+         - STRUCTURE: Use varied sentence lengths and authoritative, punchy headers.
+
+         THE ARTICLE MUST INCLUDE:
          - A professional, SEO-optimized title
-         - Executive Summary
+         - Executive Summary (but don't call it that—use a punchy intro)
          - Detailed Context & Background
          - Current Market Trends & Data
          - In-depth Impact Analysis
          - Future Outlook & Recommendations
          Format in Markdown. Start with # Title.`
       : `اكتب تحليلاً إقليمياً موثوقاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} بخصوص: ${item.topic}.
-         الأسلوب: ${specificPrompt}
+         
+         الهوية التحريرية: أنت تكتب بصفتك ${author.nameAr}، ${author.roleAr}.
+         ${author.bioAr}
+
+         الأسلوب والنبرة (نبرة خليجية رصينة):
+         - اللغة: استخدم لغة عربية سليمة ولكن بنكهة "خليجية مهنية" (اللغة البيضاء الراقية).
+         - المفردات: استخدم مصطلحات دارجة في الصحافة الاقتصادية والسياسية الإقليمية (مثل: "الساحة الخليجية"، "المشهد التنموي"، "القطاع الخاص"، "الحراك الاقتصادي"، "المواطن والمقيم").
+         - تجنب الترجمة الحرفية: لا تستخدم تعبيرات مترجمة من الإنجليزية (مثل: "في نهاية اليوم" أو "لعب دوراً"). استخدم بدائل عربية أصيلة.
+         - لمسة إنسانية ميدانية: يجب أن يتضمن المقال إشارة محددة لواقع محلي (مثل: "مجالس الأعمال"، "ديوانية"، "سوق العمل"، أو مرجع لمشروع وطني محدد في ${item.country}).
+         - تجنب "كليشيهات" الذكاء الاصطناعي: يمنع تماماً استخدام "في الختام"، "من الجدير بالذكر"، "خلاصة القول"، أو "بالإضافة إلى ذلك" بشكل متكرر وممل.
+
          يجب أن يتضمن المقال:
-         - عنوان مهني مُحسن لمحركات البحث
-         - ملخص تنفيذي
-         - السياق والخلفية التفصيلية
-         - اتجاهات السوق والبيانات الحالية
-         - تحليل معمق للتأثير
-         - التوقعات المستقبلية والتوصيات
+         - عنوان مهني جذاب (على غرار عناوين وكالات الأنباء الإقليمية: واس، قنا، وام).
+         - مقدمة تحليلية قوية تدخل في صلب الموضوع فوراً.
+         - سياق تاريخي واقتصادي للموضوع في ${item.country}.
+         - تحليل معمق للأثر على المستوى المحلي والإقليمي.
+         - رؤية مستقبلية وتوصيات استراتيجية.
          تنسيق Markdown. ابدأ بـ # العنوان.`;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -220,17 +214,18 @@ async function generateSingleArticle(lang, type, item, env) {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: "You are a senior regional analyst for Arabia Khaleej, providing institutional-grade intelligence." },
+          { role: "system", content: "You are a senior regional analyst for Arabia Khaleej, providing institutional-grade intelligence. You write with deep local GCC knowledge, utilizing a professional Khaleeji 'White-Collar' Arabic style, and meticulously avoid common AI linguistic patterns and direct English translations." },
           { role: "user", content: prompt }
         ],
-        temperature: 0.7,
+        temperature: 0.8, // Slightly higher for more creative/human output
         max_tokens: 8192,
       }),
     });
 
     if (!response.ok) return null;
     const data = await response.json();
-    const content = cleanAIContent(data.choices[0].message.content);
+    const rawContent = data.choices[0].message.content;
+    const content = cleanAIContent(rawContent);
     
     if (content.length < 3000) return null;
 
@@ -252,11 +247,28 @@ async function generateSingleArticle(lang, type, item, env) {
       language: lang,
       tags: [type, 'intelligence', contentStyle],
       image: imageUrl,
+      author: {
+        id: author.id,
+        name: lang === 'en' ? author.name : author.nameAr,
+        role: lang === 'en' ? author.role : author.roleAr,
+      }
     };
   } catch (err) {
     return null;
   }
 }
+
+// Inline Author Data for Worker (to avoid bundling complexity)
+const AUTHORS = [
+  { id: "zaid-alharbi", name: "Zaid Al-Harbi", nameAr: "زيد الحربي", role: "Senior Economic Analyst", roleAr: "كبير محللي الاقتصاد", bio: "Based in Riyadh, Zaid specializes in GCC macro-economics.", bioAr: "مقيم في الرياض، يتخصص زيد في الاقتصاد الكلي." },
+  { id: "layla-mansour", name: "Layla Mansour", nameAr: "ليلى منصور", role: "Innovation & Tech Lead", roleAr: "رئيسة الابتكار والتكنولوجيا", bio: "Dubai-based researcher focusing on AI and fintech.", bioAr: "باحثة مقيمة في دبي تركز على الذكاء الاصطناعي." },
+  { id: "omar-qabbani", name: "Omar Qabbani", nameAr: "عمر قباني", role: "Regional Policy Analyst", roleAr: "محلل السياسات الإقليمية", bio: "Doha-based deep-dive analysis on GCC inter-state policy.", bioAr: "محلل في الدوحة للسياسات البينية." }
+];
+
+function getRandomAuthor() {
+  return AUTHORS[Math.floor(Math.random() * AUTHORS.length)];
+}
+
 
 async function generateTrendingTopics(newsContext, env) {
   const prompt = `Based on these current GCC news headlines:\n${newsContext}\n\nGenerate 10 trending and authoritative article topics for the GCC region. 

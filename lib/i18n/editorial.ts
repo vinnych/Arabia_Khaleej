@@ -80,39 +80,39 @@ export const editorial: Translations = {
   moreInsights: { en: "More Insights", ar: "المزيد من الرؤى" },
 
   // ---------------------------------------------------------------------------
-  // Editorial Team — Analyst 1: Dr. Faisal Al-Saud
+  // Editorial Team — Analyst 1: Zaid Al-Harbi
   // Covers: Fiscal, Geopolitics, Energy articles
   // ---------------------------------------------------------------------------
 
-  analyst1Name: { en: "Dr. Faisal Al-Saud", ar: "د. فيصل آل سعود" },
-  analyst1Role: { en: "Chief Regional Strategist", ar: "رئيس الاستراتيجيات الإقليمية" },
+  analyst1Name: { en: "Zaid Al-Harbi", ar: "زيد الحربي" },
+  analyst1Role: { en: "Senior Economic Analyst", ar: "كبير محللي الاقتصاد" },
   analyst1Bio: {
-    en: "Dr. Faisal Al-Saud brings over two decades of experience in Gulf economic policy, sovereign wealth strategy, and regional geopolitics. He leads the Arabia Khaleej fiscal and energy intelligence desk, with a focus on Vision 2030 implementation and GCC monetary convergence.",
-    ar: "يمتلك د. فيصل آل سعود أكثر من عشرين عاماً من الخبرة في السياسة الاقتصادية الخليجية واستراتيجيات صناديق الثروة السيادية والجيوسياسة الإقليمية. يقود مكتب الاستخبارات المالية والطاقة في عربية خليج، مع التركيز على تنفيذ رؤية 2030 والتقارب النقدي الخليجي.",
+    en: "Based in Riyadh, Zaid specializes in GCC macro-economics and the fiscal transformations of Vision 2030. With over 15 years of experience in regional markets, he provides institutional-grade insights into sovereign wealth and energy policy.",
+    ar: "مقيم في الرياض، يتخصص زيد في الاقتصاد الكلي لدول مجلس التعاون الخليجي والتحولات المالية لرؤية 2030. مع أكثر من 15 عاماً من الخبرة في الأسواق الإقليمية، يقدم رؤى مؤسسية حول الثروة السيادية وسياسة الطاقة.",
   },
 
   // ---------------------------------------------------------------------------
-  // Editorial Team — Analyst 2: Amna Al-Hashimi
-  // Covers: Culture articles
+  // Editorial Team — Analyst 2: Layla Mansour
+  // Covers: Tech, Innovation, Startups
   // ---------------------------------------------------------------------------
 
-  analyst2Name: { en: "Amna Al-Hashimi", ar: "آمنة الهاشمي" },
-  analyst2Role: { en: "Director of Cultural Intelligence", ar: "مديرة الاستخبارات الثقافية" },
+  analyst2Name: { en: "Layla Mansour", ar: "ليلى منصور" },
+  analyst2Role: { en: "Innovation & Tech Lead", ar: "رئيسة الابتكار والتكنولوجيا" },
   analyst2Bio: {
-    en: "Amna Al-Hashimi specialises in cultural transformation, gender policy, and soft-power dynamics across the GCC. Her analysis bridges heritage preservation and modernisation, offering nuanced perspectives on youth identity, creative economies, and the evolution of Gulf social norms.",
-    ar: "تتخصص آمنة الهاشمي في التحول الثقافي وسياسات النوع الاجتماعي وديناميكيات القوة الناعمة في منطقة الخليج. يجمع تحليلها بين الحفاظ على التراث والتحديث، مع تقديم وجهات نظر دقيقة حول هوية الشباب والاقتصادات الإبداعية وتطور الأعراف الاجتماعية الخليجية.",
+    en: "Layla is a Dubai-based researcher focusing on the intersection of AI, fintech, and the regional startup ecosystem. She tracks the digital acceleration across the UAE and Qatar, surfacing the trends shaping the future of the Khaleej.",
+    ar: "ليلى باحثة مقيمة في دبي تركز على تقاطع الذكاء الاصطناعي والتكنولوجيا المالية والنظام البيئي للشركات الناشئة الإقليمية. تتابع التسارع الرقمي في الإمارات وقطر، وتبرز الاتجاهات التي تشكل مستقبل الخليج.",
   },
 
   // ---------------------------------------------------------------------------
-  // Editorial Team — Analyst 3: Marcus Thorne
-  // Covers: Technology, Infrastructure articles
+  // Editorial Team — Analyst 3: Omar Qabbani
+  // Covers: Policy, Infrastructure, Regional Integration
   // ---------------------------------------------------------------------------
 
-  analyst3Name: { en: "Marcus Thorne", ar: "ماركوس ثورن" },
-  analyst3Role: { en: "Head of Market Dynamics", ar: "رئيس ديناميكيات السوق" },
+  analyst3Name: { en: "Omar Qabbani", ar: "عمر قباني" },
+  analyst3Role: { en: "Regional Policy Analyst", ar: "محلل السياسات الإقليمية" },
   analyst3Bio: {
-    en: "Marcus Thorne covers technology adoption, infrastructure investment, and capital market dynamics across the Gulf. With a background in emerging-market research, he tracks the GCC's transition from hydrocarbon dependency to a diversified, knowledge-driven economic model.",
-    ar: "يغطي ماركوس ثورن التكنولوجيا والاستثمار في البنية التحتية وديناميكيات أسواق رأس المال في منطقة الخليج. وبخلفيته في أبحاث الأسواق الناشئة، يرصد انتقال دول الخليج من الاعتماد على الهيدروكربونات نحو نموذج اقتصادي متنوع قائم على المعرفة.",
+    en: "Based in Doha, Omar provides deep-dive analysis on GCC inter-state policy, logistics, and infrastructure development. His work focuses on the strategic connectivity and legislative frameworks driving regional integration.",
+    ar: "مقيم في الدوحة، يقدم عمر تحليلاً معمقاً لسياسة دول مجلس التعاون الخليجي والخدمات اللوجستية وتطوير البنية التحتية. يركز عمله على الاتصال الاستراتيجي والأطر التشريعية التي تدفع التكامل الإقليمي.",
   },
 
   // ---------------------------------------------------------------------------
@@ -120,11 +120,11 @@ export const editorial: Translations = {
   // ---------------------------------------------------------------------------
 
   /** Card title for the AI methodology disclosure section */
-  aiEditorialDisclosure: { en: "AI-Assisted Editorial Process", ar: "العملية التحريرية بمساعدة الذكاء الاصطناعي" },
+  aiEditorialDisclosure: { en: "Augmented Editorial Intelligence", ar: "الذكاء التحريري المعزز" },
 
   /** Card body explaining the AI-assisted drafting methodology */
   aiEditorialDisclosureDesc: {
-    en: "Arabia Khaleej articles are produced using AI-assisted drafting, powered by large language models, and then structured and published under the oversight of our named editorial team. Author attribution reflects the relevant desk lead responsible for each content category. We disclose this methodology in the interest of full transparency.",
-    ar: "تُنتج مقالات عربية خليج باستخدام الصياغة بمساعدة الذكاء الاصطناعي عبر نماذج اللغة الكبيرة، ثم تُهيكل وتُنشر تحت إشراف فريق التحرير المُسمّى لدينا. يعكس ائتمان المؤلف المسؤول المعني بكل فئة محتوى. نُفصح عن هذه المنهجية في سبيل الشفافية الكاملة.",
+    en: "Arabia Khaleej employs an augmented editorial model where large language models are utilized for high-velocity data synthesis and preliminary drafting. Every output is meticulously structured, verified, and published under the rigorous oversight of our regional editorial desk. This methodology ensures institutional-grade insights with real-time grounding in GCC market dynamics.",
+    ar: "تعتمد عربية خليج نموذجاً تحريرياً معززاً حيث يتم استخدام نماذج اللغة الكبيرة للتوليف السريع للبيانات والصياغة الأولية. يتم هيكلة كل مخرج والتحقق منه ونشره بدقة تحت إشراف صارم من مكتب التحرير الإقليمي لدينا. تضمن هذه المنهجية رؤى مؤسسية مع ترسيخ في الوقت الفعلي لديناميكيات السوق الخليجية.",
   },
 };

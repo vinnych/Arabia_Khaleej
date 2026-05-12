@@ -25,7 +25,13 @@ const GCC_COUNTRIES = [
   { id: 'bahrain', key: 'bahrain', flag: '/flags/bahrain_new.png', code: 'BH' },
 ];
 
-export default function HomeClient() {
+import { InsightItem } from "@/lib/insights";
+
+interface HomeClientProps {
+  initialInsights?: InsightItem[];
+}
+
+export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
   const { t, isRTL } = useLanguage();
 
   return (
@@ -163,6 +169,68 @@ export default function HomeClient() {
             ))}
           </div>
         </section>
+
+        {/* ── EDITORIAL HIGHLIGHTS ── */}
+        {initialInsights.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-2xl font-serif font-bold text-foreground">{t('featuredInsights')}</h2>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">{t('regionalIntelligence')}</p>
+              </div>
+              <Link href="/insights" className="text-xs font-bold text-gold hover:underline flex items-center gap-1 uppercase tracking-tighter">
+                {t('viewAll')} <ArrowRight size={12} />
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {initialInsights.map((insight) => (
+                <Link
+                  key={insight.slug}
+                  href={`/insights/${insight.slug}`}
+                  className="group flex flex-col sm:flex-row gap-4 card-surface rounded-2xl p-4 hover:border-primary/20 transition-all duration-300"
+                >
+                  <div className="relative w-full sm:w-40 h-32 rounded-xl overflow-hidden flex-shrink-0">
+                    <Image
+                      src={insight.image || "/images/insights/default.png"}
+                      alt={insight.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute top-2 left-2 px-2 py-1 bg-brand-gold text-[10px] font-bold rounded-md text-brand-obsidian uppercase tracking-tighter">
+                      {insight.tags?.[0] || 'Insight'}
+                    </div>
+                  </div>
+                  <div className="flex flex-col justify-center gap-2">
+                    <h3 className="text-base font-bold text-foreground leading-tight group-hover:text-gold transition-colors">
+                      {insight.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                      {insight.description}
+                    </p>
+                      <div className="flex items-center gap-2 mt-auto pt-2">
+                        <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                          <Image 
+                            src={
+                              insight.author?.id === 'layla-mansour' ? '/authors/layla.png' : 
+                              insight.author?.id === 'omar-qabbani' ? '/authors/omar.png' : 
+                              '/authors/zaid.png'
+                            } 
+                            alt={insight.author?.name || t('siteName')} 
+                            width={20} 
+                            height={20}
+                          />
+                        </div>
+                        <span className="text-[10px] font-bold text-foreground/80 uppercase tracking-tight">
+                          {insight.author?.name || t('siteName')}
+                        </span>
+                      </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ── AD UNIT ── */}
         <AdUnit slot={AD_SLOTS.home} className="w-full" />

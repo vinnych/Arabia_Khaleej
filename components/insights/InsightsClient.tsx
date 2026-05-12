@@ -19,6 +19,11 @@ interface InsightItem {
   category: string;
   language: 'en' | 'ar' | 'regional';
   image?: string;
+  author?: {
+    id: string;
+    name: string;
+    role: string;
+  };
 }
 
 export default function InsightsClient() {
@@ -247,10 +252,15 @@ export default function InsightsClient() {
                   </h2>
                   
                   <div className="flex items-center justify-between mt-8 pt-6 border-t border-brand-gold/10">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-gold/50" />
-                      {new Date(item.pubDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
-                    </span>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/50 flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-brand-gold/50" />
+                        {new Date(item.pubDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </span>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-brand-gold/70">
+                        {item.author?.name || item.source}
+                      </span>
+                    </div>
                     <div className="w-11 h-11 rounded-2xl bg-brand-gold/5 flex items-center justify-center group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all duration-500 shadow-inner">
                       <ExternalLink size={18} className="opacity-40 group-hover:opacity-100" />
                     </div>

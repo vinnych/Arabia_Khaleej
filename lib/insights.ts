@@ -56,6 +56,11 @@ export interface InsightItem {
   image?: string;
   tags?: string[];
   content?: string;
+  author?: {
+    id: string;
+    name: string;
+    role: string;
+  };
 }
 
 // ---------------------------------------------------------------------------

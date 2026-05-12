@@ -7,6 +7,8 @@ import {
 import HomeClient from "@/components/home/HomeClient";
 import { getServerLanguage, getT } from "@/lib/i18n-server";
 
+import { getUnifiedInsights } from "@/lib/insights";
+
 export const runtime = 'edge';
 
 export async function generateMetadata() {
@@ -33,6 +35,8 @@ export async function generateMetadata() {
 
 export default async function Home() {
   const t = await getT();
+  const lang = await getServerLanguage();
+  const insights = await getUnifiedInsights({ lang, limit: 4 });
   
   const faqQuestions = [
     {
@@ -75,7 +79,7 @@ export default async function Home() {
         ]}
       />
       <FAQSchema questions={faqQuestions} />
-      <HomeClient />
+      <HomeClient initialInsights={insights} />
     </>
   );
 }

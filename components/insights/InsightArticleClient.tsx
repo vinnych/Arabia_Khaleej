@@ -159,11 +159,12 @@ export default function InsightArticleClient({
               <div className="relative w-12 h-12 rounded-full overflow-hidden border border-brand-gold/30">
                 <Image 
                   src={
-                    article.source.includes('Amna') ? "https://arabiakhaleej.com/analysts/amna-al-hashimi.png" :
-                    article.source.includes('Marcus') ? "https://arabiakhaleej.com/analysts/marcus-thorne.png" :
-                    "https://arabiakhaleej.com/analysts/faisal-al-saud.png"
+                    article.author?.id === 'zaid-alharbi' ? "/authors/zaid.png" :
+                    article.author?.id === 'layla-mansour' ? "/authors/layla.png" :
+                    article.author?.id === 'omar-qabbani' ? "/authors/omar.png" :
+                    "/authors/zaid.png"
                   }
-                  alt={article.source}
+                  alt={article.author?.name || article.source}
                   fill
                   className="object-cover"
                 />
@@ -171,18 +172,10 @@ export default function InsightArticleClient({
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/30">{t('editorialLeadership')}</p>
                 <p className="text-sm font-bold text-foreground">
-                  {
-                    article.source.includes('Amna') ? "Amna Al-Hashimi" :
-                    article.source.includes('Marcus') ? "Marcus Thorne" :
-                    "Dr. Faisal Al-Saud"
-                  }
+                  {article.author?.name || article.source}
                 </p>
                 <p className="text-[10px] font-medium opacity-50 uppercase tracking-tight">
-                  {
-                    article.source.includes('Amna') ? "Director of Cultural Intelligence" :
-                    article.source.includes('Marcus') ? "Head of Market Dynamics" :
-                    "Chief Regional Strategist"
-                  }
+                  {article.author?.role || t('regionalIntelligence')}
                 </p>
               </div>
             </div>
