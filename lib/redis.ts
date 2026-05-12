@@ -5,6 +5,11 @@ import { Redis } from '@upstash/redis';
  * Uses native CompressionStream/DecompressionStream APIs.
  */
 async function compress(data: string): Promise<string> {
+  // Edge runtime (e.g., Cloudflare) does not support CompressionStream/DecompressionStream.
+  // Fallback to returning the raw data when those APIs are unavailable.
+  if (typeof CompressionStream === 'undefined') {
+    return data;
+  }
   const encoder = new TextEncoder();
   const uint8 = encoder.encode(data);
   const stream = new ReadableStream({
@@ -29,7 +34,10 @@ async function compress(data: string): Promise<string> {
 
 async function decompress(compressedStr: string): Promise<string> {
   if (!compressedStr.startsWith('compressed:')) return compressedStr;
-  
+  // Edge runtime may lack DecompressionStream; fallback to returning the original string.
+  if (typeof DecompressionStream === 'undefined') {
+    return compressedStr.replace('compressed:', '');
+  }
   const base64 = compressedStr.replace('compressed:', '');
   const binary = atob(base64);
   const bytes = new Uint8Array(binary.length);
