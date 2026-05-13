@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL!;
 const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN!;
 const ADMIN_SECRET = process.env.ADMIN_SECRET!;
