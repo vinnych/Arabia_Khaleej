@@ -131,8 +131,8 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
                       {t(link.key)}
                     </span>
                     <span className="text-sm text-muted-foreground/70 leading-relaxed font-light">
-                      {t(link.desc as any)}
-                    </span>
+                       {t(link.desc)}
+                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-brand-gold opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
                     <span className="text-xs font-bold uppercase tracking-widest">{t('explore')}</span>

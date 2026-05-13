@@ -12,7 +12,7 @@ import { toSlug } from '@/lib/utils';
 import { InsightItem } from '@/lib/insights';
 import { getRelevantImage } from '@/lib/images';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
@@ -45,7 +45,7 @@ async function generateSingleArticle(
       link: `/insights/${slug}`,
       pubDate: new Date().toISOString(),
       source: aiData.author.name, // Use AI-generated author
-      category: aiData.category as any, // Use AI-generated category
+      category: (aiData.category === 'gcc' || aiData.category === 'expat') ? aiData.category : 'gcc', // Validate category type
       language: lang,
       tags: [type, aiData.category.toLowerCase(), 'intelligence'],
       image: imageUrl,

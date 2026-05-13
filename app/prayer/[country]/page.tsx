@@ -89,7 +89,7 @@ export default async function CountryPrayerPage({
   const breadcrumbItems = [
     { name: t('home'), item: "/" },
     { name: t('prayerTimes'), item: "/prayer" },
-    { name: t(countrySlug === 'saudi-arabia' ? 'saudiArabia' : countrySlug as any), item: `/prayer/${country.slug}` },
+    { name: t(countrySlug === 'saudi-arabia' ? 'saudiArabia' : countrySlug === 'united-arab-emirates' ? 'uae' : countrySlug === 'qatar' ? 'qatar' : countrySlug === 'kuwait' ? 'kuwait' : countrySlug === 'oman' ? 'oman' : 'bahrain'), item: `/prayer/${country.slug}` },
   ];
 
   const geo = {

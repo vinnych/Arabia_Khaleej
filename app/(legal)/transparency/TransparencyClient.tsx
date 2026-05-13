@@ -132,8 +132,8 @@ export default function TransparencyPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
         {sections.map((section, idx) => (
-          <div 
-            key={idx} 
+          <div
+            key={section.title}
             className="glass p-8 rounded-3xl border-brand-gold/10 hover:border-brand-gold/30 transition-all group"
           >
             <div className="w-12 h-12 rounded-2xl bg-brand-gold/10 flex items-center justify-center text-accent mb-6 group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-colors">

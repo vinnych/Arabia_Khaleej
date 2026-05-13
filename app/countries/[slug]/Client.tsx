@@ -257,8 +257,8 @@ export default function CountryClient() {
       {/* Detailed Sections */}
       <div className="max-w-5xl mx-auto px-6 pb-24">
         <div className="grid grid-cols-1 gap-12">
-          {data.details.map((section: any, idx: number) => (
-            <div key={idx} className="group">
+          {data.details.map((section: any) => (
+            <div key={section.titleKey} className="group">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-1 h-8 bg-brand-gold rounded-full" />
                 <h2 className="text-3xl font-black uppercase tracking-tight text-accent group-hover:pl-2 transition-all duration-300">

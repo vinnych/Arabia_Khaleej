@@ -9,7 +9,7 @@ import { getServerLanguage, getT } from "@/lib/i18n-server";
 
 import { getUnifiedInsights } from "@/lib/insights";
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export async function generateMetadata() {
   const lang = await getServerLanguage();

@@ -35,7 +35,7 @@ import { SITE_URL } from '@/lib/seo';
 import { getAllInsightSlugs } from '@/lib/insights';
 
 export const dynamic = 'force-dynamic';
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const countries = ['qatar', 'uae', 'saudi-arabia', 'kuwait', 'oman', 'bahrain'];
