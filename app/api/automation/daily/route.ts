@@ -12,7 +12,7 @@ import { toSlug } from '@/lib/utils';
 import { InsightItem } from '@/lib/insights';
 import { getRelevantImage } from '@/lib/images';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 

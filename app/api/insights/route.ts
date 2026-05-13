@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getUnifiedInsights, getArticleBySlug } from '@/lib/insights';
 
-// Runtime set to Node.js to avoid edge runtime limitations with CompressionStream.
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export const revalidate = 300; // Cache for 5 minutes
 
