@@ -111,27 +111,27 @@ async function handleAutomation(env) {
       }
     }
 
-    // 4. Save to Upstash Redis (Decoupled Model)
+    // 4. Save Drafts to Upstash Redis (No auto-publish)
     for (const lang of ['en', 'ar']) {
       const batch = lang === 'en' ? generatedEn : generatedAr;
       if (batch.length === 0) continue;
 
-      const listKey = `insights:list:${lang}`;
+      const draftKey = `insights:drafts:${lang}`;
       
-      // Get current list
-      const currentRes = await fetch(`${env.UPSTASH_REDIS_REST_URL}/get/${listKey}`, {
+      // Get current drafts
+      const currentRes = await fetch(`${env.UPSTASH_REDIS_REST_URL}/get/${draftKey}`, {
         headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}` }
       });
       const currentData = await currentRes.json();
-      let currentList = [];
+      let currentDrafts = [];
       if (currentData.result) {
-        currentList = await decompress(currentData.result);
+        currentDrafts = await decompress(currentData.result);
       }
 
       const newMetadata = [];
       for (const article of batch) {
-        // Save full article content individually
-        const articleKey = `insights:article:${article.slug}`;
+        // Save full draft content individually
+        const articleKey = `insights:draft:article:${article.slug}`;
         const compressedContent = await compress(article);
         await fetch(`${env.UPSTASH_REDIS_REST_URL}/set/${articleKey}?ex=31536000`, { // 1 year
           method: 'POST',
@@ -139,19 +139,19 @@ async function handleAutomation(env) {
           body: compressedContent
         });
 
-        // Extract metadata for the list
+        // Extract metadata for the draft list
         const { content, ...metadata } = article;
         newMetadata.push(metadata);
       }
 
-      // Update the metadata list
-      const updatedList = [...newMetadata, ...currentList].slice(0, 1000);
-      const compressedList = await compress(updatedList);
+      // Update the draft list
+      const updatedDrafts = [...newMetadata, ...currentDrafts].slice(0, 1000);
+      const compressedDrafts = await compress(updatedDrafts);
       
-      await fetch(`${env.UPSTASH_REDIS_REST_URL}/set/${listKey}?ex=31536000`, {
+      await fetch(`${env.UPSTASH_REDIS_REST_URL}/set/${draftKey}?ex=31536000`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${env.UPSTASH_REDIS_REST_TOKEN}` },
-        body: compressedList
+        body: compressedDrafts
       });
     }
 
@@ -165,17 +165,16 @@ async function handleAutomation(env) {
 }
 async function generateSingleArticle(item, lang, type, contentStyle, env) {
   try {
-    const author = getRandomAuthor();
+    const author = EDITORIAL_AUTHOR;
     const prompt = lang === 'en' 
       ? `Write an extremely detailed, 1500-word authoritative regional analysis about ${item.country} regarding: ${item.topic}.
          
-         EDITORIAL IDENTITY: You are writing as ${author.name}, ${author.role}. 
-         ${author.bio}
+         EDITORIAL IDENTITY: You are writing for the Arabia Khaleej Editorial Team, providing institutional-grade intelligence for the GCC region.
 
          STYLE & TONE:
          - PROFESSIONAL & OBSERVATIONAL: Avoid "encyclopedic" or "robotic" tones. 
          - HUMAN TOUCH: Include at least one specific regional detail, local nuance, or "on-the-ground" observation (e.g., a specific landmark, a cultural habit, or a local market sentiment).
-         - NO AI-ISMS: Do NOT use phrases like "In conclusion", "It is important to note", "Furthermore", "As a senior analyst", or "Certainly".
+         - NO AI-ISMS: Do NOT use phrases like "In conclusion", "It is important to note", "Furthermore", or "Certainly".
          - STRUCTURE: Use varied sentence lengths and authoritative, punchy headers.
 
          THE ARTICLE MUST INCLUDE:
@@ -188,8 +187,7 @@ async function generateSingleArticle(item, lang, type, contentStyle, env) {
          Format in Markdown. Start with # Title.`
       : `اكتب تحليلاً إقليمياً موثوقاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} بخصوص: ${item.topic}.
          
-         الهوية التحريرية: أنت تكتب بصفتك ${author.nameAr}، ${author.roleAr}.
-         ${author.bioAr}
+         الهوية التحريرية: أنت تكتب لهيئة تحرير عربية خليج، وتقدم استخبارات مؤسسية للمنطقة.
 
          الأسلوب والنبرة (نبرة خليجية رصينة):
          - اللغة: استخدم لغة عربية سليمة ولكن بنكهة "خليجية مهنية" (اللغة البيضاء الراقية).
@@ -227,7 +225,7 @@ async function generateSingleArticle(item, lang, type, contentStyle, env) {
     if (!response.ok) return null;
     const data = await response.json();
     const rawContent = data.choices[0].message.content;
-    const content = cleanAIContent(rawContent);
+    const content = rawContent;
     
     if (content.length < 3000) return null;
 
@@ -249,6 +247,7 @@ async function generateSingleArticle(item, lang, type, contentStyle, env) {
       language: lang,
       tags: [type, 'intelligence', contentStyle],
       image: imageUrl,
+      status: 'draft',
       author: {
         id: author.id,
         name: lang === 'en' ? author.name : author.nameAr,
@@ -260,16 +259,14 @@ async function generateSingleArticle(item, lang, type, contentStyle, env) {
   }
 }
 
-// Inline Author Data for Worker (to avoid bundling complexity)
-const AUTHORS = [
-  { id: "zaid-alharbi", name: "Zaid Al-Harbi", nameAr: "زيد الحربي", role: "Senior Economic Analyst", roleAr: "كبير محللي الاقتصاد", bio: "Based in Riyadh, Zaid specializes in GCC macro-economics.", bioAr: "مقيم في الرياض، يتخصص زيد في الاقتصاد الكلي." },
-  { id: "layla-mansour", name: "Layla Mansour", nameAr: "ليلى منصور", role: "Innovation & Tech Lead", roleAr: "رئيسة الابتكار والتكنولوجيا", bio: "Dubai-based researcher focusing on AI and fintech.", bioAr: "باحثة مقيمة في دبي تركز على الذكاء الاصطناعي." },
-  { id: "omar-qabbani", name: "Omar Qabbani", nameAr: "عمر قباني", role: "Regional Policy Analyst", roleAr: "محلل السياسات الإقليمية", bio: "Doha-based deep-dive analysis on GCC inter-state policy.", bioAr: "محلل في الدوحة للسياسات البينية." }
-];
-
-function getRandomAuthor() {
-  return AUTHORS[Math.floor(Math.random() * AUTHORS.length)];
-}
+// Inline Author Data for Worker (Verified Editorial Team)
+const EDITORIAL_AUTHOR = {
+  id: "arabia-khaleej-editorial",
+  name: "Arabia Khaleej Editorial Team",
+  nameAr: "هيئة تحرير عربية خليج",
+  role: "Editorial Board",
+  roleAr: "هيئة التحرير",
+};
 
 
 async function generateTrendingTopics(newsContext, env) {
@@ -308,10 +305,6 @@ async function getRelevantImage(query, env) {
   } catch {
     return "/images/insights/default.png";
   }
-}
-
-function cleanAIContent(content) {
-  return content.replace(/^(Here is|Sure|Certainly|Title:|Article:).*\n+/i, '').trim();
 }
 
 function extractDescription(content) {

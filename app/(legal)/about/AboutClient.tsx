@@ -71,7 +71,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Team */}
+{/* Team */}
       <section className={`mb-8 ${isRTL ? 'text-right' : ''}`}>
         <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-gold/50 mb-2">
           {t('editorialTeam')}
@@ -79,35 +79,23 @@ export default function AboutPage() {
         <p className="text-xs font-light opacity-50 mb-8 italic">
           {t('editorialTeamDesc')}
         </p>
-        <div className="grid gap-6">
-           {[1, 2, 3].map((num) => {
-             const nameKey = `analyst${num}Name` as const;
-             const roleKey = `analyst${num}Role` as const;
-             const bioKey = `analyst${num}Bio` as const;
-             return (
-               <div
-                 key={num}
-                 className={`glass rounded-xl p-6 border border-brand-gold/5 flex gap-6 items-start ${isRTL ? 'flex-row-reverse text-right' : ''}`}
-               >
-                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex-shrink-0 flex items-center justify-center border border-brand-gold/10">
-                   <span className="text-brand-gold text-lg font-bold">
-                     {t(nameKey)[0]}
-                   </span>
-                 </div>
-                 <div>
-                   <p className="text-sm font-bold text-brand-gold mb-1 uppercase tracking-wider">
-                     {t(nameKey)}
-                   </p>
-                   <p className="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em] mb-3">
-                     {t(roleKey)}
-                   </p>
-                   <p className="text-xs font-light leading-relaxed opacity-60">
-                     {t(bioKey)}
-                   </p>
-                 </div>
-               </div>
-             );
-           })}
+        <div className="glass rounded-xl p-6 border border-brand-gold/5 flex gap-6 items-start">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex-shrink-0 flex items-center justify-center border border-brand-gold/10">
+            <span className="text-brand-gold text-lg font-bold">
+              {t('team1Name')[0]}
+            </span>
+          </div>
+          <div>
+            <p className="text-sm font-bold text-brand-gold mb-1 uppercase tracking-wider">
+              {t('team1Name')}
+            </p>
+            <p className="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em] mb-3">
+              {t('team1Role')}
+            </p>
+            <p className="text-xs font-light leading-relaxed opacity-60">
+              {t('team1Bio')}
+            </p>
+          </div>
         </div>
       </section>
 

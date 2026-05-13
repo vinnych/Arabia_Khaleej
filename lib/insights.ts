@@ -56,6 +56,7 @@ export interface InsightItem {
   image?: string;
   tags?: string[];
   content?: string;
+  status?: 'draft' | 'published';
   author?: {
     id: string;
     name: string;
@@ -97,6 +98,9 @@ export async function getUnifiedInsights(options: {
   } catch (e) {
     console.error("Failed to fetch insights list from Redis:", e);
   }
+
+  // Filter to only show published articles (ignore drafts)
+  allItems = allItems.filter(item => item.status !== 'draft');
 
   // Deduplicate by slug to handle any double-write edge cases from the Worker
   const allMap = new Map<string, InsightItem>();

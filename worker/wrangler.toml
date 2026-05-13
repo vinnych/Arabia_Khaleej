@@ -16,3 +16,5 @@ crons = ["0 */12 * * *"] # Run every 12 hours (midnight and noon UTC)
 # - GROQ_API_KEY
 # - PEXELS_API_KEY
 # - CRON_SECRET
+
+# Note: ADMIN_SECRET is for the Next.js app's /admin/review page
