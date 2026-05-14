@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/', 
           '/_next/data/', // Block JSON data for client-side transitions
+          '/admin/', // Block admin panel - protected, non-public content
         ],
       },
       {

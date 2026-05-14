@@ -7,13 +7,16 @@ export default function middleware(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID());
   
   const { searchParams, hostname, pathname } = new URL(request.url);
-  
+
   // Redirect from .pages.dev to the main domain
   if (hostname.endsWith('.pages.dev')) {
     const destination = new URL(`https://arabiakhaleej.com${pathname}`);
     destination.search = searchParams.toString();
     return NextResponse.redirect(destination.toString(), 301);
   }
+
+  // Add noindex header for admin pages (not public content)
+  const isAdminPage = pathname.startsWith('/admin');
 
   const langParam = searchParams.get('lang');
   const cookieLang = request.cookies.get('NEXT_LOCALE')?.value;
@@ -25,7 +28,7 @@ export default function middleware(request: NextRequest) {
       langToSet = langParam;
     }
   }
-  
+
   const isDev = process.env.NODE_ENV === 'development';
   const cspHeader = getCSPHeader(nonce, isDev);
 
@@ -42,6 +45,11 @@ export default function middleware(request: NextRequest) {
 
   // Set the CSP header on the response
   response.headers.set('Content-Security-Policy', cspHeader);
+
+  // Add noindex for admin pages
+  if (isAdminPage) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  }
 
   // Set language cookie if needed
   if (langToSet) {
