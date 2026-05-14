@@ -93,22 +93,29 @@ async function handleAutomation(env) {
     const generatedAr = [];
 
     // 3. Generate Articles (Sequential to respect Groq limits)
-    for (let i = 0; i < 5; i++) {
+    // With 12 runs per day (every 2 hours), generating 3 articles per run for ~36 daily
+    for (let i = 0; i < 2; i++) {
       if (topics[i]) {
         console.log(`Generating EN: ${topics[i].topic}`);
         const res = await generateSingleArticle(topics[i], 'en', 'gcc', 'analytical', env);
         if (res) generatedEn.push(res);
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 800));
       }
     }
 
-    for (let i = 5; i < 10; i++) {
-      if (topics[i]) {
-        console.log(`Generating AR: ${topics[i].topic}`);
-        const res = await generateSingleArticle(topics[i], 'ar', 'gcc', 'analytical', env);
-        if (res) generatedAr.push(res);
-        await new Promise(r => setTimeout(r, 3000));
-      }
+    if (topics[2]) {
+      console.log(`Generating AR: ${topics[2].topic}`);
+      const res = await generateSingleArticle(topics[2], 'ar', 'gcc', 'analytical', env);
+      if (res) generatedAr.push(res);
+      await new Promise(r => setTimeout(r, 800));
+    }
+    
+    // 4th article if available
+    if (topics[3]) {
+      console.log(`Generating EN: ${topics[3].topic}`);
+      const res = await generateSingleArticle(topics[3], 'en', 'gcc', 'analytical', env);
+      if (res) generatedEn.push(res);
+      await new Promise(r => setTimeout(r, 800));
     }
 
     // 4. Save Drafts to Upstash Redis (No auto-publish)
@@ -166,43 +173,61 @@ async function handleAutomation(env) {
 async function generateSingleArticle(item, lang, type, contentStyle, env) {
   try {
     const author = EDITORIAL_AUTHOR;
-    const prompt = lang === 'en' 
-      ? `Write an extremely detailed, 1500-word authoritative regional analysis about ${item.country} regarding: ${item.topic}.
-         
-         EDITORIAL IDENTITY: You are writing for the Arabia Khaleej Editorial Team, providing institutional-grade intelligence for the GCC region.
-
-         STYLE & TONE:
-         - PROFESSIONAL & OBSERVATIONAL: Avoid "encyclopedic" or "robotic" tones. 
-         - HUMAN TOUCH: Include at least one specific regional detail, local nuance, or "on-the-ground" observation (e.g., a specific landmark, a cultural habit, or a local market sentiment).
-         - NO AI-ISMS: Do NOT use phrases like "In conclusion", "It is important to note", "Furthermore", or "Certainly".
-         - STRUCTURE: Use varied sentence lengths and authoritative, punchy headers.
-
-         THE ARTICLE MUST INCLUDE:
-         - A professional, SEO-optimized title
-         - Executive Summary (but don't call it that—use a punchy intro)
-         - Detailed Context & Background
-         - Current Market Trends & Data
-         - In-depth Impact Analysis
-         - Future Outlook & Recommendations
-         Format in Markdown. Start with # Title.`
-      : `اكتب تحليلاً إقليمياً موثوقاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} بخصوص: ${item.topic}.
-         
-         الهوية التحريرية: أنت تكتب لهيئة تحرير عربية خليج، وتقدم استخبارات مؤسسية للمنطقة.
-
-         الأسلوب والنبرة (نبرة خليجية رصينة):
-         - اللغة: استخدم لغة عربية سليمة ولكن بنكهة "خليجية مهنية" (اللغة البيضاء الراقية).
-         - المفردات: استخدم مصطلحات دارجة في الصحافة الاقتصادية والسياسية الإقليمية (مثل: "الساحة الخليجية"، "المشهد التنموي"، "القطاع الخاص"، "الحراك الاقتصادي"، "المواطن والمقيم").
-         - تجنب الترجمة الحرفية: لا تستخدم تعبيرات مترجمة من الإنجليزية (مثل: "في نهاية اليوم" أو "لعب دوراً"). استخدم بدائل عربية أصيلة.
-         - لمسة إنسانية ميدانية: يجب أن يتضمن المقال إشارة محددة لواقع محلي (مثل: "مجالس الأعمال"، "ديوانية"، "سوق العمل"، أو مرجع لمشروع وطني محدد في ${item.country}).
-         - تجنب "كليشيهات" الذكاء الاصطناعي: يمنع تماماً استخدام "في الختام"، "من الجدير بالذكر"، "خلاصة القول"، أو "بالإضافة إلى ذلك" بشكل متكرر وممل.
-
-         يجب أن يتضمن المقال:
-         - عنوان مهني جذاب (على غرار عناوين وكالات الأنباء الإقليمية: واس، قنا، وام).
-         - مقدمة تحليلية قوية تدخل في صلب الموضوع فوراً.
-         - سياق تاريخي واقتصادي للموضوع في ${item.country}.
-         - تحليل معمق للأثر على المستوى المحلي والإقليمي.
-         - رؤية مستقبلية وتوصيات استراتيجية.
-         تنسيق Markdown. ابدأ بـ # العنوان.`;
+const prompt = lang === 'en' 
+  ? `Write an extremely detailed, 1500-word authoritative regional analysis about ${item.country} regarding: ${item.topic}.
+  
+        EDITORIAL IDENTITY: You are a seasoned GCC journalist with 20+ years experience, providing deep insights into regional developments.
+  
+        REQUIRED ELEMENTS (Critical for quality):
+        - Specific company names from ${item.country}/GCC (e.g., "Saudi Aramco", "Emirates NBD", "Qatar Investment Authority")
+        - Cite at least 2 specific official sources with dates (e.g., "According to UAE Ministry of Economy Q1 2024 report...")
+        - Include concrete statistics or policy numbers with actual figures
+        - Reference specific government initiatives or investment values (e.g., "Saudi Vision 2030 allocates...")
+        - Add specific regional examples that demonstrate local context
+  
+        STYLE & TONE:
+        - CONVERSATIONAL: Write as if explaining to a colleague over coffee
+        - LOCALIZED: Use regional terms and phrasing (e.g. "GCC business landscape", "Khaleeji markets")
+        - VARIED: Mix short punchy sentences with longer descriptive ones
+        - NO "AIISMS": Avoid "As an AI", "In conclusion", "Furthermore"
+        - ENGAGING: Use rhetorical questions and occasional humor
+  
+        THE ARTICLE MUST INCLUDE:
+        - A catchy SEO-optimized title 
+        - Clear context about why this matters now
+        - Specific examples from ${item.country} with named entities
+        - Analysis of key players/institutions involved
+        - Thoughtful prognosis of future impacts
+        - Properly cited sources throughout
+  
+        Format in Markdown. Start with # Title.`
+        : `اكتب تحليلاً إقليمياً موثوقاً ومفصلاً للغاية (1500 كلمة) عن ${item.country} بخصوص: ${item.topic}.
+  
+        الهوية التحريرية: أنت صحفي إقليمي مخضرم ولديه أكثر من 20 عاماً من الخبرة في التحليل الاقتصادي والسياسي.
+  
+        العناصر المطلوبة (حاسمة للجودة):
+        - أسماء شركات محددة من ${item.country}/الخليج (مثل "شركة Saudi Aramco"، "بنك Emirates NBD")
+        - اقتباس مصادر رسمية محددة بتواريخ (مثل "وفقاً لتقرير وزارة الاقتصاد الإماراتية للربع الأول 2024...")
+        - إدراج إحصاءات ملموسة أو أرقام سياسية بموجبها حقيقية
+        - الإشارة إلى مبادرات حكومية محددة أو قيم استثمارية (مثل "خطة رؤية 2030 السعودية تخصص...")
+        - أمثلة إقليمية محددة توضح السياق المحلي
+  
+        الأسلوب والنبرة (نبرة خليجية مهنية):
+        - اللغة: استخدم لغة عربية فصيحة ولكن بمفردات خليجية دارجة في الأوساط المهنية
+        - المحادثة: اكتب كما لو كنت تشرح الموضوع لزميل في ديوانية عمل
+        - المواقف: عبر عن آراء شخصية مدعومة بوقائع وأرقام
+        - تجنب "العبارات الآلية": يمنع استخدام "هذا المقال المقدم من الذكاء الاصطناعي" أو "في الختام"
+        - التشويق: استخدم أسئلة بلاغية وطرفة خفيفة عند الاقتضاء
+  
+        يجب أن يتضمن المقال:
+        - عنواناً جذاباً ومحسّناً لمحركات البحث
+        - سياقاً واضحاً عن أهمية الموضوع الآن
+        - أمثلة محددة من ${item.country} مع كيانات مسماة
+        - تحليل لأبرز المؤسسات والأطراف المعنية
+        - توقعات مستقبلية مبنية على معطيات
+        - مصادر مُقتبسة طوال النص
+  
+        تنسيق Markdown. ابدأ بـ # العنوان.`;
 
     const model = "llama-3.3-70b-versatile";
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -270,9 +295,9 @@ const EDITORIAL_AUTHOR = {
 
 
 async function generateTrendingTopics(newsContext, env) {
-  const prompt = `Based on these current GCC news headlines:\n${newsContext}\n\nGenerate 10 trending and authoritative article topics for the GCC region. 
-  Focus on economics, tech, policy, and business. 
-  Return ONLY a JSON array of objects with keys "country" and "topic".`;
+   const prompt = `Based on these current GCC news headlines:\n${newsContext}\n\nGenerate 20 trending and authoritative article topics for the GCC region. 
+   Focus on economics, tech, policy, and business. 
+   Return ONLY a JSON array of objects with keys "country" and "topic".`;
   
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",

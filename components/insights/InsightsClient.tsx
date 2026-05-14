@@ -187,18 +187,18 @@ export default function InsightsClient() {
             ))}
           </div>
           
-          {displayCount < insights.length && (
-            <div className="mt-20 flex justify-center">
-              <button
-                onClick={() => setDisplayCount(prev => prev + 12)}
-                className="group px-10 py-4 rounded-full border border-brand-gold/20 text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/60 hover:bg-brand-gold hover:text-brand-obsidian hover:border-brand-gold active:scale-95 transition-all duration-500 shadow-xl"
-              >
-                {t('loadMore')}
-              </button>
-            </div>
-          )}
-        </>
-      )}
+{displayCount < insights.length && (
+             <div className="mt-20 flex justify-center">
+               <button
+                 onClick={() => setDisplayCount(prev => prev + 12)}
+                 className="group px-10 py-4 rounded-full border border-brand-gold/20 text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/60 hover:bg-brand-gold hover:text-brand-obsidian hover:border-brand-gold active:scale-95 transition-all duration-500 shadow-xl"
+               >
+                 {t('loadMore')}
+               </button>
+             </div>
+           )}
+         </>
+       )}
 
       {/* Transparency Note */}
       <div className="mt-24 text-center max-w-lg mx-auto">

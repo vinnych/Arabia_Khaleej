@@ -2,7 +2,7 @@
   "name": "arabiakhaleej-contact",
   "version": "1.0.0",
   "devDependencies": {
-    "wrangler": "^3.0.0"
+    "wrangler": "^4.91.0"
   },
   "dependencies": {
     "mimetext": "^3.0.24"

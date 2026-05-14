@@ -132,6 +132,14 @@ export async function generateGCCInsight(
   const prompt = lang === 'en'
     ? `Write a comprehensive, authoritative editorial article about ${country} focusing on ${topic}.
        The article should be at least 1500 words with clear sections and institutional-grade analysis.
+
+       REQUIRED ELEMENTS FOR QUALITY:
+       - Specific company names from ${country}/GCC (e.g., "Saudi Aramco", "Emirates NBD")
+       - Cite at least 2 specific official sources with dates
+       - Include concrete statistics or policy numbers
+       - Reference specific government initiatives or investment values
+       - Add specific regional examples that demonstrate local context
+
        Focus: Accurate regional context, cultural depth, economic significance, and forward-looking strategic analysis.
        Tone: Professional, sophisticated, and informative.
        Format: Return a JSON object with the following fields:
@@ -147,6 +155,14 @@ export async function generateGCCInsight(
        4. Return VALID JSON only.`
     : `اكتب مقالاً تحريرياً شاملاً ومعمّقاً عن ${country} مع التركيز على ${topic}.
        يجب أن لا يقل عن 1500 كلمة مع أقسام واضحة وتحليل بمستوى مؤسسي.
+
+       العناصر المطلوبة للجودة:
+       - أسماء شركات محددة من ${country}/الخليج
+       - اقتباس مصادر رسمية محددة بتواريخ
+       - إدراج إحصاءات ملموسة أو أرقام سياسية
+       - الإشارة إلى مبادرات حكومية محددة أو قيم استثمارية
+       - أمثلة إقليمية محددة توضح السياق المحلي
+
        التركيز: السياق الإقليمي الدقيق، العمق الثقافي، الأهمية الاقتصادية، والتحليل الاستراتيجي الاستشرافي.
        الأسلوب: صوت تحريري مهني وراقي.
        التنسيق: أرجع كائن JSON يحتوي على الحقول التالية:

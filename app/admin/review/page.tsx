@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 type Draft = {
@@ -10,6 +11,7 @@ type Draft = {
   pubDate: string;
   language: string;
   image: string;
+  content?: string;
 };
 
 export const dynamic = 'force-dynamic';
@@ -19,6 +21,10 @@ export default function AdminReviewPage() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [expandedDraft, setExpandedDraft] = useState<string | null>(null);
+  const [editedContent, setEditedContent] = useState<Record<string, string>>({});
+  const [editingTitle, setEditingTitle] = useState<Record<string, string>>({});
+  const [hasEdits, setHasEdits] = useState<Record<string, boolean>>({});
   const router = useRouter();
 
   const secret = new URLSearchParams(window.location.search).get('secret');
@@ -50,12 +56,33 @@ export default function AdminReviewPage() {
     });
   }, [secret]);
 
+  const fetchDraftContent = async (slug: string) => {
+    try {
+      const res = await fetch(`/api/admin/draft-content?secret=${secret}&slug=${slug}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.content;
+    } catch {
+      return null;
+    }
+  };
+
   const handleApprove = async (slug: string, lang: string) => {
+    if (!hasEdits[slug]) {
+      if (!confirm('You must make substantive edits to the content before publishing for AdSense compliance. Continue anyway?')) {
+        return;
+      }
+    }
     try {
       const res = await fetch(`/api/admin/approve?secret=${secret}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug, lang }),
+        body: JSON.stringify({
+          slug,
+          lang,
+          content: editedContent[slug],
+          title: editingTitle[slug]
+        }),
       });
       const data = await res.json();
       if (data.success) {
@@ -109,7 +136,7 @@ export default function AdminReviewPage() {
 
       {error && <p className="text-red-500 mb-4">Error: {error}</p>}
 
-      {drafts.length === 0 ? (
+        {drafts.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500 mb-4">No drafts pending review.</p>
           <p className="text-sm text-gray-400">
@@ -122,11 +149,14 @@ export default function AdminReviewPage() {
           {drafts.map(draft => (
             <div key={draft.slug} className="border rounded-lg p-6 shadow-sm">
               {draft.image && (
-                <img 
-                  src={draft.image} 
-                  alt={draft.title}
-                  className="w-full h-48 object-cover rounded-md mb-4"
-                />
+                <div className="relative w-full h-48 mb-4">
+                  <Image 
+                    src={draft.image} 
+                    alt={draft.title}
+                    fill
+                    className="object-cover rounded-md"
+                  />
+                </div>
               )}
               <h2 className="text-xl font-semibold mb-2">{draft.title}</h2>
               <p className="text-gray-600 mb-4 line-clamp-3">{draft.description}</p>
@@ -134,10 +164,61 @@ export default function AdminReviewPage() {
                 <span>{new Date(draft.pubDate).toLocaleDateString()}</span>
                 <span className="uppercase">{draft.language}</span>
               </div>
+              
+              <button
+                onClick={async () => {
+                  if (expandedDraft !== draft.slug) {
+                    const content = await fetchDraftContent(draft.slug);
+                    if (content) {
+                      setEditedContent(prev => ({ ...prev, [draft.slug]: content }));
+                      setEditingTitle(prev => ({ ...prev, [draft.slug]: draft.title }));
+                    }
+                  }
+                  setExpandedDraft(expandedDraft === draft.slug ? null : draft.slug);
+                }}
+                className="w-full mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                {expandedDraft === draft.slug ? 'Hide Editor' : 'Edit & Review'}
+              </button>
+
+              {expandedDraft === draft.slug && (
+                <div className="mb-4 space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Title (edit for SEO)</label>
+                    <input
+                      type="text"
+                      value={editingTitle[draft.slug] || draft.title}
+                      onChange={(e) => {
+                        const newTitle = e.target.value;
+                        setEditingTitle(prev => ({ ...prev, [draft.slug]: newTitle }));
+                        setHasEdits(prev => ({ ...prev, [draft.slug]: newTitle !== draft.title }));
+                      }}
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Content (Markdown)</label>
+                    <textarea
+                      value={editedContent[draft.slug] || ''}
+                      onChange={(e) => {
+                        const newContent = e.target.value;
+                        setEditedContent(prev => ({ ...prev, [draft.slug]: newContent }));
+                        setHasEdits(prev => ({ ...prev, [draft.slug]: true }));
+                      }}
+                      className="w-full px-3 py-2 border rounded font-mono text-sm"
+                      rows={15}
+                    />
+                  </div>
+                  {hasEdits[draft.slug] && (
+                    <p className="text-green-600 text-sm font-medium">✓ Substantive edits detected</p>
+                  )}
+                </div>
+              )}
+
               <div className="flex gap-4">
                 <button
                   onClick={() => handleApprove(draft.slug, draft.language)}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  className={`px-4 py-2 rounded ${hasEdits[draft.slug] ? 'bg-green-600 hover:bg-green-700' : 'bg-green-400 hover:bg-green-500'} text-white`}
                 >
                   Approve & Publish
                 </button>

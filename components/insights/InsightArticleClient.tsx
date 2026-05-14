@@ -10,7 +10,6 @@ import { getDeterministicFallback } from "@/lib/fallbacks";
 import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from 'react-markdown';
-import AdUnit, { AD_SLOTS } from "@/components/ui/AdUnit";
 
 export default function InsightArticleClient({ 
   initialArticle, 
@@ -153,6 +152,14 @@ export default function InsightArticleClient({
               <Calendar size={14} />
               <span>{formatDate(article.pubDate)}</span>
             </div>
+            {article.humanEdited && (
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">
+                  Human Reviewed
+                </span>
+              </div>
+            )}
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.1] tracking-tight">
@@ -179,10 +186,15 @@ export default function InsightArticleClient({
                 <p className="text-sm font-bold text-foreground">
                   {article.author?.name || article.source}
                 </p>
-                <p className="text-[10px] font-medium opacity-50 uppercase tracking-tight">
-                  {article.author?.role || t('regionalIntelligence')}
-                </p>
-              </div>
+<p className="text-[10px] font-medium opacity-50 uppercase tracking-tight">
+                   {article.author?.role || t('regionalIntelligence')}
+                 </p>
+                 {article.humanEdited && article.editedAt && (
+                   <p className="text-[10px] font-medium opacity-30 uppercase tracking-tight mt-1">
+                     Edited: {new Date(article.editedAt).toLocaleDateString(language === 'ar' ? 'ar-QA' : 'en-US')}
+                   </p>
+                 )}
+               </div>
             </div>
             <div className="relative">
               <button 
@@ -215,9 +227,6 @@ export default function InsightArticleClient({
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
           </div>
         )}
-
-        {/* Mid-Article Ad */}
-        <AdUnit slot={AD_SLOTS.article} className="w-full" />
 
         {/* Article Content */}
         <div className={`grid grid-cols-1 ${perspectiveMode ? 'lg:grid-cols-2' : ''} gap-12 max-w-none`}>
@@ -265,12 +274,20 @@ export default function InsightArticleClient({
         </div>
       </article>
 
-      {/* Footer Disclaimer */}
-      <div className="mt-24 pt-12 border-t border-white/5">
-        
-        {/* More Insights Section */}
-        {moreInsights.length > 0 && (
-          <div className="mb-24">
+{/* Footer Disclaimer */}
+       <div className="mt-24 pt-12 border-t border-white/5 space-y-8">
+         {/* Editorial Note */}
+         <div className="glass p-6 rounded-2xl border border-brand-gold/10">
+           <p className="text-xs text-foreground/60 leading-relaxed">
+             <span className="font-bold text-brand-gold">Editorial Note:</span> This analysis was researched with 
+             AI assistance using real-time GCC economic data and reviewed by our editorial team. All insights are 
+             original to Arabia Khaleej and cite verifiable regional sources.
+           </p>
+         </div>
+
+         {/* More Insights Section */}
+         {moreInsights.length > 0 && (
+           <div className="mb-24">
             <h2 className="text-2xl font-bold mb-8 opacity-60 uppercase tracking-widest text-center">
               {t('moreInsights')}
             </h2>

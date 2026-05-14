@@ -7,7 +7,6 @@ import { useLanguage } from "@/lib/i18n";
 import PrayerLite from "@/components/prayer/PrayerLite";
 import FinanceTicker from "@/components/finance/FinanceTicker";
 import PublicSurvey from "@/components/insights/PublicSurvey";
-import AdUnit, { AD_SLOTS } from "@/components/ui/AdUnit";
 
 const NAV_LINKS = [
   { key: 'prayerTimes', href: "/prayer", icon: Clock, desc: "prayerTimesDesc" },
@@ -104,13 +103,13 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         </div>
       </section>
 
-      {/* ── MARKET TICKER ── */}
-      <div className="w-full border-y border-border/50 bg-brand-obsidian/40 backdrop-blur-md z-10">
-        <FinanceTicker />
-      </div>
+{/* ── MARKET TICKER ── */}
+       <div className="w-full border-y border-border/50 bg-brand-obsidian/40 backdrop-blur-md z-10">
+         <FinanceTicker />
+       </div>
 
-      {/* ── MAIN CONTENT AREA ── */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-24 flex flex-col gap-24 z-10">
+       {/* ── MAIN CONTENT AREA ── */}
+       <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-24 flex flex-col gap-24 z-10">
 
         {/* ── QUICK NAV CARDS ── */}
         <section className="animate-fade-up" style={{ animationDelay: "120ms" }}>

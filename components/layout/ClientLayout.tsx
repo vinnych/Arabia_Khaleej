@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import Link from "next/link";
 import MobileNav from "./MobileNav";
 import { motion, AnimatePresence } from "framer-motion";
-import AdUnit, { AD_SLOTS } from "@/components/ui/AdUnit";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const { language, t, isRTL } = useLanguage();
@@ -31,8 +30,6 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </AnimatePresence>
       
       <MobileNav />
-
-      <AdUnit slot={AD_SLOTS.footer} className="w-full max-w-5xl mx-auto px-4" />
 
       <footer className="w-full py-12 border-t border-brand-gold/5 bg-brand-obsidian/20 backdrop-blur-sm">
         <div className="w-full flex flex-col items-center gap-6">

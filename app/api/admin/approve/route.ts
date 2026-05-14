@@ -53,7 +53,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { slug, lang } = await request.json();
+    const { slug, lang, content: editedContent, title: editedTitle } = await request.json();
     if (!slug || !lang) {
       return NextResponse.json({ error: 'Missing slug or lang' }, { status: 400 });
     }
@@ -69,10 +69,27 @@ export async function POST(request: Request) {
     }
     const article = await decompress(draftData.result);
 
-    // 2. Update article status to published
-    article.status = 'published';
+    // 2. Apply human edits if provided
+    const hasEdits = !!(editedContent || editedTitle);
+    if (editedContent) {
+      article.content = editedContent;
+    }
+    if (editedTitle) {
+      article.title = editedTitle;
+      // Update description if auto-generated from content
+      const lines = editedContent ? editedContent.split('\n') : article.content.split('\n');
+      const paragraph = lines.find((l: string) => !l.startsWith('#') && l.length > 80);
+      article.description = paragraph ? paragraph.replace(/[#*_]/g, '').trim().substring(0, 180) + '...' : article.description;
+    }
 
-    // 3. Save to live article key
+    // 3. Update article status to published
+    article.status = 'published';
+    if (hasEdits) {
+      article.humanEdited = true;
+      article.editedAt = new Date().toISOString();
+    }
+
+    // 4. Save to live article key
     const liveArticleKey = `insights:article:${slug}`;
     const compressedArticle = await compress(article);
     await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(liveArticleKey)}?ex=31536000`, {
@@ -81,7 +98,7 @@ export async function POST(request: Request) {
       body: compressedArticle
     });
 
-    // 4. Add to live list
+    // 5. Add to live list
     const listKey = `insights:list:${lang}`;
     const listRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(listKey)}`, {
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
@@ -92,7 +109,7 @@ export async function POST(request: Request) {
       currentList = await decompress(listData.result);
     }
 
-    const { content, ...metadata } = article;
+    const { content: _content, ...metadata } = article;
     const updatedList = [metadata, ...currentList].slice(0, 1000);
     const compressedList = await compress(updatedList);
     await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(listKey)}?ex=31536000`, {
@@ -101,7 +118,7 @@ export async function POST(request: Request) {
       body: compressedList
     });
 
-    // 5. Remove from draft list
+    // 6. Remove from draft list
     const draftListKey = `insights:drafts:${lang}`;
     const draftListRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(draftListKey)}`, {
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
@@ -119,7 +136,7 @@ export async function POST(request: Request) {
       body: compressedDrafts
     });
 
-    // 6. Delete draft article key
+    // 7. Delete draft article key
     await fetch(`${UPSTASH_REDIS_REST_URL}/del/${encodeURIComponent(draftArticleKey)}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }

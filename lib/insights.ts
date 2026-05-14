@@ -62,6 +62,8 @@ export interface InsightItem {
     name: string;
     role: string;
   };
+  humanEdited?: boolean;
+  editedAt?: string;
 }
 
 // ---------------------------------------------------------------------------

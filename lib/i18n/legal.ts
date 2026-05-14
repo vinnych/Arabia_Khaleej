@@ -47,13 +47,18 @@ export const legal: Translations = {
     en: "You may opt out of personalized advertising through Google Ads Settings. You may also use ad-blocking software or browser privacy settings to control cookie placement.",
     ar: "يمكنك إلغاء الاشتراك في الإعلانات المخصصة من خلال إعدادات إعلانات Google. يمكنك أيضاً استخدام برنامج حظر الإعلانات أو إعدادات خصوصية المتصفح للتحكم في وضع ملفات تعريف الارتباط."
   },
-  ppSection6Title: { en: "Policy Changes", ar: "تغييرات السياسة" },
-  ppSection6Body: { 
-    en: "We may update this policy periodically. Changes are effective immediately upon posting to this page.",
-    ar: "قد نقوم بتحديث هذه السياسة بشكل دوري. تصبح التغييرات سارية فور نشرها على هذه الصفحة."
-  },
-  tosSection1Title: { en: "Acceptance of Terms", ar: "الموافقة على الشروط" },
-  tosSection2Title: { en: "Intellectual Property Rights", ar: "حقوق الملكية الفكرية" },
-  discSection1Title: { en: "No Professional Advice", ar: "لا توجد نصيحة مهنية" },
-  discSection3Title: { en: "Market Data & Financials", ar: "بيانات السوق والمالية" },
+ppSection6Title: { en: "Policy Changes", ar: "تغييرات السياسة" },
+   ppSection6Body: { 
+     en: "We may update this policy periodically. Changes are effective immediately upon posting to this page.",
+     ar: "قد نقوم بتحديث هذه السياسة بشكل دوري. تصبح التغييرات سارية فور نشرها على هذه الصفحة."
+   },
+   // Editorial Standards
+   editorialCredentials: { 
+     en: "Our analysis combines AI research with human editorial oversight from regional experts with verifiable GCC economic and policy backgrounds.", 
+     ar: "تجمع تحليلاتنا بين البحث المدعوم بالذكاء الاصطناعي والإشراف التحريري البشري من خبراء إقليميين ذوي خلفية اقتصادية وسياسية خليجية قابلة للتحقق."
+   },
+   editorialMethodology: { 
+     en: "Articles are generated using real-time GCC news sources and economic data, then reviewed for accuracy and regional relevance before publication.", 
+     ar: "تُنشأ المقالات باستخدام مصادر الأخبار الخليجية الفعلية وبيانات الاقتصاد، ثم تُراجع للدقة والصلاحية الإقليمية قبل النشر."
+   },
 };

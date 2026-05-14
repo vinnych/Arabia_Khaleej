@@ -44,11 +44,13 @@ async function generateSingleArticle(
       content: aiData.content,
       link: `/insights/${slug}`,
       pubDate: new Date().toISOString(),
-      source: aiData.author.name, // Use AI-generated author
-      category: (aiData.category === 'gcc' || aiData.category === 'expat') ? aiData.category : 'gcc', // Validate category type
+      source: aiData.author.name,
+      category: (aiData.category === 'gcc' || aiData.category === 'expat') ? aiData.category : 'gcc',
       language: lang,
       tags: [type, aiData.category.toLowerCase(), 'intelligence'],
       image: imageUrl,
+      status: 'draft',
+      humanEdited: false,
     };
   } catch (err) {
     console.error(`Failed to generate ${type} article:`, err);
@@ -94,21 +96,21 @@ export async function GET(request: Request) {
       }
     }
 
-    // Save to Redis
-    for (const lang of ['en', 'ar'] as const) {
-      const batch = lang === 'en' ? generatedEn : generatedAr;
-      if (batch.length === 0) continue;
+// Save to Redis - articles go to draft state for review
+     for (const lang of ['en', 'ar'] as const) {
+       const batch = lang === 'en' ? generatedEn : generatedAr;
+       if (batch.length === 0) continue;
 
-      const archiveKey = `insights_archive_${lang}`;
-      const currentArchive = (await getWithCompression<InsightItem[]>(archiveKey)) || [];
-      const existingSlugs = new Set(currentArchive.map(a => a.slug));
-      const uniqueBatch = batch.filter(g => !existingSlugs.has(g.slug));
+       const archiveKey = `insights_archive_${lang}`;
+       const currentArchive = (await getWithCompression<InsightItem[]>(archiveKey)) || [];
+       const existingSlugs = new Set(currentArchive.map(a => a.slug));
+       const uniqueBatch = batch.filter(g => !existingSlugs.has(g.slug));
 
-      if (uniqueBatch.length > 0) {
-        const updatedArchive = [...uniqueBatch, ...currentArchive].slice(0, 1500);
-        await setWithCompression(archiveKey, updatedArchive, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
-      }
-    }
+       if (uniqueBatch.length > 0) {
+         const updatedArchive = [...uniqueBatch, ...currentArchive].slice(0, 1500);
+         await setWithCompression(archiveKey, updatedArchive, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+       }
+     }
 
     const duration = Math.floor((Date.now() - startTime) / 1000);
     console.log(`Daily Automation Completed in ${duration}s`);

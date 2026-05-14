@@ -68,16 +68,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {children}
             </main>
           </ClientLayout>
-          <CookieConsent />
-        </Providers>
-        <Script
-          id="adsense-init"
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7212871157824722"
-          crossOrigin="anonymous"
-          nonce={nonce}
-          strategy="afterInteractive"
-        />
+<CookieConsent />
+         </Providers>
+         <Script
+            id="adsense-init"
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7212871157824722"
+            crossOrigin="anonymous"
+            nonce={nonce}
+            strategy="afterInteractive"
+          />
         <Script 
           async 
           src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" 
