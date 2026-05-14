@@ -38,7 +38,7 @@ export async function GET(request: Request) {
   const draftKey = `insights:drafts:${lang}`;
   
   try {
-    const res = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${draftKey}`, {
+    const res = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(draftKey)}`, {
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
     });
     const data = await res.json();

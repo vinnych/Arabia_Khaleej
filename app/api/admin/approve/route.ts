@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     // 1. Fetch draft article
     const draftArticleKey = `insights:draft:article:${slug}`;
-    const draftRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${draftArticleKey}`, {
+    const draftRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(draftArticleKey)}`, {
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
     });
     const draftData = await draftRes.json();
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
     // 3. Save to live article key
     const liveArticleKey = `insights:article:${slug}`;
     const compressedArticle = await compress(article);
-    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${liveArticleKey}?ex=31536000`, {
+    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(liveArticleKey)}?ex=31536000`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
       body: compressedArticle
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
 
     // 4. Add to live list
     const listKey = `insights:list:${lang}`;
-    const listRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${listKey}`, {
+    const listRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(listKey)}`, {
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
     });
     const listData = await listRes.json();
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     const { content, ...metadata } = article;
     const updatedList = [metadata, ...currentList].slice(0, 1000);
     const compressedList = await compress(updatedList);
-    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${listKey}?ex=31536000`, {
+    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(listKey)}?ex=31536000`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
       body: compressedList
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     // 5. Remove from draft list
     const draftListKey = `insights:drafts:${lang}`;
-    const draftListRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${draftListKey}`, {
+    const draftListRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(draftListKey)}`, {
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
     });
     const draftListData = await draftListRes.json();
@@ -113,14 +113,14 @@ export async function POST(request: Request) {
     }
     const updatedDrafts = currentDrafts.filter((d: any) => d.slug !== slug);
     const compressedDrafts = await compress(updatedDrafts);
-    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${draftListKey}?ex=31536000`, {
+    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(draftListKey)}?ex=31536000`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
       body: compressedDrafts
     });
 
     // 6. Delete draft article key
-    await fetch(`${UPSTASH_REDIS_REST_URL}/del/${draftArticleKey}`, {
+    await fetch(`${UPSTASH_REDIS_REST_URL}/del/${encodeURIComponent(draftArticleKey)}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
     });
