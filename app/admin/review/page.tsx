@@ -12,6 +12,9 @@ type Draft = {
   image: string;
 };
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'edge';
+
 export default function AdminReviewPage() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [loading, setLoading] = useState(true);
