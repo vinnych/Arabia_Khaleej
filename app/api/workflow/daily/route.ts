@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loadWorkflowState } from '@/lib/workflow/utils';
+import { loadWorkflowState, saveWorkflowState } from '@/lib/workflow/utils';
 import { WorkflowState, NextAction } from '@/lib/workflow/types';
 import { ok, fail } from '@/lib/workflow/response';
 
@@ -22,7 +22,10 @@ export async function POST(request: NextRequest) {
 
     // Try to load existing workflow state for resume
     const existing: WorkflowState | null = existingId
-      ? await loadWorkflowState(existingId).catch(() => null)
+      ? await loadWorkflowState(existingId).catch((err) => {
+          console.error('Failed to load workflow state for resume:', err);
+          return null;
+        })
       : null;
 
     if (!existing) {
@@ -37,8 +40,6 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(), currentIndex: 0, articles, trendingTopics: [],
         errors: [], hasGroqApiKey: !!process.env.GROQ_API_KEY, runCount: 0, adminSecret,
       };
-      await loadWorkflowState(workflowId).catch(() => null); // Initialize
-      const { saveWorkflowState } = await import('@/lib/workflow/utils');
       await saveWorkflowState(workflowId, freshState).catch(() => null);
       return NextResponse.json(ok('init', { workflowId, step: 'init', workflowStatus: 'running' },
         { type: 'fetch', method: 'GET', url: '/api/workflow/trending?wid=' + workflowId + '&idx=0' },
