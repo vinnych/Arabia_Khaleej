@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
 
   if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
 
-  const state = await loadWorkflowState(wid).catch(() => null);
+  const state = await loadWorkflowState(wid).catch((err) => {
+    console.error('Failed to load workflow state in trending:', err);
+    return null;
+  });
   if (!state) return NextResponse.json(fail('error', 'Workflow not found: ' + wid, { workflowId: wid }));
 
   if (!state.hasGroqApiKey) return NextResponse.json(fail('error', 'GROQ_API_KEY not configured', state));
@@ -93,7 +96,7 @@ isSafe=false for: crypto, gambling, medical claims, adult content.`;
 
   const groqData = await groqRes.json();
   const raw = groqData.choices[0].message.content;
-  const cleaned = raw.replace(/`json?\n?/gi, '').replace(/`$/, '').trim();
+  const cleaned = raw.replace(/`json?\n?/gi, '').replace(/`+$/, '').trim();
   const topicsJson = JSON.parse(cleaned);
   let topics = topicsJson.topics || topicsJson;
   if (!Array.isArray(topics)) topics = [];

@@ -57,7 +57,6 @@ export async function GET(request: NextRequest) {
   }
 
   // Delete workflow state early to reclaim Redis space (keep state for logging)
-  // Don't delete yet if there are more articles to process
   const nextIdx = idx + 1;
   const hasMore = nextIdx < state.articles.length;
 
@@ -79,7 +78,6 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Final article - delete workflow
   await deleteWorkflow(wid).catch((err) => {
     console.error('Failed to delete workflow in persist (final):', err);
   });

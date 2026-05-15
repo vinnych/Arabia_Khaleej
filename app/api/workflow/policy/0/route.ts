@@ -29,17 +29,17 @@ async function fetchArticleBody(slug: string, fallback: string): Promise<string>
 
     return fallback || '';
   } catch (err) {
-    console.error('Failed to fetch article body:', err);
+    console.error('Failed to fetch article body for slug ' + slug + ':', err);
     return fallback || '';
   }
 }
 
-/** count statistics (numbers, currencies) in text */
+/** Count statistics (numbers, currencies, percentages) in text */
 function countStats(text: string): number {
   return (text.match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?%?|\$\d[\d.]*|USD|GBP|SAR|AED/g) || []).length;
 }
 
-/** count citations/sources references in text */
+/** Count citations/sources references in text */
 function countCitations(text: string): number {
   return (text.match(/(?:according to|source:|reports?|ministry|authority|announced|data from|statistics show)/gi) || []).length;
 }
