@@ -1,34 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { redis } from '@/lib/redis';
 import { loadWorkflowState, saveWorkflowState } from '@/lib/workflow/utils';
-import { NodeResponse, WorkflowState } from '@/lib/workflow/types';
+import { NextAction, NodeResponse, WorkflowState } from '@/lib/workflow/types';
+import { GROQ_API_URL } from '@/lib/constants/api';
+import { ok, fail } from '@/lib/workflow/response';
 
 export const runtime = 'edge';
-
-function ok(step: string, state: Partial<WorkflowState>, nextAction?: any, summary = '') {
-  return { ok: true, step, nextAction, summary, state } as NodeResponse;
-}
-function fail(step: string, error: string, state: Partial<WorkflowState> = {}) {
-  return { ok: false, step, summary: error, error, state } as NodeResponse;
-}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const wid = searchParams.get('wid');
   const idx = parseInt(searchParams.get('idx') || '0');
 
-  if (!wid) return NextResponse.json<NodeResponse>(
-    fail('error', 'Missing workflow ID', {})
-  );
+  if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
 
   const state = await loadWorkflowState(wid).catch(() => null);
-  if (!state) return NextResponse.json<NodeResponse>(
-    fail('error', 'Workflow not found: ' + wid, { workflowId: wid })
-  );
+  if (!state) return NextResponse.json(fail('error', 'Workflow not found: ' + wid, { workflowId: wid }));
 
-  if (!state.hasGroqApiKey) return NextResponse.json<NodeResponse>(
-    fail('error', 'GROQ_API_KEY not configured', state)
-  );
+  if (!state.hasGroqApiKey) return NextResponse.json(fail('error', 'GROQ_API_KEY not configured', state));
 
   // 1. Check RSS cache FIRST to avoid unnecessary Groq calls
   let rssContext = 'GCC regional development and economic trends';
@@ -46,7 +35,9 @@ export async function GET(request: NextRequest) {
       const titles = Array.from(xml.matchAll(/<title>(.*?)<\/title>/g)).map(m => m[1]).slice(1, 15);
       rssContext = titles.join('\n');
       // Cache for 30 minutes
-      await redis.set('wf:rss-cache:latest', rssContext, { ex: 1800 }).catch(() => {});
+      await redis.set('wf:rss-cache:latest', rssContext, { ex: 1800 }).catch((err) => {
+        console.warn('Failed to cache RSS context:', err);
+      });
     }
   } catch { /* fallback */ }
 
@@ -79,7 +70,7 @@ Shape: { "topics": [{ "country": "Saudi Arabia", "topic": "...", "adsenseScore":
 RULES: 9 high-utility + 1 specialized-women. Score 80+ preferred.
 isSafe=false for: crypto, gambling, medical claims, adult content.`;
 
-  const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const groqRes = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + apiKey,
@@ -97,9 +88,7 @@ isSafe=false for: crypto, gambling, medical claims, adult content.`;
   });
 
   if (!groqRes.ok) {
-    return NextResponse.json<NodeResponse>(
-      fail('error', 'Failed to call Groq for trending topics: HTTP ' + groqRes.status, state)
-    );
+    return NextResponse.json(fail('error', 'Failed to call Groq for trending topics: HTTP ' + groqRes.status, state));
   }
 
   const groqData = await groqRes.json();
@@ -113,13 +102,15 @@ isSafe=false for: crypto, gambling, medical claims, adult content.`;
   topics.sort((a: any, b: any) => (b.adsenseScore || 0) - (a.adsenseScore || 0));
   state.trendingTopics = topics;
   state.articles[idx].country = topics[0]?.country || '';
-  state.articles[idx].topic   = topics[0]?.topic   || '';
-  state.articles[idx].lang    = 'en';
+  state.articles[idx].topic = topics[0]?.topic || '';
+  state.articles[idx].lang = 'en';
   state.step = 'generate';
   state.updatedAt = new Date().toISOString();
-  await saveWorkflowState(wid, state).catch(() => {});
+  await saveWorkflowState(wid, state).catch((err) => {
+    console.error('Failed to save workflow state in trending:', err);
+  });
 
-  return NextResponse.json<NodeResponse>(
+  return NextResponse.json(
     ok('generate', state,
       { type: 'fetch', method: 'GET',
         url: '/api/workflow/generate/' + idx + '?wid=' + wid + '&idx=' + idx },

@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { saveWorkflowState, loadWorkflowState } from '@/lib/workflow/utils';
-import { WorkflowState } from '@/lib/workflow/types';
+import { loadWorkflowState } from '@/lib/workflow/utils';
+import { WorkflowState, NextAction } from '@/lib/workflow/types';
+import { ok, fail } from '@/lib/workflow/response';
 
 export const runtime = 'edge';
 
-function ok(step: string, state: Partial<WorkflowState>, nextAction?: any, summary = '') {
-  return { ok: true, step, nextAction, summary, state };
-}
-function fail(step: string, error: string, state: Partial<WorkflowState> = {}) {
-  return { ok: false, step, summary: error, error, state };
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json().catch(() => ({})) as { 
-      articleCount?: number; 
+    const body = await request.json().catch(() => ({})) as {
+      articleCount?: number;
       workflowId?: string | null;
       adminSecret?: string | null;
     };
@@ -43,12 +37,10 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(), currentIndex: 0, articles, trendingTopics: [],
         errors: [], hasGroqApiKey: !!process.env.GROQ_API_KEY, runCount: 0, adminSecret,
       };
-      await saveWorkflowState(workflowId, freshState);
-      return NextResponse.json(ok('init', { 
-        workflowId, 
-        step: 'init', 
-        workflowStatus: 'running' 
-      }, 
+      await loadWorkflowState(workflowId).catch(() => null); // Initialize
+      const { saveWorkflowState } = await import('@/lib/workflow/utils');
+      await saveWorkflowState(workflowId, freshState).catch(() => null);
+      return NextResponse.json(ok('init', { workflowId, step: 'init', workflowStatus: 'running' },
         { type: 'fetch', method: 'GET', url: '/api/workflow/trending?wid=' + workflowId + '&idx=0' },
         'Workflow initialized; chaining to /api/workflow/trending'
       ));
@@ -67,10 +59,10 @@ export async function POST(request: NextRequest) {
       error:     '/api/workflow/trending',
     };
     const url = stepMap[existing.step] || '';
-    return NextResponse.json(ok(existing.step, { 
-      workflowId, 
-      step: existing.step, 
-      currentIndex: existing.currentIndex 
+    return NextResponse.json(ok(existing.step, {
+      workflowId,
+      step: existing.step,
+      currentIndex: existing.currentIndex
     },
       url ? { type: 'fetch', method: 'GET', url: url + existing.currentIndex + '?wid=' + workflowId + '&idx=' + existing.currentIndex } : undefined,
       'Resumed at step: ' + existing.step + ' idx=' + existing.currentIndex

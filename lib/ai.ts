@@ -23,6 +23,9 @@
 // Types
 // ---------------------------------------------------------------------------
 
+import { GROQ_API_URL } from '@/lib/constants/api';
+import { ADSENSE_RULES } from '@/lib/workflow/prompts';
+
 /**
  * Raw response shape returned by the Groq OpenAI-compatible Chat Completions API.
  * Only the fields consumed by this module are declared.
@@ -63,38 +66,6 @@ export interface GCCInsightResponse {
 }
 
 // ---------------------------------------------------------------------------
-// Shared AdSense Guardrails
-// ---------------------------------------------------------------------------
-//
-// These rules are embedded directly in every generation prompt so the
-// model is never asked to produce AdSense-violating content.
-//
-// When Google updates its content policies, only this block needs to
-// change — the generation prompt, trending filter, and policy-audit
-// prompt all pick up the update automatically.
-// ---------------------------------------------------------------------------
-
-/**
- * Canonical content rules shared by every LLM call in the platform.
- *
- * @see lib/workflow/prompts.ts — `ADSENSE_RULES` mirrors this block
- *      verbatim for the topic-scoring and policy-audit nodes.
- *      Keep both files in sync when editing.
- */
-const ADSENSE_RULES = `
-ADSENSE CONTENT REQUIREMENTS (non-negotiable — follow exactly):
-1. NO scraped, copied, or copyrighted third-party content. Every word must be original.
-2. NO unqualified medical claims, financial investment advice, or legal guidance.
-3. NO hate speech, harassment, adult content, or graphic violence.
-4. NO deceptive, misleading, or factually inaccurate information.
-5. NO thin / placeholder content — articles must contain genuine original analysis.
-6. NO gambling, crypto speculation, or promotion of regulated / illegal substances.
-7. NO instructions for circumventing AdSense or advertising policies.
-8. All statistics and quoted figures must be attributed to a named official source with a date.
-9. If a statistic cannot be reliably attributed within the article, replace the attempted citation
-   with a verifiable regional example or omit the claim entirely — never fabricate a source.`;
-
-// ---------------------------------------------------------------------------
 // Editorial Author Registry
 // ---------------------------------------------------------------------------
 
@@ -131,8 +102,6 @@ const DEFAULT_AUTHOR: GCCInsightResponse['author'] = {
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
-
-import { GROQ_API_URL } from '@/lib/constants/api';
 
 /**
  * Generates a structured, long-form GCC editorial article via the Groq API.

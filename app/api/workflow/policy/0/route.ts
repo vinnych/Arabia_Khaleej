@@ -3,16 +3,11 @@ import { redis } from '@/lib/redis';
 import { loadWorkflowState, saveWorkflowState, deleteWorkflow } from '@/lib/workflow/utils';
 import { POLICY_JUDGE_PROMPT } from '@/lib/workflow/prompts';
 import { NodeResponse, WorkflowState, ArticleDraft, PolicyViolation } from '@/lib/workflow/types';
+import { GROQ_API_URL } from '@/lib/constants/api';
+import { ok, fail } from '@/lib/workflow/response';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-
-function ok(step: string, state: Partial<WorkflowState>, nextAction?: any, summary = '') {
-  return { ok: true, step, nextAction, summary, state } as NodeResponse;
-}
-function fail(step: string, error: string, state: Partial<WorkflowState> = {}) {
-  return { ok: false, step, summary: error, error, state } as NodeResponse;
-}
 
 async function fetchArticleBody(slug: string, fallback: string): Promise<string> {
   try {
@@ -28,44 +23,41 @@ async function fetchArticleBody(slug: string, fallback: string): Promise<string>
     }
 
     if (typeof raw === 'object' && raw !== null) {
-      return (raw as any).content || fallback || '';
+      const obj = raw as Record<string, unknown>;
+      return (obj.content as string) || fallback || '';
     }
 
     return fallback || '';
-  } catch { /* ignore */ }
-  return fallback || '';
+  } catch (err) {
+    console.error('Failed to fetch article body:', err);
+    return fallback || '';
+  }
 }
 
-/**
- * Count statistics (numbers, currencies, percentages) in text
- */
+/** count statistics (numbers, currencies) in text */
 function countStats(text: string): number {
   return (text.match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?%?|\$\d[\d.]*|USD|GBP|SAR|AED/g) || []).length;
 }
 
-/**
- * Count citations/sources references in text
- */
+/** count citations/sources references in text */
 function countCitations(text: string): number {
-  return (text.match(/(?:according to|source:|reports?|ministry|authority| announced| data from | statistics show )/gi) || []).length;
+  return (text.match(/(?:according to|source:|reports?|ministry|authority|announced|data from|statistics show)/gi) || []).length;
 }
 
-/**
- * Check AdSense richness: needs minimum stats and citations
- */
+/** Check AdSense richness: needs minimum stats and citations */
 function checkRichness(content: string, wordCount: number): { isRich: boolean; stats: number; citations: number; reasons: string[] } {
   const stats = countStats(content);
   const citations = countCitations(content);
   const reasons: string[] = [];
-  
+
   // For 1500+ words, need at least 3 stats and 2 citations
   const minStats = wordCount >= 1500 ? 3 : 1;
   const minCitations = wordCount >= 1500 ? 2 : 1;
-  
+
   const isRich = stats >= minStats && citations >= minCitations;
   if (stats < minStats) reasons.push(`Need ${minStats}+ statistics (found ${stats})`);
   if (citations < minCitations) reasons.push(`Need ${minCitations}+ citations (found ${citations})`);
-  
+
   return { isRich, stats, citations, reasons };
 }
 
@@ -74,7 +66,7 @@ async function judgeArticle(apiKey: string, article: ArticleDraft): Promise<{ ve
   const trunc = content.length > 8000 ? content.substring(0, 8000) + ' [...TRUNCATED...]' : content;
   const prompt = POLICY_JUDGE_PROMPT(article.title || '', article.country || '', trunc);
 
-  const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+  const groqRes = await fetch(GROQ_API_URL, {
     method: 'POST',
     headers: {
       'Authorization': 'Bearer ' + apiKey,
@@ -101,8 +93,8 @@ async function judgeArticle(apiKey: string, article: ArticleDraft): Promise<{ ve
 
   const groqData = await groqRes.json();
   const raw = groqData.choices[0].message.content;
-  const cleaned = raw.replace(/\x60+json?\n?/gi, '').replace(/\x60+$/, '').trim();
-  
+  const cleaned = raw.replace(/`json?\n?/gi, '').replace(/`+$/, '').trim();
+
   try {
     return JSON.parse(cleaned);
   } catch (parseError) {
@@ -137,7 +129,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
   const content = await fetchArticleBody(article.slug, article.content);
   const wordCount = (content.match(/\b\w+\b/g) || []).length;
   const richness = checkRichness(content, wordCount);
-  
+
   // Richness violations are treated as policy violations for rewrite purposes
   const richnessViolations = richness.reasons.length > 0 ? [{
     category: 'richness',
@@ -155,12 +147,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
     state.step = 'generate';
     state.articles[idx].regenerateContext = {
       violations: allViolations.map(v => v.category + ': ' + v.reason).join('; '),
-      actions: verdict === 'fail' 
+      actions: verdict === 'fail'
         ? violations.map(v => v.category === 'stats' ? 'Add proper citations' : v.category === 'sources' ? 'Verify all sources' : 'Review content').join('; ')
         : `Add ${Math.max(0, 3 - richness.stats)} more statistics and ${Math.max(0, 2 - richness.citations)} more citations`,
     };
     state.updatedAt = new Date().toISOString();
-    await saveWorkflowState(wid, state).catch(() => {});
+    await saveWorkflowState(wid, state).catch((err) => {
+      console.error('Failed to save workflow state in policy (retry):', err);
+    });
 
     return NextResponse.json(
       ok('generate', state,
@@ -171,27 +165,30 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
     );
   }
 
-   // Delete after max retries on policy failure
-   if (hasFailures && !canRetry && verdict === 'fail') {
-     article.status = 'deleted';
-     article.policyResult = 'delete';
-     state.step = 'score';
-     state.updatedAt = new Date().toISOString();
-     await saveWorkflowState(wid, state).catch(() => {});
+  if (hasFailures && !canRetry && verdict === 'fail') {
+    article.status = 'deleted';
+    article.policyResult = 'delete';
+    state.step = 'score';
+    state.updatedAt = new Date().toISOString();
+    await saveWorkflowState(wid, state).catch((err) => {
+      console.error('Failed to save workflow state in policy (delete):', err);
+    });
 
-     return NextResponse.json(
-       ok('score', state,
-         { type: 'fetch', method: 'GET', url: '/api/workflow/score/' + idx + '?wid=' + wid + '&idx=' + idx },
-         'Policy FAIL after retry — Article DELETED: ' + article.title
-       )
-     );
-   }
+    return NextResponse.json(
+      ok('score', state,
+        { type: 'fetch', method: 'GET', url: '/api/workflow/score/' + idx + '?wid=' + wid + '&idx=' + idx },
+        'Policy FAIL after retry — Article DELETED: ' + article.title
+      )
+    );
+  }
 
   // Pass: proceed to scoring
   article.policyResult = 'pass';
   state.step = 'score';
   state.updatedAt = new Date().toISOString();
-  await saveWorkflowState(wid, state).catch(() => {});
+  await saveWorkflowState(wid, state).catch((err) => {
+    console.error('Failed to save workflow state in policy (pass):', err);
+  });
 
   return NextResponse.json(
     ok('score', state,

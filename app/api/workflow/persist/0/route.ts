@@ -3,104 +3,94 @@ import { loadWorkflowState, saveWorkflowState, deleteWorkflow } from '@/lib/work
 import { NodeResponse, WorkflowState } from '@/lib/workflow/types';
 import { redis, getWithCompression, setWithCompression, CACHE_TIMES } from '@/lib/redis';
 import { InsightItem } from '@/lib/insights';
+import { ok, fail } from '@/lib/workflow/response';
 
 export const runtime = 'edge';
 
-function ok(step: string, state: Partial<WorkflowState>, next?: any, summary = '') {
-  return { ok: true, step, nextAction: next, summary, state } as NodeResponse;
-}
-function fail(step: string, error: string, state: Partial<WorkflowState> = {}) {
-  return { ok: false, step, summary: error, error, state } as NodeResponse;
-}
-
-/**
- * Node 6 (Persist): Write article to final Redis store, delete workflow state.
- * This is the terminal node; always returns a 'done' NextAction.
- */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const wid = searchParams.get('wid');
   const idx = parseInt(searchParams.get('idx') || '0');
 
-  if (!wid) return NextResponse.json<NodeResponse>(
-    fail('error', 'Missing workflow ID', {})
-  );
+  if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
 
   const state = await loadWorkflowState(wid).catch(() => null);
-  if (!state) return NextResponse.json<NodeResponse>(
-    fail('error', 'State not found: ' + wid, { workflowId: wid })
-  );
+  if (!state) return NextResponse.json(fail('error', 'State not found: ' + wid, { workflowId: wid }));
 
   const article = state.articles[idx];
-  if (!article) return NextResponse.json<NodeResponse>(
-    fail('error', 'Article ' + idx + ' missing from workflow state', state)
-  );
+  if (!article) return NextResponse.json(fail('error', 'Article ' + idx + ' missing from workflow state', state));
 
   // Persist to Redis final store (always write; status already set by Node5)
-  const artKey  = 'insights:draft:article:' + article.slug;
+  const artKey = 'insights:draft:article:' + article.slug;
   const listKey = 'insights:drafts:' + article.lang;
 
   try {
     await setWithCompression(artKey, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
-  } catch { /* non-fatal */ }
+  } catch (err) {
+    console.error('Failed to save article in persist:', err);
+  }
+
+  const listEntry: InsightItem = {
+    id: article.id,
+    slug: article.slug,
+    title: article.title,
+    description: article.description,
+    link: '/insights/' + article.slug,
+    pubDate: article.pubDate,
+    source: 'Arabia Khaleej Editorial',
+    category: (article.category as InsightItem['category']) || 'gcc',
+    language: (article.lang as InsightItem['language']) || 'en',
+    tags: article.tags,
+    image: article.image,
+    status: 'draft',
+  };
 
   try {
-    // Derive a type-safe InsightItem listing entry from the workflow ArticleDraft.
-    // ArticleDraft is missing: link, source, language (uses 'lang'), humanEdited, editedAt.
-    const listEntry: InsightItem = {
-      id:          article.id,
-      slug:        article.slug,
-      title:       article.title,
-      description: article.description,
-      link:        '/insights/' + article.slug,
-      pubDate:     article.pubDate,
-      source:      'Arabia Khaleej Editorial',
-      category:    (article.category as InsightItem['category']) || 'gcc',
-      language:    (article.lang as InsightItem['language']) || 'en',
-      tags:        article.tags,
-      image:       article.image,
-      status:      'draft',
-    };
     let drafts: InsightItem[] = (await getWithCompression<InsightItem[]>(listKey)) || [];
     if (!drafts.some(d => d.slug === article.slug)) {
       drafts.unshift(listEntry);
       if (drafts.length > 500) drafts = drafts.slice(0, 500);
       await setWithCompression(listKey, drafts, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
     }
-  } catch { /* non-fatal */ }
+  } catch (err) {
+    console.error('Failed to save drafts list in persist:', err);
+  }
 
-// Delete workflow state early to reclaim Redis space (keep state for logging)
-   // Don't delete yet if there are more articles to process
+  // Delete workflow state early to reclaim Redis space (keep state for logging)
+  // Don't delete yet if there are more articles to process
+  const nextIdx = idx + 1;
+  const hasMore = nextIdx < state.articles.length;
 
-   const nextIdx = idx + 1;
-   const hasMore = nextIdx < state.articles.length;
+  state.step = hasMore ? 'trending' : 'done';
+  state.workflowStatus = hasMore ? 'running' : 'completed';
+  state.currentIndex = hasMore ? nextIdx : idx;
+  state.updatedAt = new Date().toISOString();
+  await saveWorkflowState(wid, state).catch((err) => {
+    console.error('Failed to save workflow state in persist:', err);
+  });
 
-   state.step            = hasMore ? 'trending' : 'done';
-   state.workflowStatus  = hasMore ? 'running' : 'completed';
-   state.currentIndex    = hasMore ? nextIdx : idx;
-   state.updatedAt       = new Date().toISOString();
-   await saveWorkflowState(wid, state).catch(() => {});
+  if (hasMore) {
+    return NextResponse.json(
+      ok('trending', state,
+        { type: 'fetch', method: 'GET',
+          url: '/api/workflow/trending?wid=' + wid + '&idx=' + nextIdx },
+        'Article ' + (idx + 1) + ' persisted. Continuing with article ' + (nextIdx + 1)
+      )
+    );
+  }
 
-   if (hasMore) {
-     return NextResponse.json<NodeResponse>(
-       ok('trending', state,
-         { type: 'fetch', method: 'GET',
-           url: '/api/workflow/trending?wid=' + wid + '&idx=' + nextIdx },
-         'Article ' + (idx + 1) + ' persisted. Continuing with article ' + (nextIdx + 1)
-       )
-     );
-   }
+  // Final article - delete workflow
+  await deleteWorkflow(wid).catch((err) => {
+    console.error('Failed to delete workflow in persist (final):', err);
+  });
 
-   // Final article - delete workflow
-   await deleteWorkflow(wid).catch(() => {});
-
-   return NextResponse.json<NodeResponse>(
-     ok('done', state, { type: 'done' },
-       'Workflow completed. Article persisted: ' + article.title +
-       ' | status=' + article.status +
-       ' | score=' + (article.qualityScore || 'n/a') +
-       ' | policy=' + (article.policyResult || 'n/a') +
-       ' | Total: ' + state.articles.length + ' articles'
-     )
-   );
+  return NextResponse.json(
+    ok('done', state, { type: 'done' },
+      'Workflow completed. Article persisted: ' + article.title +
+      ' | status=' + article.status +
+      ' | score=' + (article.qualityScore || 'n/a') +
+      ' | policy=' + (article.policyResult || 'n/a') +
+      ' | Total: ' + state.articles.length + ' articles'
+    )
+  );
 }

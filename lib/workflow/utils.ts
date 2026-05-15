@@ -17,9 +17,13 @@ export async function saveWorkflowState(wid: string, state: WorkflowState): Prom
 }
 
 export async function bumpTtl(wid: string): Promise<void> {
-  try { await redis.expire(PREFIX + wid, TTL); } catch { /* ignore */ }
+  try { await redis.expire(PREFIX + wid, TTL); } catch (err) {
+    console.warn('Failed to bump TTL for workflow ' + wid + ':', err);
+  }
 }
 
 export async function deleteWorkflow(wid: string): Promise<void> {
-  try { await redis.del(PREFIX + wid); } catch { /* ignore */ }
+  try { await redis.del(PREFIX + wid); } catch (err) {
+    console.error('Failed to delete workflow ' + wid + ':', err);
+  }
 }

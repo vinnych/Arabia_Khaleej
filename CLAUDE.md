@@ -20,6 +20,8 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 - **Images**: External hostnames must be in `next.config.ts` `remotePatterns`.
 - **CSP**: Defined in `lib/csp.ts`, applied in `middleware.ts`.
 - **Naming**: camelCase vars/fns, PascalCase components.
+- **Shared Helpers**: Use `ok()`, `fail()` from `lib/workflow/response.ts` for consistent responses.
+- **Types**: Use `NextAction` type instead of `any` for nextAction parameters.
 
 ## 🤖 Agentic Editorial Workflow
 
@@ -31,7 +33,7 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 | Node 1 — Trending | `GET /api/workflow/trending` | RSS + AdSense topic scoring |
 | Node 2 — Generate | `GET /api/workflow/generate/0` | Groq 70B article generation |
 | Node 3 — Policy | `GET /api/workflow/policy/0` | AdSense compliance audit + AdSense richness check (minimum statistics/citations) |
-| Node 4 — Score | `GET /api/workflow/score/0` | Quality scoring |
+| Node 4 — Score | `GET /api/workflow/score/0` | Heuristic quality scoring |
 | Node 5 — Persist | `GET /api/workflow/persist/0` | Redis commit, cleanup |
 
 - **Worker**: `worker/daily-automation.js` — cron trigger at `0 */2 * * *` (every 2 h).
@@ -43,6 +45,8 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 - `lib/workflow/types.ts` — Workflow state & node response types
 - `lib/workflow/utils.ts` — Redis state load/save/delete helpers
 - `lib/workflow/prompts.ts` — LLM prompts for trending/policy nodes
+- `lib/workflow/response.ts` — Shared `ok`/`fail` helper functions
+- `lib/constants/api.ts` — Centralized API constants (GROQ_API_URL, etc.)
 - `lib/redis.ts` — Redis client + compression helpers + rate limiter
 - `lib/insights.ts` — Redis read-side for listing/detail pages
 - `lib/csp.ts` — CSP directives
@@ -66,5 +70,7 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 - No hardcoded CSP strings.
 - No parallel Groq calls.
 - Do not rename `middleware.ts`.
+- No silent catch blocks — always log errors with `console.error`.
+- No `any` types — use proper TypeScript types.
 
 © 2026 Arabia Khaleej. All rights reserved.

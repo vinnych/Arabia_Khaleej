@@ -59,6 +59,14 @@ POST /api/workflow/daily          →  init
 - **Articles per run**: 3
 - **Daily output**: up to 36
 
+### Code Quality
+
+- **Shared Helpers**: `ok()` and `fail()` functions are centralized in `lib/workflow/response.ts`
+- **Type Safety**: All workflow routes use proper TypeScript types (`NextAction` instead of `any`)
+- **Error Logging**: All catch blocks log errors with `console.error` for debugging
+- **ADSENSE_RULES**: Single source of truth in `lib/workflow/prompts.ts`, imported where needed
+- **Constants**: API URLs centralized in `lib/constants/api.ts`
+
 ### Resume Support
 
 If a workflow run is interrupted (e.g., a node times out), the state machine is persisted in Redis under `wf:{id}` every step. On the next `/api/workflow/daily` call, the same `workflowId` resumes from the last completed step automatically.
