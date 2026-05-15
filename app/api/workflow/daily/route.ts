@@ -6,6 +6,14 @@ import { ok, fail } from '@/lib/workflow/response';
 export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
+  // Verify cron secret for authentication
+  const authHeader = request.headers.get('authorization');
+  const expectedSecret = process.env.CRON_SECRET;
+  
+  if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
+    return NextResponse.json(fail('error', 'Unauthorized'), { status: 401 });
+  }
+  
   try {
     const body = await request.json().catch((err) => {
       console.warn('Failed to parse request body:', err);

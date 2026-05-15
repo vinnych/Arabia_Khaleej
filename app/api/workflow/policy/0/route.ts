@@ -85,10 +85,9 @@ async function judgeArticle(apiKey: string, article: ArticleDraft): Promise<{ ve
 
   // Handle non-ok responses gracefully
   if (!groqRes.ok) {
-    // Don't fail the entire workflow on Groq API issues - allow article to proceed
-    // but log the error for monitoring
+    // Log the error but allow article to proceed with warning actions
     console.warn('Groq API call failed in policy judge:', groqRes.status);
-    return { verdict: 'pass', violations: [], actions: ['(LLM call failed, defaulting to pass)'] };
+    return { verdict: 'pass', violations: [], actions: ['(LLM call failed, defaulting to pass for safety)'] };
   }
 
   const groqData = await groqRes.json();

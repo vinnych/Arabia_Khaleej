@@ -3,7 +3,7 @@
  * @module AI
  * @description Arabia Khaleej — AI Intelligence Layer (Groq)
  *
- * Handles all interactions with the Groq inference API for two purposes:
+ * Handles all interactions with the Groq inference API for one purpose:
  *   1. Full article generation via `generateGCCInsight()`
  *
  * ## Authorship Policy
@@ -183,148 +183,56 @@ STRICT RULES:
 3. استخدم لغة عربية فصحى رصينة واحترافية.
 4. أرجع JSON صالحاً فقط.`;
 
-   try {
-     const response = await fetch(GROQ_API_URL, {
-       method: "POST",
-       headers: {
-         "Authorization": `Bearer ${apiKey}`,
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify({
-         model,
-         messages: [
-           {
-             role: "system",
-             content:
-               "You are a senior regional analyst and editor for Arabia Khaleej. " +
-               "You provide structured, professional intelligence in JSON format. " +
-               "Never invent author names. " +
-               "NEVER produce content that violates AdSense policies: no scraped/copyrighted text, " +
-               "no thin content, no unqualified medical/financial claims, no deceptive information, " +
-               "and no gambling or illegal-substance promotion per article.",
-           },
-           { role: "user", content: prompt },
-         ],
-         temperature: 0.6,
-         max_tokens: 8192,
-         response_format: { type: "json_object" },
-       }),
-     });
+  try {
+    const response = await fetch(GROQ_API_URL, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a senior regional analyst and editor for Arabia Khaleej. " +
+              "You provide structured, professional intelligence in JSON format. " +
+              "Never invent author names. " +
+              "NEVER produce content that violates AdSense policies: no scraped/copyrighted text, " +
+              "no thin content, no unqualified medical/financial claims, no deceptive information, " +
+              "and no gambling or illegal-substance promotion per article.",
+          },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.6,
+        max_tokens: 8192,
+        response_format: { type: "json_object" },
+      }),
+    });
 
-     if (!response.ok) {
-       const errorData = await response.json().catch(() => ({}));
-       throw new Error(`Groq API Error: ${response.status} ${JSON.stringify(errorData)}`);
-     }
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Groq API Error: ${response.status} ${JSON.stringify(errorData)}`);
+    }
 
-     const data: GroqResponse = await response.json();
-     const parsed = JSON.parse(data.choices[0].message.content);
+    const data: GroqResponse = await response.json();
+    const parsed = JSON.parse(data.choices[0].message.content);
 
-     const category: string = parsed.category || "Strategy";
+    const category: string = parsed.category || "Strategy";
 
-     // Look up the verified editorial author (default for all content)
-     const author = EDITORIAL_AUTHORS['default'] ?? DEFAULT_AUTHOR;
+    // Look up the verified editorial author (default for all content)
+    const author = EDITORIAL_AUTHORS['default'] ?? DEFAULT_AUTHOR;
 
-     return {
-       title: parsed.title || `${country}: ${topic}`,
-       content: parsed.content || "",
-       category,
-       author,
-       summary: parsed.summary || "",
-     };
-   } catch (error) {
-     console.error("GCC Insight Generation Failed:", error);
-     throw error;
-   }
- }
-
-/**
- * Discovers a batch of strategic GCC editorial topics suitable for article generation.
- *
- * Uses the lightweight `llama-3.1-8b-instant` model for speed and cost efficiency,
- * since this is a planning/discovery step rather than content production.
- * Implements automatic retry with a 1.5-second backoff between attempts.
- *
- * @param lang    - Language context for topic relevance (does not affect the prompt language)
- * @param type    - `'gcc'` for GCC-focused topics; `'international'` for globally relevant
- *                  topics of interest to an Arab/Gulf audience
- * @param retries - Maximum number of retry attempts on failure (default: 2)
- *
- * @returns Array of `{ country, topic }` pairs, or an empty array on complete failure.
- *          Never throws — failures are logged and an empty array is returned.
- */
-// export async function generateTrendingTopics(  // Commented out - unused since trending route now makes direct Groq call
-//   lang: 'en' | 'ar',
-//   type: 'gcc' | 'international' = 'gcc',
-//   retries = 2
-// ): Promise<{ country: string, topic: string }[]> {
-//   const apiKey = process.env.GROQ_API_KEY;
-//   if (!apiKey) return [];
-
-//   const context = type === 'gcc'
-//     ? "GCC region (Saudi Arabia, UAE, Qatar, Kuwait, Oman, Bahrain) focusing on strategic development, Vision 2030, and regional transformation."
-//     : "International trends relevant to the Arab world, such as global AI developments, tourism, and luxury sectors popular in the Gulf.";
-
-//   const prompt = `Generate 10 strategic regional intelligence topics for editorial analysis.
-//   Current Reference Time: ${new Date().toISOString()}
-//   Context: ${context}
-   
-//   CRITERIA:
-//   1. Focus on strategic development, regional intelligence, or social transformation.
-//   2. Avoid generic news; prioritize "Strategic Insights" and long-term impacts.
-//   3. Ensure geographic diversity across the GCC.
-//   4. Include topics on "Cultural Intelligence" (heritage, modern shifts, youth trends).
-
-//   Return ONLY a JSON array of objects with keys "country" and "topic".
-//   Format: [{"country": "Saudi Arabia", "topic": "Cognitive Urbanism and the Future of NEOM"}, ...]`;
-
-//   for (let i = 0; i <= retries; i++) {
-//     try {
-//       const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-//         method: "POST",
-//         headers: {
-//           "Authorization": `Bearer ${apiKey}`,
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           model: "llama-3.1-8b-instant",
-//           messages: [{ role: "user", content: prompt }],
-//           temperature: 0.6,
-//           response_format: { type: "json_object" },
-//         }),
-//       });
-
-//       if (!response.ok) throw new Error(`Groq API Error: ${response.status}`);
-//       const data = await response.json();
-//       const rawContent = data.choices[0].message.content;
-
-//       const parsed = JSON.parse(rawContent);
-
-//       // The model sometimes wraps the array in a root object — handle all shapes.
-//       let topics: any[] = [];
-//       if (Array.isArray(parsed)) {
-//         topics = parsed;
-//       } else if (parsed.topics && Array.isArray(parsed.topics)) {
-//         topics = parsed.topics;
-//       } else {
-//         // Last resort: find the first array value in the response object
-//         const firstArray = Object.values(parsed).find(v => Array.isArray(v));
-//         if (firstArray) topics = firstArray as any[];
-//       }
-
-//       if (topics.length > 0) {
-//         return topics.map((t: any) => ({
-//           country: t.country || "GCC",
-//           topic: t.topic || "Regional Insight",
-//         }));
-//       }
-
-//       throw new Error("Invalid topics format from AI");
-//     } catch (error) {
-//       console.error(`Trending Topics Discovery Attempt ${i + 1} failed:`, error);
-//       // Wait 1.5s before retrying to avoid hammering the API on transient failures
-//       if (i < retries) await new Promise(r => setTimeout(r, 1500));
-//     }
-//   }
-
-//   return [];
-// }
+    return {
+      title: parsed.title || `${country}: ${topic}`,
+      content: parsed.content || "",
+      category,
+      author,
+      summary: parsed.summary || "",
+    };
+  } catch (error) {
+    console.error("GCC Insight Generation Failed:", error);
+    throw error;
+  }
+}

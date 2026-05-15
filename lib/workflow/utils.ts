@@ -2,7 +2,7 @@ import { redis } from '@/lib/redis';
 import { WorkflowState } from './types';
 
 const PREFIX = 'wf:';
-const TTL    = 3600; // Reduced from 24h to 1h - workflows complete in minutes
+const TTL = parseInt(process.env.WORKFLOW_TTL || '21600', 10); // 6h default, configurable via env
 
 export async function loadWorkflowState(wid: string): Promise<WorkflowState | null> {
   try {
