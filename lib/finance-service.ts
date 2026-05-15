@@ -1,3 +1,5 @@
+import { YAHOO_FINANCE_API_URL } from '@/lib/constants/api';
+
 /**
  * Arabia Khaleej Finance Service
  * Centralized logic for market data, stock indices, and commodity prices.
@@ -35,7 +37,7 @@ export class FinanceService {
   private static async fetchFromYahoo(tickers: string[]): Promise<Record<string, { price: number; change: number }>> {
     try {
       const symbols = tickers.join(',');
-      const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols}`;
+      const url = `${YAHOO_FINANCE_API_URL}?symbols=${symbols}`;
       
       const res = await fetch(url, {
         headers: {

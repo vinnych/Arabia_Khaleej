@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/redis';
+import { SSRF_DENYLIST } from '@/lib/utils';
 
 export const runtime = 'edge';
 
@@ -35,18 +36,12 @@ export async function GET(req: NextRequest) {
   try {
     const rawIp = req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for')?.split(',')[0].trim() || '';
     
-    // Validate IP format to prevent SSRF
-    const ipv4Regex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
-    const ipv6Regex = /^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
-    const isValidIp = rawIp && (ipv4Regex.test(rawIp) || ipv6Regex.test(rawIp));
+    // SSRF protection: block private IPs from being passed to external API
+    const isPrivateIp = rawIp && SSRF_DENYLIST.test(rawIp);
     
-    // Block private/loopback IPs
-    const privateIpRegex = /^(localhost|127\.|0\.0\.0\.0|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|::1$|fe80:|fc[0-9a-f]{2}:|fd[0-9a-f]{2}:)/i;
-    const isSafe = isValidIp && !privateIpRegex.test(rawIp);
-
-    const url = isSafe
-      ? `https://freeipapi.com/api/json/${encodeURIComponent(rawIp)}`
-      : "https://freeipapi.com/api/json";
+    const url = isPrivateIp || !rawIp
+      ? "https://freeipapi.com/api/json"
+      : `https://freeipapi.com/api/json/${encodeURIComponent(rawIp)}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
@@ -85,6 +80,3 @@ export async function GET(req: NextRequest) {
     });
   }
 }
-
-
-
