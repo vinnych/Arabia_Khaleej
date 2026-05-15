@@ -7,7 +7,8 @@ compatibility_date = "2024-04-01"
 
 # Environment Variables (Non-sensitive)
 [vars]
-# Add any non-sensitive variables here
+# Production Cloudflare Pages domain — update this to your actual Pages URL
+WORKFLOW_BASE_URL = "https://arabiakhaleej.pages.dev"
 
 # Secrets (Sensitive)
 # Use 'wrangler secret put <KEY>' to add these:

@@ -33,31 +33,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/market-insight/stocks",
-        destination: "/market-insight",
-        permanent: true,
-      },
-      {
-        source: "/market-insight/gold",
-        destination: "/market-insight",
-        permanent: true,
-      },
-      {
-        source: "/market-insight/crypto",
-        destination: "/market-insight",
-        permanent: true,
-      },
-      {
-        source: "/market-insight/forex",
-        destination: "/market-insight",
-        permanent: true,
-      },
-      {
-        source: "/market-insight/details/:path*",
-        destination: "/market-insight",
-        permanent: false,
-      },
-      {
         source: "/countries/uae",
         destination: "/countries/united-arab-emirates",
         permanent: true,
@@ -65,11 +40,6 @@ const nextConfig: NextConfig = {
       {
         source: "/prayer/united-arab-emirates",
         destination: "/prayer/uae",
-        permanent: true,
-      },
-      {
-        source: "/finance/:path*",
-        destination: "/market-insight",
         permanent: true,
       },
     ];

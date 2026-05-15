@@ -64,6 +64,38 @@ export interface GCCInsightResponse {
 }
 
 // ---------------------------------------------------------------------------
+// Shared AdSense Guardrails
+// ---------------------------------------------------------------------------
+//
+// These rules are embedded directly in every generation prompt so the
+// model is never asked to produce AdSense-violating content.
+//
+// When Google updates its content policies, only this block needs to
+// change — the generation prompt, trending filter, and policy-audit
+// prompt all pick up the update automatically.
+// ---------------------------------------------------------------------------
+
+/**
+ * Canonical content rules shared by every LLM call in the platform.
+ *
+ * @see lib/workflow/prompts.ts — `ADSENSE_RULES` mirrors this block
+ *      verbatim for the topic-scoring and policy-audit nodes.
+ *      Keep both files in sync when editing.
+ */
+const ADSENSE_RULES = `
+ADSENSE CONTENT REQUIREMENTS (non-negotiable — follow exactly):
+1. NO scraped, copied, or copyrighted third-party content. Every word must be original.
+2. NO unqualified medical claims, financial investment advice, or legal guidance.
+3. NO hate speech, harassment, adult content, or graphic violence.
+4. NO deceptive, misleading, or factually inaccurate information.
+5. NO thin / placeholder content — articles must contain genuine original analysis.
+6. NO gambling, crypto speculation, or promotion of regulated / illegal substances.
+7. NO instructions for circumventing AdSense or advertising policies.
+8. All statistics and quoted figures must be attributed to a named official source with a date.
+9. If a statistic cannot be reliably attributed within the article, replace the attempted citation
+   with a verifiable regional example or omit the claim entirely — never fabricate a source.`;
+
+// ---------------------------------------------------------------------------
 // Editorial Author Registry
 // ---------------------------------------------------------------------------
 
@@ -130,52 +162,56 @@ export async function generateGCCInsight(
   }
 
   const prompt = lang === 'en'
-    ? `Write a comprehensive, authoritative editorial article about ${country} focusing on ${topic}.
-       The article should be at least 1500 words with clear sections and institutional-grade analysis.
+    ? `${ADSENSE_RULES}
 
-       REQUIRED ELEMENTS FOR QUALITY:
-       - Specific company names from ${country}/GCC (e.g., "Saudi Aramco", "Emirates NBD")
-       - Cite at least 2 specific official sources with dates
-       - Include concrete statistics or policy numbers
-       - Reference specific government initiatives or investment values
-       - Add specific regional examples that demonstrate local context
+Write a comprehensive, authoritative editorial article about ${country} focusing on ${topic}.
+The article must be at least 1500 words with clear sections and institutional-grade analysis.
 
-       Focus: Accurate regional context, cultural depth, economic significance, and forward-looking strategic analysis.
-       Tone: Professional, sophisticated, and informative.
-       Format: Return a JSON object with the following fields:
-       - title: A professional SEO title.
-       - content: The full article in Markdown format.
-       - category: One of [Fiscal, Geopolitics, Culture, Technology, Infrastructure, Energy].
-       - summary: A 160-character professional summary.
+REQUIRED ELEMENTS FOR QUALITY:
+- Specific company names from ${country}/GCC (e.g., "Saudi Aramco", "Emirates NBD")
+- Cite at least 2 specific official sources with dates
+- Include concrete statistics or policy numbers
+- Reference specific government initiatives or investment values
+- Add specific regional examples that demonstrate local context
 
-       STRICT RULES:
-       1. DO NOT include any introductory preamble.
-       2. DO NOT include an author field — it will be assigned editorially.
-       3. Use professional British English.
-       4. Return VALID JSON only.`
-    : `اكتب مقالاً تحريرياً شاملاً ومعمّقاً عن ${country} مع التركيز على ${topic}.
-       يجب أن لا يقل عن 1500 كلمة مع أقسام واضحة وتحليل بمستوى مؤسسي.
+Focus: Accurate regional context, cultural depth, economic significance, and forward-looking strategic analysis.
+Tone: Professional, sophisticated, and informative.
+Format: Return a JSON object with the following fields:
+- title: A professional SEO title.
+- content: The full article in Markdown format.
+- category: One of [Fiscal, Geopolitics, Culture, Technology, Infrastructure, Energy].
+- summary: A 160-character professional summary.
 
-       العناصر المطلوبة للجودة:
-       - أسماء شركات محددة من ${country}/الخليج
-       - اقتباس مصادر رسمية محددة بتواريخ
-       - إدراج إحصاءات ملموسة أو أرقام سياسية
-       - الإشارة إلى مبادرات حكومية محددة أو قيم استثمارية
-       - أمثلة إقليمية محددة توضح السياق المحلي
+STRICT RULES:
+1. DO NOT include any introductory preamble.
+2. DO NOT include an author field — it will be assigned editorially.
+3. Use professional British English.
+4. Return VALID JSON only.`
+    : `${ADSENSE_RULES}
 
-       التركيز: السياق الإقليمي الدقيق، العمق الثقافي، الأهمية الاقتصادية، والتحليل الاستراتيجي الاستشرافي.
-       الأسلوب: صوت تحريري مهني وراقي.
-       التنسيق: أرجع كائن JSON يحتوي على الحقول التالية:
-       - title: عنوان احترافي مهيأ لمحركات البحث.
-       - content: المقال كاملاً بتنسيق Markdown.
-       - category: واحد من [Fiscal, Geopolitics, Culture, Technology, Infrastructure, Energy].
-       - summary: ملخص احترافي من 160 حرفاً.
+اكتب مقالاً تحريرياً شاملاً ومعمّقاً عن ${country} مع التركيز على ${topic}.
+يجب أن لا يقل عن 1500 كلمة مع أقسام واضحة وتحليل بمستوى مؤسسي.
 
-       قواعد صارمة:
-       1. لا تدرج أي نص تمهيدي.
-       2. لا تُضمّن حقل المؤلف — سيتم تعيينه تحريرياً.
-       3. استخدم لغة عربية فصحى رصينة واحترافية.
-       4. أرجع JSON صالحاً فقط.`;
+العناصر المطلوبة للجودة:
+- أسماء شركات محددة من ${country}/الخليج
+- اقتباس مصادر رسمية محددة بتواريخ
+- إدراج إحصاءات ملموسة أو أرقام سياسية
+- الإشارة إلى مبادرات حكومية محددة أو قيم استثمارية
+- أمثلة إقليمية محددة توضح السياق المحلي
+
+التركيز: السياق الإقليمي الدقيق، العمق الثقافي، الأهمية الاقتصادية، والتحليل الاستراتيجي الاستشرافي.
+الأسلوب: صوت تحريري مهني وراقي.
+التنسيق: أرجع كائن JSON يحتوي على الحقول التالية:
+- title: عنوان احترافي مهيأ لمحركات البحث.
+- content: المقال كاملاً بتنسيق Markdown.
+- category: واحد من [Fiscal, Geopolitics, Culture, Technology, Infrastructure, Energy].
+- summary: ملخص احترافي من 160 حرفاً.
+
+قواعد صارمة:
+1. لا تدرج أي نص تمهيدي.
+2. لا تُضمّن حقل المؤلف — سيتم تعيينه تحريرياً.
+3. استخدم لغة عربية فصحى رصينة واحترافية.
+4. أرجع JSON صالحاً فقط.`;
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -189,7 +225,13 @@ export async function generateGCCInsight(
         messages: [
           {
             role: "system",
-            content: "You are a senior regional analyst and editor for Arabia Khaleej. You provide structured, professional intelligence in JSON format. Never invent author names.",
+            content:
+              "You are a senior regional analyst and editor for Arabia Khaleej. " +
+              "You provide structured, professional intelligence in JSON format. " +
+              "Never invent author names. " +
+              "NEVER produce content that violates AdSense policies: no scraped/copyrighted text, " +
+              "no thin content, no unqualified medical/financial claims, no deceptive information, " +
+              "and no gambling or illegal-substance promotion per article.",
           },
           { role: "user", content: prompt },
         ],

@@ -97,10 +97,21 @@ export default function AdminReviewPage() {
   };
 
   const handleReject = async (slug: string, lang: string) => {
-    if (!confirm('Are you sure you want to reject this draft?')) return;
-    // For simplicity, we'll just remove from draft list (add delete API if needed)
-    setDrafts(prev => prev.filter(d => d.slug !== slug));
-    alert('Draft rejected (draft list updated locally, add delete API for permanent removal)');
+    if (!confirm('Are you sure you want to reject and permanently delete this draft?')) return;
+    try {
+      const res = await fetch(`/api/admin/drafts/${encodeURIComponent(slug)}?secret=${secret}&lang=${lang}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDrafts(prev => prev.filter(d => d.slug !== slug));
+        alert('Draft rejected and permanently deleted.');
+      } else {
+        alert('Delete failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch {
+      alert('Delete failed');
+    }
   };
 
   if (!secret) {

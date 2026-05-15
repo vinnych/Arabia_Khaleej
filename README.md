@@ -25,20 +25,48 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 
 ---
 
-## 📡 Content Intelligence Pipeline
-The platform features a sophisticated editorial pipeline:
+## 🤖 Agentic Editorial Workflow
 
-- **Trigger**: Strategic regional updates (Cloudflare Scheduled Triggers).
-- **Core**: High-fidelity analysis engine.
-- **Output**: 10 High-fidelity articles (5 English, 5 Arabic) per run.
-- **Mix (90/10)**: 90% High-Utility (How-To Guides, Reviews, Explainers) and 10% Specialized Women-centric Analysis.
-- **Quality**: Long-form 1500+ word professional regional analysis.
-- **Advanced SEO**: Automated schema injection (HowTo, Review, FAQ, Article) based on content type.
-- **Strategy**: Sequential generation to maintain peak quality and respect API constraints.
+The platform uses a **6-node edge state machine** to generate, validate, and persist editorial content. Every node outputs a `nextAction` field, so the Cloudflare Worker can chain through the entire pipeline without additional orchestration.
+
+### Node Flow
+
+```
+POST /api/workflow/daily          →  init
+  │  GET /api/workflow/trending    →  trending      (Node 1: RSS + AdSense topic scoring)
+  │    GET /api/workflow/generate/ →  generate     (Node 2: Groq 70B article generation)
+  │      GET /api/workflow/policy/  →  policy       (Node 3: AdSense compliance audit)
+  │        GET /api/workflow/score/ →  score        (Node 4: heuristic quality scoring)
+  │          GET /api/workflow/persist/ → persist   (Node 5: Redis commit + workflow cleanup)
+  │            ✓ done
+```
+
+### Per-Node Responsibilities
+
+| Node | Endpoint | What it does |
+|---|---|---|
+| **1 — Init** | `POST /api/workflow/daily` | Creates or resumes workflow state in Redis; chains to trending |
+| **2 — Trending** | `GET /api/workflow/trending` | Fetches Google News RSS for GCC, Groq 8B scores topics for AdSense density, picks top topic |
+| **3 — Generate** | `GET /api/workflow/generate/0` | Groq 70B writes the full article; Pexels/Search image; draft saved to Redis |
+| **4 — Policy** | `GET /api/workflow/policy/0` | Groq 8B audits against AdSense policy; retries once on fail; auto-deletes on second fail |
+| **5 — Score** | `GET /api/workflow/score/0` | Heuristic 0–100 score across word count, sections, citations, stats, named entities |
+| **6 — Persist** | `GET /api/workflow/persist/0` | Writes to `insights:drafts:{lang}` list; deletes workflow state; returns `done` |
+
+### Cron Trigger
+
+- **Worker**: `worker/daily-automation.js` (Cloudflare Worker)
+- **Schedule**: `0 */2 * * *` — every 2 hours, consistently generating new drafts awaiting human editorial review on `/admin/review`
+- **Articles per run**: 3
+- **Daily output**: up to 36
+
+### Resume Support
+
+If a workflow run is interrupted (e.g., a node times out), the state machine is persisted in Redis under `wf:{id}` every step. On the next `/api/workflow/daily` call, the same `workflowId` resumes from the last completed step automatically.
 
 ---
 
 ## 🛠️ API Architecture
+
 | Endpoint | Parameters | Purpose |
 | :--- | :--- | :--- |
 | `GET /api/insights` | `lang`, `slug`, `limit` | Article delivery & discovery |
@@ -46,7 +74,8 @@ The platform features a sophisticated editorial pipeline:
 | `GET /api/exchange-rates` | — | Real-time GCC currency dynamics |
 | `GET /api/market-data` | — | GCC stock and commodity indices |
 
-The editorial content pipeline is managed via a Cloudflare Worker scheduled trigger. The Worker endpoint is authenticated via `CRON_SECRET` and is not publicly accessible.
+The agentic editorial pipeline is **not** called from a browser.
+It is triggered exclusively by the Cloudflare Worker cron (`worker/daily-automation.js`).
 
 ---
 
@@ -59,30 +88,44 @@ UPSTASH_REDIS_REST_TOKEN=    # Redis Auth Token
 GROQ_API_KEY=                # AI Generation Key
 PEXELS_API_KEY=              # Primary Imagery Source
 UNSPLASH_ACCESS_KEY=         # Fallback Imagery Source
-CRON_SECRET=                 # Vercel Cron Authentication
+CRON_SECRET=                 # Worker Cron Authentication
+ADMIN_SECRET=                # Admin Review Panel Access
 ```
 
 ---
 
 ## ☁️ Cloudflare Deployment
-1. **Frontend**: Deploy to **Cloudflare Pages** using the Next.js preset.
-2. **Automation**: Deploy `worker/daily-automation.js` using `npm run worker:deploy`.
-3. **Secrets**: 
-   - **Pages**: Add variables in the Cloudflare Dashboard under **Settings → Variables**.
-   - **Worker**: Use `wrangler secret put <KEY>` for production, or create a `.dev.vars` file for local testing (see `.dev.vars.example`).
 
-Required Keys: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `GROQ_API_KEY`, `PEXELS_API_KEY`, `CRON_SECRET`.
+### 1. Frontend (Cloudflare Pages)
+
+1. Run `npm run build` — outputs to `.vercel/output`
+2. In Cloudflare Pages, select **Next.js framework preset** with **Output = Serverless Functions** (SSR)
+3. Connect your repo / upload the built output
+
+Required Pages environment variables (Settings → Variables → Add):
+`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `GROQ_API_KEY`, `PEXELS_API_KEY`, `ADMIN_SECRET`, `NEXT_PUBLIC_ADSENSE_ID`, `NEXT_PUBLIC_SITE_VERIFICATION`
+
+### 2. Automation Worker (Cloudflare Worker)
+
+```bash
+npm run worker:deploy
+```
+
+This deploys `worker/daily-automation.js` with `worker/wrangler.toml` (schedule: every 2 h).
+
+Required Worker secrets (via `wrangler secret put <KEY>`):
+`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `GROQ_API_KEY`, `PEXELS_API_KEY`, `CRON_SECRET`
 
 ---
 
 ## 🛡️ Security & Performance
-- **Edge Caching**: Optimized with Next.js 15 ISR/SWR (5-minute revalidation) for near-instant loading.
-- **Image Optimization**: High-performance delivery for regional news sources (WAM, QNA, SPA, etc.) via Next.js Image Optimizer.
-- **Free-Tier Optimized**: Specifically architected to stay within Cloudflare Free and Upstash Redis Free limits.
-- **CSP**: Strict Content Security Policy managed via `middleware.ts`.
-- **Rate Limiting**: Intelligent IP-based throttling on sensitive utility routes.
-- **No-DB Strategy**: Legal-optimized transient storage using Redis with aggressive TTLs.
-- **SEO**: Dynamic metadata generation for every insight article.
+- **Edge Caching**: ISR/SWR (5-minute revalidation) for near-instant loading.
+- **Image Optimization**: Next.js Image Optimizer for regional news sources (WAM, QNA, SPA, etc.).
+- **Free-Tier Optimized**: Architected for Cloudflare Free + Upstash Redis Free limits.
+- **CSP**: Strict Content Security Policy managed via `middleware.ts` + `lib/csp.ts`.
+- **Rate Limiting**: IP-based throttling on sensitive utility routes.
+- **No-DB Strategy**: Transient storage using Redis with aggressive TTLs.
+- **AdSense Compliance**: Per-article policy audit node + human editorial review before publishing.
 
 ---
 
