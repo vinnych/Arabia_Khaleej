@@ -7,7 +7,10 @@ export const runtime = 'edge';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json().catch(() => ({})) as {
+    const body = await request.json().catch((err) => {
+      console.warn('Failed to parse request body:', err);
+      return {};
+    }) as {
       articleCount?: number;
       workflowId?: string | null;
       adminSecret?: string | null;
@@ -40,7 +43,9 @@ export async function POST(request: NextRequest) {
         updatedAt: new Date().toISOString(), currentIndex: 0, articles, trendingTopics: [],
         errors: [], hasGroqApiKey: !!process.env.GROQ_API_KEY, runCount: 0, adminSecret,
       };
-      await saveWorkflowState(workflowId, freshState).catch(() => null);
+      await saveWorkflowState(workflowId, freshState).catch((err) => {
+        console.error('Failed to save initial workflow state:', err);
+      });
       return NextResponse.json(ok('init', { workflowId, step: 'init', workflowStatus: 'running' },
         { type: 'fetch', method: 'GET', url: '/api/workflow/trending?wid=' + workflowId + '&idx=0' },
         'Workflow initialized; chaining to /api/workflow/trending'
@@ -69,6 +74,7 @@ export async function POST(request: NextRequest) {
       'Resumed at step: ' + existing.step + ' idx=' + existing.currentIndex
     ));
   } catch (e: any) {
+    console.error('Workflow initialization failed:', e);
     return NextResponse.json(fail('error', e.message || 'Unknown error'));
   }
 }
