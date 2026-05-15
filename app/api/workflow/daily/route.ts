@@ -23,6 +23,14 @@ export async function POST(request: NextRequest) {
       workflowId?: string | null;
       adminSecret?: string | null;
     };
+    
+    // Validate admin secret for admin-triggered actions
+    const providedAdminSecret = body.adminSecret;
+    const expectedAdminSecret = process.env.ADMIN_SECRET;
+    if (providedAdminSecret && expectedAdminSecret && providedAdminSecret !== expectedAdminSecret) {
+      return NextResponse.json(fail('error', 'Invalid admin secret'), { status: 401 });
+    }
+    
     const articleCount: number = Math.min(Math.max(body.articleCount ?? 1, 1), 5);
 
     const existingId = typeof body.workflowId === 'string' ? body.workflowId : null;

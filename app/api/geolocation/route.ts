@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/redis';
 import { SSRF_DENYLIST } from '@/lib/utils';
+import { FREEIPAPI_URL } from '@/lib/constants/api';
 
 export const runtime = 'edge';
 
@@ -40,8 +41,8 @@ export async function GET(req: NextRequest) {
     const isPrivateIp = rawIp && SSRF_DENYLIST.test(rawIp);
     
     const url = isPrivateIp || !rawIp
-      ? "https://freeipapi.com/api/json"
-      : `https://freeipapi.com/api/json/${encodeURIComponent(rawIp)}`;
+      ? FREEIPAPI_URL
+      : `${FREEIPAPI_URL}/${encodeURIComponent(rawIp)}`;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
