@@ -16,20 +16,3 @@ export function fail(
 ): NodeResponse {
   return { ok: false, step, summary: error, error, state };
 }
-
-export function okSimple(
-  step: WorkflowStep,
-  state: Partial<WorkflowState>,
-  nextAction?: NextAction,
-  summary = ''
-): NodeResponse {
-  return { ok: true, step, nextAction, summary, state };
-}
-
-export function failSimple(
-  step: WorkflowStep,
-  error: string,
-  state: Partial<WorkflowState> = {}
-): NodeResponse {
-  return { ok: false, step, summary: error, error, state };
-}
