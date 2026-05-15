@@ -24,7 +24,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ status: 'error', message: 'Invalid name' }, { status: 400 });
     }
 
-    const workerUrl = process.env.CONTACT_WORKER_URL || "https://arabiakhaleej-contact.asishchilakapati.workers.dev";
+const workerUrl = process.env.CONTACT_WORKER_URL;
+    if (!workerUrl) {
+      return NextResponse.json({ status: 'error', message: 'Contact worker not configured' }, { status: 500 });
+    }
     
     const res = await fetch(workerUrl, {
       method: "POST",

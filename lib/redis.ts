@@ -65,6 +65,7 @@ const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
 const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 // Memory cache fallback for local development or when Redis is not configured
+// WARNING: In-memory cache has no persistence - restarts clear all data
 const memoryCache: Record<string, { value: any, expiresAt: number }> = {};
 
 export const redis = redisUrl && redisToken 

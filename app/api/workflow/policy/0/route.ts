@@ -85,9 +85,9 @@ async function judgeArticle(apiKey: string, article: ArticleDraft): Promise<{ ve
 
   // Handle non-ok responses gracefully
   if (!groqRes.ok) {
-    // Log the error but allow article to proceed with warning actions
+    // Log the error and fail the article — AdSense compliance cannot be verified
     console.warn('Groq API call failed in policy judge:', groqRes.status);
-    return { verdict: 'pass', violations: [], actions: ['(LLM call failed, defaulting to pass for safety)'] };
+    return { verdict: 'fail', violations: [{ category: 'api', reason: 'Policy audit unavailable', severity: 'critical', location: 'full content' }], actions: ['(LLM unavailable — article FAILED policy check)'] };
   }
 
   const groqData = await groqRes.json();
