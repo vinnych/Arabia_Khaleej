@@ -74,7 +74,7 @@ try {
     const steps = [];
     const MAX_STEPS = 20; // Reduced from 60: 4 steps per article × 5 articles max
 
-    while (current.nextAction && current.nextAction.type === 'fetch' && steps.length < MAX_STEPS) {
+    while (current.nextAction?.type === 'fetch' && steps.length < MAX_STEPS) {
       const action = current.nextAction;
       steps.push(action.url);
 

@@ -104,8 +104,8 @@ export function pageMeta({
       follow: true,
     },
     other: {
-      "google-adsense-account": process.env.NEXT_PUBLIC_ADSENSE_ID || "",
-      "google-site-verification": process.env.NEXT_PUBLIC_SITE_VERIFICATION || "",
+      ...(process.env.NEXT_PUBLIC_ADSENSE_ID ? { "google-adsense-account": process.env.NEXT_PUBLIC_ADSENSE_ID } : {}),
+      ...(process.env.NEXT_PUBLIC_SITE_VERIFICATION ? { "google-site-verification": process.env.NEXT_PUBLIC_SITE_VERIFICATION } : {}),
       ...(geo ? {
         "geo.region": geo.region,
         "geo.placename": geo.placename,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { loadWorkflowState, saveWorkflowState, deleteWorkflow } from '@/lib/workflow/utils';
 import { NodeResponse, WorkflowState } from '@/lib/workflow/types';
-import { redis, setWithCompression, CACHE_TIMES } from '@/lib/redis';
+import { redis, getWithCompression, setWithCompression, CACHE_TIMES } from '@/lib/redis';
 import { InsightItem } from '@/lib/insights';
 
 export const runtime = 'edge';
@@ -45,11 +45,25 @@ export async function GET(request: NextRequest) {
   } catch { /* non-fatal */ }
 
   try {
-    const raw = await redis.get(listKey);
-    let drafts = [];
-    if (raw) { try { drafts = (JSON.parse(raw as string) as any[]); } catch {} }
+    // Derive a type-safe InsightItem listing entry from the workflow ArticleDraft.
+    // ArticleDraft is missing: link, source, language (uses 'lang'), humanEdited, editedAt.
+    const listEntry: InsightItem = {
+      id:          article.id,
+      slug:        article.slug,
+      title:       article.title,
+      description: article.description,
+      link:        '/insights/' + article.slug,
+      pubDate:     article.pubDate,
+      source:      'Arabia Khaleej Editorial',
+      category:    (article.category as InsightItem['category']) || 'gcc',
+      language:    (article.lang as InsightItem['language']) || 'en',
+      tags:        article.tags,
+      image:       article.image,
+      status:      'draft',
+    };
+    let drafts: InsightItem[] = (await getWithCompression<InsightItem[]>(listKey)) || [];
     if (!drafts.some(d => d.slug === article.slug)) {
-      drafts.unshift(article);
+      drafts.unshift(listEntry);
       if (drafts.length > 500) drafts = drafts.slice(0, 500);
       await setWithCompression(listKey, drafts, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
     }

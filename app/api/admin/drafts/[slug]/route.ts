@@ -60,8 +60,8 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    // 1. Delete draft article key
-    const draftArticleKey = `insights:draft:article:${encodeURIComponent(slug)}`;
+    // 1. Delete draft article key (same format as generate/0/route.ts write path)
+    const draftArticleKey = 'insights:draft:article:' + slug;
     await fetch(`${UPSTASH_REDIS_REST_URL}/del/${draftArticleKey}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }

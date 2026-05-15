@@ -36,6 +36,39 @@ async function fetchArticleBody(slug: string, fallback: string): Promise<string>
   return fallback || '';
 }
 
+/**
+ * Count statistics (numbers, currencies, percentages) in text
+ */
+function countStats(text: string): number {
+  return (text.match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?%?|\$\d[\d.]*|USD|GBP|SAR|AED/g) || []).length;
+}
+
+/**
+ * Count citations/sources references in text
+ */
+function countCitations(text: string): number {
+  return (text.match(/(?:according to|source:|reports?|ministry|authority| announced| data from | statistics show )/gi) || []).length;
+}
+
+/**
+ * Check AdSense richness: needs minimum stats and citations
+ */
+function checkRichness(content: string, wordCount: number): { isRich: boolean; stats: number; citations: number; reasons: string[] } {
+  const stats = countStats(content);
+  const citations = countCitations(content);
+  const reasons: string[] = [];
+  
+  // For 1500+ words, need at least 3 stats and 2 citations
+  const minStats = wordCount >= 1500 ? 3 : 1;
+  const minCitations = wordCount >= 1500 ? 2 : 1;
+  
+  const isRich = stats >= minStats && citations >= minCitations;
+  if (stats < minStats) reasons.push(`Need ${minStats}+ statistics (found ${stats})`);
+  if (citations < minCitations) reasons.push(`Need ${minCitations}+ citations (found ${citations})`);
+  
+  return { isRich, stats, citations, reasons };
+}
+
 async function judgeArticle(apiKey: string, article: any): Promise<{ verdict: 'pass' | 'fail' | 'delete'; violations: any[]; actions: string[] }> {
   const content = await fetchArticleBody(article.slug, article.content);
   const trunc = content.length > 8000 ? content.substring(0, 8000) + ' [...TRUNCATED...]' : content;
@@ -83,18 +116,37 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
 
   if (!process.env.GROQ_API_KEY) return NextResponse.json(fail('error', 'GROQ_API_KEY missing', state));
 
+  // 1. Run AdSense policy check
   const { verdict, violations } = await judgeArticle(process.env.GROQ_API_KEY, article);
+  article.policyResult = verdict;
+  article.policyViolations = violations;
+  article.policyCheckedAt = new Date().toISOString();
 
-  article.policyResult     = verdict;
-  article.policyViolations  = violations;
-  article.policyCheckedAt   = new Date().toISOString();
+  // 2. Run AdSense richness check (statistics, citations)
+  const content = await fetchArticleBody(article.slug, article.content);
+  const wordCount = (content.match(/\b\w+\b/g) || []).length;
+  const richness = checkRichness(content, wordCount);
+  
+  // Richness violations are treated as policy violations for rewrite purposes
+  const richnessViolations = richness.reasons.length > 0 ? [{
+    category: 'richness',
+    reason: richness.reasons.join(', '),
+    severity: 'warning' as const,
+    location: 'full content'
+  }] : [];
 
-  if (verdict === 'fail' && article.retryCount < article.maxRetries) {
+  const allViolations = [...violations, ...richnessViolations];
+  const hasFailures = verdict === 'fail' || !richness.isRich;
+  const canRetry = article.retryCount < article.maxRetries;
+
+  if (hasFailures && canRetry) {
     article.retryCount++;
     state.step = 'generate';
     state.articles[idx].regenerateContext = {
-      violations: violations.map(v => v.category + ': ' + v.reason).join('; '),
-      actions: violations.map(v => v.category === 'stats' ? 'Add proper citations' : v.category === 'sources' ? 'Verify all sources' : 'Review content').join('; ')
+      violations: allViolations.map(v => v.category + ': ' + v.reason).join('; '),
+      actions: verdict === 'fail' 
+        ? violations.map(v => v.category === 'stats' ? 'Add proper citations' : v.category === 'sources' ? 'Verify all sources' : 'Review content').join('; ')
+        : `Add ${Math.max(0, 3 - richness.stats)} more statistics and ${Math.max(0, 2 - richness.citations)} more citations`,
     };
     state.updatedAt = new Date().toISOString();
     await saveWorkflowState(wid, state).catch(() => {});
@@ -102,13 +154,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
     return NextResponse.json(
       ok('generate', state,
         { type: 'fetch', method: 'GET', url: '/api/workflow/generate/' + idx + '?wid=' + wid + '&idx=' + idx },
-        'Policy FAIL — "' + article.title + '" violation: ' + (violations[0]?.category || 'unspecified')
+        'Policy FAIL — "' + article.title + '" | ' + (verdict === 'fail' ? violations[0]?.category : 'Not AdSense-rich')
         + '. Retry ' + article.retryCount + '/1. Rewriting with corrections.'
       )
     );
   }
 
-  if (verdict === 'fail' && article.retryCount >= article.maxRetries) {
+  // Delete after max retries or if policy says delete
+  if ((hasFailures && !canRetry && verdict !== 'pass') || verdict === 'delete') {
     article.status = 'deleted';
     article.policyResult = 'delete';
     state.step = 'score';
@@ -123,6 +176,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
     );
   }
 
+  // Pass: proceed to scoring
   article.policyResult = 'pass';
   state.step = 'score';
   state.updatedAt = new Date().toISOString();
@@ -131,7 +185,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
   return NextResponse.json(
     ok('score', state,
       { type: 'fetch', method: 'GET', url: '/api/workflow/score/' + idx + '?wid=' + wid + '&idx=' + idx },
-      'Policy PASS: ' + article.title
+      'Policy PASS: ' + article.title + ` (${wordCount}w, ${richness.stats} stats, ${richness.citations} citations)`
     )
   );
 }
