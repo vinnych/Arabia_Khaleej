@@ -80,10 +80,31 @@ export const REGENERATE_PROMPT = (violations: string, actions: string, content: 
   `Rewrite this article to resolve these AdSense policy violations.
 Keep the core topic and country. Address each violation directly.
 
+REQUIRED ELEMENTS FOR QUALITY:
+- Specific company names from the country/GCC (e.g., "Saudi Aramco", "Emirates NBD")
+- Cite at least 2 specific official sources with dates
+- Include concrete statistics or policy numbers
+- Reference specific government initiatives or investment values
+- Add specific regional examples that demonstrate local context
+
 VIOLATIONS:
 ${violations}
 ACTIONS:
 ${actions}
 
 ORIGINAL:
-${content}`;
+${content}
+
+Focus: Accurate regional context, cultural depth, economic significance, and forward-looking strategic analysis.
+Tone: Professional, sophisticated, and informative.
+Format: Return a JSON object with the following fields:
+- title: A professional SEO title.
+- content: The full article in Markdown format.
+- category: One of [Fiscal, Geopolitics, Culture, Technology, Infrastructure, Energy].
+- summary: A 160-character professional summary.
+
+STRICT RULES:
+1. DO NOT include any introductory preamble.
+2. DO NOT include an author field — it will be assigned editorially.
+3. Use professional British English.
+4. Return VALID JSON only.`;

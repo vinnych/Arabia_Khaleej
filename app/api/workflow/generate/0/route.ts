@@ -79,53 +79,74 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
      );
    }
 
-  // -- Build InsightItem ------------------------------------------
-  const slug = toSlug(aiResult.title + ' ' + topic);
-  const imageUrl = await getRelevantImage(topic + ' ' + country, slug).catch(() => '/images/insights/default.png');
-  const wordCount = (aiResult.content.match(/\b\w+\b/g) || []).length;
+    // -- Build InsightItem ------------------------------------------
+    const slug = toSlug(aiResult.title + ' ' + topic);
+    const imageUrl = await getRelevantImage(topic + ' ' + country, slug).catch(() => '/images/insights/default.png');
+    const wordCount = (aiResult.content.match(/\b\w+\b/g) || []).length;
 
-  const freshArticle: InsightItem = {
-    id:          'wf-' + wid.slice(-6) + '-a' + idx,
-    slug,
-    title:       aiResult.title,
-    description: aiResult.summary,
-    content:     aiResult.content,
-    link:        '/insights/' + slug,
-    pubDate:     new Date().toISOString(),
-    source:      aiResult.author?.name || 'Arabia Khaleej Editorial',
-    category:    (aiResult.category as InsightItem['category']) || 'gcc',
-    language:    'en',
-    tags:        ['gcc', 'intelligence', (aiResult.category?.toLowerCase() || 'strategy') as string].filter(Boolean),
-    image:       imageUrl,
-    status:      'draft' as const,
-    humanEdited: false,
-  };
+    // Safety check for required fields from AI response
+    const safeTitle = aiResult.title || `${country}: ${topic}`;
+    const safeSummary = aiResult.summary || `Analysis of ${topic} in ${country}`;
+    const safeContent = aiResult.content || "";
+    const safeCategory = (aiResult.category as InsightItem['category']) || 'gcc';
+    const safeAuthor = aiResult.author ?? { name: "Arabia Khaleej Editorial Team", nameAr: "هيئة تحرير عربية خليج", title: "Editorial Board", titleAr: "هيئة التحرير" };
 
-  // -- Save article body to Redis (main store) -------------------
-  const articleKey = 'insights:draft:article:' + slug;
-  await redis.set(articleKey, JSON.stringify(freshArticle), { ex: 31536000 }).catch(() => {});
+    const freshArticle: InsightItem = {
+      id:          'wf-' + wid.slice(-6) + '-a' + idx,
+      slug,
+      title:       safeTitle,
+      description: safeSummary,
+      content:     safeContent,
+      link:        '/insights/' + slug,
+      pubDate:     new Date().toISOString(),
+      source:      safeAuthor.name,
+      category:    safeCategory,
+      language:    'en',
+      tags:        ['gcc', 'intelligence', (safeCategory?.toLowerCase() || 'strategy') as string].filter(Boolean),
+      image:       imageUrl,
+      status:      'draft' as const,
+      humanEdited: false,
+    };
 
-// -- Update workflow state --------------------------------------
-   state.articles[idx] = {
-     ...article,
-     title:       aiResult.title,
-     slug,
-     description: aiResult.summary,
-     content:     aiResult.content,
-     image:       imageUrl,
-     category:    (aiResult.category as InsightItem['category']) || 'gcc',
-     tags:        freshArticle.tags || [],
-     wordCount,
-     status:      'pending',
-     retryCount:  article.retryCount || 0,
-     maxRetries:  article.maxRetries || 1,
-   };
-   // Clear regenerate context after use to prevent stale rewrites
-   delete state.articles[idx].regenerateContext;
-  state.step = 'policy';
-  state.updatedAt = new Date().toISOString();
+     // Clean up old slug if it changed during regeneration (prevents Redis orphaned keys)
+     if (article.slug && article.slug !== slug) {
+       const oldArticleKey = 'insights:draft:article:' + article.slug;
+       await redis.del(oldArticleKey).catch((err) => {
+         console.warn(`Failed to delete old article key ${oldArticleKey}:`, err);
+       });
+     }
 
-  await saveWorkflowState(wid, state).catch(() => {});
+   // -- Save article body to Redis (main store) -------------------
+   const articleKey = 'insights:draft:article:' + slug;
+   await redis.set(articleKey, JSON.stringify(freshArticle), { ex: 31536000 }).catch((err) => {
+     console.error(`Failed to save article to Redis ${articleKey}:`, err);
+     throw err; // Re-throw to fail the request
+   });
+
+ // -- Update workflow state --------------------------------------
+    state.articles[idx] = {
+      ...article,
+      title:       safeTitle,
+      slug,
+      description: safeSummary,
+      content:     safeContent,
+      image:       imageUrl,
+      category:    safeCategory,
+      tags:        ['gcc', 'intelligence', (safeCategory?.toLowerCase() || 'strategy') as string].filter(Boolean),
+      wordCount,
+      status:      'pending',
+      retryCount:  article.retryCount || 0,
+      maxRetries:  article.maxRetries || 1,
+    };
+    // Clear regenerate context after use to prevent stale rewrites
+    delete state.articles[idx].regenerateContext;
+   state.step = 'policy';
+   state.updatedAt = new Date().toISOString();
+
+   await saveWorkflowState(wid, state).catch((err) => {
+     console.error(`Failed to save workflow state ${wid}:`, err);
+     throw err; // Re-throw to fail the request
+   });
 
   // -- Chain to policy check --------------------------------------
   return NextResponse.json<NodeResponse>(
