@@ -48,7 +48,7 @@ POST /api/workflow/daily          →  init
 | **1 — Init** | `POST /api/workflow/daily` | Creates or resumes workflow state in Redis; chains to trending |
 | **2 — Trending** | `GET /api/workflow/trending` | Fetches Google News RSS for GCC, Groq 8B scores topics for AdSense density, picks top topic |
 | **3 — Generate** | `GET /api/workflow/generate/0` | Groq 70B writes the full article; Pexels/Search image; draft saved to Redis |
-| **4 — Policy** | `GET /api/workflow/policy/0` | Groq 8B audits against AdSense policy; retries once on fail; auto-deletes on second fail |
+| **4 — Policy** | `GET /api/workflow/policy/0` | Groq 8B audits against AdSense policy AND checks for AdSense richness (minimum statistics/citations); retries once on fail/poor richness; auto-deletes on second fail |
 | **5 — Score** | `GET /api/workflow/score/0` | Heuristic 0–100 score across word count, sections, citations, stats, named entities |
 | **6 — Persist** | `GET /api/workflow/persist/0` | Writes to `insights:drafts:{lang}` list; deletes workflow state; returns `done` |
 

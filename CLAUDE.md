@@ -30,7 +30,7 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 | Init / Trigger | `POST /api/workflow/daily` | Create or resume state |
 | Node 1 — Trending | `GET /api/workflow/trending` | RSS + AdSense topic scoring |
 | Node 2 — Generate | `GET /api/workflow/generate/0` | Groq 70B article generation |
-| Node 3 — Policy | `GET /api/workflow/policy/0` | AdSense compliance audit |
+| Node 3 — Policy | `GET /api/workflow/policy/0` | AdSense compliance audit + AdSense richness check (minimum statistics/citations) |
 | Node 4 — Score | `GET /api/workflow/score/0` | Quality scoring |
 | Node 5 — Persist | `GET /api/workflow/persist/0` | Redis commit, cleanup |
 
