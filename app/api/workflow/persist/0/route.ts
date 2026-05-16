@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
 
-  const state = await loadWorkflowState(wid).catch(() => null);
+  const state = await loadWorkflowState(wid);
   if (!state) return NextResponse.json(fail('error', 'State not found: ' + wid, { workflowId: wid }));
 
   const article = state.articles[idx];

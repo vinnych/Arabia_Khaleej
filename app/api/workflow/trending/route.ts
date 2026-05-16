@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { redis } from '@/lib/redis';
 import { loadWorkflowState, saveWorkflowState } from '@/lib/workflow/utils';
 import { NextAction, NodeResponse, WorkflowState } from '@/lib/workflow/types';
-import { GROQ_API_URL } from '@/lib/constants/api';
+import { GROQ_API_URL, GOOGLE_NEWS_RSS_URL } from '@/lib/constants/api';
 import { ok, fail } from '@/lib/workflow/response';
 
 export const runtime = 'edge';
@@ -14,10 +14,7 @@ export async function GET(request: NextRequest) {
 
   if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
 
-  const state = await loadWorkflowState(wid).catch((err) => {
-    console.error('Failed to load workflow state in trending:', err);
-    return null;
-  });
+  const state = await loadWorkflowState(wid);
   if (!state) return NextResponse.json(fail('error', 'Workflow not found: ' + wid, { workflowId: wid }));
 
   if (!state.hasGroqApiKey) return NextResponse.json(fail('error', 'GROQ_API_KEY not configured', state));
@@ -31,9 +28,7 @@ export async function GET(request: NextRequest) {
       rssContext = cached as string;
     } else {
       // Fetch fresh RSS only if cache is empty/stale
-      const rssRes = await fetch(
-        'https://news.google.com/rss/search?q=GCC+business+economy+technology&hl=en-US&gl=US&ceid=US:en'
-      );
+      const rssRes = await fetch(GOOGLE_NEWS_RSS_URL);
       const xml = await rssRes.text();
       const titles = Array.from(xml.matchAll(/<title>(.*?)<\/title>/g)).map(m => m[1]).slice(1, 15);
       rssContext = titles.join('\n');

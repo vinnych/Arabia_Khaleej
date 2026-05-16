@@ -21,7 +21,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
 
   if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
 
-  const state = await loadWorkflowState(wid).catch(() => null);
+  const state = await loadWorkflowState(wid);
   if (!state) return NextResponse.json(fail('error', 'Workflow not found: ' + wid, { workflowId: wid }));
 
   if (!process.env.GROQ_API_KEY) return NextResponse.json(fail('error', 'GROQ_API_KEY missing', state));
@@ -77,7 +77,10 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
 
   // -- Build InsightItem ------------------------------------------
   const slug = toSlug(aiResult.title + ' ' + topic);
-  const imageUrl = await getRelevantImage(topic + ' ' + country, slug).catch(() => '/images/insights/default.png');
+  const imageUrl = await getRelevantImage(topic + ' ' + country, slug).catch((err) => {
+    console.warn('Image fetch failed, using default:', err);
+    return '/images/insights/default.png';
+  });
   const wordCount = (aiResult.content.match(/\b\w+\b/g) || []).length;
 
   // Safety check for required fields from AI response

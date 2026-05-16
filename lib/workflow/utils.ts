@@ -10,8 +10,8 @@ export async function loadWorkflowState(wid: string): Promise<WorkflowState | nu
     if (!raw) return null;
     return typeof raw === 'string' ? JSON.parse(raw) as WorkflowState : raw as WorkflowState;
   } catch (err) {
-    console.error('Failed to load workflow state ' + wid + ':', err);
-    return null;
+    console.error('Redis failure loading workflow ' + wid + ':', err);
+    return null; // Return null but logged - routes should check and fail explicitly
   }
 }
 
