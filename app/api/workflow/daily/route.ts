@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // Try to load existing workflow state for resume
     const existing: WorkflowState | null = existingId
       ? await loadWorkflowState(existingId).catch((err) => {
-          console.error('Failed to load workflow state for resume:', err);
+          console.error('Failed to load workflow state for resume [' + existingId + ']:', err);
           return null;
         })
       : null;

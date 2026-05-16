@@ -45,15 +45,26 @@ export async function GET(request: NextRequest) {
     status: 'draft',
   };
 
+  const listKeyLabel = 'insights:drafts:' + article.lang;
   try {
-    let drafts: InsightItem[] = (await getWithCompression<InsightItem[]>(listKey)) || [];
+    const rawList = await getWithCompression<unknown>(listKey);
+    const drafts: InsightItem[] = Array.isArray(rawList) ? (rawList as InsightItem[]) : [];
+
     if (!drafts.some(d => d.slug === article.slug)) {
       drafts.unshift(listEntry);
-      if (drafts.length > 500) drafts = drafts.slice(0, 500);
+      if (drafts.length > 500) drafts.splice(500);
       await setWithCompression(listKey, drafts, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+      console.log('Drafts list saved [key=' + listKeyLabel + '] count=' + drafts.length + ' newSlug=' + article.slug);
+    } else {
+      console.log('Drafts list skip [key=' + listKeyLabel + '] slug already present: ' + article.slug);
     }
   } catch (err) {
-    console.error('Failed to save drafts list in persist:', err);
+    console.error('Failed to save drafts list [' + listKeyLabel + '] slug=' + article.slug + ':', err);
+    // Fail the workflow step so the cron worker knows something went wrong
+    return NextResponse.json(
+      fail('error', 'Failed to persist drafts list for ' + article.slug + ': ' + (err as Error).message, state),
+      { status: 500 }
+    );
   }
 
   // Delete workflow state early to reclaim Redis space (keep state for logging)

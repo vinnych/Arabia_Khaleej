@@ -105,18 +105,23 @@ export const redis = redisUrl && redisToken
  * Enhanced Redis methods with transparent compression support.
  */
 export async function getWithCompression<T>(key: string): Promise<T | null> {
+  let raw: string | null = null;
+  let rawType = 'null';
+  let rawLen = 0;
   try {
-    const raw = await redis.get(key) as string | null;
+    raw = await redis.get(key) as string | null;
+    rawType = typeof raw;
+    rawLen = raw ? raw.length : 0;
     if (!raw) return null;
-    
+
     if (typeof raw === 'string' && raw.startsWith('compressed:')) {
       const decompressed = await decompress(raw);
       return JSON.parse(decompressed) as T;
     }
-    
+
     return (typeof raw === 'string' ? JSON.parse(raw) : raw) as T;
   } catch (e) {
-    console.error(`Redis Get/Decompress Error [${key}]:`, e);
+    console.error(`Redis Get/Decompress Error [${key}] rawType=${rawType} rawLen=${rawLen}:`, e);
     return null;
   }
 }

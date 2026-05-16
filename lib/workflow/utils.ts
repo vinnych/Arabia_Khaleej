@@ -5,14 +5,9 @@ const PREFIX = 'wf:';
 const TTL = parseInt(process.env.WORKFLOW_TTL || '21600', 10); // 6h default, configurable via env
 
 export async function loadWorkflowState(wid: string): Promise<WorkflowState | null> {
-  try {
-    const raw = await redis.get(PREFIX + wid);
-    if (!raw) return null;
-    return typeof raw === 'string' ? JSON.parse(raw) as WorkflowState : raw as WorkflowState;
-  } catch (err) {
-    console.error('Redis failure loading workflow ' + wid + ':', err);
-    return null; // Return null but logged - routes should check and fail explicitly
-  }
+  const raw = await redis.get(PREFIX + wid);
+  if (!raw) return null;
+  return typeof raw === 'string' ? JSON.parse(raw) as WorkflowState : raw as WorkflowState;
 }
 
 export async function saveWorkflowState(wid: string, state: WorkflowState): Promise<string | null> {
