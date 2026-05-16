@@ -8,6 +8,7 @@
 
 import { NextResponse } from 'next/server';
 import { FinanceService } from '@/lib/finance-service';
+import { OPEN_ER_API_BASE } from '@/lib/constants/api';
 
 export const runtime = 'edge';
 
@@ -18,7 +19,7 @@ export async function GET() {
     const commodities = await FinanceService.getCommodities();
 
     // Fetch live currency rates (Real data - already reliable)
-    const currencyRes = await fetch('https://open.er-api.com/v6/latest/USD', {
+    const currencyRes = await fetch(`${OPEN_ER_API_BASE}/latest/USD`, {
       next: { revalidate: 3600 } 
     });
     const currencyData = await currencyRes.json();

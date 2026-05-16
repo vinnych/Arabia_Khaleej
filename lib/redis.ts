@@ -5,50 +5,9 @@ import * as zlib from 'fflate';
  * Compression Helpers for Edge Runtime (Cloudflare/Vercel)
  * Uses fflate for gzip compression/decompression compatible with Edge Runtime.
  */
-async function compress(data: string): Promise<string> {
-  // Use fflate for gzip compression
-  const uint8Array = new TextEncoder().encode(data);
-  const compressed = zlib.gzipSync(uint8Array);
-  
-  // Convert to base64
-  let binary = '';
-  const bytes = new Uint8Array(compressed);
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return 'compressed:' + btoa(binary);
-}
 
-async function decompress(compressedStr: string): Promise<string> {
-   if (!compressedStr.startsWith('compressed:')) return compressedStr;
-   const base64 = compressedStr.replace('compressed:', '');
-   const binary = atob(base64);
-   const bytes = new Uint8Array(binary.length);
-   for (let i = 0; i < binary.length; i++) {
-     bytes[i] = binary.charCodeAt(i);
-   }
-   
-   // Use fflate for gzip decompression
-   const decompressed = zlib.unzipSync(bytes);
-   // Convert to Uint8Array safely
-   let decompressedArray: Uint8Array;
-   if (decompressed instanceof Uint8Array) {
-     decompressedArray = decompressed;
-   } else {
-     // Handle number[] or other array-like
-     const arr = decompressed as unknown as number[];
-     decompressedArray = new Uint8Array(arr.length);
-     for (let i = 0; i < arr.length; i++) {
-       decompressedArray[i] = arr[i];
-     }
-   }
-   return new TextDecoder().decode(decompressedArray);
- }
+/** Arabia Khaleej Redis Client
 
-
-/**
- * Arabia Khaleej Redis Client
  * Used for transient data storage and performance caching.
  */
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
@@ -94,6 +53,32 @@ export const redis = redisUrl && redisToken
 /**
  * Enhanced Redis methods with transparent compression support.
  */
+
+/** Decompress a value produced by {@link compress}. */
+async function decompress(compressedStr: string): Promise<string> {
+  if (!compressedStr.startsWith('compressed:')) return compressedStr;
+  const base64 = compressedStr.replace('compressed:', '');
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  const decompressed = zlib.gunzipSync(bytes);
+  return new TextDecoder().decode(decompressed);
+}
+
+/** Compress a string; returns `'compressed:' + base64(gzip(data))`. */
+async function compress(data: string): Promise<string> {
+  const uint8Array = new TextEncoder().encode(data);
+  const compressed = zlib.gzipSync(uint8Array);
+  let binary = '';
+  const bytes = new Uint8Array(compressed);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return 'compressed:' + btoa(binary);
+}
+
 export async function getWithCompression<T>(key: string): Promise<T | null> {
   let raw: string | null = null;
   let rawType = 'null';

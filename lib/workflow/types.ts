@@ -28,7 +28,7 @@ export interface ArticleDraft {
   tags: string[];
   image: string;
   pubDate: string;
-  status: 'pending' | 'approved' | 'rejected' | 'deleted';
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'deleted';
   retryCount: number;
   maxRetries: number;
   policyResult?: PolicyResult;

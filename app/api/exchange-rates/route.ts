@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { OPEN_ER_API_BASE } from '@/lib/constants/api';
 
 export const runtime = 'edge';
 
@@ -54,7 +55,7 @@ const CURRENCY_META: Record<string, { name: string; nameAr: string; symbol: stri
 
 export async function GET() {
   try {
-    const res = await fetch('https://open.er-api.com/v6/latest/USD', {
+    const res = await fetch(`${OPEN_ER_API_BASE}/latest/USD`, {
       next: { revalidate: 1800 } // Cache for 30 minutes
     });
     const data = await res.json();

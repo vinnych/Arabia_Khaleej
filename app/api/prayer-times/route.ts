@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/redis';
+import { ALADHAN_API_BASE } from '@/lib/constants/api';
 
 export const runtime = 'edge';
 
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
     const timeoutId = setTimeout(() => controller.abort(), 6000);
     
     try {
-      const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${method}`, {
+      const res = await fetch(`${ALADHAN_API_BASE}/timings?latitude=${lat}&longitude=${lng}&method=${method}`, {
         next: { revalidate: 3600 },
         signal: controller.signal
       });

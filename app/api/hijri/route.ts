@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { ALADHAN_API_BASE } from '@/lib/constants/api';
 
 export const runtime = 'edge';
 
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const res = await fetch(`https://api.aladhan.com/v1/gToHCalendar/${encodeURIComponent(month)}/${encodeURIComponent(year)}`);
+    const res = await fetch(`${ALADHAN_API_BASE}/gToHCalendar/${encodeURIComponent(month)}/${encodeURIComponent(year)}`);
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
