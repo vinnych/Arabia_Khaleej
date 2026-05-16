@@ -1,30 +1,18 @@
 import { Redis } from '@upstash/redis';
+import * as zlib from 'fflate';
 
 /**
  * Compression Helpers for Edge Runtime (Cloudflare/Vercel)
- * Uses native CompressionStream/DecompressionStream APIs.
+ * Uses fflate for gzip compression/decompression compatible with Edge Runtime.
  */
 async function compress(data: string): Promise<string> {
-  // Edge runtime (e.g., Cloudflare) does not support CompressionStream/DecompressionStream.
-  // Fallback to returning the raw data when those APIs are unavailable.
-  if (typeof CompressionStream === 'undefined') {
-    return data;
-  }
-  const encoder = new TextEncoder();
-  const uint8 = encoder.encode(data);
-  const stream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(uint8);
-      controller.close();
-    },
-  }).pipeThrough(new CompressionStream('gzip'));
-
-  const response = new Response(stream);
-  const buffer = await response.arrayBuffer();
+  // Use fflate for gzip compression
+  const uint8Array = new TextEncoder().encode(data);
+  const compressed = zlib.gzipSync(uint8Array);
   
-  // Efficiently convert ArrayBuffer to Base64 using a chunked approach or modern API
-  const bytes = new Uint8Array(buffer);
+  // Convert to base64
   let binary = '';
+  const bytes = new Uint8Array(compressed);
   const len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
     binary += String.fromCharCode(bytes[i]);
@@ -33,28 +21,30 @@ async function compress(data: string): Promise<string> {
 }
 
 async function decompress(compressedStr: string): Promise<string> {
-  if (!compressedStr.startsWith('compressed:')) return compressedStr;
-  // Edge runtime may lack DecompressionStream; fallback to returning the original string.
-  if (typeof DecompressionStream === 'undefined') {
-    return compressedStr.replace('compressed:', '');
-  }
-  const base64 = compressedStr.replace('compressed:', '');
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-
-  const stream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(bytes);
-      controller.close();
-    },
-  }).pipeThrough(new DecompressionStream('gzip'));
-
-  const response = new Response(stream);
-  return await response.text();
-}
+   if (!compressedStr.startsWith('compressed:')) return compressedStr;
+   const base64 = compressedStr.replace('compressed:', '');
+   const binary = atob(base64);
+   const bytes = new Uint8Array(binary.length);
+   for (let i = 0; i < binary.length; i++) {
+     bytes[i] = binary.charCodeAt(i);
+   }
+   
+   // Use fflate for gzip decompression
+   const decompressed = zlib.unzipSync(bytes);
+   // Convert to Uint8Array safely
+   let decompressedArray: Uint8Array;
+   if (decompressed instanceof Uint8Array) {
+     decompressedArray = decompressed;
+   } else {
+     // Handle number[] or other array-like
+     const arr = decompressed as unknown as number[];
+     decompressedArray = new Uint8Array(arr.length);
+     for (let i = 0; i < arr.length; i++) {
+       decompressedArray[i] = arr[i];
+     }
+   }
+   return new TextDecoder().decode(decompressedArray);
+ }
 
 
 /**

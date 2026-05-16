@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 type Draft = {
   slug: string;
@@ -26,8 +26,8 @@ export default function AdminReviewPage() {
   const [editingTitle, setEditingTitle] = useState<Record<string, string>>({});
   const [hasEdits, setHasEdits] = useState<Record<string, boolean>>({});
   const router = useRouter();
-
-  const secret = new URLSearchParams(window.location.search).get('secret');
+  const searchParams = useSearchParams();
+  const secret = searchParams.get('secret');
 
   useEffect(() => {
     if (!secret) {
@@ -137,12 +137,12 @@ export default function AdminReviewPage() {
     <div className="min-h-screen p-8 pt-24 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Arabia Khaleej - Draft Review</h1>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
-        >
-          Refresh
-        </button>
+<button
+  onClick={() => router.refresh()}
+  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+>
+  Refresh
+</button>
       </div>
 
       {error && <p className="text-red-500 mb-4">Error: {error}</p>}

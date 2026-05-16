@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import * as zlib from 'fflate';
 
 export const runtime = 'edge';
 
@@ -7,24 +8,33 @@ const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN!;
 const ADMIN_SECRET = process.env.ADMIN_SECRET!;
 
 async function decompress(compressedStr: string) {
-  if (typeof compressedStr !== 'string' || !compressedStr.startsWith('compressed:')) {
-    return typeof compressedStr === 'string' ? JSON.parse(compressedStr) : compressedStr;
-  }
-  const base64 = compressedStr.replace('compressed:', '');
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  const stream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(bytes);
-      controller.close();
-    },
-  }).pipeThrough(new DecompressionStream('gzip'));
-  const text = await new Response(stream).text();
-  return JSON.parse(text);
-}
+   if (typeof compressedStr !== 'string' || !compressedStr.startsWith('compressed:')) {
+     return typeof compressedStr === 'string' ? JSON.parse(compressedStr) : compressedStr;
+   }
+   const base64 = compressedStr.replace('compressed:', '');
+   const binary = atob(base64);
+   const bytes = new Uint8Array(binary.length);
+   for (let i = 0; i < binary.length; i++) {
+     bytes[i] = binary.charCodeAt(i);
+   }
+   
+// Use fflate for gzip decompression
+    const decompressed = zlib.unzipSync(bytes);
+    // Convert to Uint8Array safely
+    let decompressedArray: Uint8Array;
+    if (decompressed instanceof Uint8Array) {
+      decompressedArray = decompressed;
+    } else {
+      // Handle number[] or other array-like
+      const arr = decompressed as unknown as number[];
+      decompressedArray = new Uint8Array(arr.length);
+      for (let i = 0; i < arr.length; i++) {
+        decompressedArray[i] = arr[i];
+      }
+    }
+    const text = new TextDecoder().decode(decompressedArray);
+    return JSON.parse(text);
+ }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
