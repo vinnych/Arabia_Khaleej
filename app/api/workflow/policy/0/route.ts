@@ -98,8 +98,8 @@ async function judgeArticle(apiKey: string, article: ArticleDraft): Promise<{ ve
     return JSON.parse(cleaned);
   } catch (parseError) {
     console.error('Failed to parse Groq response as JSON:', parseError, 'Raw:', raw);
-    // On parse error, default to pass to avoid blocking workflow
-    return { verdict: 'pass', violations: [], actions: ['(JSON parse failed, defaulting to pass)'] };
+    // On parse error, FAIL to ensure policy compliance is verified
+    return { verdict: 'fail', violations: [{ category: 'api', reason: 'Policy audit parse error', severity: 'critical', location: 'full content' }], actions: ['(JSON parse failed — article FAILED policy check)'] };
   }
 }
 

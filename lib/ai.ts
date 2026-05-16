@@ -183,56 +183,61 @@ STRICT RULES:
 3. استخدم لغة عربية فصحى رصينة واحترافية.
 4. أرجع JSON صالحاً فقط.`;
 
-  try {
-    const response = await fetch(GROQ_API_URL, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a senior regional analyst and editor for Arabia Khaleej. " +
-              "You provide structured, professional intelligence in JSON format. " +
-              "Never invent author names. " +
-              "NEVER produce content that violates AdSense policies: no scraped/copyrighted text, " +
-              "no thin content, no unqualified medical/financial claims, no deceptive information, " +
-              "and no gambling or illegal-substance promotion per article.",
-          },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.6,
-        max_tokens: 8192,
-        response_format: { type: "json_object" },
-      }),
-    });
+   try {
+     const response = await fetch(GROQ_API_URL, {
+       method: "POST",
+       headers: {
+         "Authorization": `Bearer ${apiKey}`,
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify({
+         model,
+         messages: [
+           {
+             role: "system",
+             content:
+               "You are a senior regional analyst and editor for Arabia Khaleej. " +
+               "You provide structured, professional intelligence in JSON format. " +
+               "Never invent author names. " +
+               "NEVER produce content that violates AdSense policies: no scraped/copyrighted text, " +
+               "no thin content, no unqualified medical/financial claims, no deceptive information, " +
+               "and no gambling or illegal-substance promotion per article.",
+           },
+           { role: "user", content: prompt },
+         ],
+         temperature: 0.6,
+         max_tokens: 8192,
+         response_format: { type: "json_object" },
+       }),
+     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Groq API Error: ${response.status} ${JSON.stringify(errorData)}`);
-    }
+     if (!response.ok) {
+       let errorData = {};
+       try {
+         errorData = await response.json();
+       } catch (parseErr) {
+         console.error('Failed to parse Groq error response as JSON:', parseErr);
+       }
+       throw new Error(`Groq API Error: ${response.status} ${JSON.stringify(errorData)}`);
+     }
 
-    const data: GroqResponse = await response.json();
-    const parsed = JSON.parse(data.choices[0].message.content);
+     const data: GroqResponse = await response.json();
+     const parsed = JSON.parse(data.choices[0].message.content);
 
-    const category: string = parsed.category || "Strategy";
+     const category: string = parsed.category || "Strategy";
 
-    // Look up the verified editorial author (default for all content)
-    const author = EDITORIAL_AUTHORS['default'] ?? DEFAULT_AUTHOR;
+     // Look up the verified editorial author (default for all content)
+     const author = EDITORIAL_AUTHORS['default'] ?? DEFAULT_AUTHOR;
 
-    return {
-      title: parsed.title || `${country}: ${topic}`,
-      content: parsed.content || "",
-      category,
-      author,
-      summary: parsed.summary || "",
-    };
-  } catch (error) {
-    console.error("GCC Insight Generation Failed:", error);
-    throw error;
-  }
+     return {
+       title: parsed.title || `${country}: ${topic}`,
+       content: parsed.content || "",
+       category,
+       author,
+       summary: parsed.summary || "",
+     };
+   } catch (error) {
+     console.error("GCC Insight Generation Failed:", error);
+     throw error;
+   }
 }

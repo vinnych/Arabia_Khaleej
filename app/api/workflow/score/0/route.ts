@@ -10,9 +10,13 @@ function countStats(text: string): number {
   return (text.match(/\d{1,3}(?:,\d{3})*(?:\.\d+)?%?|\$\d[\d.]*|USD|GBP|SAR|AED/g) || []).length;
 }
 
-/** Count named entities (simple heuristic: Titlecase multi-word phrases) */
+/** Count named entities - supports both Latin (Title Case) and Arabic (proper nouns) */
 function countEntities(text: string): number {
-  return (text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g) || []).length;
+  // Latin entities: TitleCase multi-word phrases
+  const latinEntities = (text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g) || []).length;
+  // Arabic entities: sequences of Arabic letters (including common Arabic names/places)
+  const arabicEntities = (text.match(/[\u0600-\u06FF]{2,}/g) || []).length;
+  return latinEntities + arabicEntities;
 }
 
 /** Return 0-100 quality score */
