@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 type Draft = {
   slug: string;
@@ -25,7 +25,7 @@ export default function AdminReviewPage() {
   const [editedContent, setEditedContent] = useState<Record<string, string>>({});
   const [editingTitle, setEditingTitle] = useState<Record<string, string>>({});
   const [hasEdits, setHasEdits] = useState<Record<string, boolean>>({});
-  const router = useRouter();
+  const [refreshKey, setRefreshKey] = useState(0);
   const searchParams = useSearchParams();
   const secret = searchParams.get('secret');
 
@@ -44,17 +44,29 @@ export default function AdminReviewPage() {
       }
       const data = await res.json();
       if (data.drafts) {
-        setDrafts(prev => [...prev, ...data.drafts]);
+        return data.drafts;
       }
+      return [];
     };
 
-    Promise.all([fetchDrafts('en'), fetchDrafts('ar')]).then(() => {
+    const loadDrafts = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const [enDrafts, arDrafts] = await Promise.all([fetchDrafts('en'), fetchDrafts('ar')]);
+        const combined = [...enDrafts, ...arDrafts];
+        const uniqueDrafts = combined.filter((draft, idx, arr) =>
+          arr.findIndex(d => d.slug === draft.slug) === idx
+        );
+        setDrafts(uniqueDrafts);
+      } catch (err) {
+        setError((err as Error).message || 'Failed to load drafts');
+      }
       setLoading(false);
-    }).catch(err => {
-      setError(err.message || 'Failed to load drafts');
-      setLoading(false);
-    });
-  }, [secret]);
+    };
+
+    loadDrafts();
+  }, [secret, refreshKey]);
 
   const fetchDraftContent = async (slug: string) => {
     try {
@@ -138,11 +150,11 @@ export default function AdminReviewPage() {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Arabia Khaleej - Draft Review</h1>
 <button
-  onClick={() => router.refresh()}
-  className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
->
-  Refresh
-</button>
+   onClick={() => setRefreshKey(k => k + 1)}
+   className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-50"
+ >
+   Refresh
+ </button>
       </div>
 
       {error && <p className="text-red-500 mb-4">Error: {error}</p>}

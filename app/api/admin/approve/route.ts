@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { redis, getWithCompression, setWithCompression, compressValue, decompressValue } from '@/lib/redis';
+import { redis, getWithCompression, setWithCompression, CACHE_TIMES } from '@/lib/redis';
 
 export const runtime = 'edge';
 
@@ -21,39 +21,35 @@ export async function POST(request: NextRequest) {
       return fail({ error: 'Missing slug or lang' }, 400);
     }
 
-    // 1. Fetch draft article body via shared decompressValue
+    // 1. Fetch draft article body via shared decompression
     const draftArticleKey = `insights:draft:article:${slug}`;
-    const raw = await redis.get(draftArticleKey);
-    if (!raw) return fail({ error: 'Draft not found' }, 404);
-
-    // 2. Human-editable draft body — decompressed from whatever format the workflow wrote
-    const article = decompressValue(String(raw)) as Record<string, unknown>;
+    const article = await getWithCompression<Record<string, unknown>>(draftArticleKey);
+    if (!article) return fail({ error: 'Draft not found' }, 404);
 
     // 2. Apply human edits if provided
     const hasEdits = !!(editedContent || editedTitle);
     if (editedContent !== undefined) {
-      (article as Record<string, unknown>).content = editedContent;
+      article.content = editedContent;
     }
     if (editedTitle !== undefined) {
-      (article as Record<string, unknown>).title = editedTitle;
-      const contentForDesc = (editedContent ?? (article as Record<string, unknown>).content ?? '') as string;
+      article.title = editedTitle;
+      const contentForDesc = (editedContent ?? article.content ?? '') as string;
       const lines = contentForDesc.split('\n');
       const paragraph = lines.find((l: string) => !l.startsWith('#') && l.length > 80);
-      (article as Record<string, unknown>).description = paragraph
+      article.description = paragraph
         ? paragraph.replace(/[#*_]/g, '').trim().substring(0, 180) + '...'
-        : (article as Record<string, unknown>).description;
+        : article.description;
     }
 
     // 3. Update status
-    (article as Record<string, unknown>).status = 'published';
+    article.status = 'published';
     if (hasEdits) {
-      (article as Record<string, unknown>).humanEdited = true;
-      (article as Record<string, unknown>).editedAt = new Date().toISOString();
+      article.humanEdited = true;
+      article.editedAt = new Date().toISOString();
     }
 
-    // 4. Save to live article key with the same format the workflow/readers expect
-    const liveCompressed = compressValue(article);
-    await redis.set(`insights:article:${slug}`, liveCompressed, { ex: 31536000 } as Record<string, unknown>);
+    // 4. Save to live article key
+    await setWithCompression(`insights:article:${slug}`, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE || 31536000 });
 
     // 5. Add to live list (content is already part of the article object; live list carries full metadata)
     const listKey = `insights:list:${lang}`;
