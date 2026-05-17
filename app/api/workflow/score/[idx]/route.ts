@@ -43,16 +43,14 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
       await saveWorkflowState(wid, state);
     } catch (err) {
       console.error('Failed to save workflow state in score (deleted article):', err);
-      // Still try to clean up before returning the error
       await deleteWorkflow(wid).catch(() => {});
-    console.log('[WF ' + stepLabel + '] Article DELETED score=0 | workflow done');
-
-    return NextResponse.json(
+      return NextResponse.json(
         fail('error', 'Score step failed for deleted article: ' + (err as Error).message, state),
         { status: 500 }
       );
     }
 
+    console.log('[WF ' + stepLabel + '] Article DELETED score=0 | workflow done');
     await deleteWorkflow(wid).catch((err) => {
       console.error('Failed to delete workflow in score (deleted article):', err);
     });

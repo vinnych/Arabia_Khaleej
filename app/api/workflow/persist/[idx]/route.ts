@@ -113,15 +113,15 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
     // same step with the correct in-progress article body still in Redis.
   }
 
-  if (hasMore) {
-    return NextResponse.json(
-      ok('trending', state,
-        { type: 'fetch', method: 'GET',
-          url: '/api/workflow/trending?wid=' + wid + '&idx=' + nextIdx },
-        'Article ' + (idx + 1) + ' persisted. Continuing with article ' + (nextIdx + 1)
-      )
-    );
-  }
+if (hasMore) {
+     return NextResponse.json(
+       ok('trending', state,
+         { type: 'fetch', method: 'GET',
+           url: '/api/workflow/trending/' + nextIdx + '?wid=' + wid + '&idx=' + nextIdx },
+         'Article ' + (idx + 1) + ' persisted. Continuing with article ' + (nextIdx + 1)
+       )
+     );
+   }
 
   await deleteWorkflow(wid).catch((err) => {
     console.error(`[WF ${stepLabel}] Failed to delete workflow on final persist:`, err);

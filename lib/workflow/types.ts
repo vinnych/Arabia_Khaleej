@@ -38,6 +38,9 @@ export interface ArticleDraft {
   wordCount?: number;
   regenerateContext?: { violations: string; actions: string };
   persistError?: string;
+  workflowId?: string;
+  workflowStep?: string;
+  workflowStatus?: string;
 }
 
 export interface TrendingTopic {
