@@ -7,7 +7,9 @@
  */
 export default {
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(handleAutomation(env));
+    ctx.waitUntil(handleAutomation(env).catch((err) => {
+      console.error('[Worker] handleAutomation fatal error:', err.message);
+    }));
   },
 
   async fetch(request, env) {
@@ -15,18 +17,24 @@ export default {
     if (searchParams.get('secret') !== env.CRON_SECRET) {
       return new Response('Unauthorized', { status: 401 });
     }
-    return new Response(JSON.stringify(await handleAutomation(env)), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    try {
+      const result = await handleAutomation(env);
+      return new Response(JSON.stringify(result), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (err) {
+      console.error('[Worker] handleAutomation threw:', err.message);
+      return new Response(JSON.stringify({ success: false, error: err.message }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
   },
 };
 
 /**
  * Workflow Base URL — points to the Cloudflare Pages origin that
  * serves the Next.js app (including /api/workflow/* routes).
- *
- * Default: the Cloudflare Worker's own Upstash env vars.
- * Production: set WORKFLOW_BASE_URL env in wrangler.toml or CF secrets.
  */
 function getWorkflowBaseUrl(env) {
   const explicit = env.WORKFLOW_BASE_URL || 'https://arabiakhaleej.pages.dev';
@@ -40,11 +48,11 @@ async function handleAutomation(env) {
   const adminSecret = env.ADMIN_SECRET;
   const workflowUrl = baseUrl + '/api/workflow/daily';
 
-  console.log('[Workflow] Starting Arabia Khaleej daily automation');
-  console.log('[Workflow] Base URL:' + baseUrl);
-  console.log('[Workflow] Triggering POST to' + workflowUrl);
+  console.log('[Worker] ==== Workflow run START ====');
+  console.log('[Worker] Base URL: ' + baseUrl);
+  console.log('[Worker] Triggering POST to ' + workflowUrl);
 
-try {
+  try {
     const triggerRes = await fetch(workflowUrl, {
       method: 'POST',
       headers: {
@@ -61,24 +69,26 @@ try {
 
     if (!triggerRes.ok) {
       const errText = await triggerRes.text().catch(() => 'unknown error');
-      throw new Error(
-        'Workflow trigger HTTP ' + triggerRes.status + ': ' + errText
-      );
+      throw new Error('Workflow trigger HTTP ' + triggerRes.status + ': ' + errText);
     }
 
     const triggerData = await triggerRes.json();
-    console.log('[Workflow] Step 1 (init):', JSON.stringify(triggerData));
+    console.log('[Worker] Init step=' + triggerData.step +
+      ' summary=' + (triggerData.summary || 'n/a') +
+      ' wid=' + (triggerData.workflowId || 'n/a'));
 
-// -- Drive node chain until complete ---------------------------
+    // -- Drive node chain until complete --
     let current = triggerData;
     const steps = [];
-    const MAX_STEPS = 20; // Reduced from 60: 4 steps per article × 5 articles max
+    const MAX_STEPS = 20;
 
     while (current.nextAction?.type === 'fetch' && steps.length < MAX_STEPS) {
       const action = current.nextAction;
       steps.push(action.url);
 
-      console.log('[Workflow] Fetching node:', action.url);
+      console.log('[Worker] === Step ' + steps.length + ' ===');
+      console.log('[Worker] From=' + current.step + ' To=' + action.url + ' method=' + (action.method || 'GET'));
+
       try {
         const nodeRes = await fetch(action.url, {
           method: action.method || 'GET',
@@ -91,21 +101,42 @@ try {
 
         if (!nodeRes.ok) {
           const errText = await nodeRes.text().catch(() => 'unknown');
-          throw new Error(
-            'Node ' + action.url + ' HTTP ' + nodeRes.status + ': ' + errText
-          );
+          console.error('[Worker] Step failed HTTP=' + nodeRes.status + ' body=' + errText);
+          throw new Error('Node ' + action.url + ' HTTP ' + nodeRes.status + ': ' + errText);
         }
 
         current = await nodeRes.json();
-        console.log('[Workflow] Next step:', current.step, '|', current.summary);
+        console.log('[Worker] Step result: step=' + current.step +
+          ' ok=' + current.ok +
+          ' summary=' + (current.summary || 'n/a') +
+          ' nextAction=' + (current.nextAction ? current.nextAction.type : 'DONE'));
       } catch (nodeErr) {
-        console.error('[Workflow] Node failed:', action.url, nodeErr.message);
+        console.error('[Worker] === chain FAILED at step ' + steps.length + ' ===');
+        console.error('[Worker] Node error:', nodeErr.message);
+        console.error('[Worker] Steps completed:', steps.length);
         break;
       }
     }
 
     const duration = Math.floor((Date.now() - startTime) / 1000);
-    console.log('[Workflow] Completed in ' + duration + 's | steps:', steps.length);
+    const finalOk = current.ok !== false;
+
+    console.log('[Worker] ==== Workflow run END =======================');
+    console.log('[Worker] Duration: ' + duration + 's | steps: ' + steps.length +
+      ' | finalStep: ' + current.step + ' | ok: ' + finalOk);
+
+    if (!finalOk) {
+      console.error('[Worker] FAILED step=' + current.step + ' error=' + (current.error || current.summary || 'unknown'));
+      return {
+        success: false,
+        error: current.error || current.summary || 'Unknown workflow error',
+        duration: duration + 's',
+        workflowId: (current.state && current.state.workflowId) || triggerData.workflowId,
+        stepsRun: steps.length,
+        finalStep: current.step,
+        stepSummary: current.summary || 'failed',
+      };
+    }
 
     return {
       success: true,
@@ -116,10 +147,10 @@ try {
       finalStep: current.step,
       summaries: [triggerData.summary, ...steps.slice(1).map((_, i) => (current.summary || '')).filter(Boolean)],
       articles: (current.state && current.state.articles)
-        ? current.state.articles.map(a => ({
+        ? current.state.articles.map((a: { id: string; title: string; lang?: string; policyResult?: string; qualityScore?: number; status?: string }) => ({
             id: a.id,
             title: a.title,
-            lang: a.lang,
+            lang: a.lang || 'en',
             policy: a.policyResult,
             score: a.qualityScore,
             status: a.status,
@@ -127,9 +158,7 @@ try {
         : [],
     };
   } catch (error) {
-    console.error('[Workflow] Failed:', error.message);
+    console.error('[Worker] FATAL:', error.message);
     return { success: false, error: error.message };
   }
 }
-
-

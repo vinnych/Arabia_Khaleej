@@ -120,6 +120,45 @@ export async function setWithCompression(key: string, value: any, options?: { ex
 }
 
 
+/**
+ * Compress a value to 'compressed:<base64(gzip(data))>'.
+ * Stores the value as plain JSON if < 1024 bytes.
+ * Designed to mirror Upstash's REST API behaviour and fflate gzip output.
+ */
+export function compressValue(data: unknown): string {
+  const json = JSON.stringify(data);
+  if (json.length < 1024) return json;
+  const uint8Array = new TextEncoder().encode(json);
+  const compressed = zlib.gzipSync(uint8Array);
+  let binary = '';
+  for (let i = 0; i < compressed.length; i++) {
+    binary += String.fromCharCode(compressed[i]);
+  }
+  return 'compressed:' + btoa(binary);
+}
+
+/**
+ * Decompress a value from Redis.
+ * Handles both plain-JSON strings (<1024 bytes, no prefix) and
+ * Upstash REST / custom stored values (prefixed 'compressed:' = fflate gzip).
+ */
+export function decompressValue(str: string): unknown {
+  if (typeof str !== 'string') return str;
+  if (str.startsWith('compressed:')) {
+    const base64 = str.replace('compressed:', '');
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < bytes.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    const text = new TextDecoder().decode(zlib.gunzipSync(bytes));
+    return JSON.parse(text);
+  }
+  // Plain JSON stored directly
+  return JSON.parse(str);
+}
+
+
 export async function rateLimit(ip: string, limit: number = 10, windowSeconds: number = 60, route = 'global') {
   const key = `ratelimit:${route}:${ip}`;
   const current = await redis.incr(key);

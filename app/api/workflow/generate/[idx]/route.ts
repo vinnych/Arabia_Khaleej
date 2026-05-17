@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { redis } from '@/lib/redis';
+import { redis, setWithCompression, CACHE_TIMES } from '@/lib/redis';
 import { generateGCCInsight } from '@/lib/ai';
 import { toSlug } from '@/lib/utils';
 import { getRelevantImage } from '@/lib/images';
-import { loadWorkflowState, saveWorkflowState } from '@/lib/workflow/utils';
+import { loadWorkflowState, saveWorkflowState, deleteWorkflow } from '@/lib/workflow/utils';
 import { InsightItem } from '@/lib/insights';
-import { NodeResponse, WorkflowState } from '@/lib/workflow/types';
+import { NodeResponse, WorkflowState, ArticleDraft } from '@/lib/workflow/types';
 import { REGENERATE_PROMPT } from '@/lib/workflow/prompts';
 import { GROQ_API_URL } from '@/lib/constants/api';
 import { ok, fail } from '@/lib/workflow/response';
@@ -16,18 +16,20 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest): Promise<NextResponse<NodeResponse>> {
   const { searchParams } = new URL(request.url);
   const wid = searchParams.get('wid');
-  const idxStr = searchParams.get('idx');
-  const idx = parseInt(idxStr || '0');
+  const idx = parseInt(searchParams.get('idx') || '0');
+  const stepLabel = 'generate[' + idx + ']';
 
   if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
+  console.log('[WF ' + stepLabel + '] wid=' + wid + ' idx=' + idx);
 
   const state = await loadWorkflowState(wid);
   if (!state) return NextResponse.json(fail('error', 'Workflow not found: ' + wid, { workflowId: wid }));
 
   if (!process.env.GROQ_API_KEY) return NextResponse.json(fail('error', 'GROQ_API_KEY missing', state));
 
-  // Determine country/topic from state (set by trending/filter node)
   const article = state.articles[idx];
+  if (!article) return NextResponse.json(fail('error', 'Article ' + idx + ' not found in workflow', state));
+
   const country = article?.country || '';
   const topic = article?.topic || '';
 
@@ -37,12 +39,12 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
     );
   }
 
+  console.log('[WF ' + stepLabel + '] country=' + country + ' topic=' + topic + ' regenerate=' + !!article.regenerateContext);
+
   // -- Generate article -------------------------------------------
   let aiResult;
   try {
-    // Check for regeneration context from policy failure
     if (article.regenerateContext && article.content) {
-      // Regenerate using REGENERATE_PROMPT for targeted rewrite
       const { violations, actions } = article.regenerateContext;
       const regenPrompt = REGENERATE_PROMPT(violations, actions, article.content);
       const groqRes = await fetch(GROQ_API_URL, {
@@ -62,7 +64,7 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
           response_format: { type: 'json_object' },
         }),
       });
-      if (!groqRes.ok) throw new Error('Regeneration API failed');
+      if (!groqRes.ok) throw new Error('Regeneration API failed: HTTP ' + groqRes.status);
       const data = await groqRes.json();
       aiResult = JSON.parse(data.choices[0].message.content);
     } else {
@@ -76,27 +78,26 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
   }
 
   // -- Build InsightItem ------------------------------------------
-  const slug = toSlug(aiResult.title + ' ' + topic);
-  const imageUrl = await getRelevantImage(topic + ' ' + country, slug).catch((err) => {
+  const newSlug = toSlug(aiResult.title + ' ' + topic);
+  const imageUrl = await getRelevantImage(topic + ' ' + country, newSlug).catch((err) => {
     console.warn('Image fetch failed, using default:', err);
     return '/images/insights/default.png';
   });
   const wordCount = (aiResult.content.match(/\b\w+\b/g) || []).length;
 
-  // Safety check for required fields from AI response
   const safeTitle = aiResult.title || `${country}: ${topic}`;
   const safeSummary = aiResult.summary || `Analysis of ${topic} in ${country}`;
-  const safeContent = aiResult.content || "";
+  const safeContent = aiResult.content || '';
   const safeCategory = (aiResult.category as InsightItem['category']) || 'gcc';
   const safeAuthor = aiResult.author ?? { name: "Arabia Khaleej Editorial Team", nameAr: "هيئة تحرير عربية خليج", title: "Editorial Board", titleAr: "هيئة التحرير" };
 
   const freshArticle: InsightItem = {
     id: 'wf-' + wid.slice(-6) + '-a' + idx,
-    slug,
+    slug: newSlug,
     title: safeTitle,
     description: safeSummary,
     content: safeContent,
-    link: '/insights/' + slug,
+    link: '/insights/' + newSlug,
     pubDate: new Date().toISOString(),
     source: safeAuthor.name,
     category: safeCategory,
@@ -107,26 +108,29 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
     humanEdited: false,
   };
 
-  // Clean up old slug if it changed during regeneration (prevents Redis orphaned keys)
-  if (article.slug && article.slug !== slug) {
+  // -- Save article body to Redis (main store) -------------------
+  const articleKey = 'insights:draft:article:' + newSlug;
+  try {
+    await setWithCompression(articleKey, freshArticle, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+  } catch (err) {
+    console.error(`Failed to save article to Redis ${articleKey}:`, err);
+    await redis.del(articleKey).catch(() => {});
+    return NextResponse.json(fail('error', 'Failed to save generated article to Redis', state));
+  }
+
+  // -- Error-recovery: clean up stale Redis orphan from prior slug --
+  if (article.slug && article.slug !== newSlug) {
     const oldArticleKey = 'insights:draft:article:' + article.slug;
     await redis.del(oldArticleKey).catch((err) => {
       console.warn(`Failed to delete old article key ${oldArticleKey}:`, err);
     });
   }
 
-  // -- Save article body to Redis (main store) -------------------
-  const articleKey = 'insights:draft:article:' + slug;
-  await redis.set(articleKey, JSON.stringify(freshArticle), { ex: 31536000 }).catch((err) => {
-    console.error(`Failed to save article to Redis ${articleKey}:`, err);
-    throw err; // Re-throw to fail the request
-  });
-
   // -- Update workflow state --------------------------------------
   state.articles[idx] = {
     ...article,
     title: safeTitle,
-    slug,
+    slug: newSlug,
     description: safeSummary,
     content: safeContent,
     image: imageUrl,
@@ -142,12 +146,16 @@ export async function GET(request: NextRequest): Promise<NextResponse<NodeRespon
   state.step = 'policy';
   state.updatedAt = new Date().toISOString();
 
-  await saveWorkflowState(wid, state).catch((err) => {
+  try {
+    await saveWorkflowState(wid, state);
+  } catch (err) {
     console.error(`Failed to save workflow state ${wid}:`, err);
-    throw err; // Re-throw to fail the request
-  });
+    // Revert in-memory article body change — caller gets a clear error
+    return NextResponse.json(fail('error', 'Failed to persist workflow state after generation', state));
+  }
 
   // -- Chain to policy check --------------------------------------
+  console.log('[WF ' + stepLabel + '] Chain -> policy wid=' + wid + ' idx=' + idx);
   return NextResponse.json(
     ok('policy', state,
       { type: 'fetch', method: 'GET',

@@ -11,13 +11,18 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const wid = searchParams.get('wid');
   const idx = parseInt(searchParams.get('idx') || '0');
+  const stepLabel = 'trending[' + idx + ']';
 
   if (!wid) return NextResponse.json(fail('error', 'Missing workflow ID', {}));
+  console.log('[WF ' + stepLabel + '] wid=' + wid + ' idx=' + idx);
 
   const state = await loadWorkflowState(wid);
   if (!state) return NextResponse.json(fail('error', 'Workflow not found: ' + wid, { workflowId: wid }));
 
   if (!state.hasGroqApiKey) return NextResponse.json(fail('error', 'GROQ_API_KEY not configured', state));
+
+  const apiKey = process.env.GROQ_API_KEY;
+  console.log('[WF ' + stepLabel + '] Fetching RSS + Groq trending topics...');
 
   // 1. Check RSS cache FIRST to avoid unnecessary Groq calls
   let rssContext = 'GCC regional development and economic trends';
@@ -40,7 +45,6 @@ export async function GET(request: NextRequest) {
   } catch { /* fallback */ }
 
   // 2. Call Groq for trending topics + AdSense scores
-  const apiKey = process.env.GROQ_API_KEY;
   // Use inline prompt instead of importing unused TRENDING_PROMPT to avoid unused import warning
   const prompt = `You are a GCC editorial strategist. Based on the following RSS headlines
 for GCC business/economy/tech, generate exactly 10 strategic article topics.
@@ -104,9 +108,14 @@ isSafe=false for: crypto, gambling, medical claims, adult content.`;
   state.articles[idx].lang = 'en';
   state.step = 'generate';
   state.updatedAt = new Date().toISOString();
+
   await saveWorkflowState(wid, state).catch((err) => {
     console.error('Failed to save workflow state in trending:', err);
+    // Fail explicitly so the cron worker retries
+    throw err;
   });
+
+  console.log('[WF ' + stepLabel + '] Topics=' + topics.length + ' top=' + (topics[0]?.topic || 'none') + ' score=' + (topics[0]?.adsenseScore || 'n/a') + ' | next=generate');
 
   return NextResponse.json(
     ok('generate', state,

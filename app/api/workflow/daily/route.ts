@@ -39,6 +39,8 @@ export async function POST(request: NextRequest) {
       ? body.adminSecret
       : 'wf-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
 
+    console.log('[WF daily] articleCount=' + articleCount + ' workflowId=' + workflowId + ' resume=' + !!existingId);
+
     // Try to load existing workflow state for resume
     const existing: WorkflowState | null = existingId
       ? await loadWorkflowState(existingId).catch((err) => {
@@ -57,36 +59,39 @@ export async function POST(request: NextRequest) {
       const freshState: WorkflowState = {
         workflowId, step: 'init', workflowStatus: 'running', createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(), currentIndex: 0, articles, trendingTopics: [],
-        errors: [], hasGroqApiKey: !!process.env.GROQ_API_KEY, runCount: 0, adminSecret,
+        errors: [], hasGroqApiKey: !!process.env.GROQ_API_KEY,         runCount: 0, adminSecret,
       };
-      await saveWorkflowState(workflowId, freshState).catch((err) => {
-        console.error('Failed to save initial workflow state:', err);
-      });
+      await saveWorkflowState(workflowId, freshState);
+      console.log('[WF daily] NEW workflow created wid=' + workflowId + ' idx=0');
+
       return NextResponse.json(ok('init', { workflowId, step: 'init', workflowStatus: 'running' },
         { type: 'fetch', method: 'GET', url: '/api/workflow/trending?wid=' + workflowId + '&idx=0' },
         'Workflow initialized; chaining to /api/workflow/trending'
       ));
     }
 
-    // Resume path
+// Resume path
+    console.log('[WF daily] RESUMING wid=' + workflowId + ' step=' + existing.step + ' idx=' + existing.currentIndex);
     const stepMap: Record<string, string> = {
-      init:      '/api/workflow/trending',
+      init:      '/api/workflow/trending?',
       trending:  '/api/workflow/generate/',
-      filter:    '/api/workflow/trending',
+      filter:    '/api/workflow/trending?',
       generate:  '/api/workflow/policy/',
       policy:    '/api/workflow/score/',
       score:     '/api/workflow/persist/',
-      persist:   '/api/workflow/trending',
+      persist:   '/api/workflow/trending?',
       done:      '',
-      error:     '/api/workflow/trending',
+      error:     '/api/workflow/trending?',
     };
-    const url = stepMap[existing.step] || '';
+    const baseUrl = stepMap[existing.step] || '';
+    const nextUrl = baseUrl ? baseUrl + existing.currentIndex + '?wid=' + workflowId + '&idx=' + existing.currentIndex : undefined;
+
     return NextResponse.json(ok(existing.step, {
       workflowId,
       step: existing.step,
       currentIndex: existing.currentIndex
     },
-      url ? { type: 'fetch', method: 'GET', url: url + existing.currentIndex + '?wid=' + workflowId + '&idx=' + existing.currentIndex } : undefined,
+      nextUrl ? { type: 'fetch', method: 'GET', url: nextUrl } : undefined,
       'Resumed at step: ' + existing.step + ' idx=' + existing.currentIndex
     ));
   } catch (e: any) {

@@ -1,52 +1,29 @@
 import { NextResponse } from 'next/server';
-import * as zlib from 'fflate';
+import { redis, getWithCompression, setWithCompression } from '@/lib/redis';
 
 export const runtime = 'edge';
-
-const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL!;
-const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN!;
-const ADMIN_SECRET = process.env.ADMIN_SECRET!;
-
-async function decompress(compressedStr: string) {
-  if (typeof compressedStr !== 'string' || !compressedStr.startsWith('compressed:')) {
-    return typeof compressedStr === 'string' ? JSON.parse(compressedStr) : compressedStr;
-  }
-  const base64 = compressedStr.replace('compressed:', '');
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  
-  // Use fflate for gzip decompression
-  const decompressed = zlib.gunzipSync(bytes);
-  const text = new TextDecoder().decode(decompressed);
-  return JSON.parse(text);
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const secret = searchParams.get('secret');
-  
+  const ADMIN_SECRET = process.env.ADMIN_SECRET!;
+
   if (secret !== ADMIN_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const lang = searchParams.get('lang') || 'en';
+const lang = searchParams.get('lang') || 'en';
   const draftKey = `insights:drafts:${lang}`;
-  
-  try {
-    const res = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(draftKey)}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
-    });
-    const data = await res.json();
-    let drafts = [];
-    if (data.result) {
-      drafts = await decompress(data.result);
-    }
-    
-    return NextResponse.json({ drafts });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch drafts' }, { status: 500 });
+
+  console.log(`[Admin Drafts] Fetching key=${draftKey}`);
+  const raw = await getWithCompression<unknown>(draftKey);
+  console.log(`[Admin Drafts] rawType=${typeof raw} isArray=${Array.isArray(raw)} len=${Array.isArray(raw) ? raw.length : 'n/a'}`);
+
+  if (raw && !Array.isArray(raw)) {
+    console.warn(`[Admin Drafts] Expected array, got:`, typeof raw, Object.keys(raw || {}));
   }
+
+  const drafts: unknown[] = Array.isArray(raw) ? raw as unknown[] : [];
+
+  return NextResponse.json({ drafts });
 }

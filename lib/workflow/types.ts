@@ -28,7 +28,7 @@ export interface ArticleDraft {
   tags: string[];
   image: string;
   pubDate: string;
-  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'deleted';
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'deleted' | 'failed';
   retryCount: number;
   maxRetries: number;
   policyResult?: PolicyResult;
@@ -37,6 +37,7 @@ export interface ArticleDraft {
   qualityScore?: number;
   wordCount?: number;
   regenerateContext?: { violations: string; actions: string };
+  persistError?: string;
 }
 
 export interface TrendingTopic {

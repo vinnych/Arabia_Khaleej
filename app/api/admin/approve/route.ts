@@ -1,149 +1,78 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { redis, getWithCompression, setWithCompression, compressValue, decompressValue } from '@/lib/redis';
 
 export const runtime = 'edge';
 
-const UPSTASH_REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL!;
-const UPSTASH_REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN!;
 const ADMIN_SECRET = process.env.ADMIN_SECRET!;
 
-async function compress(data: any) {
-  const encoder = new TextEncoder();
-  const uint8 = encoder.encode(typeof data === 'string' ? data : JSON.stringify(data));
-  const stream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(uint8);
-      controller.close();
-    },
-  }).pipeThrough(new CompressionStream('gzip'));
-  const buffer = await new Response(stream).arrayBuffer();
-  let binary = '';
-  const bytes = new Uint8Array(buffer);
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return 'compressed:' + btoa(binary);
+function fail(body: Record<string, unknown>, status: number) {
+  return NextResponse.json(body, { status });
 }
 
-async function decompress(compressedStr: string) {
-  if (typeof compressedStr !== 'string' || !compressedStr.startsWith('compressed:')) {
-    return typeof compressedStr === 'string' ? JSON.parse(compressedStr) : compressedStr;
-  }
-  const base64 = compressedStr.replace('compressed:', '');
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  const stream = new ReadableStream({
-    start(controller) {
-      controller.enqueue(bytes);
-      controller.close();
-    },
-  }).pipeThrough(new DecompressionStream('gzip'));
-  const text = await new Response(stream).text();
-  return JSON.parse(text);
-}
-
-export async function POST(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const secret = searchParams.get('secret');
-  
-  if (secret !== ADMIN_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    const { slug, lang, content: editedContent, title: editedTitle } = await request.json();
-    if (!slug || !lang) {
-      return NextResponse.json({ error: 'Missing slug or lang' }, { status: 400 });
+    const secret = new URL(request.url).searchParams.get('secret');
+    if (secret !== ADMIN_SECRET) {
+      return fail({ error: 'Unauthorized' }, 401);
     }
 
-    // 1. Fetch draft article
-    const draftArticleKey = `insights:draft:article:${slug}`;
-    const draftRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(draftArticleKey)}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
-    });
-    const draftData = await draftRes.json();
-    if (!draftData.result) {
-      return NextResponse.json({ error: 'Draft not found' }, { status: 404 });
+    const { slug, lang, content: editedContent, title: editedTitle } = await request.json().catch(() => ({}));
+    if (!slug || !lang) {
+      return fail({ error: 'Missing slug or lang' }, 400);
     }
-    const article = await decompress(draftData.result);
+
+    // 1. Fetch draft article body via shared decompressValue
+    const draftArticleKey = `insights:draft:article:${slug}`;
+    const raw = await redis.get(draftArticleKey);
+    if (!raw) return fail({ error: 'Draft not found' }, 404);
+
+    // 2. Human-editable draft body — decompressed from whatever format the workflow wrote
+    const article = decompressValue(String(raw)) as Record<string, unknown>;
 
     // 2. Apply human edits if provided
     const hasEdits = !!(editedContent || editedTitle);
-    if (editedContent) {
-      article.content = editedContent;
+    if (editedContent !== undefined) {
+      (article as Record<string, unknown>).content = editedContent;
     }
-    if (editedTitle) {
-      article.title = editedTitle;
-      // Update description if auto-generated from content
-      const lines = editedContent ? editedContent.split('\n') : article.content.split('\n');
+    if (editedTitle !== undefined) {
+      (article as Record<string, unknown>).title = editedTitle;
+      const contentForDesc = (editedContent ?? (article as Record<string, unknown>).content ?? '') as string;
+      const lines = contentForDesc.split('\n');
       const paragraph = lines.find((l: string) => !l.startsWith('#') && l.length > 80);
-      article.description = paragraph ? paragraph.replace(/[#*_]/g, '').trim().substring(0, 180) + '...' : article.description;
+      (article as Record<string, unknown>).description = paragraph
+        ? paragraph.replace(/[#*_]/g, '').trim().substring(0, 180) + '...'
+        : (article as Record<string, unknown>).description;
     }
 
-    // 3. Update article status to published
-    article.status = 'published';
+    // 3. Update status
+    (article as Record<string, unknown>).status = 'published';
     if (hasEdits) {
-      article.humanEdited = true;
-      article.editedAt = new Date().toISOString();
+      (article as Record<string, unknown>).humanEdited = true;
+      (article as Record<string, unknown>).editedAt = new Date().toISOString();
     }
 
-    // 4. Save to live article key
-    const liveArticleKey = `insights:article:${slug}`;
-    const compressedArticle = await compress(article);
-    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(liveArticleKey)}?ex=31536000`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
-      body: compressedArticle
-    });
+    // 4. Save to live article key with the same format the workflow/readers expect
+    const liveCompressed = compressValue(article);
+    await redis.set(`insights:article:${slug}`, liveCompressed, { ex: 31536000 } as Record<string, unknown>);
 
-    // 5. Add to live list
+    // 5. Add to live list (content is already part of the article object; live list carries full metadata)
     const listKey = `insights:list:${lang}`;
-    const listRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(listKey)}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
-    });
-    const listData = await listRes.json();
-    let currentList = [];
-    if (listData.result) {
-      currentList = await decompress(listData.result);
-    }
-
-    const { content: _content, ...metadata } = article;
-    const updatedList = [metadata, ...currentList].slice(0, 1000);
-    const compressedList = await compress(updatedList);
-    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(listKey)}?ex=31536000`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
-      body: compressedList
-    });
+    const currentLive = await getWithCompression<Record<string, string | number | boolean | string[]>[]>(listKey) ?? [];
+    await setWithCompression(listKey, [article as Record<string, unknown>, ...currentLive].slice(0, 1000), { ex: 31536000 });
 
     // 6. Remove from draft list
     const draftListKey = `insights:drafts:${lang}`;
-    const draftListRes = await fetch(`${UPSTASH_REDIS_REST_URL}/get/${encodeURIComponent(draftListKey)}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
-    });
-    const draftListData = await draftListRes.json();
-    let currentDrafts = [];
-    if (draftListData.result) {
-      currentDrafts = await decompress(draftListData.result);
-    }
-    const updatedDrafts = currentDrafts.filter((d: any) => d.slug !== slug);
-    const compressedDrafts = await compress(updatedDrafts);
-    await fetch(`${UPSTASH_REDIS_REST_URL}/set/${encodeURIComponent(draftListKey)}?ex=31536000`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` },
-      body: compressedDrafts
-    });
+    const currentDrafts = await getWithCompression<Record<string, unknown>[]>(draftListKey) ?? [];
+    const updatedDrafts = currentDrafts.filter((d: Record<string, unknown>) => d.slug !== slug);
+    await setWithCompression(draftListKey, updatedDrafts, { ex: 31536000 });
 
-    // 7. Delete draft article key
-    await fetch(`${UPSTASH_REDIS_REST_URL}/del/${encodeURIComponent(draftArticleKey)}`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${UPSTASH_REDIS_REST_TOKEN}` }
-    });
+    // 7. Delete draft article body
+    await redis.del(draftArticleKey).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Approval failed' }, { status: 500 });
+    console.error('Approval failed:', error);
+    const statusNum = typeof (error as { status?: number }).status === 'number' ? (error as { status: number }).status : 500;
+    return NextResponse.json({ error: 'Approval failed' }, { status: statusNum });
   }
 }
