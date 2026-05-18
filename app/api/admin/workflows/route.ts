@@ -181,6 +181,79 @@ function violationBadges(violations: PolicyViolation[]): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// Load all published articles from Redis
+// ---------------------------------------------------------------------------
+// Load all published articles from Redis
+// ---------------------------------------------------------------------------
+
+async function loadPublishedArticles(): Promise<ArticleCard[]> {
+  const articles: ArticleCard[] = [];
+
+  for (const lang of ['en', 'ar'] as const) {
+    const listRaw = await getWithCompression<unknown>(`insights:list:${lang}`);
+    const list: Record<string, unknown>[] = Array.isArray(listRaw) ? (listRaw as Record<string, unknown>[]) : [];
+
+    const resolved = await Promise.all(
+      list.map(async (entry) => {
+        const slugRaw = entry.slug;
+        if (!slugRaw) return null;
+        const slug = String(slugRaw);
+
+        // Fetch full article data from Redis
+        const articleData = await getWithCompression<Record<string, unknown>>(`insights:article:${slug}`).catch(() => null);
+        if (!articleData) return null;
+
+        // Strictly use Redis data - if a field is missing or undefined, use empty string/zero/false as appropriate
+        // but only if the field exists in the Redis data (not strictly missing)
+        const title = articleData.title !== undefined && articleData.title !== null ? String(articleData.title) : '';
+        const description = articleData.description !== undefined && articleData.description !== null ? String(articleData.description) : '';
+        const pubDate = articleData.pubDate !== undefined && articleData.pubDate !== null ? String(articleData.pubDate) : new Date().toISOString();
+        const language = articleData.language !== undefined && articleData.language !== null ? String(articleData.language) : lang;
+        const image = articleData.image !== undefined && articleData.image !== null ? String(articleData.image) : '';
+        const status = articleData.status !== undefined && articleData.status !== null ? String(articleData.status) : 'published';
+        const policyResult = articleData.policyResult !== undefined && articleData.policyResult !== null ? String(articleData.policyResult) : undefined;
+        const qualityScore = articleData.qualityScore !== undefined && articleData.qualityScore !== null ? Number(articleData.qualityScore) : undefined;
+        const wordCount = articleData.wordCount !== undefined && articleData.wordCount !== null ? Number(articleData.wordCount) : undefined;
+        const persistError = articleData.persistError !== undefined && articleData.persistError !== null ? String(articleData.persistError) : undefined;
+        const policyViolations = Array.isArray(articleData.policyViolations) ? articleData.policyViolations as PolicyViolation[] : [];
+        const country = articleData.country !== undefined && articleData.country !== null ? articleData.country : undefined;
+        const topic = articleData.topic !== undefined && articleData.topic !== null ? articleData.topic : undefined;
+        const retryCount = articleData.retryCount !== undefined && articleData.retryCount !== null ? Number(articleData.retryCount) : 0;
+        const maxRetries = articleData.maxRetries !== undefined && articleData.maxRetries !== null ? Number(articleData.maxRetries) : 1;
+
+        return {
+          slug,
+          title,
+          description,
+          pubDate,
+          language,
+          image,
+          status,
+          policyResult,
+          qualityScore,
+          wordCount,
+          persistError,
+          policyViolations,
+          country,
+          topic,
+          retryCount,
+          maxRetries,
+        } as ArticleCard;
+      })
+    );
+
+    articles.push(...(resolved.filter(Boolean) as ArticleCard[]));
+  }
+
+   // Sort by publication date (newest first)
+   return deduplicateCards(articles.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()));
+}
+
+// ---------------------------------------------------------------------------
+// Load all draft article cards (both languages) from Redis
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
 // Load all draft article cards (both languages) from Redis
 // ---------------------------------------------------------------------------
 
@@ -199,39 +272,54 @@ async function loadArticleCards(): Promise<ArticleCard[]> {
         const body = await getWithCompression<Record<string, unknown>>(`insights:draft:article:${slug}`).catch(() => null);
 
         const str = (v: any, fallback: any) => v != null ? String(v) : fallback;
+        const num = (v: any) => v != null ? Number(v) : undefined;
 
         const rawStatus = (entry as any).status ?? body?.status ?? 'draft';
         if (rawStatus === 'published') return null;
 
         return {
           slug,
-          title:   str((entry as any).title,  body?.title  ?? slug),
+          title: str((entry as any).title, body?.title ?? slug),
           description: str((entry as any).description, body?.description ?? ''),
           pubDate: str((entry as any).pubDate, body?.pubDate ?? new Date().toISOString()),
           language: str((entry as any).language, lang),
-          image:   str((entry as any).image,   body?.image   ?? ''),
-          status:  String(rawStatus),
-          policyResult:    (() => { const v = (entry as any).policyResult ?? body?.policyResult; return v ? String(v) : undefined; })(),
+          image: str((entry as any).image, body?.image ?? ''),
+          status: String(rawStatus),
+          policyResult: (() => { const v = (entry as any).policyResult ?? body?.policyResult; return v ? String(v) : undefined; })(),
           qualityScore: (() => { const v = (entry as any).qualityScore ?? body?.qualityScore; return v != null ? Number(v) : undefined; })(),
-          wordCount:    (() => { const v = (entry as any).wordCount ?? body?.wordCount; return v != null ? Number(v) : undefined; })(),
+          wordCount: (() => { const v = (entry as any).wordCount ?? body?.wordCount; return v != null ? Number(v) : undefined; })(),
           persistError: (() => { const v = (entry as any).persistError ?? body?.persistError; return v ? String(v) : undefined; })(),
           policyViolations: (() => { const v = (entry as any).policyViolations ?? body?.policyViolations; return Array.isArray(v) ? v as PolicyViolation[] : []; })(),
           country: (() => { const v = (entry as any).country ?? body?.country; return v; })(),
-          topic:   (() => { const v = (entry as any).topic ?? body?.topic; return v; })(),
-          retryCount: Number((entry as any).retryCount ?? body?.retryCount ?? 0),
-          maxRetries: Number((entry as any).maxRetries ?? body?.maxRetries ?? 1),
-        } as ArticleCard;
-      })
-    );
-
-    cards.push(...(resolved.filter(Boolean) as ArticleCard[]));
+          topic: (() => { const v = (entry as any).topic ?? body?.topic; return v; })(),
+           retryCount: Number((entry as any).retryCount ?? body?.retryCount ?? 0),
+           maxRetries: Number((entry as any).maxRetries ?? body?.maxRetries ?? 1),
+         } as ArticleCard;
+       })
+     );
+ 
+      cards.push(...(resolved.filter(Boolean) as ArticleCard[]));
+    }
+  
+    // Deduplicate by slug
+    const seen = new Set<string>();
+    return cards.filter(c => { if (seen.has(c.slug)) return false; seen.add(c.slug); return true; });
   }
 
-  // Deduplicate by slug
-  const seen = new Set<string>();
-  return cards.filter(c => { if (seen.has(c.slug)) return false; seen.add(c.slug); return true; });
-}
-
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
 // ---------------------------------------------------------------------------
 // Load running workflow state (from Redis singleton store)
 // ---------------------------------------------------------------------------
@@ -286,6 +374,9 @@ async function loadActiveRuns(): Promise<ActiveWorkflow[]> {
   return runs;
 }
 
+// ---------------------------------------------------------------------------
+// Load all workflow runs (for History tab) — same Redis scan as above,
+// returns up to 50 runs regardless of status.
 // ---------------------------------------------------------------------------
 // Load all workflow runs (for History tab) — same Redis scan as above,
 // returns up to 50 runs regardless of status.
@@ -381,7 +472,7 @@ async function enrichCards(cards: ArticleCard[]): Promise<ArticleCard[]> {
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-type Tab = 'drafts' | 'rejected' | 'workflow' | 'history';
+type Tab = 'drafts' | 'rejected' | 'workflow' | 'history' | 'published';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -417,17 +508,31 @@ export async function GET(request: NextRequest) {
     }
 
     // ── Drafts / Rejected tabs ────────────────────────────────────────
-    const cards = await loadArticleCards();
-    const enriched = await enrichCards(cards);
+    if (tab === 'drafts' || tab === 'rejected') {
+      const cards = await loadArticleCards();
+      const enriched = await enrichCards(cards);
 
-    if (tab === 'rejected') {
-      const rejected = enriched.filter(c =>
-        c.status === 'rejected' || c.status === 'failed' || c.status === 'deleted' ||
-        c.policyResult === 'fail' || c.policyResult === 'delete'
-      );
+      if (tab === 'rejected') {
+        const rejected = enriched.filter(c =>
+          c.status === 'rejected' || c.status === 'failed' || c.status === 'deleted' ||
+          c.policyResult === 'fail' || c.policyResult === 'delete'
+        );
+        return NextResponse.json({
+          drafts: rejected,
+          total: rejected.length,
+          timeAgo,
+          articleStatusBadge: ARTICLE_STATUS_BADGE,
+          policyBadge: POLICY_BADGE,
+          violationBadges,
+          stepLabels: STEP_LABELS,
+          statusBadge: STATUS_BADGE,
+        });
+      }
+
+      // default: drafts
       return NextResponse.json({
-        drafts: rejected,
-        total: rejected.length,
+        drafts: enriched,
+        total: enriched.length,
         timeAgo,
         articleStatusBadge: ARTICLE_STATUS_BADGE,
         policyBadge: POLICY_BADGE,
@@ -437,17 +542,20 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // default: drafts
-    return NextResponse.json({
-      drafts: enriched,
-      total: enriched.length,
-      timeAgo,
-      articleStatusBadge: ARTICLE_STATUS_BADGE,
-      policyBadge: POLICY_BADGE,
-      violationBadges,
-      stepLabels: STEP_LABELS,
-      statusBadge: STATUS_BADGE,
-    });
+    // ── Published tab ─────────────────────────────────────────────────
+    if (tab === 'published') {
+      const published = await loadPublishedArticles();
+      return NextResponse.json({
+        drafts: published, // Reusing 'drafts' field for consistency with frontend
+        total: published.length,
+        timeAgo,
+        articleStatusBadge: ARTICLE_STATUS_BADGE,
+        policyBadge: POLICY_BADGE,
+        violationBadges: () => [], // Published articles shouldn't have policy violations
+        stepLabels: STEP_LABELS,
+        statusBadge: STATUS_BADGE,
+      });
+    }
   } catch (error) {
     console.error('[Admin Workflows] GET error:', error);
     return NextResponse.json(
@@ -457,6 +565,14 @@ export async function GET(request: NextRequest) {
   }
 }
 
+  // Deduplicate by slug
+function deduplicateCards(cards: ArticleCard[]): ArticleCard[] {
+  const seen = new Set<string>();
+  return cards.filter(c => { if (seen.has(c.slug)) return false; seen.add(c.slug); return true; });
+}
+
+// ---------------------------------------------------------------------------
+// Load running workflow state (from Redis singleton store)
 // ---------------------------------------------------------------------------
 // POST — approve or reject a single draft
 // ---------------------------------------------------------------------------
@@ -546,39 +662,74 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, message: 'Article approved and published' });
     }
 
-    // ── REJECT ────────────────────────────────────────────────────────
-    if (action === 'reject') {
-      const draftArticleKey = `insights:draft:article:${slug}`;
-      await redis.del(draftArticleKey).catch(() => {});
+     // ── REJECT ────────────────────────────────────────────────────────
+     if (action === 'reject') {
+       const draftArticleKey = `insights:draft:article:${slug}`;
+       await redis.del(draftArticleKey).catch(() => {});
 
-      const dlKey = `insights:drafts:${lang}`;
-      const rawList = await getWithCompression<Record<string, unknown>[]>(dlKey) ?? [];
-      if (rawList.some((d: Record<string, unknown>) => d.slug === slug)) {
-        const filtered = rawList.filter((d: Record<string, unknown>) => d.slug !== slug);
-        await setWithCompression(dlKey, filtered, { ex: 31536000 });
-      }
+       const dlKey = `insights:drafts:${lang}`;
+       const rawList = await getWithCompression<Record<string, unknown>[]>(dlKey) ?? [];
+       if (rawList.some((d: Record<string, unknown>) => d.slug === slug)) {
+         const filtered = rawList.filter((d: Record<string, unknown>) => d.slug !== slug);
+         await setWithCompression(dlKey, filtered, { ex: 31536000 });
+       }
 
-      // Mark as rejected in workflow state if present
-      try {
-        const wfKeys = await redis.keys('wf:*');
-        const matches = wfKeys.filter(k => /^wf:[a-z0-9-]+$/.test(k));
-        for (const wk of matches) {
-          const wid = wk.replace(/^wf:/, '');
-          const state = await loadWorkflowState(wid).catch(() => null);
-          if (!state) continue;
-          const art = state.articles.find((a: any) => a.slug === slug);
-          if (art) {
-            art.status = 'rejected';
-            art.policyResult = 'delete';
-            await saveWorkflowState(wid, state).catch(() => {});
-          }
-        }
-      } catch { /* best-effort */ }
+       // Mark as rejected in workflow state if present
+       try {
+         const wfKeys = await redis.keys('wf:*');
+         const matches = wfKeys.filter(k => /^wf:[a-z0-9-]+$/.test(k));
+         for (const wk of matches) {
+           const wid = wk.replace(/^wf:/, '');
+           const state = await loadWorkflowState(wid).catch(() => null);
+           if (!state) continue;
+           const art = state.articles.find((a: any) => a.slug === slug);
+           if (art) {
+             art.status = 'rejected';
+             art.policyResult = 'delete';
+             await saveWorkflowState(wid, state).catch(() => {});
+           }
+         }
+       } catch { /* best-effort */ }
 
-      return NextResponse.json({ success: true, message: 'Draft rejected and removed' });
-    }
+       return NextResponse.json({ success: true, message: 'Draft rejected and removed' });
+     }
 
-    return NextResponse.json({ error: 'Unknown action: ' + action }, { status: 400 });
+     // ── DELETE PUBLISHED ───────────────────────────────────────────────
+     if (action === 'delete') {
+       const publishedArticleKey = `insights:article:${slug}`;
+       const article = await getWithCompression<Record<string, unknown>>(publishedArticleKey);
+       if (!article) return NextResponse.json({ error: 'Published article not found' }, { status: 404 });
+
+       // Remove from published list
+       const listKey = `insights:list:${lang}`;
+       const currentLive = await getWithCompression<Record<string, unknown>[]>(listKey) ?? [];
+       const filtered = currentLive.filter((a: Record<string, unknown>) => a.slug !== slug);
+       await setWithCompression(listKey, filtered, { ex: 31536000 });
+
+       // Delete the article body
+       await redis.del(publishedArticleKey).catch(() => {});
+
+       // Clean up any workflow state referencing this slug (best-effort)
+       try {
+         const wfKeys = await redis.keys('wf:*');
+         const matches = wfKeys.filter(k => /^wf:[a-z0-9-]+$/.test(k));
+         for (const wk of matches) {
+           const wid = wk.replace(/^wf:/, '');
+           const state = await loadWorkflowState(wid).catch(() => null);
+           if (!state) continue;
+           const changed = state.articles.some((a: any) => a.slug === slug);
+           if (changed) {
+             state.articles = state.articles.filter((a: any) => a.slug !== slug);
+             state.step = state.articles.length === 0 ? 'done' : state.step;
+             await saveWorkflowState(wid, state).catch(() => {});
+           }
+         }
+       } catch { /* best-effort */ }
+
+        return NextResponse.json({ success: true, message: 'Published article deleted' });
+     }
+
+     return NextResponse.json({ error: 'Unknown action: ' + action }, { status: 400 });
   } catch (error) {
     console.error('[Admin Workflows] POST error:', error);
     return NextResponse.json(

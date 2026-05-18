@@ -42,8 +42,8 @@ export function checkRichness(
   const citations = countCitations(content);
   const reasons: string[] = [];
 
-  const minStats = wordCount >= 1500 ? 3 : 1;
-  const minCitations = wordCount >= 1500 ? 2 : 1;
+  const minStats = wordCount >= 1100 ? 3 : 1;
+  const minCitations = wordCount >= 1100 ? 2 : 1;
 
   const isRich = stats >= minStats && citations >= minCitations;
   if (stats < minStats) reasons.push(`Need ${minStats}+ statistics (found ${stats})`);
@@ -57,40 +57,40 @@ export function checkRichness(
  * word count · sections · citations · statistics · entities
  */
 export function scoreArticle(
-  article: { content?: string }
+   article: { content?: string }
 ): {
-  score: number;
-  wordCount: number;
-  sections: number;
-  citations: number;
-  stats: number;
-  entities: number;
+   score: number;
+   wordCount: number;
+   sections: number;
+   citations: number;
+   stats: number;
+   entities: number;
 } {
-  const text = article.content ?? '';
-  const words = (text.match(/\b\w+\b/g) || []).length;
-  const sections = countSections(text);
-  const citations = countCitations(text);
-  const stats = countStats(text);
-  const entities = countEntities(text);
+   const text = article.content ?? '';
+   const words = (text.match(/\b\w+\b/g) || []).length;
+   const sections = countSections(text);
+   const citations = countCitations(text);
+   const stats = countStats(text);
+   const entities = countEntities(text);
 
-  const wordScore = Math.min(30, Math.round(30 * Math.min(1, words / 1500)));
-  const sectionScore = Math.min(20, Math.round(20 * Math.min(1, sections / 3)));
-  const citeScore = Math.min(15, Math.round(15 * Math.min(1, citations / 2)));
-  const statsScore = Math.min(15, Math.round(15 * Math.min(1, stats / 1)));
-  const entScore = Math.min(20, Math.round(20 * Math.min(1, entities / 3)));
+   const wordScore = Math.min(30, Math.round(30 * Math.min(1, words / 1100)));
+   const sectionScore = Math.min(20, Math.round(20 * Math.min(1, sections / 3)));
+   const citeScore = Math.min(15, Math.round(15 * Math.min(1, citations / 2)));
+   const statsScore = Math.min(15, Math.round(15 * Math.min(1, stats / 1)));
+   const entScore = Math.min(20, Math.round(20 * Math.min(1, entities / 3)));
 
-  let score = wordScore + sectionScore + citeScore + statsScore + entScore;
+   let score = wordScore + sectionScore + citeScore + statsScore + entScore;
 
-  if (citations === 0 && words > 1500) score -= 5;
-  if (stats === 0 && words > 1500) score -= 5;
-  if (entities === 0 && words > 1500) score -= 5;
+   if (citations === 0 && words > 1100) score -= 5;
+   if (stats === 0 && words > 1100) score -= 5;
+   if (entities === 0 && words > 1100) score -= 5;
 
-  return {
-    score: Math.max(0, Math.min(100, score)),
-    wordCount: words,
-    sections,
-    citations,
-    stats,
-    entities,
-  };
+   return {
+      score: Math.max(0, Math.min(100, score)),
+      wordCount: words,
+      sections,
+      citations,
+      stats,
+      entities,
+   };
 }

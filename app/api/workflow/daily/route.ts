@@ -9,11 +9,9 @@ export async function POST(request: NextRequest) {
   // Verify cron secret for authentication
   const authHeader = request.headers.get('authorization');
   const expectedSecret = process.env.CRON_SECRET;
-  
-  if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
-    return NextResponse.json(fail('error', 'Unauthorized'), { status: 401 });
-  }
-  
+  const { searchParams } = new URL(request.url);
+  const querySecret = searchParams.get('secret');
+   
   try {
     const body = await request.json().catch((err) => {
       console.warn('Failed to parse request body:', err);
@@ -31,13 +29,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(fail('error', 'Invalid admin secret'), { status: 401 });
     }
     
+    // Allow if either:
+    // 1. cron secret header is valid
+    // 2. admin secret in body is valid
+    // 3. secret in query parameters is valid (for admin-triggered workflows from UI)
+    const isCronValid = expectedSecret && authHeader === `Bearer ${expectedSecret}`;
+    const isAdminValid = expectedAdminSecret && providedAdminSecret && providedAdminSecret === expectedAdminSecret;
+    const isQueryValid = expectedAdminSecret && querySecret && querySecret === expectedAdminSecret;
+    
+    if (!isCronValid && !isAdminValid && !isQueryValid) {
+      return NextResponse.json(fail('error', 'Unauthorized'), { status: 401 });
+    }
+    
     const articleCount: number = Math.min(Math.max(body.articleCount ?? 1, 1), 5);
-
+  
     const existingId = typeof body.workflowId === 'string' ? body.workflowId : null;
     const workflowId = existingId || 'wf-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+    // Use query secret, body adminSecret, or generate a fallback
     const adminSecret = typeof body.adminSecret === 'string' && body.adminSecret?.length > 0
       ? body.adminSecret
-      : 'wf-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+      : (typeof querySecret === 'string' && querySecret?.length > 0 ? querySecret : 'wf-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7));
 
     console.log('[WF daily] articleCount=' + articleCount + ' workflowId=' + workflowId + ' resume=' + !!existingId);
 
@@ -70,7 +81,7 @@ export async function POST(request: NextRequest) {
       ));
     }
 
-// Resume path
+  // Resume path
     console.log('[WF daily] RESUMING wid=' + workflowId + ' step=' + existing.step + ' idx=' + existing.currentIndex);
     const stepMap: Record<string, string> = {
       init:      '/api/workflow/trending?',

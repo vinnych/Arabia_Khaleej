@@ -131,11 +131,11 @@ export async function generateGCCInsight(
      throw new Error("GROQ_API_KEY is not configured.");
    }
 
-   const prompt = lang === 'en'
-     ? `${ADSENSE_RULES}
+    const prompt = lang === 'en'
+      ? `${ADSENSE_RULES}
 
 Write a comprehensive, authoritative editorial article about ${country} focusing on ${topic}.
-The article must be at least 1500 words with clear sections and institutional-grade analysis.
+The article must be at least 1100 words with clear sections and institutional-grade analysis.
 
 REQUIRED ELEMENTS FOR QUALITY:
 - Specific company names from ${country}/GCC (e.g., "Saudi Aramco", "Emirates NBD")
@@ -157,10 +157,10 @@ STRICT RULES:
 2. DO NOT include an author field — it will be assigned editorially.
 3. Use professional British English.
 4. Return VALID JSON only.`
-     : `${ADSENSE_RULES}
+      : `${ADSENSE_RULES}
 
 اكتب مقالاً تحريرياً شاملاً ومعمّقاً عن ${country} مع التركيز على ${topic}.
-يجب أن لا يقل عن 1500 كلمة مع أقسام واضحة وتحليل بمستوى مؤسسي.
+يجب أن لا يقل عن 1100 كلمة مع أقسام واضحة وتحليل بمستوى مؤسسي.
 
 العناصر المطلوبة للجودة:
 - أسماء شركات محددة من ${country}/الخليج

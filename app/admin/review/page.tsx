@@ -40,13 +40,14 @@ type PolicyBadgeMap         = Record<string, { bg: string; text: string }>;
 
 // ---------- Tab definitions ----------
 
-type TabId = 'drafts' | 'rejected' | 'workflow' | 'history';
+type TabId = 'drafts' | 'rejected' | 'workflow' | 'history' | 'published';
 
 const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
   { id: 'drafts',    label: 'Drafts',    icon: <FileText className="w-4 h-4" /> },
   { id: 'rejected',  label: 'Rejected',  icon: <XCircle className="w-4 h-4" /> },
   { id: 'workflow',  label: 'Workflow',  icon: <Zap className="w-4 h-4" /> },
   { id: 'history',   label: 'History',   icon: <Clock className="w-4 h-4" /> },
+  { id: 'published', label: 'Published', icon: <Trophy className="w-4 h-4" /> },
 ];
 
 // ---------------------------------------------------------------------------
@@ -96,7 +97,7 @@ function ArticleCard({ article, secret }: { article: Article; secret: string }) 
   const [hasEdits, setHasEdits] = useState(false);
   const [editingTitle, setEditingTitle] = useState(article.title);
 
-  const loadContent = async () => {
+const loadContent = async () => {
     if (content) return;
     try {
       const r = await fetch(`/api/admin/draft-content?secret=${secret}&slug=${article.slug}`);
@@ -107,10 +108,26 @@ function ArticleCard({ article, secret }: { article: Article; secret: string }) 
     } catch { /* silent */ }
   };
 
-  const openExpand = async () => {
-    if (!expanded) await loadContent();
-    setExpanded(!expanded);
+  const deletePublished = async () => {
+    if (!confirm('Are you sure you want to delete this published article? This action cannot be undone.')) return;
+    setBusy(true);
+    try {
+      const r = await fetch(`/api/admin/workflows?secret=${secret}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: article.slug, lang: article.language, action: 'delete' }),
+      });
+      const d = await r.json();
+      if (d.success) { window.location.reload(); }
+      else alert('Failed: ' + (d.error || d.details || 'unknown'));
+    } catch { alert('Delete failed'); }
+    setBusy(false);
   };
+
+    const openExpand = async () => {
+      if (!showContent) await loadContent();
+      setShowContent(!showContent);
+    };
 
   const approve = async () => {
     if (!hasEdits && !confirm('You must make substantive edits before publishing for AdSense compliance. Continue?')) return;
@@ -245,18 +262,18 @@ function ArticleCard({ article, secret }: { article: Article; secret: string }) 
             {article.policyViolations.length} policy violation{article.policyViolations.length !== 1 ? 's' : ''}{' '}
             <span className={expanded ? 'rotate-90' : ''}>▶</span>
           </button>
-          {expanded && (
-            <div className="pl-4 border-l-2 border-orange-200 space-y-1">
-              {article.policyViolations.map((v, i) => (
-                <div key={i} className="text-xs">
-                  {sevIcon(v.severity)} <span className="font-medium">{v.category}</span>
-                  {v.reason         && ` — ${v.reason}`}
-                  {v.location       && ` (${v.location})`}
-                  <span className="ml-2 text-gray-400">[{v.severity}]</span>
-                </div>
-              ))}
-            </div>
-          )}
+           {expanded && (
+             <div className="pl-4 border-l-2 border-orange-200 space-y-1">
+               {article.policyViolations.map((v, i) => (
+                 <div key={i} className="text-xs">
+                   {sevIcon(v.severity)} <span className="font-medium">{v.category}</span>
+                   {v.reason         && ` — ${v.reason}`}
+                   {v.location       && ` (${v.location})`}
+                   <span className="ml-2 text-gray-600">[{v.severity}]</span>
+                 </div>
+               ))}
+             </div>
+           )}
         </div>
       )}
 
@@ -284,48 +301,58 @@ function ArticleCard({ article, secret }: { article: Article; secret: string }) 
             className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-xs"
             rows={14}
           />
-          {hasEdits && (
-            <p className="text-green-600 text-xs font-medium">✓ Substantive edits detected — AdSense compliance ready</p>
-          )}
-        </div>
-      )}
+{hasEdits && (
+             <p className="text-green-600 text-xs font-medium">✓ Substantive edits detected — AdSense compliance ready</p>
+           )}
+         </div>
+       )}
 
-      {/* ── Actions ── */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={openExpand}
-          className="flex items-center gap-1 px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50"
-        >
-          {showContent ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-          {showContent ? 'Hide Editor' : 'Edit & Review'}
-        </button>
+       {/* ── Actions ── */}
+       <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={openExpand}
+            className="flex items-center gap-1 px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-900"
+          >
+            {showContent ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+            {showContent ? 'Hide Editor' : 'Edit & Review'}
+          </button>
 
-        <a
-          href={`/insights/${article.slug}?preview=true`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50"
-        >
-          <Eye className="w-3.5 h-3.5" /> Preview
-        </a>
+          <a
+            href={`/insights/${article.slug}?preview=true`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-50 text-gray-900"
+          >
+            <Eye className="w-3.5 h-3.5" /> Preview
+          </a>
 
-        <button
-          onClick={approve}
-          disabled={busy}
-          className={`inline-flex items-center gap-1 px-4 py-1.5 rounded text-white text-xs disabled:opacity-50
-            ${hasEdits ? 'bg-green-600 hover:bg-green-700' : 'bg-green-400 hover:bg-green-500'}`}
-        >
-          <CheckCircle className="w-3.5 h-3.5" /> Approve & Publish
-        </button>
+         <button
+           onClick={approve}
+           disabled={busy}
+           className={`inline-flex items-center gap-1 px-4 py-1.5 rounded text-white text-xs disabled:opacity-50
+             ${hasEdits ? 'bg-green-600 hover:bg-green-700' : 'bg-green-400 hover:bg-green-500'}`}
+         >
+           <CheckCircle className="w-3.5 h-3.5" /> Approve & Publish
+         </button>
 
-        <button
-          onClick={reject}
-          disabled={busy}
-          className="inline-flex items-center gap-1 px-4 py-1.5 rounded bg-red-600 text-white text-xs hover:bg-red-700 disabled:opacity-50"
-        >
-          <Trash2 className="w-3.5 h-3.5" /> Reject & Delete
-        </button>
-      </div>
+         {article.status === 'published' && (
+           <button
+             onClick={deletePublished}
+             disabled={busy}
+             className="inline-flex items-center gap-1 px-4 py-1.5 rounded bg-red-600 text-white text-xs hover:bg-red-700 disabled:opacity-50"
+           >
+             <Trash2 className="w-3.5 h-3.5" /> Delete Published
+           </button>
+         )}
+
+         <button
+           onClick={reject}
+           disabled={busy}
+           className="inline-flex items-center gap-1 px-4 py-1.5 rounded bg-red-600 text-white text-xs hover:bg-red-700 disabled:opacity-50"
+         >
+           <Trash2 className="w-3.5 h-3.5" /> Reject & Delete
+         </button>
+       </div>
     </div>
   );
 }
@@ -561,9 +588,43 @@ export default function AdminReviewPage() {
     loadAll();
   }, [secret, loadAll, refreshKey]);
 
-  // ---------- helpers on handleApprove/reject above ----------
+    // ---------- helpers on handleApprove/reject above ----------
+const handleTriggerWorkflow = async () => {
+  if (!secret) return;
+  try {
+    const res = await fetch(`/api/workflow/daily?secret=${secret}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ articleCount: 1, adminSecret: secret }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    // Optionally show a toast or just refresh
+    setRefreshKey(k => k + 1);
+  } catch (err) {
+    console.error('Failed to trigger workflow:', err);
+    alert('Failed to trigger workflow: ' + (err instanceof Error ? err.message : String(err)));
+  }
+};
 
-  // ---------- Tab content ----------
+   const renderPublished = () => {
+     if (!articles.length) return (
+       <div className="text-center py-16">
+         <Trophy className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+         <p className="text-gray-500 font-medium">No published articles</p>
+         <p className="text-sm text-gray-400 mt-1">Published articles will appear here after approval.</p>
+       </div>
+     );
+     return (
+       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+         {articles.map(art => (
+           <ArticleCard key={art.slug} article={art} secret={secret!} />
+         ))}
+       </div>
+     );
+   };
+
+   // ---------- Tab content ----------
 
   const renderDrafts = () => {
     if (!articles.length) return (
@@ -603,22 +664,22 @@ export default function AdminReviewPage() {
     );
   };
 
-  const renderWorkflow = () => {
-    if (!activeRuns.length) return (
-      <div className="text-center py-16">
-        <Zap className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-        <p className="text-gray-500 font-medium">No workflow is currently running</p>
-        <p className="text-sm text-gray-400 mt-1">
-          Workflows run automatically on a cron schedule. Trigger one manually from History.
-        </p>
-        <button
-          onClick={() => { /* TODO: trigger workflow endpoint */ }}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-        >
-          ⚡ Trigger Workflow Now
-        </button>
-      </div>
-    );
+    const renderWorkflow = () => {
+      if (!activeRuns.length) return (
+        <div className="text-center py-16">
+          <Zap className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <p className="text-gray-500 font-medium">No workflow is currently running</p>
+          <p className="text-sm text-gray-400 mt-1">
+            Workflows run automatically on a cron schedule. Trigger one manually from History.
+          </p>
+          <button
+            onClick={handleTriggerWorkflow}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+          >
+            ⚡ Trigger Workflow Now
+          </button>
+        </div>
+      );
 
     return activeRuns.map(run => {
       const ms  = typeof run.duration === 'string' ? run.duration : 'unknown';
@@ -881,20 +942,21 @@ export default function AdminReviewPage() {
         })}
       </nav>
 
-      {/* ── Tab panels ── */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mr-3" />
-          <span className="text-gray-600">Loading…</span>
-        </div>
-      ) : (
-        <>
-          {(activeTab === 'drafts' || activeTab === 'rejected') && activeTab === 'drafts' && renderDrafts()}
-          {activeTab === 'rejected'                                            && renderRejected()}
-          {activeTab === 'workflow'                                            && renderWorkflow()}
-          {activeTab === 'history'                                             && renderHistory()}
-        </>
-      )}
+       {/* ── Tab panels ── */}
+       {loading ? (
+         <div className="flex items-center justify-center py-20">
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mr-3" />
+           <span className="text-gray-600">Loading…</span>
+         </div>
+       ) : (
+         <>
+           {activeTab === 'drafts' && renderDrafts()}
+           {activeTab === 'rejected' && renderRejected()}
+           {activeTab === 'workflow' && renderWorkflow()}
+           {activeTab === 'history' && renderHistory()}
+           {activeTab === 'published' && renderPublished()}
+         </>
+       )}
     </div>
   );
 }
