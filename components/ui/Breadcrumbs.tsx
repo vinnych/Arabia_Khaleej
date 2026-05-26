@@ -14,8 +14,6 @@ interface BreadcrumbsProps {
   isRTL?: boolean;
 }
 
-
-
 /**
  * Visual Breadcrumbs component for SEO and UX.
  * Pairs with BreadcrumbSchema (JSON-LD) in StructuredData.tsx.

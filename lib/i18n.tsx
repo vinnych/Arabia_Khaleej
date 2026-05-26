@@ -15,10 +15,10 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ 
+export function LanguageProvider({
   children,
   initialLanguage = 'en'
-}: { 
+}: {
   children: React.ReactNode;
   initialLanguage?: Language;
 }) {
@@ -27,13 +27,13 @@ export function LanguageProvider({
 
   const setLanguage = useCallback((lang: Language) => {
     if (lang === language) return;
-    
+
     setLanguageState(lang);
     localStorage.setItem('language', lang);
     document.cookie = `NEXT_LOCALE=${lang}; path=/; max-age=31536000; SameSite=Lax; ${window.location.protocol === 'https:' ? 'Secure' : ''}`;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    
+
     const url = new URL(window.location.href);
     url.searchParams.set('lang', lang);
     window.history.replaceState({}, '', url.toString());
@@ -41,16 +41,14 @@ export function LanguageProvider({
 
   useEffect(() => {
     setMounted(true);
-    
-    // Only sync if the URL has a lang parameter that differs from current state
+
     const params = new URLSearchParams(window.location.search);
     const langParam = params.get('lang') as Language;
-    
+
     if (langParam && (langParam === 'en' || langParam === 'ar') && langParam !== language) {
       setLanguage(langParam);
     }
   }, [language, setLanguage]);
-
 
   const t = useCallback((key: string): string => {
     return translations[key]?.[language] || key;

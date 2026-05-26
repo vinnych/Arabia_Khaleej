@@ -1,26 +1,7 @@
 /**
- * @file lib/redis-node.ts
- * @module Redis · Node.js Standalone Provider
- * @description Arabia Khaleej — ioredis factory for Node.js-only targets.
- *
- * NEVER import this file from any Edge runtime route.
- * It is only imported into Node.js-targeted API routes; `require('ioredis')`
- * will fail on Edge / Cloudflare Workers.
- *
- * Marked `serverExternalPackages: ['ioredis']` in next.config.ts so that
- * Next.js leaves the package external — it is resolved at runtime, not at
- * build time.
- *
- * ## Hot-swap contract
- *
- * This module MUST call `_patchRedisModule(this)` at module evaluation time
- * so that `lib/redis.ts`'s edge-safe shim is replaced with the real
- * Node.js implementation before any API handler code runs.
+ * Arabia Khaleej — Redis Node.js Provider
+ * ioredis factory for Node.js-only targets. NEVER import from Edge runtime.
  */
-
-// ---------------------------------------------------------------------------
-// Implementation interface (mirrors lib/redis.ts StandaloneNode)
-// ---------------------------------------------------------------------------
 
 interface StandaloneNode {
   getStandaloneRedis(): any;
@@ -29,39 +10,19 @@ interface StandaloneNode {
   compressValue(data: unknown): string;
   decompressValue(str: string): unknown;
   rateLimit(ip: string, limit?: number, windowSeconds?: number, route?: string): Promise<{ success: boolean; current: number; limit: number }>;
-
-  // workflow helpers (forwarded from lib/workflow/utils)
   loadWorkflowState(wid: string): Promise<any>;
   saveWorkflowState(wid: string, state: any): Promise<string | null>;
   deleteWorkflow(wid: string): Promise<void>;
   bumpTtl(wid: string): Promise<void>;
 }
 
-// ---------------------------------------------------------------------------
-// Singleton implementation  (initialised exactly once)
-// ---------------------------------------------------------------------------
-
-// Will be the real ioredis instance once `getStandaloneRedisNode()` succeeds
 let _rawRedis: any = null;
-
-// The real Redis singleton this module owns (used directly by module-level
-// workflow helpers below, bypassing the lib/redis.ts proxy entirely)
-let _redisNode: StandaloneNode | null = null;
-
-/** The shared `redis` object that lib/redis.ts will swap its proxy to forward to */
 let _realRedis: any = null;
-
-/** Direct RedisLike instance used by this module (avoids proxy round-trips) */
 let _redisDirect: any = null;
-
-// ---------------------------------------------------------------------------
-// ioredis connection
-// ---------------------------------------------------------------------------
 
 export function getStandaloneRedisNode(): any {
   if (_rawRedis) return _rawRedis;
 
-  // `require('ioredis')` — dynamic so webpack does not statically resolve Node.js builtins
   const Redis = require('ioredis');
   const url = process.env.REDIS_URL || 'redis://localhost:6379';
 
@@ -88,10 +49,6 @@ export function getStandaloneRedisNode(): any {
   return _rawRedis;
 }
 
-// ---------------------------------------------------------------------------
-// Compiled helpers
-// ---------------------------------------------------------------------------
-
 import * as zlib from 'fflate';
 
 async function decompress(compressedStr: string): Promise<string> {
@@ -111,10 +68,6 @@ async function compress(data: string): Promise<string> {
   for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
   return 'compressed:' + btoa(binary);
 }
-
-// ---------------------------------------------------------------------------
-// Compression helpers
-// ---------------------------------------------------------------------------
 
 export async function getWithCompression<T>(key: string): Promise<T | null> {
   try {
@@ -183,39 +136,35 @@ export async function rateLimit(
   return { success: current <= limit, current, limit };
 }
 
-// ---------------------------------------------------------------------------
-// Workflow helpers (re-exported from lib/workflow/utils but using _redisDirect)
-// ---------------------------------------------------------------------------
-
-interface WorkflowState {
-  workflowId: string;
-  step: string;
-  workflowStatus: string;
-  createdAt: string;
-  updatedAt: string;
-  currentIndex: number;
-  articles: any[];
-  trendingTopics: any[];
-  errors: string[];
-  hasGroqApiKey: boolean;
-  runCount: number;
-  adminSecret: string;
+interface ArticleData {
+  workflowId?: string;
+  step?: string;
+  workflowStatus?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  currentIndex?: number;
+  articles?: any[];
+  trendingTopics?: any[];
+  errors?: string[];
+  hasGroqApiKey?: boolean;
+  runCount?: number;
+  adminSecret?: string;
 }
 
 const PREFIX = 'wf:';
 const TTL = parseInt(process.env.WORKFLOW_TTL || '21600', 10);
 
-export async function loadWorkflowState(wid: string): Promise<WorkflowState | null> {
+export async function loadWorkflowState(wid: string): Promise<ArticleData | null> {
   const raw = await (getWithCompression as any)(PREFIX + wid);
   if (!raw) return null;
-  return raw as WorkflowState;
+  return raw as ArticleData;
 }
 
-export async function saveWorkflowState(wid: string, state: WorkflowState): Promise<string | null> {
+export async function saveWorkflowState(wid: string, state: ArticleData): Promise<string | null> {
   try {
     return await setWithCompression(PREFIX + wid, state, { ex: TTL });
   } catch (err) {
-    console.error('Failed to save workflow state ' + wid + ':', err);
+    console.error('Failed to save article draft ' + wid + ':', err);
     throw err;
   }
 }
@@ -232,38 +181,26 @@ export async function deleteWorkflow(wid: string): Promise<void> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Bootstrap — run at module load time (Node.js only)
-// ---------------------------------------------------------------------------
-
-/** Pre-initialise the ioredis connection so all helpers are ready immediately */
-getStandaloneRedisNode().then((_conn: any) => {
-  _rawRedis   = _conn;
-  _redisDirect = _conn;
-  _realRedis  = _conn;
-  console.log('[redis-node] Connection initialised ✓');
-}).catch((err: Error) => {
-  console.warn('[redis-node] Async connect error:', err.message);
-});
-
-// ---------------------------------------------------------------------------
-// Module-level export consumed fully by callers
-// ---------------------------------------------------------------------------
+// Initialize redis connection synchronously at module load time.
+// We assign to both _redisDirect and _rawRedis to ensure getWithCompression
+// and other functions have immediate access without waiting for async init.
+const conn = getStandaloneRedisNode();
+_redisDirect = conn;
+_rawRedis = conn;
 
 const _fns: StandaloneNode = {
-  getStandaloneRedis:    getStandaloneRedisNode,
+  getStandaloneRedis: getStandaloneRedisNode,
   getWithCompression,
   setWithCompression,
   compressValue,
   decompressValue,
   rateLimit,
-  loadWorkflowState:     loadWorkflowState,
+  loadWorkflowState,
   saveWorkflowState,
   deleteWorkflow,
   bumpTtl,
 };
 
-/** Hot-swap call: patches lib/redis.ts when this module is first required. */
 // @ts-expect-error — _patchRedisModule is injected by lib/redis.ts at startup
 _patchRedisModule?.(_fns);
 

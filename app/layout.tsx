@@ -17,7 +17,6 @@ const amiri = Amiri({ weight: ["400", "700"], subsets: ["arabic"], variable: "--
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 
-
 export const runtime = 'edge';
 
 export const metadata = pageMeta({
@@ -40,6 +39,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const headList = await headers();
   const nonce = headList.get('x-nonce') || undefined;
   
+  // Extract user's preferred language from cookies to avoid hydration mismatch
+  // This runs on the server before the client hydrates
   const cookieHeader = headList.get('cookie') || '';
   const initialLanguage = (cookieHeader.split('; ').find(row => row.startsWith('NEXT_LOCALE='))?.split('=')[1] || 'en') as Language;
 

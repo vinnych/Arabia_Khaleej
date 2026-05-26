@@ -7,11 +7,11 @@
  *
  * ## Route Groups
  *
- * | Group           | Count     | Source               | Priority |
- * |-----------------|-----------|----------------------|----------|
- * | Static routes   | ~10 URLs  | Hardcoded            | 0.3–1.0  |
- * | Prayer pages    | 6 URLs    | `countries` array    | 0.8      |
- * | Country guides  | 6 URLs    | `fullCountrySlugs`   | 0.8      |
+ * | Group           | Count     | Source                       | Priority |
+ * |-----------------|-----------|------------------------------|----------|
+ * | Static routes   | ~10 URLs  | Hardcoded                    | 0.3–1.0  |
+ * | Prayer pages    | 6 URLs    | `countries` array            | 0.8      |
+ * | Country guides  | 6 URLs    | `fullCountrySlugs`           | 0.8      |
  * | Insight articles| ≤2000 URLs| Redis via `getAllInsightSlugs()` | 0.6 |
  *
  * ## Priority Logic
@@ -38,7 +38,9 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'edge';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Country codes for prayer times routes - matches GCC countries
   const countries = ['qatar', 'uae', 'saudi-arabia', 'kuwait', 'oman', 'bahrain'];
+  // Full country slug names for guide pages - must match route pathnames
   const fullCountrySlugs = [
     'saudi-arabia', 
     'united-arab-emirates', 
@@ -101,10 +103,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         'ar-QA': `${SITE_URL}/countries/${slug}?lang=ar`,
       }
     }
-  }));
+}));
 
-
-  // 5. Dynamic Insights Routes (Deduplicated & Capped)
+  // 4. Dynamic Insights Routes (Deduplicated & Capped)
   let insightRoutes: MetadataRoute.Sitemap = [];
   let latestDate = new Date();
   

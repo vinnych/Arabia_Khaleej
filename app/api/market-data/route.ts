@@ -1,9 +1,6 @@
 /**
  * Arabia Khaleej — Market Intelligence API
- * 
  * Provides real-time regional and global financial data.
- * Integrated with FinanceService for a single source of truth.
- * Optimized for Edge Runtime.
  */
 
 import { NextResponse } from 'next/server';
@@ -18,9 +15,8 @@ export async function GET() {
     const stocks = await FinanceService.getStockMarkets();
     const commodities = await FinanceService.getCommodities();
 
-    // Fetch live currency rates (Real data - already reliable)
     const currencyRes = await fetch(`${OPEN_ER_API_BASE}/latest/USD`, {
-      next: { revalidate: 3600 } 
+      next: { revalidate: 3600 }
     });
     const currencyData = await currencyRes.json();
 

@@ -89,30 +89,38 @@ export default function PublicSurvey() {
   const { language, isRTL, t } = useLanguage();
   const surveys = MOCK_SURVEYS[language as keyof typeof MOCK_SURVEYS] || MOCK_SURVEYS.en;
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [votedIds, setVotedIds] = useState<Record<string, string>>({});
+  const [votedIds, setVotedIds] = useState<Map<string, string>>(new Map());
   
   const currentSurvey = surveys[currentIndex];
 
   useEffect(() => {
-    const surveyData = MOCK_SURVEYS[language as keyof typeof MOCK_SURVEYS] || MOCK_SURVEYS.en;
-    const savedVotes: Record<string, string> = {};
-    surveyData.forEach(s => {
-      const vote = localStorage.getItem(`voted_${s.id}`);
-      if (vote) savedVotes[s.id] = vote;
-    });
-    setVotedIds(savedVotes);
-    
-    // Safety: Reset index if current index is out of bounds for the new language list
-    if (currentIndex >= surveyData.length) {
-      setCurrentIndex(0);
+    try {
+      const surveyData = MOCK_SURVEYS[language as keyof typeof MOCK_SURVEYS] || MOCK_SURVEYS.en;
+      const savedVotes = new Map<string, string>();
+      surveyData.forEach(s => {
+        const vote = localStorage.getItem(`voted_${s.id}`);
+        if (vote) savedVotes.set(s.id, vote);
+      });
+      setVotedIds(savedVotes);
+      
+      if (currentIndex >= surveyData.length) {
+        setCurrentIndex(0);
+      }
+    } catch (e) {
+      console.warn("Storage access denied - survey will not persist votes");
     }
   }, [language, currentIndex]);
 
   const handleVote = (optionId: string) => {
-    if (votedIds[currentSurvey.id]) return;
-    const newVotes = { ...votedIds, [currentSurvey.id]: optionId };
+    if (votedIds.has(currentSurvey.id)) return;
+    const newVotes = new Map(votedIds);
+    newVotes.set(currentSurvey.id, optionId);
     setVotedIds(newVotes);
-    localStorage.setItem(`voted_${currentSurvey.id}`, optionId);
+    try {
+      localStorage.setItem(`voted_${currentSurvey.id}`, optionId);
+    } catch (e) {
+      // Ignored: Private browsing or quota exceeded
+    }
   };
 
   const nextSurvey = () => setCurrentIndex((prev) => (prev + 1) % surveys.length);
@@ -134,7 +142,7 @@ export default function PublicSurvey() {
             </h2>
           </div>
           <div className="flex items-center gap-4">
-            {votedIds[currentSurvey.id] && (
+            {votedIds.has(currentSurvey.id) && (
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -145,10 +153,10 @@ export default function PublicSurvey() {
               </motion.div>
             )}
             <div className="flex items-center gap-1">
-              <button onClick={prevSurvey} className="p-1.5 rounded-full glass hover:bg-brand-gold/10 transition-colors">
+              <button onClick={prevSurvey} aria-label="Previous Survey" className="p-1.5 rounded-full glass hover:bg-brand-gold/10 transition-colors">
                 <ChevronLeft size={16} className={isRTL ? "rotate-180" : ""} />
               </button>
-              <button onClick={nextSurvey} className="p-1.5 rounded-full glass hover:bg-brand-gold/10 transition-colors">
+              <button onClick={nextSurvey} aria-label="Next Survey" className="p-1.5 rounded-full glass hover:bg-brand-gold/10 transition-colors">
                 <ChevronRight size={16} className={isRTL ? "rotate-180" : ""} />
               </button>
             </div>
@@ -172,17 +180,18 @@ export default function PublicSurvey() {
                 <button
                   key={option.id}
                   onClick={() => handleVote(option.id)}
-                  disabled={!!votedIds[currentSurvey.id]}
-                  className={`w-full text-left relative group outline-none select-none transition-all ${votedIds[currentSurvey.id] ? 'cursor-default' : 'cursor-pointer active:scale-[0.99]'}`}
+                  disabled={votedIds.has(currentSurvey.id)}
+                  aria-pressed={votedIds.get(currentSurvey.id) === option.id}
+                  className={`w-full text-left relative group outline-none select-none transition-all ${votedIds.has(currentSurvey.id) ? 'cursor-default' : 'cursor-pointer active:scale-[0.99]'}`}
                 >
                   <div className="flex justify-between items-center mb-2.5 px-2">
                     <span className={`text-sm sm:text-base font-bold transition-colors ${
-                      votedIds[currentSurvey.id] === option.id ? 'text-brand-gold' : 'text-foreground/80 group-hover:text-foreground'
+                      votedIds.get(currentSurvey.id) === option.id ? 'text-brand-gold' : 'text-foreground/80 group-hover:text-foreground'
                     }`}>
                       {option.label}
                     </span>
                     <AnimatePresence>
-                      {votedIds[currentSurvey.id] && (
+                      {votedIds.has(currentSurvey.id) && (
                         <motion.span 
                           initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -196,16 +205,16 @@ export default function PublicSurvey() {
                   <div className="h-4 w-full bg-brand-gold/5 rounded-full overflow-hidden border border-brand-gold/10 relative">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: votedIds[currentSurvey.id] ? `${option.percentage}%` : "0%" }}
+                      animate={{ width: votedIds.has(currentSurvey.id) ? `${option.percentage}%` : "0%" }}
                       transition={{ duration: 1.2, ease: "circOut", delay: idx * 0.05 }}
                       className={`h-full rounded-full ${
-                        votedIds[currentSurvey.id] === option.id 
+                        votedIds.get(currentSurvey.id) === option.id 
                         ? 'bg-gradient-to-r from-brand-gold/60 to-brand-gold shadow-[0_0_15px_rgba(212,175,55,0.4)]' 
                         : 'bg-brand-gold/20'
                       }`}
                     />
                     
-                    {!votedIds[currentSurvey.id] && (
+                    {!votedIds.has(currentSurvey.id) && (
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-brand-gold/5" />
                     )}
                   </div>

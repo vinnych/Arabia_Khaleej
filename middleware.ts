@@ -3,12 +3,14 @@ import type { NextRequest } from 'next/server';
 import { getCSPHeader } from './lib/csp';
 
 export default function middleware(request: NextRequest) {
-  // Generate a cryptographically secure nonce
+  // Generate a cryptographically secure nonce for CSP script-src
+  // Using crypto.randomUUID() ensures unique nonces per request, preventing XSS
   const nonce = btoa(crypto.randomUUID());
   
   const { searchParams, hostname, pathname } = new URL(request.url);
 
-  // Redirect from .pages.dev to the main domain
+  // Redirect from .pages.dev to the main domain for SEO consistency
+  // This ensures only the canonical domain appears in search results
   if (hostname.endsWith('.pages.dev')) {
     const destination = new URL(`https://arabiakhaleej.com${pathname}`);
     destination.search = searchParams.toString();
@@ -21,7 +23,8 @@ export default function middleware(request: NextRequest) {
   const langParam = searchParams.get('lang');
   const cookieLang = request.cookies.get('NEXT_LOCALE')?.value;
 
-  // Sync lang param with cookie
+  // Sync lang param with cookie for i18n support
+  // This allows users to switch languages via URL parameter while persisting preference
   let langToSet = null;
   if (langParam && (langParam === 'en' || langParam === 'ar')) {
     if (cookieLang !== langParam) {
@@ -32,26 +35,29 @@ export default function middleware(request: NextRequest) {
   const isDev = process.env.NODE_ENV === 'development';
   const cspHeader = getCSPHeader(nonce, isDev);
 
-  // Set the nonce in the request headers so it can be read by Server Components
+  // Set the nonce in request headers so Server Components can inline scripts securely
+  // The nonce must match in both the CSP header and script tags
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
 
-  // Create the response
+  // Create the response with modified request headers
   const response = NextResponse.next({
     request: {
       headers: requestHeaders,
     },
   });
 
-  // Set the CSP header on the response
+  // Set the CSP header on the response to enable strict Content Security Policy
+  // This prevents XSS attacks by restricting script sources to nonce-authorized scripts
   response.headers.set('Content-Security-Policy', cspHeader);
 
-  // Add noindex for admin pages
+  // Add noindex for admin pages to prevent search engines from indexing admin UI
   if (isAdminPage) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   }
 
-  // Set language cookie if needed
+  // Set language cookie if language preference changed
+  // 1 year maxAge (31536000 seconds) - user preference should persist long-term
   if (langToSet) {
     response.cookies.set('NEXT_LOCALE', langToSet, { 
       path: '/', 

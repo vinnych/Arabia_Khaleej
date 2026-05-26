@@ -18,10 +18,10 @@ const nextConfig: NextConfig = {
     unoptimized: false,
   },
 
-  // ioredis is a Node.js-only package (uses `net`, `tls` builtins).
-  // Mark it external so our Redis provider abstraction can `require()` it
-  // at runtime when REDIS_URL is set, without breaking the Edge build.
-  serverExternalPackages: ['ioredis'],
+// ioredis is a Node.js-only package (uses `net`, `tls` builtins).
+   // Mark it external so our Redis provider abstraction can `require()` it
+   // at runtime when REDIS_URL is set, without breaking the Node.js build.
+   serverExternalPackages: ['ioredis'],
 
   trailingSlash: false,
   async redirects() {

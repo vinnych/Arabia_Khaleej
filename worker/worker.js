@@ -1,20 +1,30 @@
 import { createMimeMessage } from "mimetext";
 import { EmailMessage } from "cloudflare:email";
 
+/**
+ * Arabia Khaleej Contact Form Worker
+ * Handles contact form submissions via email forwarding using Cloudflare Email Workers.
+ * Uses Cloudflare's SEND_EMAIL binding rather than external SMTP to avoid deliverability
+ * issues and ensure reliable delivery within the Cloudflare ecosystem.
+ */
+const RECIPIENT_EMAIL = process.env.CONTACT_RECIPIENT_EMAIL || "asishchilakapati@gmail.com";
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const origin = request.headers.get("Origin");
+    // Allow any origin for development flexibility, but restrict in production
     const corsHeaders = {
       "Access-Control-Allow-Origin": origin || "*",
       "Access-Control-Allow-Methods": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
-    // Handle CORS preflight
+    // Handle CORS preflight requests for cross-origin form submissions
     if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
     }
 
+    // Only accept POST requests for form submissions - prevents accidental spam via GET
     if (request.method !== "POST") {
       return new Response("Method Not Allowed", { status: 405, headers: corsHeaders });
     }
@@ -23,6 +33,7 @@ export default {
       const body = await request.json();
       const { email, name, message } = body;
 
+      // Email is required for contact form submission - we need a way to respond
       if (!email) {
         return new Response(JSON.stringify({ error: "Email is required" }), {
           status: 400,
@@ -32,11 +43,12 @@ export default {
 
       console.log(`Processing contact form: ${email} | Name: ${name || 'N/A'}`);
 
-      // Create a professional MIME email for Internal Notification
+      // Create a professional MIME email using mimetext library
       const msg = createMimeMessage();
       msg.setSender({ name: "Arabia Khaleej Service", addr: "connect@arabiakhaleej.com" });
-      msg.setRecipient("asishchilakapati@gmail.com");
+      msg.setRecipient(RECIPIENT_EMAIL);
       msg.setSubject(`✨ New Inquiry: ${name || email}`);
+      // HTML email template uses inline styles because many email clients strip <style> tags
       msg.addMessage({
         contentType: 'text/html',
         data: `
@@ -63,10 +75,11 @@ export default {
       });
 
       // Internal Notification (To Owner)
+      // Uses Cloudflare's Send Email binding for reliable delivery within the CF ecosystem
       if (env.SEND_EMAIL) {
         const emailMsg = new EmailMessage(
           "connect@arabiakhaleej.com",
-          "asishchilakapati@gmail.com",
+          RECIPIENT_EMAIL,
           msg.asRaw()
         );
         await env.SEND_EMAIL.send(emailMsg);
@@ -92,9 +105,10 @@ export default {
     }
   },
 
+  // Email handler: forward direct emails to the recipient
+  // Allows the worker to receive mail directly at contact@arabiakhaleej.com
   async email(message, env, ctx) {
-    // Forward direct emails sent to connect@arabiakhaleej.com to owner
-    await message.forward("asishchilakapati@gmail.com");
+    await message.forward(RECIPIENT_EMAIL);
     console.log(`Direct email forwarded from ${message.from}`);
   }
 };

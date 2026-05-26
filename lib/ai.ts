@@ -24,7 +24,6 @@
 // ---------------------------------------------------------------------------
 
 import { GROQ_API_URL } from '@/lib/constants/api';
-import { ADSENSE_RULES } from '@/lib/workflow/prompts';
 
 /**
  * Raw response shape returned by the Groq OpenAI-compatible Chat Completions API.
@@ -132,9 +131,7 @@ export async function generateGCCInsight(
    }
 
     const prompt = lang === 'en'
-      ? `${ADSENSE_RULES}
-
-Write a comprehensive, authoritative editorial article about ${country} focusing on ${topic}.
+      ? `Write a comprehensive, authoritative editorial article about ${country} focusing on ${topic}.
 The article must be at least 1100 words with clear sections and institutional-grade analysis.
 
 REQUIRED ELEMENTS FOR QUALITY:
@@ -157,9 +154,7 @@ STRICT RULES:
 2. DO NOT include an author field — it will be assigned editorially.
 3. Use professional British English.
 4. Return VALID JSON only.`
-      : `${ADSENSE_RULES}
-
-اكتب مقالاً تحريرياً شاملاً ومعمّقاً عن ${country} مع التركيز على ${topic}.
+      : `اكتب مقالاً تحريرياً شاملاً ومعمّقاً عن ${country} مع التركيز على ${topic}.
 يجب أن لا يقل عن 1100 كلمة مع أقسام واضحة وتحليل بمستوى مؤسسي.
 
 العناصر المطلوبة للجودة:

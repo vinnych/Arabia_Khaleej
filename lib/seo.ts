@@ -1,8 +1,6 @@
 /**
  * Arabia Khaleej — SEO & Metadata Engine
- * 
- * Centralized utility for generating meta tags, structured data,
- * and search engine optimization configurations.
+ * Centralized utility for generating meta tags and search engine optimization.
  */
 
 import type { Metadata } from "next";
@@ -43,9 +41,6 @@ interface PageMetaOptions {
   lang?: "en" | "ar";
 }
 
-/**
- * Generate complete page metadata with automatic canonicals, OG tags, and regional alternates.
- */
 export function pageMeta({
   title,
   titleAr,
@@ -65,11 +60,10 @@ export function pageMeta({
   const og = ogTitle ?? (lang === "ar" && titleAr ? titleAr : title);
   const ogDesc = ogDescription ?? (lang === "ar" && descriptionAr ? descriptionAr : description);
   const img = image ?? `${SITE_URL}/opengraph-image`;
-  
-  // Sanitize path
+
   const cleanPath = path.split('?')[0];
   const canonical = cleanPath === "/" ? SITE_URL : `${SITE_URL}${cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`}`;
-  
+
   const now = new Date().toISOString();
   const published = datePublished ?? "2026-01-01T00:00:00Z";
   const modified = dateModified ?? now;

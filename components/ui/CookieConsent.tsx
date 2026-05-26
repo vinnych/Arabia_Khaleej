@@ -9,15 +9,23 @@ export default function CookieConsent() {
   const { isRTL, language } = useLanguage();
 
   useEffect(() => {
-    const consent = localStorage.getItem("ak_cookie_consent");
-    if (!consent) {
-      const timer = setTimeout(() => setShow(true), 2000);
-      return () => clearTimeout(timer);
+    try {
+      const consent = localStorage.getItem("ak_cookie_consent");
+      if (!consent) {
+        const timer = setTimeout(() => setShow(true), 2000);
+        return () => clearTimeout(timer);
+      }
+    } catch (e) {
+      console.warn("localStorage access denied for cookies");
     }
   }, []);
 
   const accept = () => {
-    localStorage.setItem("ak_cookie_consent", "true");
+    try {
+      localStorage.setItem("ak_cookie_consent", "true");
+    } catch (e) {
+      // Ignore
+    }
     setShow(false);
   };
 

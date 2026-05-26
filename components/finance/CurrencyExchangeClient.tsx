@@ -53,9 +53,11 @@ export default function CurrencyExchangeClient() {
 
   useEffect(() => {
     fetchRates();
-    const saved = localStorage.getItem("ak_fav_currencies");
-    if (saved) {
-      try { setFavorites(JSON.parse(saved)); } catch { /* corrupted data, ignore */ }
+    try {
+      const saved = localStorage.getItem("ak_fav_currencies");
+      if (saved) setFavorites(JSON.parse(saved));
+    } catch (e) {
+      console.warn("localStorage unavailable for favorites");
     }
     const interval = setInterval(() => fetchRates(), 60000);
     return () => clearInterval(interval);
@@ -87,7 +89,11 @@ export default function CurrencyExchangeClient() {
   const toggleFavorite = (code: string) => {
     const next = favorites.includes(code) ? favorites.filter(f => f !== code) : [...favorites, code];
     setFavorites(next);
-    localStorage.setItem("ak_fav_currencies", JSON.stringify(next));
+    try {
+      localStorage.setItem("ak_fav_currencies", JSON.stringify(next));
+    } catch (e) {
+      // Ignored
+    }
   };
 
   const handleSwap = () => {

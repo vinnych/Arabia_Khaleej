@@ -1,8 +1,11 @@
 /**
  * Arabia Khaleej — Content Security Policy Configuration
  * Centralized source of truth for security headers.
+ *
+ * 'unsafe-inline' for styles is required due to CSS-in-JS patterns in the component library.
+ * nonce-based script execution with 'strict-dynamic' provides modern XSS protection while
+ * allowing legitimate inline handlers from UI frameworks.
  */
-
 export function getCSPHeader(nonce: string, isDev: boolean): string {
   const directives = {
     'default-src': ["'self'"],
@@ -12,6 +15,7 @@ export function getCSPHeader(nonce: string, isDev: boolean): string {
       "'strict-dynamic'",
       "https:",
       "'unsafe-inline'",
+      // 'unsafe-eval' disabled in prod to prevent code injection attacks
       isDev ? "'unsafe-eval'" : '',
     ],
     'style-src': [
@@ -32,14 +36,20 @@ export function getCSPHeader(nonce: string, isDev: boolean): string {
     ],
     'connect-src': [
       "'self'",
+      // Vercel analytics for performance monitoring
       "https://va.vercel-scripts.com",
+      // Contact form worker endpoint
       "https://arabiakhaleej-contact.asishchilakapati.workers.dev",
+      // IP geolocation for prayer times detection
       "https://freeipapi.com",
       "https://api.aladhan.com",
+      // Exchange rates API for currency conversion
       "https://open.er-api.com",
+      // Google Analytics for insights tracking (requires .google-analytics.com domains)
       "https://*.google-analytics.com",
       "https://*.analytics.google.com",
       "https://*.googletagmanager.com",
+      // AdSense domains for monetization
       "https://*.googlesyndication.com",
       "https://*.doubleclick.net",
       "https://*.adtrafficquality.google",

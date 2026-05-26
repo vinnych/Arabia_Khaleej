@@ -14,42 +14,27 @@ export function isValidHttpUrl(str: string): boolean {
   }
 }
 
-/**
- * Converts a title + optional seed into a readable SEO slug.
- * Supports both English and Arabic characters.
- * e.g. "Qatar Raises Fuel Prices" → "qatar-raises-fuel-prices-a3f9"
- * The hash suffix guarantees uniqueness across same-title articles.
- */
 export function toSlug(title: string, seed?: string): string {
   const base = title
     .toLowerCase()
-    // Keep Arabic characters (\u0600-\u06FF), English alphanumeric, spaces and dashes
     .replace(/[^\u0600-\u06FFa-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
     .slice(0, 80)
     .replace(/-+$/, "");
-    
-  // If base resulted in nothing (e.g. only symbols), use "insight"
+
   const slugBase = base || "insight";
-  
-  // Use provided seed or fallback to the title for deterministic hashing
   const hashSource = seed || title;
-  
-  // 6-char hash for strong uniqueness in large archives
+
   let h = 0;
   for (let i = 0; i < hashSource.length; i++) {
     h = (Math.imul(31, h) + hashSource.charCodeAt(i)) | 0;
   }
   const hash = Math.abs(h).toString(36).slice(0, 6).padStart(6, "0");
-  
+
   return `${slugBase}-${hash}`;
 }
 
-/**
- * Parses any date string (RSS, Aladhan .readable, ISO, etc.) into parts.
- * Returns { day, mon, year, display } or null if unparseable.
- */
 export function parseDate(raw: string | undefined | null): { day: string; mon: string; year: string; display: string } | null {
   if (!raw) return null;
   const d = new Date(raw);
@@ -60,7 +45,6 @@ export function parseDate(raw: string | undefined | null): { day: string; mon: s
   return { day, mon, year, display: `${day} ${mon} ${year}` };
 }
 
-/** Escapes </script> in JSON-LD strings to prevent XSS */
 export function safeJsonLd(data: unknown): string {
   return JSON.stringify(data)
     .replace(/</g, "\\u003c")
@@ -72,7 +56,6 @@ export function safeJsonLd(data: unknown): string {
 
 export const SSRF_DENYLIST = /^(localhost|127\.|0\.0\.0\.0|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|169\.254\.|::1$|\[::1\]|fe80:|fc[0-9a-f]{2}:|fd[0-9a-f]{2}:)/i;
 
-/** Like isValidHttpUrl but also blocks private/loopback IPs to prevent SSRF */
 export function isSafeExternalUrl(str: string): boolean {
   if (!isValidHttpUrl(str)) return false;
   try {

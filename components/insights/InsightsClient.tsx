@@ -28,38 +28,49 @@ interface InsightItem {
 }
 
 export default function InsightsClient() {
-  const { t, isRTL, language } = useLanguage();
-  const [insights, setInsights] = useState<InsightItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const [displayCount, setDisplayCount] = useState(12);
+   const { t, isRTL, language } = useLanguage();
+   const [insights, setInsights] = useState<InsightItem[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [error, setError] = useState(false);
+   const [displayCount, setDisplayCount] = useState(12);
+   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+   const [autoRefresh, setAutoRefresh] = useState(true);
 
-  const fetchInsights = useCallback(async () => {
-    setLoading(true);
-    setError(false);
-    try {
-      const res = await fetch(`/api/insights?lang=${language}`, {
-        next: { revalidate: 300 },
-        signal: AbortSignal.timeout(10000)
-      });
-      if (!res.ok) throw new Error('Network response was not ok');
-      const data = await res.json();
-      if (data.status === 'success') {
-        setInsights(data.insights);
-      } else {
-        setError(true);
-      }
-    } catch (err) {
-      console.error("Insights fetch error:", err);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  }, [language]);
+   const fetchInsights = useCallback(async (forceRefresh = false) => {
+     setLoading(true);
+     setError(false);
+     try {
+       const res = await fetch(`/api/insights?lang=${language}${forceRefresh ? '&t=' + Date.now() : ''}`, {
+         signal: AbortSignal.timeout(10000),
+         cache: forceRefresh ? 'no-store' : 'force-cache'
+       });
+       if (!res.ok) throw new Error('Network response was not ok');
+       const data = await res.json();
+       if (data.status === 'success') {
+         setInsights(data.insights);
+         setLastUpdate(new Date());
+       } else {
+         setError(true);
+       }
+     } catch (err) {
+       console.error("Insights fetch error:", err);
+       setError(true);
+     } finally {
+       setLoading(false);
+     }
+   }, [language]);
 
-  useEffect(() => {
-    fetchInsights();
-  }, [fetchInsights]);
+   useEffect(() => {
+     fetchInsights();
+   }, [fetchInsights]);
+
+   useEffect(() => {
+     if (!autoRefresh) return;
+     const interval = setInterval(() => {
+       fetchInsights(true);
+     }, 60000);
+     return () => clearInterval(interval);
+   }, [autoRefresh, fetchInsights]);
 
   return (
     <div className={`w-full max-w-6xl mx-auto px-4 pt-6 pb-12 ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
@@ -81,17 +92,28 @@ export default function InsightsClient() {
           {t('intelligenceTerminal')}
         </h1>
         
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-8">
-          <button
-            onClick={fetchInsights}
-            disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 rounded-full glass border-brand-gold/15 hover:border-brand-gold/35 active:scale-95 transition-all duration-150"
-            aria-label={t('refreshInsights')}
-          >
-            <RefreshCw size={14} className={`${loading ? 'animate-spin' : ''} text-accent`} />
-            <span className="text-xs font-bold uppercase tracking-widest text-foreground/70">{loading ? t('processing') : t('refresh')}</span>
-          </button>
-        </div>
+<div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 mt-8">
+           <button
+             onClick={() => fetchInsights(true)}
+             disabled={loading}
+             className="flex items-center gap-2 px-6 py-3 rounded-full glass border-brand-gold/15 hover:border-brand-gold/35 active:scale-95 transition-all duration-150"
+             aria-label={t('refreshInsights')}
+           >
+             <RefreshCw size={14} className={`${loading ? 'animate-spin' : ''} text-accent`} />
+             <span className="text-xs font-bold uppercase tracking-widest text-foreground/70">{loading ? t('processing') : t('refresh')}</span>
+           </button>
+           <button
+             onClick={() => setAutoRefresh(!autoRefresh)}
+             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${autoRefresh ? 'bg-brand-gold/20 text-brand-gold' : 'bg-gray-800/50 text-gray-400'}`}
+           >
+             {autoRefresh ? '🔴 Live' : '⚪ Paused'}
+           </button>
+           {lastUpdate && (
+             <span className="text-xs text-gray-400">
+               Updated: {lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+             </span>
+           )}
+         </div>
       </div>
 
       {/* Editorial Intro Section */}
@@ -109,13 +131,13 @@ export default function InsightsClient() {
         <div className="mt-12 h-px w-24 bg-brand-gold/20 mx-auto" />
       </div>
 
-      {/* Mobile Floating Refresh Button */}
-      <MobileFAB 
-        icon={RefreshCw} 
-        onClick={fetchInsights} 
-        label={loading ? t('processing') : t('refresh')}
-        className={loading ? "opacity-50 pointer-events-none" : ""}
-      />
+{/* Mobile Floating Refresh Button */}
+       <MobileFAB 
+         icon={RefreshCw} 
+         onClick={() => fetchInsights(true)}
+         label={loading ? t('processing') : t('refresh')}
+         className={loading ? "opacity-50 pointer-events-none" : ""}
+       />
 
       {/* Top Stories Section */}
       {!loading && insights.length > 0 && (
@@ -166,12 +188,12 @@ export default function InsightsClient() {
       ) : error ? (
         <div className="glass p-16 rounded-[2.5rem] text-center border-brand-gold/10">
           <p className="text-foreground/50 mb-6 text-sm font-medium">{t('somethingWentWrong')}</p>
-          <button
-            onClick={fetchInsights}
-            className="px-8 py-3 bg-brand-gold/10 text-brand-gold rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-brand-gold/20 active:scale-95 transition-all"
-          >
-            {t('retryConnection')}
-          </button>
+<button
+             onClick={() => fetchInsights(true)}
+             className="px-8 py-3 bg-brand-gold/10 text-brand-gold rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-brand-gold/20 active:scale-95 transition-all"
+           >
+             {t('retryConnection')}
+           </button>
         </div>
       ) : (
         <>

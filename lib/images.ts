@@ -2,9 +2,12 @@ import { getDeterministicFallback } from './fallbacks';
 
 /**
  * Tiered image search optimized for Pexels:
- * 1. Pexels (Primary Source)
- * 2. Unsplash (Secondary Fallback)
- * 3. Deterministic Fallback (Final Safety Net)
+ * 1. Pexels (Primary Source) - Superior regional/Lifestyle imagery for GCC context
+ * 2. Unsplash (Secondary Fallback) - Reliable source when Pexels lacks matches
+ * 3. Deterministic Fallback (Final Safety Net) - Ensures consistent visuals per slug
+ *
+ * Pexels prioritized first because its Middle Eastern content coverage is significantly
+ * better than Unsplash's regional representation, reducing mismatched imagery.
  */
 export async function getRelevantImage(query: string, slug: string): Promise<string> {
   // Clean and optimize query: remove punctuation and focus on nouns

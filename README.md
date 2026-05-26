@@ -27,49 +27,59 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 
 ## 🤖 Agentic Editorial Workflow
 
-The platform uses a **6-node edge state machine** to generate, validate, and persist editorial content. Every node outputs a `nextAction` field, so the Cloudflare Worker can chain through the entire pipeline without additional orchestration.
+The platform uses a **LangGraph state machine** to generate, validate, and persist editorial content. The workflow runs entirely in `/api/workflow/daily` via `workflow.invoke()`, returning the final result after processing all articles sequentially.
+
+### Architecture
+
+```
+Worker (CF Worker)  →  POST /api/workflow/daily
+                           │
+                           ▼
+                      LangGraph State Graph
+                           │
+        ┌─────────────────┬─┴─┬─────────────────┐
+        ▼                 ▼   ▼                 ▼
+     trending          policy  score       persist
+        │                  │     │              │
+        ▼                  ▼     │              ▼
+     generate ──────► retry/passthrough  drafts list
+        │
+        ▼
+   [LLM Article]
+   [Image Fetch]
+```
 
 ### Node Flow
 
-```
-POST /api/workflow/daily          →  init
-  │  GET /api/workflow/trending    →  trending      (Node 1: RSS + AdSense topic scoring)
-  │    GET /api/workflow/generate/ →  generate     (Node 2: Groq 70B article generation)
-  │      GET /api/workflow/policy/  →  policy       (Node 3: AdSense compliance audit)
-  │        GET /api/workflow/score/ →  score        (Node 4: heuristic quality scoring)
-  │          GET /api/workflow/persist/ → persist   (Node 5: Redis commit + workflow cleanup)
-  │            ✓ done
-```
+Each article flows through 6 agent nodes:
 
-### Per-Node Responsibilities
-
-| Node | Endpoint | What it does |
-|---|---|---|
-| **1 — Init** | `POST /api/workflow/daily` | Creates or resumes workflow state in Redis; chains to trending |
-| **2 — Trending** | `GET /api/workflow/trending` | Fetches Google News RSS for GCC, Groq 8B scores topics for AdSense density, picks top topic |
-| **3 — Generate** | `GET /api/workflow/generate/0` | Groq 70B writes the full article; Pexels/Search image; draft saved to Redis |
-| **4 — Policy** | `GET /api/workflow/policy/0` | Groq 8B audits against AdSense policy AND checks for AdSense richness (minimum statistics/citations); retries once on fail/poor richness; auto-deletes on second fail |
-| **5 — Score** | `GET /api/workflow/score/0` | Heuristic 0–100 score across word count, sections, citations, stats, named entities |
-| **6 — Persist** | `GET /api/workflow/persist/0` | Writes to `insights:drafts:{lang}` list; deletes workflow state; returns `done` |
+| Node | Step | What it does |
+|------|------|--------------|
+| **init** | Creates placeholder articles for each requested count |
+| **trending** | Fetches GCC topics from Groq LLM; sorts by AdSense score |
+| **generate** | Groq 70B writes article; Pexels/Unsplash image; saves draft |
+| **policy** | AdSense compliance check (1100+ words, richness); retries once on fail |
+| **score** | 0–100 quality score (word count, sections, citations, stats, entities) |
+| **persist** | Saves to `insights:drafts:{lang}`; deletes workflow state |
 
 ### Cron Trigger
 
 - **Worker**: `worker/daily-automation.js` (Cloudflare Worker)
-- **Schedule**: `0 */2 * * *` — every 2 hours, consistently generating new drafts awaiting human editorial review on `/admin/review`
+- **Schedule**: `0 */2 * * *` — every 2 hours
 - **Articles per run**: 3
 - **Daily output**: up to 36
 
+### Deleted Article Handling
+
+When an article fails policy checks after retries, it is marked `deleted`. The workflow **continues** to the next article (previously this would terminate the entire run — bug fixed in LangGraph version).
+
 ### Code Quality
 
-- **Shared Helpers**: `ok()` and `fail()` functions are centralized in `lib/workflow/response.ts`
-- **Type Safety**: All workflow routes use proper TypeScript types (`NextAction` instead of `any`)
-- **Error Logging**: All catch blocks log errors with `console.error` for debugging
-- **ADSENSE_RULES**: Single source of truth in `lib/workflow/prompts.ts`, imported where needed
-- **Constants**: API URLs centralized in `lib/constants/api.ts`
-
-### Resume Support
-
-If a workflow run is interrupted (e.g., a node times out), the state machine is persisted in Redis under `wf:{id}` every step. On the next `/api/workflow/daily` call, the same `workflowId` resumes from the last completed step automatically.
+- **LangGraph v1.3.2**: Annotation.Root pattern for state schema
+- **State Persistence**: Redis state saved between nodes for debugging
+- **Error Isolation**: Failed articles don't block other articles
+- **ADSENSE_RULES**: Single source of truth in `lib/workflow/prompts.ts`
+- **Analysis**: Richness/scoring functions in `lib/workflow/analysis.ts`
 
 ---
 
@@ -82,8 +92,7 @@ If a workflow run is interrupted (e.g., a node times out), the state machine is 
 | `GET /api/exchange-rates` | — | Real-time GCC currency dynamics |
 | `GET /api/market-data` | — | GCC stock and commodity indices |
 
-The agentic editorial pipeline is **not** called from a browser.
-It is triggered exclusively by the Cloudflare Worker cron (`worker/daily-automation.js`).
+The agentic editorial pipeline is triggered by the Cloudflare Worker cron (`worker/daily-automation.js`) or manually via POST to `/api/workflow/daily` with proper authentication.
 
 ---
 

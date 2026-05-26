@@ -45,6 +45,8 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
     setMounted(true);
   }, []);
 
+  // IP-based Geolocation is the primary detection method - more reliable than browser
+  // geolocation for users who deny permission, and works across all devices
   useEffect(() => {
     // IP-based Geolocation only if no initialCity was provided
     if (mounted && !initialCity) {

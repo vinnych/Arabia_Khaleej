@@ -1,3 +1,7 @@
+/**
+ * Arabia Khaleej Unified Translation Dictionary
+ * Refactored into modular domains for maintainability.
+ */
 import { common } from "./i18n/common";
 import { finance } from "./i18n/finance";
 import { prayer } from "./i18n/prayer";
@@ -15,10 +19,6 @@ export interface Translations {
   };
 }
 
-/**
- * Arabia Khaleej Unified Translation Dictionary
- * Refactored into modular domains for high-fidelity maintainability.
- */
 export const translations: Translations = {
   ...common,
   ...finance,
@@ -27,8 +27,8 @@ export const translations: Translations = {
   ...guides,
   ...legal,
   ...boutique,
-  
-  // High-Fidelity SEO & Metadata (Kept here for central oversight)
+
+  // SEO & Metadata
   homeSchemaName: { en: "Arabia Khaleej — The GCC Standard", ar: "عربية خليج — المعيار الخليجي" },
   homeSchemaDesc: { en: "The definitive independent reference for the Gulf Cooperation Council.", ar: "المرجع المستقل النهائي لدول مجلس التعاون الخليجي." },
   homeDatasetName: { en: "Arabia Khaleej GCC Regional Intelligence", ar: "عربية خليج الاستخبارات الإقليمية الخليجية" },

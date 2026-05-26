@@ -2,7 +2,7 @@
 
 ## 🏗️ Architecture Overview
 Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
-- **Runtime**: Edge (`export const runtime = 'edge'`) on all API routes.
+- **Runtime**: Edge (`export const runtime = 'edge'`) on most API routes. **Node.js runtime** required for LangGraph workflow routes that use `@langchain/langgraph`.
 - **Database**: No permanent DB. Upstash Redis (Free) used as a transient cache only.
 - **AI**: Groq API using `llama-3.3-70b-versatile` (article gen) + `llama-3.1-8b-instant` (scoring/topics).
 
@@ -14,7 +14,7 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 - `npm run worker:deploy` — Deploy Cloudflare Worker automation
 
 ## 📝 Coding Standards
-- **Runtime**: Always declare `export const runtime = 'edge'` on API routes.
+- **Runtime**: Declare `export const runtime = 'edge'` on API routes. Use `export const runtime = 'nodejs'` for LangGraph workflow routes.
 - **Redis**: Set TTL on every write: `{ ex: CACHE_TIMES.X }`.
 - **Groq**: Never call Gro in parallel (rate limits).
 - **Images**: External hostnames must be in `next.config.ts` `remotePatterns`.
@@ -25,14 +25,19 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 
 ## 🤖 Agentic Editorial Workflow
 
-6-node edge state machine for content generation. All routes live under `app/api/workflow/`.
+LangGraph-based state machine for content generation. All routes live under `app/api/workflow/`.
 
+**Active Route** (LangGraph):
+| Route | Purpose |
+|---|---|
+| `POST /api/workflow/daily` | Single entry point - entire workflow runs via LangGraph state machine. Uses **Node.js runtime** because @langchain/langgraph requires Node.js APIs. |
+
+**Legacy Routes** (deprecated - not used by LangGraph):
 | Node | Route | Purpose |
 |---|---|---|
-| Init / Trigger | `POST /api/workflow/daily` | Create or resume state |
 | Node 1 — Trending | `GET /api/workflow/trending` | RSS + AdSense topic scoring |
 | Node 2 — Generate | `GET /api/workflow/generate/0` | Groq 70B article generation |
-| Node 3 — Policy | `GET /api/workflow/policy/0` | AdSense compliance audit + AdSense richness check (minimum statistics/citations) |
+| Node 3 — Policy | `GET /api/workflow/policy/0` | AdSense compliance audit |
 | Node 4 — Score | `GET /api/workflow/score/0` | Heuristic quality scoring |
 | Node 5 — Persist | `GET /api/workflow/persist/0` | Redis commit, cleanup |
 

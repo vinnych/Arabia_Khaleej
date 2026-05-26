@@ -86,10 +86,20 @@ export default async function CountryPrayerPage({
   const t = await getT();
   const meta = COUNTRY_META[countrySlug] ?? { nameAr: country.name, capitalAr: country.capital, code: "QA" };
 
+  /** Mapping of country slugs to i18n translation keys for breadcrumb display */
+  const countryKeyMap: Record<string, string> = {
+    'saudi-arabia': 'saudiArabia',
+    'united-arab-emirates': 'uae',
+    'qatar': 'qatar',
+    'kuwait': 'kuwait',
+    'oman': 'oman',
+    'bahrain': 'bahrain',
+  };
+
   const breadcrumbItems = [
     { name: t('home'), item: "/" },
     { name: t('prayerTimes'), item: "/prayer" },
-    { name: t(countrySlug === 'saudi-arabia' ? 'saudiArabia' : countrySlug === 'united-arab-emirates' ? 'uae' : countrySlug === 'qatar' ? 'qatar' : countrySlug === 'kuwait' ? 'kuwait' : countrySlug === 'oman' ? 'oman' : 'bahrain'), item: `/prayer/${country.slug}` },
+    { name: t(countryKeyMap[countrySlug] || 'bahrain'), item: `/prayer/${country.slug}` },
   ];
 
   const geo = {

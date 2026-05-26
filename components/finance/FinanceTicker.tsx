@@ -6,10 +6,11 @@ import { useLanguage } from "@/lib/i18n";
 import { getMarketData } from "@/lib/api";
 
 export default function FinanceTicker() {
-  const [rates, setRates] = useState<any>(null);
+  const [rates, setRates] = useState<Map<string, number> | null>(null);
   const [goldPrice, setGoldPrice] = useState<number>(2385.40);
   const [goldChange, setGoldChange] = useState<number>(0.12);
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState(false);
   const { t, isRTL } = useLanguage();
 
   useEffect(() => {
@@ -19,10 +20,10 @@ export default function FinanceTicker() {
       try {
         const json = await getMarketData();
         if (json.status === 'success') {
-          const rateMap = json.currencies.reduce((acc: any, curr: any) => {
-            acc[curr.code] = curr.rate;
-            return acc;
-          }, {});
+          const rateMap = new Map<string, number>();
+          json.currencies.forEach((curr: any) => {
+            rateMap.set(curr.code, curr.rate);
+          });
           setRates(rateMap);
           
           const gold = json.commodities.find((c: any) => c.id === 'gold');
@@ -33,6 +34,7 @@ export default function FinanceTicker() {
         }
       } catch (e) {
         console.error("Finance API failed", e);
+        setError(true);
       }
     }
 
@@ -49,6 +51,18 @@ export default function FinanceTicker() {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, []);
+
+  if (error) {
+    return (
+      <div className="w-full max-w-4xl mx-auto px-4 mb-8 animate-in fade-in">
+        <div className="glass rounded-full py-3 px-6 flex items-center justify-center border-red-500/15">
+          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/50">
+            {t('marketsUnavailable') || "Market Data Unavailable"}
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   if (!mounted || !rates) {
     return (
@@ -89,7 +103,7 @@ export default function FinanceTicker() {
             <div key={curr.code} className="flex flex-col min-w-fit">
               <p className={`text-[10px] uppercase font-bold tracking-[0.15em] text-foreground/50 ${isRTL ? 'text-right' : ''}`}>{curr.code} / USD</p>
               <p className={`text-sm font-bold text-foreground tabular-nums ${isRTL ? 'text-right' : ''}`}>
-                {rates[curr.code]?.toFixed(3)}
+                {rates.get(curr.code)?.toFixed(3)}
                 <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-[10px] opacity-40 font-medium uppercase`}>{curr.symbol}</span>
               </p>
             </div>
