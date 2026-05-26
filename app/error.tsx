@@ -1,4 +1,4 @@
-/* eslint-disable i18next/no-literal-string */
+
 'use client';
 
 import { useEffect } from 'react';

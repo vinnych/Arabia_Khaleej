@@ -1,4 +1,4 @@
-/* eslint-disable i18next/no-literal-string */
+
 export default function Loading() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-brand-obsidian/95 backdrop-blur-xl">
