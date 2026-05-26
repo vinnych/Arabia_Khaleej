@@ -30,71 +30,120 @@ export default function Dashboard() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [editContent, setEditContent] = useState('');
   const [activeTab, setActiveTab] = useState<'drafts' | 'published'>('drafts');
+  const [secret, setSecret] = useState<string>('');
   
   const modalRef = useRef<HTMLDialogElement>(null);
 
-  const fetchArticles = async () => {
+  // Why parameter passing: The state setter setSecret is asynchronous, so we allow passing
+  // a local 'currentSecret' to prevent first-load queries from being made with an empty string.
+  const fetchArticles = async (currentSecret: string = secret) => {
     try {
-      const res = await fetch('/api/article');
+      const res = await fetch(`/api/article?secret=${encodeURIComponent(currentSecret)}`);
+      if (!res.ok) {
+        console.error(`[dashboard] Fetch failed with status ${res.status}`);
+        return;
+      }
       const data = await res.json();
       setArticles(data.articles || []);
     } catch (err) {
-      console.error(err);
+      console.error('[dashboard] Failed to fetch articles:', err);
     }
   };
 
   useEffect(() => {
-    fetchArticles();
-    const interval = setInterval(fetchArticles, 5000);
-    return () => clearInterval(interval);
+    // Why window check: Reading URL query parameters at mount ensures that
+    // standard static compilation matches the client-side interactive requirements.
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlSecret = params.get('secret') || '';
+      setSecret(urlSecret);
+      
+      // Fetch immediately with urlSecret
+      fetchArticles(urlSecret);
+
+      const interval = setInterval(() => fetchArticles(urlSecret), 5000);
+      return () => clearInterval(interval);
+    }
   }, []);
 
   const generateArticle = async () => {
     if (!topic.trim()) return alert('Enter a topic');
     setLoading(true);
     try {
-      await fetch('/api/generate', {
+      // Why authorization headers: The generate endpoint is secured using bearer token headers,
+      // which we forward to prevent unauthorized triggers.
+      const res = await fetch('/api/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${secret}`
+        },
         body: JSON.stringify({ topic }),
       });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || `Status code ${res.status}`);
+      }
+      
       setTopic('');
-      fetchArticles();
+      fetchArticles(secret);
       setActiveTab('drafts');
-    } catch (err) {
-      alert('Failed to start generation');
+    } catch (err: any) {
+      alert('Failed to start generation: ' + (err.message || err));
     }
     setLoading(false);
   };
 
   const deleteArticle = async (t: string) => {
     if(!confirm("Are you sure you want to permanently delete this article?")) return;
-    await fetch('/api/article', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic: t }),
-    });
-    fetchArticles();
+    try {
+      const res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: t }),
+      });
+      if (!res.ok) {
+        throw new Error(`Server returned status ${res.status}`);
+      }
+      fetchArticles(secret);
+    } catch (err: any) {
+      alert('Failed to delete article: ' + (err.message || err));
+    }
   };
 
   const publishArticle = async (t: string) => {
-    await fetch('/api/article', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic: t, action: 'publish' }),
-    });
-    fetchArticles();
+    try {
+      const res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: t, action: 'publish' }),
+      });
+      if (!res.ok) {
+        throw new Error(`Server returned status ${res.status}`);
+      }
+      fetchArticles(secret);
+    } catch (err: any) {
+      alert('Failed to publish article: ' + (err.message || err));
+    }
   };
 
   const saveArticle = async () => {
     if (!selectedArticle) return;
-    await fetch('/api/article', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic: selectedArticle.topic, action: 'edit', content: editContent }),
-    });
-    fetchArticles();
-    modalRef.current?.close();
+    try {
+      const res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: selectedArticle.topic, action: 'edit', content: editContent }),
+      });
+      if (!res.ok) {
+        throw new Error(`Server returned status ${res.status}`);
+      }
+      fetchArticles(secret);
+      modalRef.current?.close();
+    } catch (err: any) {
+      alert('Failed to save article modifications: ' + (err.message || err));
+    }
   };
 
   const viewArticle = (art: Article) => {
@@ -154,7 +203,8 @@ export default function Dashboard() {
         {displayedArticles.map((art) => (
           <div key={art.topic} className={styles.card}>
             <span className={`${styles.badge} ${getBadgeClass(art.status, styles)}`}>
-              {art.status.replace('_', ' ')}
+              {/* Added optional chaining and fallback 'unknown' to prevent UI rendering crashes if status is missing */}
+              {art.status?.replace('_', ' ') || 'unknown'}
             </span>
             {art.image_url ? (
                <img src={art.image_url} alt="Hero" className={styles.cardImg} />

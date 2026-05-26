@@ -108,6 +108,16 @@ export function _patchRedisModule(helpers: NodeHelpers) {
   nodeHelpers = helpers;
 }
 
+// Why dynamic import instead of static: Next.js Edge Runtime compiles files statically and will crash if a file
+// directly or indirectly imports Node.js-only packages like 'ioredis' (which relies on 'net' and 'tls' libraries).
+// Dynamically importing './redis-node' conditionally at runtime ensures 'ioredis' is only loaded in traditional Node.js
+// environments where those builtins are supported, preserving seamless Edge compilation.
+if (BACKEND === 'standalone' && typeof window === 'undefined') {
+  import('./redis-node').catch((err) => {
+    console.error('[redis] Standalone Redis provider initialization failed:', err);
+  });
+}
+
 function getStandaloneRedis(): RedisLike | undefined {
   return nodeHelpers?.redis;
 }

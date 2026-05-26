@@ -3,7 +3,13 @@
  * ioredis factory for Node.js-only targets. NEVER import from Edge runtime.
  */
 
+// Why explicit import instead of global: Evaluating _patchRedisModule directly on the global namespace
+// throws a ReferenceError under modern bundler/ESM environments. Importing it from its parent module
+// guarantees proper symbol resolution.
+import { _patchRedisModule } from "./redis";
+
 interface StandaloneNode {
+  redis: any; // Raw ioredis client instance. Required by resolveRedis() in lib/redis.ts.
   getStandaloneRedis(): any;
   getWithCompression<T>(key: string): Promise<T | null>;
   setWithCompression(key: string, value: any, options?: { ex?: number }): Promise<string>;
@@ -189,6 +195,7 @@ _redisDirect = conn;
 _rawRedis = conn;
 
 const _fns: StandaloneNode = {
+  redis: conn, // Expose connection instance so redis proxy proxy-routes properly in lib/redis.ts.
   getStandaloneRedis: getStandaloneRedisNode,
   getWithCompression,
   setWithCompression,
@@ -201,7 +208,7 @@ const _fns: StandaloneNode = {
   bumpTtl,
 };
 
-// @ts-expect-error — _patchRedisModule is injected by lib/redis.ts at startup
-_patchRedisModule?.(_fns);
+// Execute named self-patching to inject these Node.js helpers into the core edge-safe Redis module.
+_patchRedisModule(_fns);
 
 export default _fns;

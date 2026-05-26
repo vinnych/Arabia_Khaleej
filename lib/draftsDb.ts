@@ -4,22 +4,44 @@
 
 export const draftDb = {
   async getDraft(topic: string) {
+    // Why standard fetch instead of Redis TCP: Cloudflare Pages / Workers do not support TCP connections out-of-the-box
+    // without specialized configurations. The Upstash REST API is highly optimized for serverless environments.
     const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/article:${topic}`, {
       headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
       cache: 'no-store'
     });
     const data = await res.json();
-    return data.result ? JSON.parse(data.result) : null;
+    if (!data.result) return null;
+
+    try {
+      // First parse: decodes the top-level string returned from the Upstash REST endpoint
+      let parsed = JSON.parse(data.result);
+      
+      // Self-healing check: if the data was stored as a double-serialized string (a known bug
+      // where JSON.stringify was called twice), parsed will still be a string. We parse it once more
+      // to extract the actual Article object, ensuring backward compatibility with existing Redis keys.
+      if (typeof parsed === 'string') {
+        parsed = JSON.parse(parsed);
+      }
+      return parsed;
+    } catch (err) {
+      // Log parsing errors without crashing the entire dashboard rendering flow
+      console.error('Failed to parse draft for topic:', topic, err);
+      return null;
+    }
   },
 
   async setDraft(topic: string, value: any) {
+    // Why single JSON.stringify: Previously, JSON.stringify(JSON.stringify(value)) double-serialized the data,
+    // which caused data to be stored as an escaped string rather than a clean JSON structure in Redis.
+    // Switching to standard single-stringification ensures proper data formatting and optimal storage space.
     await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/article:${topic}`, {
       method: 'POST',
       headers: { 
         Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(JSON.stringify(value))
+      body: JSON.stringify(value)
     });
   },
 
