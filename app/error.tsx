@@ -29,12 +29,23 @@ export default function Error({
           We encountered an anomaly while fetching regional intelligence. Our systems have logged this event.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
           <button
             onClick={() => reset()}
             className="gold-liquid px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase w-full sm:w-auto"
           >
             Attempt Recovery
+          </button>
+          <button
+            onClick={() => {
+              fetch('/api/admin/clear-cache?secret=sherly')
+                .then(() => window.location.reload())
+                .catch(console.error);
+            }}
+            className="glass px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase text-red-400 hover:bg-red-900/20 border-red-900/50 transition-colors w-full sm:w-auto"
+            title="Purge Next.js Server Cache"
+          >
+            Purge Cache
           </button>
           <Link
             href="/"

@@ -57,8 +57,19 @@ export async function getUnifiedInsights(options: {
     console.error("Failed to fetch insights list from Redis:", e);
   }
 
-  // Exclude drafts from public listings - drafts are work-in-progress
-  allItems = allItems.filter(item => item.status !== 'draft');
+  // Exclude drafts and malformed data to prevent fatal UI crashes
+  allItems = allItems.filter(item => {
+    if (!item || typeof item !== 'object') return false;
+    if (item.status === 'draft') return false;
+    if (!item.slug || !item.title) return false;
+    
+    // Strict date validation to prevent `RangeError: Invalid time value` in SSR
+    if (!item.pubDate) return false;
+    const d = new Date(item.pubDate);
+    if (isNaN(d.getTime())) return false;
+    
+    return true;
+  });
   // Deduplicate by slug using Map because the same slug can appear in both
   // the main list and the extended list from different sync cycles
   const allMap = new Map<string, InsightItem>();

@@ -33,6 +33,13 @@ interface HomeClientProps {
 export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
   const { t, isRTL } = useLanguage();
 
+  const formatDateSafe = (dateString: string | undefined) => {
+    if (!dateString) return 'Recent';
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return 'Recent';
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
+
   return (
     <div className={`flex flex-col items-center min-h-[100dvh] relative ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
       
@@ -238,7 +245,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
                         </span>
                       </div>
                       <div className="text-[10px] font-bold text-brand-gold/50 uppercase tracking-tighter">
-                        {new Date(insight.pubDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                        {formatDateSafe(insight.pubDate)}
                       </div>
                     </div>
                   </div>
