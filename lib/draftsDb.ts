@@ -59,12 +59,20 @@ export const draftDb = {
     const data = await res.json();
     const keys = data.result || [];
     
-    const drafts = [];
-    for (const key of keys) {
-      const topic = key.replace('article:', '');
-      const draft = await this.getDraft(topic);
-      if (draft) drafts.push(draft);
-    }
-    return drafts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    // Concurrently fetch all drafts from Redis in parallel using Promise.all
+    // Why Promise.all is used instead of a sequential for-of loop:
+    // - A sequential loop does O(N) sequential HTTP calls, causing high network latency.
+    // - Promise.all runs all fetch requests in parallel, reducing the retrieval time to a single concurrent roundtrip.
+    const drafts = await Promise.all(
+      keys.map(async (key: string) => {
+        const topic = key.replace('article:', '');
+        return await this.getDraft(topic);
+      })
+    );
+    
+    // Filter out empty results and sort by timestamp descending
+    return drafts
+      .filter(Boolean)
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   }
 };
