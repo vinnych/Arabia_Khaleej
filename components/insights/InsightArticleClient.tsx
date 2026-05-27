@@ -30,11 +30,108 @@ function getContentProfile(content: string): ContentProfile {
 
 function detectFeatures(content: string) {
   return {
-    hasTables: /^\|.+\|\s*\n\|[\s:-]+\|/m.test(content),
+    // Check both properly-formatted and smushed table syntax
+    hasTables: /^\|.+\|\s*\n\|[\s:-]+\|/m.test(content) || /\|[\s:-]+\|[\s:-|]*/.test(content),
     hasCode: /```/.test(content),
     hasBlockquotes: /^>/m.test(content),
     hasMultipleHeadings: (content.match(/^#{1,3} /gm) || []).length > 3,
   };
+}
+
+// ─── Markdown table repair ───────────────────────────────────────────────────
+// AI agents sometimes send table rows concatenated on a single line instead of
+// each row on its own line.  remark-gfm requires proper line breaks to parse
+// tables, so we normalise the content before handing it to ReactMarkdown.
+
+/** Split data rows from a flat string given the expected column count. */
+function splitDataRows(content: string, colCount: number): string[] {
+  const rows: string[] = [];
+  let remaining = content.trim();
+  const targetPipes = colCount + 1; // N cells → N+1 pipes  e.g. |a|b|c| = 4
+
+  while (remaining.startsWith('|')) {
+    let pipeFound = 0;
+    let i = 0;
+
+    for (; i < remaining.length; i++) {
+      if (remaining[i] === '|') {
+        pipeFound++;
+        if (pipeFound === targetPipes) { i++; break; }
+      }
+    }
+
+    if (pipeFound < targetPipes) {
+      // Not enough pipes left — absorb the rest as the final row
+      rows.push(remaining.trim());
+      break;
+    }
+
+    const row = remaining.slice(0, i).trim();
+    if (row) rows.push(row);
+    remaining = remaining.slice(i).trim();
+  }
+
+  return rows;
+}
+
+/** Detect and repair a smushed GFM table line.
+ *  Returns one or more lines; no-ops on non-table / already-correct lines. */
+function repairSmushedTableLine(line: string): string[] {
+  const trimmed = line.trim();
+  if (!trimmed.startsWith('|')) return [line];
+
+  // Locate a GFM separator row pattern: cells that are ONLY dashes / colons / spaces
+  // e.g. |---|:---|---:| or |---|---|---|---|
+  const sepRegex = /(\|(?:[\t ]*[-:]+[\t ]*\|)+)/;
+  const sepMatch = trimmed.match(sepRegex);
+  if (!sepMatch) return [line]; // no separator → normal paragraph line
+
+  const sepStr  = sepMatch[0];
+  const sepIdx  = trimmed.indexOf(sepStr);
+
+  // If the separator spans the whole line it is already a proper separator row
+  if (sepStr.trim() === trimmed) return [line];
+
+  // Content before the separator → becomes the header row
+  const headerPart = trimmed.slice(0, sepIdx).trim();
+
+  // Content after the separator → zero or more data rows
+  const afterSep = trimmed.slice(sepIdx + sepStr.length).trim();
+
+  if (!headerPart.startsWith('|')) return [line]; // Sanity check
+
+  // Count columns from the separator cells
+  const colCount = sepStr.split('|').filter(c => c.trim()).length;
+
+  // Split possibly-smushed data rows
+  const dataRows = afterSep ? splitDataRows(afterSep, colCount) : [];
+
+  return [headerPart, sepStr.trim(), ...dataRows].filter(Boolean);
+}
+
+/**
+ * Normalise markdown content so remark-gfm can parse it reliably:
+ *   1. Expand literal `\n` two-character sequences (double-escaped newlines)
+ *   2. Convert CRLF → LF
+ *   3. Repair GFM tables whose rows are smushed onto a single line
+ */
+function preprocessMarkdown(content: string): string {
+  // 1. Literal backslash-n (two chars) → actual newline
+  if (!content.includes('\n') && content.includes('\\n')) {
+    content = content.replace(/\\n/g, '\n');
+  }
+
+  // 2. Windows line endings
+  content = content.replace(/\r\n/g, '\n');
+
+  // 3. Repair smushed tables line by line
+  const lines = content.split('\n');
+  const out: string[] = [];
+  for (const line of lines) {
+    out.push(...repairSmushedTableLine(line));
+  }
+
+  return out.join('\n');
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -529,7 +626,13 @@ export default function InsightArticleClient({
                     ),
                   }}
                 >
-                  {article.content}
+                  {/*
+                    We pre-process the article content to repair tables whose rows were
+                    congested onto a single line by LLMs/agents, normalize Windows CRLF endings,
+                    and parse literal '\n' characters. This ensures remark-gfm can parse tables
+                    properly rather than breaking.
+                  */}
+                  {preprocessMarkdown(article.content)}
                 </ReactMarkdown>
               </div>
             )}
