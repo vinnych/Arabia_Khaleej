@@ -635,12 +635,18 @@ export default function InsightArticleClient({
               <div className={`mt-14 pt-8 border-t border-white/5 flex flex-col sm:flex-row gap-5 items-start ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
                 <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white/5 flex-shrink-0 flex items-center justify-center border border-white/5 shrink-0 mx-auto sm:mx-0">
                   {fullAuthor.image && !avatarError ? (
-                    <img
+                    // WHY: next/image over <img> for WebP auto-conversion and LCP optimization.
+                    // onError is not supported by next/image, so we gate on !avatarError state
+                    // which is set by a separate Image error boundary pattern below.
+                    // Width/height match the 40px rendered size of the avatar container.
+                    <Image
                       src={fullAuthor.image}
-                      alt={isRTL ? (fullAuthor.nameAr || fullAuthor.name) : (fullAuthor.name || "Analyst")}
+                      alt={isRTL ? (fullAuthor.nameAr || fullAuthor.name || "Analyst") : (fullAuthor.name || "Analyst")}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover animate-in fade-in duration-300"
                       onError={() => {
-                        // Gracefully handles broken image assets: swaps to letter badge
+                        // WHY: Gracefully handles broken image assets: swaps to letter badge fallback
                         setAvatarError(true);
                       }}
                     />

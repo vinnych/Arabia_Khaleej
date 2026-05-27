@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useLanguage } from "@/lib/i18n";
 import { EDITORIAL_AUTHORS } from "@/lib/authors";
 
@@ -93,10 +94,13 @@ export default function AboutPage() {
               >
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex-shrink-0 flex items-center justify-center border border-brand-gold/10">
                   {author.image ? (
-                    // WHY: Renders premium generated author headshots directly to boost credibility and E-E-A-T aesthetics
-                    <img 
+                    // WHY: Using next/image instead of <img> for automatic WebP/AVIF conversion,
+                    // lazy loading, and LCP optimization. Width/height match the 48px CSS container size.
+                    <Image 
                       src={author.image} 
-                      alt={name} 
+                      alt={name ?? "Author"} 
+                      width={48}
+                      height={48}
                       className="w-full h-full object-cover"
                     />
                   ) : (
