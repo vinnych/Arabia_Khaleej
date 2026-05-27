@@ -171,7 +171,14 @@ export async function PUT(req: Request) {
           category: "gcc",
           language: "en",
           image: draft.image_url || "/images/insights/default.png",
-          tags: ["gcc", "intelligence"],
+          // WHY: Prefer agent-supplied tags saved in the draft over the old hardcoded
+          // fallback. This allows AI-generated articles to carry meaningful semantic tags
+          // (e.g. ["uae", "oil", "economy"]) that the Python agent derived from content.
+          // The fallback ["gcc", "intelligence"] is kept so manually-published drafts
+          // (which never have tags in the draft) still display something sensible.
+          tags: (Array.isArray(draft.tags) && draft.tags.length > 0)
+            ? draft.tags
+            : ["gcc", "intelligence"],
           content: {
             en: draft.content || "",
             ar: contentAr,

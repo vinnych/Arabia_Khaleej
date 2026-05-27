@@ -310,22 +310,6 @@ export default function InsightArticleClient({
             <span className="capitalize">{article.title}</span>
           </h1>
 
-          {/* Tags */}
-          {hasTags && (
-            <div className="flex flex-wrap items-center gap-2">
-              <Tag size={13} className="text-foreground/30" />
-              {article.tags!.map((tag) => (
-                /* WHY: Added scale transform, subtle gold glow shadow, and text color lift to reward user engagement with responsive tactile feedback. */
-                <span
-                  key={tag}
-                  className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-foreground/50 hover:border-brand-gold/40 hover:text-brand-gold hover:scale-[1.04] hover:shadow-[0_4px_12px_rgba(212,175,55,0.1)] transition-all duration-300 cursor-pointer"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          )}
-
           {/* Author bar */}
           <div className="flex items-center justify-between py-5 border-y border-white/5">
             <div className="flex items-center gap-4">
@@ -688,6 +672,27 @@ export default function InsightArticleClient({
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Tags — placed at the end of the article, following editorial best-practice.
+                WHY: Moving tags below the article body (not the header) keeps the hero area
+                clean and focused. Readers discover topic tags only after consuming the content,
+                reducing cognitive load at article start. This mirrors how leading publishers
+                (Medium, The Atlantic, NYT) structure their articles. */}
+            {hasTags && (
+              <div className="mt-10 pt-8 border-t border-white/5 flex flex-wrap items-center gap-2">
+                <Tag size={13} className="text-foreground/30" />
+                {article.tags!.map((tag) => (
+                  /* WHY: Scale transform + gold glow on hover rewards user engagement with
+                     responsive tactile feedback without cluttering the reading experience. */
+                  <span
+                    key={tag}
+                    className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-foreground/50 hover:border-brand-gold/40 hover:text-brand-gold hover:scale-[1.04] hover:shadow-[0_4px_12px_rgba(212,175,55,0.1)] transition-all duration-300 cursor-pointer"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
             )}
         </div>

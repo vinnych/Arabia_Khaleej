@@ -38,6 +38,13 @@ export async function POST(req: Request) {
       content: payload.article || '',
       word_count: payload.word_count?.toString() || '0',
       image_url: payload.image_url || '',
+      // WHY: Extract agent-supplied tags here so they survive into the draft and
+      // eventually into the published article. Previously this field was never
+      // mapped, so all AI-generated tags were silently dropped at this boundary.
+      // We validate it is an array of strings; malformed values are discarded safely.
+      tags: Array.isArray(payload.tags)
+        ? payload.tags.filter((t: unknown) => typeof t === 'string')
+        : undefined,
       timestamp: Date.now()
     };
 
