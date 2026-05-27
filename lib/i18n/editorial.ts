@@ -53,17 +53,9 @@ export const editorial: Translations = {
   /** Share action label on article pages */
   shareArticle: { en: "Share Article", ar: "مشاركة المقال" },
 
-  /** Button label to close the perspective overlay */
-  closePerspective: { en: "Close Perspective", ar: "إغلاق المنظور" },
+  // Note: Perspective Mode (AR) translation keys have been removed to clean up
+  // unused translation tags after the feature was retired for a cleaner UX.
 
-  /** Toggle label to switch article language to Arabic */
-  perspectiveModeAR: { en: "Perspective Mode (AR)", ar: "عرض المنظور العربي" },
-
-  /** Toggle label to switch article language to English */
-  perspectiveModeEN: { en: "Perspective Mode (EN)", ar: "عرض المنظور الإنجليزي" },
-
-  /** Shown when an article has no translation in the alternate language */
-  translationUnavailable: { en: "No translation available for this article.", ar: "لا توجد ترجمة متاحة لهذا المقال." },
 
   /** Pagination / load-more label */
   moreInsights: { en: "More Insights", ar: "المزيد من الرؤى" },

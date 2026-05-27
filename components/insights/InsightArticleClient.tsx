@@ -3,7 +3,9 @@
 import { useEffect, useState, useMemo } from "react";
 import { InsightItem } from "@/lib/insights";
 import { useLanguage } from "@/lib/i18n";
-import { Calendar, ChevronLeft, Share2, Clock, Languages, RefreshCw, Tag, BookOpen, BarChart2, Quote } from "lucide-react";
+// Elegant icons chosen for maximum visual polish and semantic clarity.
+// Languages, RefreshCw, BookOpen, BarChart2 were removed along with the Perspective (AR) translation mode.
+import { Calendar, ChevronLeft, Share2, Clock, Tag, Quote } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { getDeterministicFallback } from "@/lib/fallbacks";
@@ -147,9 +149,8 @@ export default function InsightArticleClient({
   const router = useRouter();
   const [imgError, setImgError] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [perspectiveMode, setPerspectiveMode] = useState(false);
-  const [translation, setTranslation] = useState<InsightItem | null>(null);
-  const [loadingTranslation, setLoadingTranslation] = useState(false);
+  // We removed translation and loading states since the side-by-side Perspective (AR)
+  // translation block has been retired for a faster page load and clean UX.
   const [copied, setCopied] = useState(false);
   const article = initialArticle;
 
@@ -171,26 +172,6 @@ export default function InsightArticleClient({
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // ── Perspective toggle ────────────────────────────────────────────────────
-  const togglePerspective = async () => {
-    if (!perspectiveMode && !translation) {
-      setLoadingTranslation(true);
-      const targetLang = language === 'en' ? 'ar' : 'en';
-      try {
-        const res = await fetch(`/api/insights?slug=${article.slug}&lang=${targetLang}`);
-        const data = await res.json();
-        if (data.status === 'success' && data.insights?.[0]) {
-          setTranslation(data.insights[0]);
-        }
-      } catch (e) {
-        console.error("Translation fetch failed");
-      } finally {
-        setLoadingTranslation(false);
-      }
-    }
-    setPerspectiveMode(!perspectiveMode);
-  };
 
   // ── Share ─────────────────────────────────────────────────────────────────
   const handleShare = async () => {
@@ -256,61 +237,48 @@ export default function InsightArticleClient({
         className={isRTL ? "[&_svg]:rotate-180" : ""}
       />
 
-      {/* ── Perspective Mode Toggle ───────────────────────────────────────── */}
-      <div className="flex justify-end mb-8">
-        <button
-          onClick={togglePerspective}
-          disabled={loadingTranslation}
-          className={`flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all ${
-            perspectiveMode
-              ? 'bg-brand-gold text-brand-obsidian border-brand-gold'
-              : 'glass border-brand-gold/10 text-foreground/60 hover:text-accent'
-          }`}
-        >
-          {loadingTranslation ? <RefreshCw size={16} className="animate-spin" /> : <Languages size={16} />}
-          <span className="text-[10px] font-black uppercase tracking-widest">
-            {perspectiveMode ? t('closePerspective') : (isRTL ? t('perspectiveModeEN') : t('perspectiveModeAR'))}
-          </span>
-        </button>
-      </div>
+      {/* 
+        Perspective Mode (AR) Toggle was removed to achieve a distraction-free, 
+        minimal, and highly readable single-column editorial reading layout.
+      */}
 
-      <article className={`space-y-10 transition-all duration-700 ${perspectiveMode ? 'max-w-none' : ''}`}>
+      <article className="space-y-10 transition-all duration-500">
 
         {/* ── Article Header ────────────────────────────────────────────── */}
         <header className="space-y-7">
 
-          {/* Source + Date + Badges row */}
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border bg-brand-gold/10 border-brand-gold/20 text-brand-gold">
+          {/* 
+            Minimal Metadata Row:
+            Designed to offer clear reading context without distracting the reader.
+            We replaced the multiple colored badges with high-end, low-contrast typography
+            separated by elegant mid-dots.
+          */}
+          <div className="flex flex-wrap items-center gap-3 text-foreground/45 text-[11px] font-bold uppercase tracking-widest">
+            <span className="px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-brand-gold/10 text-brand-gold border border-brand-gold/15">
               {article.source}
             </span>
-            <div className="flex items-center gap-2 text-foreground/40 text-[10px] font-bold uppercase tracking-widest">
-              <Calendar size={13} />
+            <span className="opacity-40">•</span>
+            <div className="flex items-center gap-1.5">
+              <Calendar size={13} className="opacity-70" />
               <span>{formatDate(article.pubDate)}</span>
             </div>
             {readTime && (
-              <div className="flex items-center gap-2 text-foreground/40 text-[10px] font-bold uppercase tracking-widest">
-                <Clock size={13} />
-                <span>{readTime} min read</span>
-              </div>
-            )}
-            {contentProfile === 'deep-dive' && (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
-                <BookOpen size={11} className="text-blue-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">In-Depth</span>
-              </div>
-            )}
-            {features.hasTables && (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full">
-                <BarChart2 size={11} className="text-purple-400" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Data</span>
-              </div>
+              <>
+                <span className="opacity-40">•</span>
+                <div className="flex items-center gap-1.5">
+                  <Clock size={13} className="opacity-70" />
+                  <span>{readTime} min read</span>
+                </div>
+              </>
             )}
             {article.humanEdited && (
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">Human Reviewed</span>
-              </div>
+              <>
+                <span className="opacity-40">•</span>
+                <span className="text-emerald-500/90 font-extrabold tracking-widest flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                  Reviewed
+                </span>
+              </>
             )}
           </div>
 
@@ -413,8 +381,12 @@ export default function InsightArticleClient({
         )}
 
         {/* ── Article Body ──────────────────────────────────────────────── */}
-        <div className={`grid grid-cols-1 ${perspectiveMode ? 'lg:grid-cols-2' : ''} gap-12`}>
-          <div className="space-y-0">
+        {/*
+          Clean, single-column reader experience.
+          We removed the side-by-side translation grid to maximize readability,
+          allowing the premium typography to shine.
+        */}
+        <div className="space-y-0 max-w-3xl mx-auto">
 
             {/* Lead / Description ── styled as pull intro */}
             <div className={`relative ${contentProfile === 'brief' ? 'mb-10' : 'mb-12'}`}>
@@ -636,30 +608,6 @@ export default function InsightArticleClient({
                 </ReactMarkdown>
               </div>
             )}
-          </div>
-
-          {/* Perspective mode: side-by-side translation */}
-          {perspectiveMode && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
-              <div
-                className={`p-8 rounded-[2rem] glass border border-brand-gold/20 sticky top-20 ${
-                  !isRTL ? 'font-serif-ar text-right' : ''
-                }`}
-              >
-                <h3 className="text-sm font-black uppercase tracking-widest text-accent mb-6 border-b border-brand-gold/10 pb-4">
-                  {isRTL ? 'English Translation' : 'الترجمة العربية'}
-                </h3>
-                {translation ? (
-                  <div className="space-y-6">
-                    <h2 className="text-2xl font-bold leading-tight">{translation.title}</h2>
-                    <p className="text-lg leading-relaxed opacity-80">{translation.description}</p>
-                  </div>
-                ) : (
-                  <p className="text-sm italic opacity-40">{t('translationUnavailable')}</p>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </article>
 
