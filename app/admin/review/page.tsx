@@ -258,7 +258,11 @@ export default function Dashboard() {
             {(art.image_url || art.image) ? (
                <img src={art.image_url || art.image} alt="Hero" className={styles.cardImg} />
             ) : (
-               <div className={`${styles.cardImg} ${styles.placeholder}`}>No Image</div>
+               /* WHY: Created a custom high-fidelity placeholder representation for drafts that do not yet possess standard assets, using an icon and brand-aligned styling. */
+               <div className={`${styles.cardImg} ${styles.placeholder} flex flex-col gap-2`}>
+                 <span className="text-[28px] opacity-40">✍️</span>
+                 <span className="text-[9px] font-black uppercase tracking-[0.25em] opacity-40">Editorial Insight Draft</span>
+               </div>
             )}
             <div className={styles.cardContent}>
               {/* title is present for insights-store articles; fall back to topic for draft-queue articles */}
@@ -298,9 +302,13 @@ export default function Dashboard() {
             />
 
             {selectedArticle.slug && selectedArticle.lang && (
-              <p style={{color: '#f59e0b', fontSize: '0.85rem', margin: '0.5rem 0'}}>
-                This is a live published article. Editing is read-only — delete and re-publish to update content.
-              </p>
+              /* WHY: Transformed the small loose warning text into a high-visibility, premium alert callout card, preventing accidental modifications and ensuring editorial safety. */
+              <div className="my-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/25 flex gap-3 items-center">
+                <span className="text-amber-500 text-lg select-none">⚠️</span>
+                <p className="text-xs text-amber-500/90 font-medium leading-relaxed m-0 text-left">
+                  <strong>Live Editorial Insight:</strong> This analysis is currently live on the public feed. Content is locked as Read-Only. To apply alterations, delete this record and publish a revised version.
+                </p>
+              </div>
             )}
             
             <div style={{display: 'flex', justifyContent: 'flex-end'}}>

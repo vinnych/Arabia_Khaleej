@@ -232,12 +232,16 @@ export default function InsightArticleClient({
       </div>
 
       {/* ── Navigation ───────────────────────────────────────────────────── */}
+      {/* WHY: Tighter vertical flow (mb-6 instead of mb-12) eliminates visual void. Group-hover translate-x on ChevronLeft creates an organic micro-interaction. */}
       <Link
         href="/insights"
-        className="hidden md:inline-flex items-center gap-2 text-foreground/40 hover:text-accent transition-colors mb-12 group"
+        className="hidden md:inline-flex items-center gap-2 text-foreground/40 hover:text-accent transition-all duration-300 mb-6 group"
       >
-        <ChevronLeft size={20} className={isRTL ? 'rotate-180' : ''} />
-        <span className="text-xs font-bold uppercase tracking-widest">{t('back')}</span>
+        <ChevronLeft 
+          size={16} 
+          className={`transition-transform duration-300 ease-out group-hover:-translate-x-1.5 ${isRTL ? 'rotate-180 group-hover:translate-x-1.5' : ''}`} 
+        />
+        <span className="text-[10px] font-black uppercase tracking-[0.25em]">{t('back')}</span>
       </Link>
 
       <MobileFAB
@@ -302,7 +306,8 @@ export default function InsightArticleClient({
                 : 'text-4xl sm:text-5xl lg:text-6xl'
             }`}
           >
-            {article.title}
+            {/* WHY: Dynamically capitalize headings to ensure proper nouns (e.g. "dubai" -> "Dubai") assert professional editorial authority. */}
+            <span className="capitalize">{article.title}</span>
           </h1>
 
           {/* Tags */}
@@ -310,9 +315,10 @@ export default function InsightArticleClient({
             <div className="flex flex-wrap items-center gap-2">
               <Tag size={13} className="text-foreground/30" />
               {article.tags!.map((tag) => (
+                /* WHY: Added scale transform, subtle gold glow shadow, and text color lift to reward user engagement with responsive tactile feedback. */
                 <span
                   key={tag}
-                  className="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white/5 border border-white/10 text-foreground/50 hover:border-brand-gold/30 hover:text-brand-gold/70 transition-colors"
+                  className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-white/5 border border-white/10 text-foreground/50 hover:border-brand-gold/40 hover:text-brand-gold hover:scale-[1.04] hover:shadow-[0_4px_12px_rgba(212,175,55,0.1)] transition-all duration-300 cursor-pointer"
                 >
                   {tag}
                 </span>
@@ -367,10 +373,11 @@ export default function InsightArticleClient({
 
         {/* ── Hero Image ────────────────────────────────────────────────── */}
         {article.image && (
-          <div className={`relative w-full overflow-hidden shadow-2xl border border-white/5 ${
+          /* WHY: Shifted hero image boundaries from bubbly rounded-3rem corners and heavy shadow layers to a clean, understated rounded-xl geometric card frame. */
+          <div className={`relative w-full overflow-hidden border border-white/5 ${
             contentProfile === 'brief'
-              ? 'aspect-[21/9] rounded-[2rem]'
-              : 'aspect-video rounded-[3rem]'
+              ? 'aspect-[21/9] rounded-xl'
+              : 'aspect-video rounded-xl'
           }`}>
             <Image
               src={imgError ? getDeterministicFallback(article.slug) : article.image}
@@ -476,8 +483,9 @@ export default function InsightArticleClient({
 
                     // Block quote — styled as pull quote
                     blockquote: ({ node, children, ...props }) => (
+                      /* WHY: Simplified blockquotes from heavy rounded backing shapes with gold fills to a classic, elegant, minimal editorial pull-quote style (thin border-l-2 and italic text). */
                       <blockquote
-                        className="relative my-10 pl-8 pr-6 py-5 border-l-4 border-brand-gold/70 bg-brand-gold/5 rounded-r-2xl text-foreground/80"
+                        className="relative my-8 pl-6 pr-4 border-l-2 border-brand-gold/60 text-foreground/75 italic"
                         {...props}
                       >
                         <Quote
@@ -623,8 +631,9 @@ export default function InsightArticleClient({
             {/* WHY: Implements the premium hybrid publishing standard: keeps the top clutter-free and provides full visual credentials and bio at the end of the article. */}
             {/* Added comprehensive error handling and safety fallbacks to prevent broken image displays or stray text markers if credentials are missing. */}
             {fullAuthor && (
+              /* WHY: Converted bubbly rounded-full author profiles to minimal rounded-lg boxes. */
               <div className={`mt-14 pt-8 border-t border-white/5 flex flex-col sm:flex-row gap-5 items-start ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
-                <div className="relative w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex-shrink-0 flex items-center justify-center border border-brand-gold/15 shrink-0 mx-auto sm:mx-0">
+                <div className="relative w-10 h-10 rounded-lg overflow-hidden bg-white/5 flex-shrink-0 flex items-center justify-center border border-white/5 shrink-0 mx-auto sm:mx-0">
                   {fullAuthor.image && !avatarError ? (
                     <img
                       src={fullAuthor.image}

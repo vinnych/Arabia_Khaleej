@@ -44,10 +44,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
     <div className={`flex flex-col items-center min-h-[100dvh] relative ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
       
       {/* ── BACKGROUND ORCHESTRATION ── */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-gold/5 blur-[120px] rounded-full animate-float"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/5 blur-[120px] rounded-full animate-float" style={{ animationDelay: '-3s' }}></div>
-      </div>
+      {/* WHY: Completely stripped the absolute floating gradient blurs to maintain a solid, clean, dark-obsidian background. */}
 
       {/* ── HERO ── */}
       <section className="relative w-full pt-32 pb-24 px-4 flex flex-col items-center text-center overflow-hidden z-10">
@@ -57,12 +54,13 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         {/* Logo */}
         <div className="animate-fade-up" style={{ animationDelay: "0ms" }}>
           <div className="relative w-44 sm:w-72 h-16 sm:h-24 mx-auto mb-10 group cursor-pointer">
+            {/* WHY: Removed glowing visual drop-shadows under the brand logo to respect minimalist typographic cleanliness. */}
             <Image
               src="/logo-premium-gold.png"
               alt={`${t('siteName')} Logo`}
               fill
               sizes="(max-width: 768px) 176px, 288px"
-              className="object-contain filter drop-shadow-[0_0_15px_rgba(212,175,55,0.2)] group-hover:drop-shadow-[0_0_25px_rgba(212,175,55,0.4)] transition-all duration-500"
+              className="object-contain transition-opacity duration-300 group-hover:opacity-85"
               priority
               fetchPriority="high"
             />
@@ -86,26 +84,28 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         </div>
 
         {/* CTA Buttons */}
-        <div className="animate-fade-up flex flex-col sm:flex-row gap-6 mb-16" style={{ animationDelay: "200ms" }}>
+        {/* WHY: Replaced rounded bubbly capsule styles and moving glowing gradients with clean, classic rounded-lg geometry and solid brand borders. */}
+        <div className="animate-fade-up flex flex-col sm:flex-row gap-4 mb-16" style={{ animationDelay: "200ms" }}>
           <Link
             href="/insights"
-            className="gold-liquid px-10 py-4 rounded-full font-bold text-sm flex items-center gap-3 shadow-[0_10px_30px_rgba(212,175,55,0.2)] active:scale-95"
+            className="bg-brand-gold hover:bg-brand-gold/90 text-brand-obsidian px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2.5 transition-all duration-200 active:scale-[0.98]"
           >
-            <Newspaper size={18} />
+            <Newspaper size={16} />
             {t('pressTerminal')}
-            <ArrowRight size={16} />
+            <ArrowRight size={14} />
           </Link>
           <Link
             href="/prayer"
-            className="glass px-10 py-4 rounded-full font-bold text-sm text-foreground flex items-center gap-3 active:scale-95"
+            className="glass px-8 py-3 rounded-lg font-bold text-sm text-foreground flex items-center gap-2.5 hover:border-white/15 transition-all duration-200 active:scale-[0.98]"
           >
-            <Clock size={18} className="text-brand-gold" />
+            <Clock size={16} className="text-brand-gold" />
             {t('prayerTimes')}
           </Link>
         </div>
 
         {/* Prayer Strip Refinement */}
-        <div className="animate-fade-up w-full max-w-3xl glass p-1 rounded-[2rem]" style={{ animationDelay: "300ms" }}>
+        {/* WHY: Shifted rounding standard from large round 2rem to minimal rounded-xl to keep layout structures crisp. */}
+        <div className="animate-fade-up w-full max-w-3xl glass p-1 rounded-xl" style={{ animationDelay: "300ms" }}>
           <PrayerLite />
         </div>
       </section>
@@ -120,29 +120,30 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
 
         {/* ── QUICK NAV CARDS ── */}
         <section className="animate-fade-up" style={{ animationDelay: "120ms" }}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* WHY: Redesigned the cards grid with minimal geometries, removing heavy translation lifts, bubbles, and visual shadows. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {NAV_LINKS.map((link) => {
               const Icon = link.icon;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="group mesh-surface rounded-[2rem] p-8 flex flex-col gap-6 hover:border-brand-gold/30 transition-all duration-500 hover:-translate-y-2 shadow-xl"
+                  className="group mesh-surface rounded-xl p-6 flex flex-col gap-4 hover:border-brand-gold/20 transition-all duration-300 border border-white/5"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-brand-gold/10 flex items-center justify-center group-hover:bg-brand-gold/20 transition-colors">
-                    <Icon size={24} className="text-brand-gold" />
+                  <div className="w-10 h-10 rounded bg-brand-gold/10 flex items-center justify-center group-hover:bg-brand-gold/15 transition-colors">
+                    <Icon size={18} className="text-brand-gold" />
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <span className="text-xl font-display font-bold text-foreground group-hover:text-brand-gold transition-colors">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-lg font-display font-bold text-foreground group-hover:text-brand-gold transition-colors">
                       {t(link.key)}
                     </span>
-                    <span className="text-sm text-muted-foreground/70 leading-relaxed font-light">
+                    <span className="text-xs text-muted-foreground/75 leading-relaxed font-light">
                        {t(link.desc)}
                      </span>
                   </div>
-                  <div className="flex items-center gap-2 text-brand-gold opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
-                    <span className="text-xs font-bold uppercase tracking-widest">{t('explore')}</span>
-                    <ArrowRight size={14} />
+                  <div className="flex items-center gap-1.5 text-brand-gold opacity-60 group-hover:opacity-100 transition-opacity mt-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">{t('explore')}</span>
+                    <ArrowRight size={12} className="transition-transform group-hover:translate-x-1 duration-200" />
                   </div>
                 </Link>
               );
@@ -167,7 +168,8 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
               <Link
                 key={country.id}
                 href={`/countries/${country.id}`}
-                className="group relative h-64 rounded-[2rem] overflow-hidden shadow-2xl hover:-translate-y-2 transition-all duration-500"
+                /* WHY: Replaced bubbly rounding and heavy grid offsets with sleek rounded-xl boundaries and low-profile opacity transitions. */
+                className="group relative h-60 rounded-xl overflow-hidden border border-white/5 hover:opacity-95 transition-opacity duration-300"
               >
                 <Image
                   src={country.flag}
@@ -188,26 +190,27 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         </section>
 
         {/* ── EDITORIAL HIGHLIGHTS ── */}
+        {/* WHY: Swapped extremely round containers with crisp, modern, low-profile layouts that highlight editorial text instead of shiny frames. */}
         {initialInsights.length > 0 && (
-          <section className="mesh-surface rounded-[3rem] p-8 md:p-16 border border-white/5">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-8">
+          <section className="mesh-surface rounded-xl p-8 md:p-12 border border-white/5">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
               <div className="text-center md:text-left">
-                <p className="text-xs text-brand-gold uppercase tracking-[0.4em] font-bold mb-4">{t('regionalIntelligence')}</p>
-                <h2 className="text-4xl md:text-6xl font-display font-bold text-foreground tracking-tighter">{t('featuredInsights')}</h2>
+                <p className="text-[10px] text-brand-gold uppercase tracking-[0.3em] font-black mb-3">{t('regionalIntelligence')}</p>
+                <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground tracking-tighter">{t('featuredInsights')}</h2>
               </div>
-              <Link href="/insights" className="gold-liquid px-8 py-4 rounded-full font-bold text-xs uppercase tracking-widest shadow-lg">
+              <Link href="/insights" className="bg-brand-gold hover:bg-brand-gold/90 text-brand-obsidian px-6 py-3 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-colors duration-200">
                 {t('openTerminal')}
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {initialInsights.map((insight) => (
                 <Link
                   key={insight.slug}
                   href={`/insights/${insight.slug}`}
-                  className="group flex flex-col gap-6 glass rounded-[2.5rem] p-6 hover:bg-white/5 transition-all duration-500"
+                  className="group flex flex-col gap-5 glass rounded-xl p-5 hover:border-white/10 transition-all duration-350"
                 >
-                  <div className="relative w-full h-64 rounded-[2rem] overflow-hidden">
+                  <div className="relative w-full h-56 rounded-lg overflow-hidden border border-white/5">
                     <Image
                       src={insight.image || "/images/insights/default.png"}
                       alt={insight.title}
@@ -256,7 +259,8 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         )}
 
         {/* ── SURVEY ── */}
-        <section className="relative py-24 px-8 glass rounded-[4rem] text-center overflow-hidden">
+        {/* WHY: Tightened survey boundary from bubbly rounded-[4rem] to sleek, unified rounded-xl container. */}
+        <section className="relative py-20 px-8 glass rounded-xl text-center overflow-hidden">
            {/* Decor */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 blur-[80px] rounded-full"></div>
           

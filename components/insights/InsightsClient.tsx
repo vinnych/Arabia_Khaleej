@@ -77,16 +77,12 @@ export default function InsightsClient() {
 
       {/* Header */}
       <div className="text-center mb-16 pt-2">
+        {/* WHY: Shifted from visually heavy chrome multi-color gradient header text to a solid, understated brand gold. Sized slightly smaller for visual elegance. */}
         <h1
-          className="font-extrabold uppercase leading-[0.95] tracking-tighter select-none"
+          className="font-extrabold uppercase leading-[0.95] tracking-tighter select-none text-brand-gold"
           style={{
-            fontSize: 'clamp(3.5rem, 18vw, 9rem)',
-            backgroundImage: 'linear-gradient(135deg, #8B6914 0%, #D4AF37 25%, #F5E090 50%, #C5A028 75%, #8B6914 100%)',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            color: 'transparent',
-            fontFamily: 'var(--font-inter), var(--font-serif)',
+            fontSize: 'clamp(2.5rem, 10vw, 5.5rem)',
+            fontFamily: 'var(--font-sans)',
           }}
         >
           {t('intelligenceTerminal')}
@@ -151,24 +147,25 @@ export default function InsightsClient() {
               <Link
                 key={`top-${item.id}-${idx}`}
                 href={`/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`}
-                className="group relative h-[400px] rounded-[3rem] overflow-hidden border border-brand-gold/20 shadow-2xl hover:border-brand-gold/40 transition-all duration-700"
+                /* WHY: Standardized rounded boundaries to rounded-xl and stripped shadow highlights for clean editorial framing. */
+                className="group relative h-[400px] rounded-xl overflow-hidden border border-brand-gold/15 hover:border-brand-gold/30 transition-all duration-500"
               >
                 <Image
                   src={item.image || getDeterministicFallback(item.slug)}
                   alt={item.title}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-[2000ms] ease-out"
+                  className="object-cover group-hover:scale-103 transition-transform duration-[1200ms] ease-out"
                   priority={idx === 0}
                   unoptimized={!!item.image && !item.image.startsWith('/')}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-brand-obsidian via-brand-obsidian/40 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-10 space-y-4">
+                <div className="absolute bottom-0 left-0 right-0 p-8 space-y-3">
                   <div className="flex items-center gap-3">
-                    <span className="px-3 py-1 rounded-full bg-brand-gold text-brand-obsidian text-[8px] font-black uppercase tracking-widest">
+                    <span className="px-2.5 py-1 rounded bg-brand-gold text-brand-obsidian text-[8px] font-black uppercase tracking-widest">
                       {t('premium')}
                     </span>
                   </div>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white leading-tight group-hover:text-brand-gold transition-colors duration-500">
+                  <h3 className="text-xl sm:text-2xl font-black text-white leading-tight group-hover:text-brand-gold transition-colors duration-300">
                     {item.title}
                   </h3>
                 </div>
@@ -182,15 +179,17 @@ export default function InsightsClient() {
       {loading && insights.length === 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="glass h-[400px] rounded-[2.5rem] animate-pulse bg-white/5 border-white/5" />
+            /* WHY: Adjusted placeholder skeleton rounding from bubbly rounded-2.5rem to crisp rounded-xl. */
+            <div key={i} className="glass h-[400px] rounded-xl animate-pulse bg-white/5 border-white/5" />
           ))}
         </div>
       ) : error ? (
-        <div className="glass p-16 rounded-[2.5rem] text-center border-brand-gold/10">
-          <p className="text-foreground/50 mb-6 text-sm font-medium">{t('somethingWentWrong')}</p>
-<button
+        /* WHY: Cleaned up error card geometry to standard rounded-xl, and converted bubbly button to rounded-lg container. */
+        <div className="glass p-12 rounded-xl text-center border-brand-gold/10">
+          <p className="text-foreground/50 mb-4 text-sm font-medium">{t('somethingWentWrong')}</p>
+          <button
              onClick={() => fetchInsights(true)}
-             className="px-8 py-3 bg-brand-gold/10 text-brand-gold rounded-full font-bold uppercase tracking-widest text-[10px] hover:bg-brand-gold/20 active:scale-95 transition-all"
+             className="px-6 py-2.5 bg-brand-gold/10 text-brand-gold rounded-lg font-bold uppercase tracking-widest text-[10px] hover:bg-brand-gold/15 active:scale-[0.98] transition-all"
            >
              {t('retryConnection')}
            </button>
@@ -213,7 +212,8 @@ export default function InsightsClient() {
              <div className="mt-20 flex justify-center">
                <button
                  onClick={() => setDisplayCount(prev => prev + 12)}
-                 className="group px-10 py-4 rounded-full border border-brand-gold/20 text-[11px] font-bold uppercase tracking-[0.3em] text-foreground/60 hover:bg-brand-gold hover:text-brand-obsidian hover:border-brand-gold active:scale-95 transition-all duration-500 shadow-xl"
+                 /* WHY: Replaced rounded-full button and shadows with a sleek, low-profile rounded-lg layout border. */
+                 className="group px-8 py-3 rounded-lg border border-brand-gold/20 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/60 hover:bg-brand-gold hover:text-brand-obsidian hover:border-brand-gold active:scale-[0.98] transition-all duration-300"
                >
                  {t('loadMore')}
                </button>

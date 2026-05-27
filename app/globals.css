@@ -24,7 +24,8 @@
     --border: 224 20% 12%;
     --input: 224 20% 12%;
     --ring: 45 74% 55%;
-    --radius: 1.25rem;
+    /* WHY: Reduced from 1.25rem to 0.5rem to ensure a sleeker, tighter editorial look instead of bubbly, round containers. */
+    --radius: 0.5rem;
 
     --surface: rgba(4, 7, 14, 0.7);
     --surface-elevated: rgba(10, 15, 25, 0.8);
@@ -102,53 +103,30 @@
   /* --- 2026 Mesh Surface --- */
   .mesh-surface {
     position: relative;
-    background: hsla(224, 40%, 4%, 0.8);
-    backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--surface-border);
+    /* WHY: Cleaned up saturation overlays and noise layers to ensure a simple, premium editorial card background. */
+    background: rgba(4, 7, 14, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     overflow: hidden;
-  }
-
-  .mesh-surface::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.04;
-    pointer-events: none;
   }
 
   /* --- Glass surface — 2026 refinement --- */
   .glass {
-    background-color: var(--surface);
-    backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid var(--surface-border);
-    box-shadow: var(--shadow-sm);
+    /* WHY: Stripped visual noise, blurs, and shadows to prioritize clean text and lightweight boundaries. */
+    background-color: rgba(4, 7, 14, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     @apply transition-all duration-300;
   }
 
   .glass:hover {
-    box-shadow: var(--shadow);
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.12);
   }
 
   /* --- Gold Liquid CTA --- */
   .gold-liquid {
-    background: linear-gradient(135deg, hsl(45 74% 55%), hsl(45 74% 35%));
-    color: hsl(var(--primary-foreground));
+    /* WHY: Replaced moving gradients with solid, elegant brand gold to keep visual styling clean and low-profile. */
+    background-color: hsl(45, 74%, 55%);
+    color: #04070e;
     @apply relative overflow-hidden transition-all duration-300;
-  }
-
-  .gold-liquid::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transform: translateX(-100%);
-    transition: transform 0.6s ease;
-  }
-
-  .gold-liquid:hover::after {
-    transform: translateX(100%);
   }
 
   /* --- Animations --- */

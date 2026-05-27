@@ -42,13 +42,17 @@ export default function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300
+                /* WHY: Transitioning from heavy capsule outlines (which compete with action buttons) to a relative block with an absolute bottom gradient underline maintains a premium, minimal route marker. */
+                className={`relative px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300
                   ${isActive
-                    ? 'glass border-brand-gold/30 text-brand-gold shadow-[0_0_15px_rgba(212,175,55,0.1)]'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                    ? 'text-brand-gold'
+                    : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 {t(item.key)}
+                {isActive && (
+                  <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-gradient-to-r from-brand-gold/30 via-brand-gold to-brand-gold/30 shadow-[0_1px_8px_rgba(212,175,55,0.4)] animate-in fade-in duration-300" />
+                )}
               </Link>
             );
           })}
