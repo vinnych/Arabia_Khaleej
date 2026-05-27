@@ -17,7 +17,7 @@ export default async function TransparencyClient() {
         </h1>
         <div className={`w-16 h-[2px] bg-gradient-to-r ${isRTL ? 'from-transparent to-brand-gold mr-auto ml-0' : 'from-brand-gold to-transparent'} rounded-full mb-8`} />
         <p className="text-base sm:text-lg font-light leading-relaxed opacity-70 max-w-2xl">
-          {t('transparencyBody')}
+          {t('transparencyPageBody')}
         </p>
       </header>
 

@@ -40,7 +40,6 @@ export const common: Translations = {
 
   // ── Navigation ─────────────────────────────────────────────────────────────
   pressTerminal:      { en: "Insights", ar: "الرؤى" },
-  marketInsights:     { en: "Markets", ar: "الأسواق" },
   navMarket:          { en: "Markets", ar: "الأسواق" },
   navInsights:        { en: "Insights", ar: "الرؤى" },
   navPrayer:          { en: "Prayer", ar: "الصلاة" },

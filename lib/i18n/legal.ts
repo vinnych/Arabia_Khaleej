@@ -14,7 +14,7 @@ export const legal: Translations = {
     ar: "عربية خليج هي منصة استخبارات إقليمية مستقلة احترافية - وليست بوابة حكومية أو مكتب محاماة أو خدمة استشارية." 
   },
   transparencyNotice: { en: "Transparency & Ethical Content Notice", ar: "إشعار الشفافية والمحتوى الأخلاقي" },
-  transparencyBody: { 
+  transparencyPageBody: { 
     en: "Arabia Khaleej is a professional regional intelligence reference. We aggregate, simplify, and surface authoritative information from official sources.", 
     ar: "عربية خليج هي مرجع استخبارات إقليمي احترافي. نحن نجمع ونبسط ونظهر المعلومات الموثوقة من المصادر الرسمية." 
   },
