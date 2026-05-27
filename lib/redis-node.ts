@@ -16,10 +16,6 @@ interface StandaloneNode {
   compressValue(data: unknown): string;
   decompressValue(str: string): unknown;
   rateLimit(ip: string, limit?: number, windowSeconds?: number, route?: string): Promise<{ success: boolean; current: number; limit: number }>;
-  loadWorkflowState(wid: string): Promise<any>;
-  saveWorkflowState(wid: string, state: any): Promise<string | null>;
-  deleteWorkflow(wid: string): Promise<void>;
-  bumpTtl(wid: string): Promise<void>;
 }
 
 let _rawRedis: any = null;
@@ -142,51 +138,6 @@ export async function rateLimit(
   return { success: current <= limit, current, limit };
 }
 
-interface ArticleData {
-  workflowId?: string;
-  step?: string;
-  workflowStatus?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  currentIndex?: number;
-  articles?: any[];
-  trendingTopics?: any[];
-  errors?: string[];
-  hasGroqApiKey?: boolean;
-  runCount?: number;
-  adminSecret?: string;
-}
-
-const PREFIX = 'wf:';
-const TTL = parseInt(process.env.WORKFLOW_TTL || '21600', 10);
-
-export async function loadWorkflowState(wid: string): Promise<ArticleData | null> {
-  const raw = await (getWithCompression as any)(PREFIX + wid);
-  if (!raw) return null;
-  return raw as ArticleData;
-}
-
-export async function saveWorkflowState(wid: string, state: ArticleData): Promise<string | null> {
-  try {
-    return await setWithCompression(PREFIX + wid, state, { ex: TTL });
-  } catch (err) {
-    console.error('Failed to save article draft ' + wid + ':', err);
-    throw err;
-  }
-}
-
-export async function bumpTtl(wid: string): Promise<void> {
-  try { await _redisDirect!.expire(PREFIX + wid, TTL); } catch (err) {
-    console.warn('Failed to bump TTL for workflow ' + wid + ':', err);
-  }
-}
-
-export async function deleteWorkflow(wid: string): Promise<void> {
-  try { await _redisDirect!.del(PREFIX + wid); } catch (err) {
-    console.error('Failed to delete workflow ' + wid + ':', err);
-  }
-}
-
 // Initialize redis connection synchronously at module load time.
 // We assign to both _redisDirect and _rawRedis to ensure getWithCompression
 // and other functions have immediate access without waiting for async init.
@@ -202,10 +153,6 @@ const _fns: StandaloneNode = {
   compressValue,
   decompressValue,
   rateLimit,
-  loadWorkflowState,
-  saveWorkflowState,
-  deleteWorkflow,
-  bumpTtl,
 };
 
 // Execute named self-patching to inject these Node.js helpers into the core edge-safe Redis module.

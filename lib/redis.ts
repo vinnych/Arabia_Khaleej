@@ -95,9 +95,6 @@ type NodeHelpers = {
   compressValue:  (d: unknown) => string;
   decompressValue: (s: string) => unknown;
   rateLimit: (ip: string, limit?: number, ws?: number, r?: string) => Promise<{ success: boolean; current: number; limit: number }>;
-  deleteWorkflow: (wid: string) => Promise<void>;
-  saveWorkflowState: (wid: string, s: any) => Promise<string | null>;
-  bumpTtl: (wid: string) => Promise<void>;
 };
 
 let nodeHelpers: NodeHelpers | null = null;

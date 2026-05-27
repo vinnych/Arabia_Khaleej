@@ -15,8 +15,6 @@
     "contact-worker:deploy": "wrangler deploy worker/worker.js --config worker/wrangler.jsonc"
   },
   "dependencies": {
-    "@langchain/core": "^1.1.47",
-    "@langchain/langgraph": "^1.3.2",
     "@upstash/redis": "^1.37.0",
     "adhan": "^4.4.3",
     "clsx": "^2.1.1",
