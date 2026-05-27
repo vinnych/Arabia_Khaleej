@@ -164,5 +164,48 @@
   .animate-fade-up {
     animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  /* ── Article body typography ─────────────────────────────────────────── */
+  .article-body {
+    font-variant-ligatures: common-ligatures;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Ordered list counter — Tailwind can't do counter() natively */
+  .article-body ol {
+    counter-reset: ol-counter;
+  }
+  .article-body ol > li {
+    counter-increment: ol-counter;
+  }
+  .article-body ol > li::before {
+    content: counter(ol-counter);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 9999px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.18);
+    color: hsl(45, 74%, 55%);
+    font-size: 0.65rem;
+    font-weight: 800;
+    font-family: var(--font-sans);
+    line-height: 1;
+  }
+
+  /* Blockquote inner paragraphs — remove double bottom margin */
+  .article-body blockquote p {
+    margin-bottom: 0;
+  }
+
+  /* Table zebra stripes */
+  .article-body tbody tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.018);
+  }
 }
 

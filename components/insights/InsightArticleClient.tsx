@@ -1,22 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { InsightItem } from "@/lib/insights";
 import { useLanguage } from "@/lib/i18n";
-import { Calendar, ChevronLeft, Globe, Share2, Clock, AlertCircle, Languages, RefreshCw } from "lucide-react";
+import { Calendar, ChevronLeft, Share2, Clock, Languages, RefreshCw, Tag, BookOpen, BarChart2, Quote } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { getDeterministicFallback } from "@/lib/fallbacks";
 import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
-export default function InsightArticleClient({ 
-  initialArticle, 
-  moreInsights = [] 
-}: { 
-  initialArticle: InsightItem, 
-  moreInsights?: InsightItem[] 
+// ─── Content analysis helpers ────────────────────────────────────────────────
+
+function estimateReadTime(content: string): number {
+  const words = content.trim().split(/\s+/).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
+type ContentProfile = 'brief' | 'standard' | 'deep-dive';
+
+function getContentProfile(content: string): ContentProfile {
+  const words = content.trim().split(/\s+/).length;
+  if (words < 350) return 'brief';
+  if (words < 1100) return 'standard';
+  return 'deep-dive';
+}
+
+function detectFeatures(content: string) {
+  return {
+    hasTables: /^\|.+\|\s*\n\|[\s:-]+\|/m.test(content),
+    hasCode: /```/.test(content),
+    hasBlockquotes: /^>/m.test(content),
+    hasMultipleHeadings: (content.match(/^#{1,3} /gm) || []).length > 3,
+  };
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function InsightArticleClient({
+  initialArticle,
+  moreInsights = [],
+}: {
+  initialArticle: InsightItem;
+  moreInsights?: InsightItem[];
 }) {
   const { t, isRTL, language } = useLanguage();
   const router = useRouter();
@@ -25,23 +53,29 @@ export default function InsightArticleClient({
   const [perspectiveMode, setPerspectiveMode] = useState(false);
   const [translation, setTranslation] = useState<InsightItem | null>(null);
   const [loadingTranslation, setLoadingTranslation] = useState(false);
+  const [copied, setCopied] = useState(false);
   const article = initialArticle;
 
+  // ── Derived content metadata ──────────────────────────────────────────────
+  const readTime = useMemo(() => article.content ? estimateReadTime(article.content) : null, [article.content]);
+  const contentProfile = useMemo(() => article.content ? getContentProfile(article.content) : 'standard', [article.content]);
+  const features = useMemo(() => article.content ? detectFeatures(article.content) : { hasTables: false, hasCode: false, hasBlockquotes: false, hasMultipleHeadings: false }, [article.content]);
+  const hasTags = article.tags && article.tags.length > 0;
+
+  // ── Scroll progress ───────────────────────────────────────────────────────
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
     const handleScroll = () => {
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
       setScrollProgress(Math.min(progress, 100));
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); // Initialize on mount
-
+    handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // ── Perspective toggle ────────────────────────────────────────────────────
   const togglePerspective = async () => {
     if (!perspectiveMode && !translation) {
       setLoadingTranslation(true);
@@ -52,21 +86,22 @@ export default function InsightArticleClient({
         if (data.status === 'success' && data.insights?.[0]) {
           setTranslation(data.insights[0]);
         }
-      } catch (e) { console.error("Translation fetch failed"); }
-      finally { setLoadingTranslation(false); }
+      } catch (e) {
+        console.error("Translation fetch failed");
+      } finally {
+        setLoadingTranslation(false);
+      }
     }
     setPerspectiveMode(!perspectiveMode);
   };
 
-  const [copied, setCopied] = useState(false);
-
+  // ── Share ─────────────────────────────────────────────────────────────────
   const handleShare = async () => {
     const shareData = {
       title: article.title,
       text: article.description.substring(0, 100) + "...",
       url: `${window.location.origin}/insights/${article.slug}`,
     };
-
     try {
       if (navigator.share) {
         await navigator.share(shareData);
@@ -80,58 +115,59 @@ export default function InsightArticleClient({
     }
   };
 
+  // ── Date formatter ────────────────────────────────────────────────────────
   const formatDate = (dateStr: string) => {
     try {
-      const date = new Date(dateStr);
-      return date.toLocaleDateString(language === 'ar' ? 'ar-QA' : 'en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      return new Date(dateStr).toLocaleDateString(language === 'ar' ? 'ar-QA' : 'en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
       });
     } catch {
       return dateStr;
     }
   };
 
+  // ── Adaptive prose size based on content profile ──────────────────────────
+  const proseBaseSize =
+    contentProfile === 'brief' ? 'text-xl sm:text-2xl leading-[1.9]' :
+    contentProfile === 'deep-dive' ? 'text-base sm:text-[1.0625rem] leading-[1.85]' :
+    'text-[1.0625rem] sm:text-lg leading-[1.8]';
+
   return (
     <div className={`w-full max-w-4xl mx-auto px-4 py-12 pb-32 ${isRTL ? 'font-serif-ar' : ''}`}>
-      {/* Scroll Progress Bar */}
+
+      {/* ── Scroll Progress Bar ───────────────────────────────────────────── */}
       <div className="fixed top-0 left-0 w-full h-1 z-[110] bg-white/5 pointer-events-none">
-        <div 
+        <div
           className="h-full bg-brand-gold shadow-[0_0_10px_rgba(212,175,55,0.5)] transition-all duration-150 ease-out"
           style={{ width: `${scrollProgress}%` }}
         />
       </div>
 
-      {/* Navigation */}
-      <Link 
-        href="/insights" 
+      {/* ── Navigation ───────────────────────────────────────────────────── */}
+      <Link
+        href="/insights"
         className="hidden md:inline-flex items-center gap-2 text-foreground/40 hover:text-accent transition-colors mb-12 group"
       >
         <ChevronLeft size={20} className={isRTL ? 'rotate-180' : ''} />
         <span className="text-xs font-bold uppercase tracking-widest">{t('back')}</span>
       </Link>
 
-      {/* Mobile Back FAB - Ergonomic */}
-      <MobileFAB 
-        icon={ChevronLeft} 
-        onClick={() => router.back()} 
+      <MobileFAB
+        icon={ChevronLeft}
+        onClick={() => router.back()}
         label={t('back')}
         className={isRTL ? "[&_svg]:rotate-180" : ""}
       />
 
-      {/* Perspective Mode Toggle */}
+      {/* ── Perspective Mode Toggle ───────────────────────────────────────── */}
       <div className="flex justify-end mb-8">
-        <button 
+        <button
           onClick={togglePerspective}
           disabled={loadingTranslation}
           className={`flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all ${
-            perspectiveMode 
-            ? 'bg-brand-gold text-brand-obsidian border-brand-gold' 
-            : 'glass border-brand-gold/10 text-foreground/60 hover:text-accent'
+            perspectiveMode
+              ? 'bg-brand-gold text-brand-obsidian border-brand-gold'
+              : 'glass border-brand-gold/10 text-foreground/60 hover:text-accent'
           }`}
         >
           {loadingTranslation ? <RefreshCw size={16} className="animate-spin" /> : <Languages size={16} />}
@@ -141,35 +177,79 @@ export default function InsightArticleClient({
         </button>
       </div>
 
-      <article className={`space-y-12 transition-all duration-700 ${perspectiveMode ? 'max-w-none' : ''}`}>
-        {/* Header Metadata */}
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-center gap-4">
+      <article className={`space-y-10 transition-all duration-700 ${perspectiveMode ? 'max-w-none' : ''}`}>
+
+        {/* ── Article Header ────────────────────────────────────────────── */}
+        <header className="space-y-7">
+
+          {/* Source + Date + Badges row */}
+          <div className="flex flex-wrap items-center gap-3">
             <span className="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border bg-brand-gold/10 border-brand-gold/20 text-brand-gold">
               {article.source}
             </span>
             <div className="flex items-center gap-2 text-foreground/40 text-[10px] font-bold uppercase tracking-widest">
-              <Calendar size={14} />
+              <Calendar size={13} />
               <span>{formatDate(article.pubDate)}</span>
             </div>
+            {readTime && (
+              <div className="flex items-center gap-2 text-foreground/40 text-[10px] font-bold uppercase tracking-widest">
+                <Clock size={13} />
+                <span>{readTime} min read</span>
+              </div>
+            )}
+            {contentProfile === 'deep-dive' && (
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full">
+                <BookOpen size={11} className="text-blue-400" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">In-Depth</span>
+              </div>
+            )}
+            {features.hasTables && (
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 border border-purple-500/20 rounded-full">
+                <BarChart2 size={11} className="text-purple-400" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-purple-400">Data</span>
+              </div>
+            )}
             {article.humanEdited && (
               <div className="flex items-center gap-1.5 px-3 py-1 bg-green-500/10 border border-green-500/30 rounded-full">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">
-                  Human Reviewed
-                </span>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">Human Reviewed</span>
               </div>
             )}
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-[1.1] tracking-tight">
+          {/* Title — size adapts to content profile */}
+          <h1
+            className={`font-extrabold text-foreground leading-[1.05] tracking-tight ${
+              contentProfile === 'brief'
+                ? 'text-4xl sm:text-6xl lg:text-7xl'
+                : contentProfile === 'deep-dive'
+                ? 'text-3xl sm:text-5xl lg:text-[3.25rem]'
+                : 'text-4xl sm:text-5xl lg:text-6xl'
+            }`}
+          >
             {article.title}
           </h1>
 
-          <div className="flex items-center justify-between py-6 border-y border-white/5">
+          {/* Tags */}
+          {hasTags && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Tag size={13} className="text-foreground/30" />
+              {article.tags!.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white/5 border border-white/10 text-foreground/50 hover:border-brand-gold/30 hover:text-brand-gold/70 transition-colors"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Author bar */}
+          <div className="flex items-center justify-between py-5 border-y border-white/5">
             <div className="flex items-center gap-4">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden border border-brand-gold/30">
-                <Image 
+              <div className="relative w-12 h-12 rounded-full overflow-hidden border border-brand-gold/30 shrink-0">
+                <Image
                   src={
                     article.author?.id === 'zaid-alharbi' ? "/authors/zaid.png" :
                     article.author?.id === 'layla-mansour' ? "/authors/layla.png" :
@@ -183,69 +263,270 @@ export default function InsightArticleClient({
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-foreground/30">{t('editorialLeadership')}</p>
-                <p className="text-sm font-bold text-foreground">
-                  {article.author?.name || article.source}
+                <p className="text-sm font-bold text-foreground">{article.author?.name || article.source}</p>
+                <p className="text-[10px] font-medium opacity-50 uppercase tracking-tight">
+                  {article.author?.role || t('regionalIntelligence')}
                 </p>
-<p className="text-[10px] font-medium opacity-50 uppercase tracking-tight">
-                   {article.author?.role || t('regionalIntelligence')}
-                 </p>
-                 {article.humanEdited && article.editedAt && (
-                   <p className="text-[10px] font-medium opacity-30 uppercase tracking-tight mt-1">
-                     Edited: {new Date(article.editedAt).toLocaleDateString(language === 'ar' ? 'ar-QA' : 'en-US')}
-                   </p>
-                 )}
-               </div>
+                {article.humanEdited && article.editedAt && (
+                  <p className="text-[10px] font-medium opacity-30 uppercase tracking-tight mt-0.5">
+                    Edited: {new Date(article.editedAt).toLocaleDateString(language === 'ar' ? 'ar-QA' : 'en-US')}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="relative">
-              <button 
+              <button
                 onClick={handleShare}
                 className="w-10 h-10 rounded-full glass flex items-center justify-center text-foreground/40 hover:text-accent transition-all active:scale-95"
               >
                 <Share2 size={18} />
               </button>
               {copied && (
-                <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-accent text-brand-obsidian text-[10px] font-bold uppercase tracking-widest rounded-lg animate-in fade-in slide-in-from-bottom-1">
+                <div className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-accent text-brand-obsidian text-[10px] font-bold uppercase tracking-widest rounded-lg animate-in fade-in slide-in-from-bottom-1 whitespace-nowrap">
                   {t('linkCopied')}
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Hero Image */}
+        {/* ── Hero Image ────────────────────────────────────────────────── */}
         {article.image && (
-          <div className="relative w-full aspect-video rounded-[3rem] overflow-hidden shadow-2xl border border-white/5">
+          <div className={`relative w-full overflow-hidden shadow-2xl border border-white/5 ${
+            contentProfile === 'brief'
+              ? 'aspect-[21/9] rounded-[2rem]'
+              : 'aspect-video rounded-[3rem]'
+          }`}>
             <Image
               src={imgError ? getDeterministicFallback(article.slug) : article.image}
               alt={article.title}
               fill
               className="object-cover"
               priority
-              unoptimized={!!article.image && !article.image.startsWith('/') && !article.image.startsWith('https://images.unsplash.com') && !article.image.startsWith('https://images.pexels.com')}
+              unoptimized={
+                !!article.image &&
+                !article.image.startsWith('/') &&
+                !article.image.startsWith('https://images.unsplash.com') &&
+                !article.image.startsWith('https://images.pexels.com')
+              }
               onError={() => setImgError(true)}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
           </div>
         )}
 
-        {/* Article Content */}
-        <div className={`grid grid-cols-1 ${perspectiveMode ? 'lg:grid-cols-2' : ''} gap-12 max-w-none`}>
-          <div className="space-y-8">
-            <p className="text-xl sm:text-2xl text-foreground/90 leading-relaxed font-normal italic">
-              {article.description}
-            </p>
+        {/* ── Article Body ──────────────────────────────────────────────── */}
+        <div className={`grid grid-cols-1 ${perspectiveMode ? 'lg:grid-cols-2' : ''} gap-12`}>
+          <div className="space-y-0">
 
+            {/* Lead / Description ── styled as pull intro */}
+            <div className={`relative ${contentProfile === 'brief' ? 'mb-10' : 'mb-12'}`}>
+              <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-brand-gold/60 via-brand-gold/20 to-transparent rounded-full" />
+              <p className={`pl-6 font-serif italic text-foreground/85 leading-relaxed ${
+                contentProfile === 'brief'
+                  ? 'text-2xl sm:text-3xl'
+                  : 'text-xl sm:text-2xl'
+              }`}>
+                {article.description}
+              </p>
+            </div>
+
+            {/* Decorative separator */}
             {article.content && (
-              <div className={`prose prose-invert prose-brand-gold max-w-none mt-12 space-y-6 text-foreground/80 leading-loose ${isRTL ? 'text-right' : 'text-left'}`}>
+              <div className="flex items-center gap-4 mb-10">
+                <div className="flex-1 h-px bg-brand-gold/10" />
+                <div className="flex gap-1">
+                  <div className="w-1 h-1 rounded-full bg-brand-gold/40" />
+                  <div className="w-1 h-1 rounded-full bg-brand-gold/20" />
+                  <div className="w-1 h-1 rounded-full bg-brand-gold/10" />
+                </div>
+                <div className="flex-1 h-px bg-brand-gold/10" />
+              </div>
+            )}
+
+            {/* Main Content via ReactMarkdown */}
+            {article.content && (
+              <div
+                className={`article-body max-w-none ${proseBaseSize} text-foreground/80 ${isRTL ? 'text-right' : 'text-left'}`}
+              >
                 <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                   components={{
-                    h1: ({node, ...props}) => <h2 className="text-3xl font-bold mt-12 mb-6 text-foreground" {...props} />,
-                    h2: ({node, ...props}) => <h2 className="text-2xl font-bold mt-10 mb-5 text-foreground/90" {...props} />,
-                    h3: ({node, ...props}) => <h3 className="text-xl font-bold mt-8 mb-4 text-foreground/80" {...props} />,
-                    p: ({node, ...props}) => <p className="text-lg mb-6 opacity-80" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-6 space-y-2 opacity-80" {...props} />,
-                    ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-6 space-y-2 opacity-80" {...props} />,
-                    li: ({node, ...props}) => <li className="text-lg" {...props} />,
+                    // Headings
+                    h1: ({ node, ...props }) => (
+                      <h2
+                        className="text-3xl sm:text-4xl font-extrabold mt-14 mb-6 text-foreground leading-tight border-l-4 border-brand-gold pl-5"
+                        {...props}
+                      />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <h2
+                        className="text-2xl sm:text-3xl font-bold mt-12 mb-5 text-foreground/95 leading-snug"
+                        {...props}
+                      />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <h3
+                        className="text-xl font-bold mt-10 mb-4 text-foreground/85 leading-snug"
+                        {...props}
+                      />
+                    ),
+                    h4: ({ node, ...props }) => (
+                      <h4
+                        className="text-lg font-bold mt-8 mb-3 text-foreground/75 uppercase tracking-wide"
+                        {...props}
+                      />
+                    ),
+                    h5: ({ node, ...props }) => (
+                      <h5
+                        className="text-base font-bold mt-6 mb-2 text-foreground/65 uppercase tracking-widest text-[11px]"
+                        {...props}
+                      />
+                    ),
+                    h6: ({ node, ...props }) => (
+                      <h6
+                        className="text-sm font-bold mt-4 mb-2 text-brand-gold/70 uppercase tracking-widest"
+                        {...props}
+                      />
+                    ),
+
+                    // Paragraphs
+                    p: ({ node, ...props }) => (
+                      <p className="mb-7 last:mb-0" {...props} />
+                    ),
+
+                    // Block quote — styled as pull quote
+                    blockquote: ({ node, children, ...props }) => (
+                      <blockquote
+                        className="relative my-10 pl-8 pr-6 py-5 border-l-4 border-brand-gold/70 bg-brand-gold/5 rounded-r-2xl text-foreground/80"
+                        {...props}
+                      >
+                        <Quote
+                          size={22}
+                          className="absolute -top-2.5 left-1 text-brand-gold/50 rotate-180 fill-brand-gold/15"
+                        />
+                        {children}
+                      </blockquote>
+                    ),
+
+                    // Lists
+                    ul: ({ node, ...props }) => (
+                      <ul
+                        className="mb-7 space-y-2.5 pl-0 list-none [&>li]:relative [&>li]:pl-6 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-[0.6em] [&>li]:before:w-1.5 [&>li]:before:h-1.5 [&>li]:before:rounded-full [&>li]:before:bg-brand-gold/50"
+                        {...props}
+                      />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol
+                        className="mb-7 space-y-2.5 pl-0 list-none [&>li]:relative [&>li]:pl-9 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:top-0 [&>li]:before:w-6 [&>li]:before:h-6 [&>li]:before:rounded-full [&>li]:before:bg-brand-gold/10 [&>li]:before:border [&>li]:before:border-brand-gold/20 [&>li]:before:text-brand-gold [&>li]:before:text-[11px] [&>li]:before:font-bold [&>li]:before:flex [&>li]:before:items-center [&>li]:before:justify-center"
+                        {...props}
+                      />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="leading-relaxed" {...props} />
+                    ),
+
+                    // Inline formatting
+                    strong: ({ node, ...props }) => (
+                      <strong className="font-bold text-foreground" {...props} />
+                    ),
+                    em: ({ node, ...props }) => (
+                      <em className="italic text-foreground/85" {...props} />
+                    ),
+
+                    // Links
+                    a: ({ node, href, ...props }) => (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-brand-gold border-b border-brand-gold/30 hover:border-brand-gold transition-colors duration-200"
+                        {...props}
+                      />
+                    ),
+
+                    // Horizontal Rule — decorative divider
+                    hr: ({ node, ...props }) => (
+                      <div className="flex items-center gap-4 my-12" aria-hidden>
+                        <div className="flex-1 h-px bg-white/8" />
+                        <div className="flex gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-gold/50" />
+                          <span className="w-1 h-1 rounded-full bg-brand-gold/25 mt-0.5" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-brand-gold/50" />
+                        </div>
+                        <div className="flex-1 h-px bg-white/8" />
+                      </div>
+                    ),
+
+                    // Code — react-markdown passes `inline` prop for inline code
+                    code: ({ node, inline, className, children, ...props }: any) => {
+                      if (inline) {
+                        return (
+                          <code
+                            className="px-2 py-0.5 rounded-md bg-brand-gold/10 text-brand-gold text-[0.85em] font-mono border border-brand-gold/15"
+                            {...props}
+                          >
+                            {children}
+                          </code>
+                        );
+                      }
+                      // Block code (inside <pre>)
+                      return (
+                        <code className="block font-mono text-sm text-foreground/85" {...props}>
+                          {children}
+                        </code>
+                      );
+                    },
+                    pre: ({ node, ...props }) => (
+                      <pre
+                        className="bg-[#0a0c10] border border-white/10 rounded-2xl px-6 py-5 overflow-x-auto font-mono text-sm my-8 text-foreground/80 leading-relaxed shadow-inner"
+                        {...props}
+                      />
+                    ),
+
+                    // Tables — responsive wrapper
+                    table: ({ node, ...props }) => (
+                      <div className="overflow-x-auto my-10 rounded-2xl border border-white/10 shadow-lg">
+                        <table className="w-full text-sm border-collapse" {...props} />
+                      </div>
+                    ),
+                    thead: ({ node, ...props }) => (
+                      <thead className="bg-brand-gold/8 border-b border-brand-gold/15" {...props} />
+                    ),
+                    tbody: ({ node, ...props }) => (
+                      <tbody className="divide-y divide-white/5" {...props} />
+                    ),
+                    tr: ({ node, ...props }) => (
+                      <tr className="hover:bg-white/[0.03] transition-colors duration-150" {...props} />
+                    ),
+                    th: ({ node, ...props }) => (
+                      <th
+                        className="text-left px-5 py-3.5 text-[10px] font-black uppercase tracking-widest text-brand-gold/80 whitespace-nowrap"
+                        {...props}
+                      />
+                    ),
+                    td: ({ node, ...props }) => (
+                      <td className="px-5 py-3.5 text-foreground/70 leading-relaxed" {...props} />
+                    ),
+
+                    // Images inside content
+                    img: ({ node, src, alt, ...props }) => (
+                      <figure className="my-10">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src}
+                          alt={alt}
+                          className="w-full rounded-2xl object-cover shadow-xl border border-white/5"
+                          loading="lazy"
+                          {...props}
+                        />
+                        {alt && (
+                          <figcaption className="text-center text-xs text-foreground/40 mt-3 italic">
+                            {alt}
+                          </figcaption>
+                        )}
+                      </figure>
+                    ),
                   }}
                 >
                   {article.content}
@@ -254,9 +535,14 @@ export default function InsightArticleClient({
             )}
           </div>
 
+          {/* Perspective mode: side-by-side translation */}
           {perspectiveMode && (
             <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
-              <div className={`p-8 rounded-[2rem] glass border-brand-gold/20 ${!isRTL ? 'font-serif-ar text-right' : ''}`}>
+              <div
+                className={`p-8 rounded-[2rem] glass border border-brand-gold/20 sticky top-20 ${
+                  !isRTL ? 'font-serif-ar text-right' : ''
+                }`}
+              >
                 <h3 className="text-sm font-black uppercase tracking-widest text-accent mb-6 border-b border-brand-gold/10 pb-4">
                   {isRTL ? 'English Translation' : 'الترجمة العربية'}
                 </h3>
@@ -274,34 +560,36 @@ export default function InsightArticleClient({
         </div>
       </article>
 
-{/* Footer Disclaimer */}
-       <div className="mt-24 pt-12 border-t border-white/5 space-y-8">
-         {/* Editorial Note */}
-         <div className="glass p-6 rounded-2xl border border-brand-gold/10">
-           <p className="text-xs text-foreground/60 leading-relaxed">
-             <span className="font-bold text-brand-gold">Editorial Note:</span> This analysis was researched with 
-             AI assistance using real-time GCC economic data and reviewed by our editorial team. All insights are 
-             original to Arabia Khaleej and cite verifiable regional sources.
-           </p>
-         </div>
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      <div className="mt-24 pt-12 border-t border-white/5 space-y-8">
 
-         {/* More Insights Section */}
-         {moreInsights.length > 0 && (
-           <div className="mb-24">
+        {/* Editorial Note */}
+        <div className="glass p-6 rounded-2xl border border-brand-gold/10">
+          <p className="text-xs text-foreground/60 leading-relaxed">
+            <span className="font-bold text-brand-gold">Editorial Note:</span> This analysis was
+            researched with AI assistance using real-time GCC economic data and reviewed by our
+            editorial team. All insights are original to Arabia Khaleej and cite verifiable
+            regional sources.
+          </p>
+        </div>
+
+        {/* More Insights */}
+        {moreInsights.length > 0 && (
+          <div className="mb-24">
             <h2 className="text-2xl font-bold mb-8 opacity-60 uppercase tracking-widest text-center">
               {t('moreInsights')}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {moreInsights.map((insight) => (
-                <Link 
-                  key={insight.id} 
+                <Link
+                  key={insight.id}
                   href={`/insights/${insight.slug}${language === 'ar' ? '?lang=ar' : ''}`}
-                  className="glass overflow-hidden rounded-3xl border-white/5 hover:border-brand-gold/30 transition-all group flex flex-col"
+                  className="glass overflow-hidden rounded-3xl border border-white/5 hover:border-brand-gold/30 transition-all group flex flex-col"
                 >
                   {insight.image && (
                     <div className="relative w-full aspect-video overflow-hidden">
-                      <Image 
-                        src={insight.image} 
+                      <Image
+                        src={insight.image}
                         alt={insight.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
