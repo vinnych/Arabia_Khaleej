@@ -8,6 +8,10 @@ import path from "path";
 //   forces Webpack to cleanly substitute them with empty modules, avoiding static bundle trace parsing of Node.js-only built-ins.
 // - This surgically resolves compilation failures specifically for Edge runtime builds while leaving the Node.js build fully functional.
 const nextConfig: NextConfig = {
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
+
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
