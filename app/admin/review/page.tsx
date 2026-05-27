@@ -9,9 +9,16 @@ interface Article {
   topic: string;
   status: string;
   word_count?: number;
+  // Normalised fields present when loaded from /api/admin/workflows (insights store)
+  wordCount?: number;
   content?: string;
   image_url?: string;
+  image?: string;
   error?: string;
+  slug?: string;   // set for insights-store articles; used as the delete/edit identifier
+  lang?: string;   // 'en' | 'ar' – set for insights-store articles
+  title?: string;  // already-extracted title from insights-store articles
+  description?: string;
 }
 
 const getBadgeClass = (status: string, styles: any) => {
@@ -33,12 +40,27 @@ export default function Dashboard() {
   const [secret, setSecret] = useState<string>('');
   
   const modalRef = useRef<HTMLDialogElement>(null);
+  // Refs let the polling interval always read the latest secret/tab without recreating the timer.
+  const secretRef = useRef('');
+  const activeTabRef = useRef<'drafts' | 'published'>('drafts');
 
-  // Why parameter passing: The state setter setSecret is asynchronous, so we allow passing
-  // a local 'currentSecret' to prevent first-load queries from being made with an empty string.
-  const fetchArticles = async (currentSecret: string = secret) => {
+  // Keep refs in sync via useEffect so the polling interval always reads current values.
+  // Note: refs are also updated eagerly inside handleTabChange / the initial useEffect to avoid
+  // the single-render lag that useEffect introduces.
+  useEffect(() => { secretRef.current = secret; }, [secret]);
+  useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
+
+  // Why two endpoints: /api/article only returns draft-queue articles (article:{topic} keys).
+  // Published articles live in insights:article:{slug} / insights:list:{lang} and are
+  // served by /api/admin/workflows?tab=published.
+  const fetchArticles = async (currentSecret: string, tab: 'drafts' | 'published') => {
     try {
-      const res = await fetch(`/api/article?secret=${encodeURIComponent(currentSecret)}`);
+      const url =
+        tab === 'published'
+          ? `/api/admin/workflows?secret=${encodeURIComponent(currentSecret)}&tab=published`
+          : `/api/article?secret=${encodeURIComponent(currentSecret)}`;
+
+      const res = await fetch(url);
       if (!res.ok) {
         console.error(`[dashboard] Fetch failed with status ${res.status}`);
         return;
@@ -57,14 +79,26 @@ export default function Dashboard() {
       const params = new URLSearchParams(window.location.search);
       const urlSecret = params.get('secret') || '';
       setSecret(urlSecret);
+      secretRef.current = urlSecret;
       
-      // Fetch immediately with urlSecret
-      fetchArticles(urlSecret);
+      // Fetch immediately with urlSecret and the initial tab (drafts).
+      fetchArticles(urlSecret, 'drafts');
 
-      const interval = setInterval(() => fetchArticles(urlSecret), 5000);
+      // Poll every 5 s using refs so we always see the current secret/tab.
+      const interval = setInterval(() => {
+        fetchArticles(secretRef.current, activeTabRef.current);
+      }, 5000);
       return () => clearInterval(interval);
     }
   }, []);
+
+  // Switch tab and immediately reload the correct article set.
+  // Sync activeTabRef eagerly here so the next polling tick (possibly < 5 s away) uses the new tab.
+  const handleTabChange = (tab: 'drafts' | 'published') => {
+    activeTabRef.current = tab;
+    setActiveTab(tab);
+    fetchArticles(secret, tab);
+  };
 
   const generateArticle = async () => {
     if (!topic.trim()) return alert('Enter a topic');
@@ -87,26 +121,39 @@ export default function Dashboard() {
       }
       
       setTopic('');
-      fetchArticles(secret);
-      setActiveTab('drafts');
+      handleTabChange('drafts');
     } catch (err: any) {
       alert('Failed to start generation: ' + (err.message || err));
     }
     setLoading(false);
   };
 
-  const deleteArticle = async (t: string) => {
-    if(!confirm("Are you sure you want to permanently delete this article?")) return;
+  // Why two delete paths:
+  // - Insights-store articles (loaded via /api/admin/workflows) are identified by slug+lang.
+  //   They must be removed from insights:article:{slug} and both insights:list:{en/ar} lists.
+  // - Draft-queue articles (loaded via /api/article) are identified by topic.
+  //   /api/article DELETE already cascades to draft key + live keys + both list caches.
+  const deleteArticle = async (art: Article) => {
+    if (!confirm("Are you sure you want to permanently delete this article?")) return;
     try {
-      const res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: t }),
-      });
-      if (!res.ok) {
-        throw new Error(`Server returned status ${res.status}`);
+      if (art.slug && art.lang) {
+        // Published insights-store article – remove via workflows API.
+        const res = await fetch(`/api/admin/workflows?secret=${encodeURIComponent(secret)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: art.slug, lang: art.lang, action: 'delete' }),
+        });
+        if (!res.ok) throw new Error(`Server returned status ${res.status}`);
+      } else {
+        // Draft-queue article – cascade-delete via article API.
+        const res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic: art.topic }),
+        });
+        if (!res.ok) throw new Error(`Server returned status ${res.status}`);
       }
-      fetchArticles(secret);
+      fetchArticles(secret, activeTab);
     } catch (err: any) {
       alert('Failed to delete article: ' + (err.message || err));
     }
@@ -122,7 +169,7 @@ export default function Dashboard() {
       if (!res.ok) {
         throw new Error(`Server returned status ${res.status}`);
       }
-      fetchArticles(secret);
+      fetchArticles(secret, activeTab);
     } catch (err: any) {
       alert('Failed to publish article: ' + (err.message || err));
     }
@@ -139,7 +186,7 @@ export default function Dashboard() {
       if (!res.ok) {
         throw new Error(`Server returned status ${res.status}`);
       }
-      fetchArticles(secret);
+      fetchArticles(secret, activeTab);
       modalRef.current?.close();
     } catch (err: any) {
       alert('Failed to save article modifications: ' + (err.message || err));
@@ -152,10 +199,12 @@ export default function Dashboard() {
     modalRef.current?.showModal();
   };
 
-  // Filter articles based on active tab
-  const displayedArticles = articles.filter(art => 
-    activeTab === 'drafts' ? art.status !== 'published' : art.status === 'published'
-  );
+  // For drafts tab: exclude published entries (they now have their own data source).
+  // For published tab: all articles returned by /api/admin/workflows are already published.
+  const displayedArticles =
+    activeTab === 'drafts'
+      ? articles.filter(art => art.status !== 'published')
+      : articles;
 
   return (
     <div className={styles.container}>
@@ -183,13 +232,13 @@ export default function Dashboard() {
       <div className={styles.tabsContainer}>
         <button 
           className={`${styles.tabBtn} ${activeTab === 'drafts' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('drafts')}
+          onClick={() => handleTabChange('drafts')}
         >
           Drafts Queue
         </button>
         <button 
           className={`${styles.tabBtn} ${activeTab === 'published' ? styles.tabActive : ''}`}
-          onClick={() => setActiveTab('published')}
+          onClick={() => handleTabChange('published')}
         >
           Published Articles
         </button>
@@ -201,26 +250,27 @@ export default function Dashboard() {
         )}
         
         {displayedArticles.map((art) => (
-          <div key={art.topic} className={styles.card}>
+          <div key={art.slug || art.topic} className={styles.card}>
             <span className={`${styles.badge} ${getBadgeClass(art.status, styles)}`}>
               {/* Added optional chaining and fallback 'unknown' to prevent UI rendering crashes if status is missing */}
               {art.status?.replace('_', ' ') || 'unknown'}
             </span>
-            {art.image_url ? (
-               <img src={art.image_url} alt="Hero" className={styles.cardImg} />
+            {(art.image_url || art.image) ? (
+               <img src={art.image_url || art.image} alt="Hero" className={styles.cardImg} />
             ) : (
                <div className={`${styles.cardImg} ${styles.placeholder}`}>No Image</div>
             )}
             <div className={styles.cardContent}>
-              <h3>{art.topic}</h3>
-              <p className={styles.meta}>Words: {art.word_count || 0}</p>
+              {/* title is present for insights-store articles; fall back to topic for draft-queue articles */}
+              <h3>{art.title || art.topic}</h3>
+              <p className={styles.meta}>Words: {art.word_count || art.wordCount || 0}</p>
               <div className={styles.actions}>
                 <button className={styles.btnView} onClick={() => viewArticle(art)}>Review / Edit</button>
                 <div style={{display: 'flex', gap: '0.5rem', marginTop: '0.5rem'}}>
                   {art.status !== 'published' && (
                     <button className={styles.btnPublish} onClick={() => publishArticle(art.topic)}>Publish</button>
                   )}
-                  <button className={styles.btnDelete} onClick={() => deleteArticle(art.topic)}>Delete</button>
+                  <button className={styles.btnDelete} onClick={() => deleteArticle(art)}>Delete</button>
                 </div>
               </div>
             </div>
@@ -232,7 +282,7 @@ export default function Dashboard() {
         {selectedArticle && (
           <div>
             <div style={{display:'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
-              <h2 style={{margin: 0}}>{selectedArticle.topic}</h2>
+              <h2 style={{margin: 0}}>{selectedArticle.title || selectedArticle.topic}</h2>
               <button onClick={() => modalRef.current?.close()} style={{fontSize:'2rem', color:'white', background:'none', border:'none', cursor:'pointer'}}>&times;</button>
             </div>
             
@@ -241,10 +291,28 @@ export default function Dashboard() {
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               placeholder="Article markdown content..."
+              // Why readOnly for insights-store articles: they have no draft-queue key, so PUT /api/article
+              // would return 404 and silently discard edits. Editing live published articles requires
+              // a separate workflow (approve with modified content via /api/admin/workflows).
+              readOnly={!!(selectedArticle.slug && selectedArticle.lang)}
             />
+
+            {selectedArticle.slug && selectedArticle.lang && (
+              <p style={{color: '#f59e0b', fontSize: '0.85rem', margin: '0.5rem 0'}}>
+                This is a live published article. Editing is read-only — delete and re-publish to update content.
+              </p>
+            )}
             
             <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-              <button className={styles.btnSave} onClick={saveArticle}>Save Changes</button>
+              <button
+                className={styles.btnSave}
+                onClick={saveArticle}
+                // Disable save for insights-store articles that have no corresponding draft-queue key.
+                disabled={!!(selectedArticle.slug && selectedArticle.lang)}
+                style={selectedArticle.slug && selectedArticle.lang ? {opacity: 0.4, cursor: 'not-allowed'} : undefined}
+              >
+                Save Changes
+              </button>
             </div>
           </div>
         )}

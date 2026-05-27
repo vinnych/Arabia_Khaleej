@@ -44,6 +44,7 @@ async function loadPublished(lang: 'en' | 'ar') {
       if (!body || body.status !== 'published') return null;
       return {
         slug,
+        lang,
         title: body.title ?? entry.title ?? slug,
         description: body.description ?? entry.description ?? '',
         language: lang,
@@ -51,6 +52,10 @@ async function loadPublished(lang: 'en' | 'ar') {
         qualityScore: body.qualityScore,
         wordCount: body.wordCount,
         content: body.content ?? '',
+        // image field so the admin card can render the thumbnail
+        image: body.image ?? entry.image ?? null,
+        // topic is not always present in insights-store articles; fall back to title or slug
+        topic: body.topic ?? body.title ?? slug,
       };
     })
   );
@@ -141,13 +146,22 @@ export async function POST(request: NextRequest) {
 
     if (action === 'delete') {
       const articleKey = `insights:article:${slug}`;
-      const article = await getWithCompression<any>(articleKey);
-      if (article) {
-        const listKey = `insights:list:${lang}`;
+
+      // Remove from BOTH language listing caches regardless of which lang was provided.
+      // Why: an article may appear in en or ar lists (or both) depending on how it was published.
+      // Removing only the provided lang would leave a stale entry in the other language's feed.
+      for (const l of ['en', 'ar'] as const) {
+        const listKey = `insights:list:${l}`;
         const current = await getWithCompression<any[]>(listKey) ?? [];
-        await setWithCompression(listKey, current.filter((a: any) => a.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
-        await redis.del(articleKey).catch(() => {});
+        const filtered = current.filter((a: any) => a.slug !== slug);
+        if (filtered.length !== current.length) {
+          await setWithCompression(listKey, filtered, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        }
       }
+
+      // Delete the full article detail key.
+      await redis.del(articleKey).catch(() => {});
+
       return NextResponse.json({ success: true });
     }
 
