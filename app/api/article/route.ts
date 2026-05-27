@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { draftDb } from '@/lib/draftsDb';
 import { toSlug } from '@/lib/utils';
 import { redis, getWithCompression, setWithCompression } from '@/lib/redis';
+import { translateMarkdown } from '@/lib/translate';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -9,8 +10,6 @@ export const dynamic = 'force-dynamic';
 function getAdminSecret(): string | null {
   const adminSecret = process.env.ADMIN_SECRET;
   
-  // Why fail-closed: If the admin secret token is not configured on the environment,
-  // we refuse to validate any credentials, protecting the administration pipeline.
   if (!adminSecret) {
     console.error('[security] Server Configuration Error: ADMIN_SECRET environment variable is missing.');
     return null;
@@ -25,6 +24,32 @@ function isAuthorized(req: Request): boolean {
   
   if (!adminSecret) return false;
   return secret === adminSecret;
+}
+
+// Local helper to normalize bilingual items
+function normalizeArticle(item: any, lang: 'en' | 'ar'): any {
+  if (!item) return null;
+  const title = typeof item.title === 'string' ? item.title : (item.title?.[lang] || item.title?.en || '');
+  const description = typeof item.description === 'string' ? item.description : (item.description?.[lang] || item.description?.en || '');
+  const content = typeof item.content === 'string' ? item.content : (item.content?.[lang] || item.content?.en || '');
+  
+  let author = item.author;
+  if (author) {
+    author = {
+      ...author,
+      name: typeof author.name === 'string' ? author.name : (author.name?.[lang] || author.name?.en || ''),
+      role: typeof author.role === 'string' ? author.role : (author.role?.[lang] || author.role?.en || '')
+    };
+  }
+
+  return {
+    ...item,
+    title,
+    description,
+    content,
+    language: lang,
+    author
+  };
 }
 
 // GET all articles (Authorized)
@@ -42,12 +67,7 @@ export async function GET(req: Request) {
   }
 }
 
-// DELETE an article (Authorized) - handles both drafts and live published articles.
-// Why this particular is used: If a published article is deleted from the dashboard,
-// we must remove its entry from Redis draft queue (`article:${topic}`), the live details key
-// (`insights:article:${slug}`), and the homepage listing feed caches (`insights:list:en` & `insights:list:ar`).
-// If we only deleted the draft key, the live page on the website would still be active and visible,
-// leaving broken routes and obsolete content.
+// DELETE an article (Authorized)
 export async function DELETE(req: Request) {
   try {
     if (!isAuthorized(req)) {
@@ -55,37 +75,29 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Unauthorized: Invalid administrative credentials.' }, { status: 401 });
     }
     
-    // Parse body payload securely inside a catch block to prevent syntax error crashing
     const body = await req.json().catch(() => null);
     if (!body || !body.topic || typeof body.topic !== 'string') {
       return NextResponse.json({ error: 'Bad Request: "topic" string parameter required.' }, { status: 400 });
     }
 
     const topic = body.topic;
-    // Generate the URL-friendly slug matching the publish logic to determine target keys.
-    // Why: Consistent slug generation ensures we hit the exact same Redis keys created during publishing.
     const slug = toSlug(topic);
 
     // 1. Delete draft key from the queue (article:${topic})
-    // Why: Removes the article metadata from the admin dashboard list.
     await draftDb.delDraft(topic);
     console.log(`[admin] Permanently deleted draft article key for topic: "${topic}"`);
 
     // 2. Delete live compressed article detail key (insights:article:${slug})
-    // Why: Prevents dangling SSR pages from continuing to resolve, ensuring search engines receive 404s.
     const articleKey = `insights:article:${slug}`;
     await redis.del(articleKey);
     console.log(`[admin] Deleted live article details key: "${articleKey}"`);
 
     // 3. Filter and remove from localized listings lists (insights:list:en & insights:list:ar)
-    // Why: Homepages and listings read from cached arrays to preserve Upstash API limits. Removing the item
-    // here ensures homepage feed items disappear immediately without waiting for a cache refresh.
     for (const lang of ['en', 'ar']) {
       const listKey = `insights:list:${lang}`;
       const currentList = await getWithCompression<any[]>(listKey);
       if (currentList && Array.isArray(currentList)) {
         const updatedList = currentList.filter((item: any) => item.slug !== slug);
-        // Optimize operations: only update if the list actually contained the deleted item
         if (updatedList.length !== currentList.length) {
           await setWithCompression(listKey, updatedList, { ex: 2592000 });
           console.log(`[admin] Successfully removed article from listing: "${listKey}"`);
@@ -120,19 +132,8 @@ export async function PUT(req: Request) {
     if (draft) {
       if (action === 'publish') {
         draft.status = 'published';
-        
-        // Generate a clean, deterministic, and URL-friendly slug from the topic name
-        // Why toSlug is used: Ensures slugs are clean, safe, and do not contain special URI characters.
         const slug = toSlug(topic);
         
-        // Auto-detect language by checking if the topic contains Arabic script characters
-        // Why regex check is used: Provides lightweight, synchronous, and highly reliable language
-        // classification without the overhead or latency of invoking an external LLM or translation API.
-        const isArabic = /[\u0600-\u06FF]/.test(topic);
-        const lang = isArabic ? 'ar' : 'en';
-
-        // Extract a clean title from the markdown heading (e.g. # The UAE Economic Vision)
-        // Why title extraction is used: Avoids duplicating the "#" prefix in listings, giving a premium visual feel.
         let title = topic;
         if (draft.content) {
           const match = draft.content.match(/^#\s+(.+)$/m);
@@ -141,53 +142,68 @@ export async function PUT(req: Request) {
           }
         }
 
-        // Establish editorial board author metadata to satisfy GSC and AdSense EEAT parameters
-        // Why this particular is used: Satisfies search engine authority guidelines by attributing all
-        // automatically generated content to our verified regional editorial board.
+        console.log(`[admin] Publishing manually generated draft: "${topic}". Starting automated translations.`);
+
+        // Translate manual draft dynamically on publication
+        const titleAr = await translateMarkdown(title, 'en', 'ar');
+        const contentAr = await translateMarkdown(draft.content || '', 'en', 'ar');
+
         const author = {
           id: "arabia-khaleej-editorial",
-          name: isArabic ? "هيئة تحرير عربية خليج" : "Arabia Khaleej Editorial Team",
-          role: isArabic ? "هيئة التحرير" : "Editorial Board"
+          name: { en: "Arabia Khaleej Editorial Team", ar: "هيئة تحرير عربية خليج" },
+          role: { en: "Editorial Board", ar: "هيئة التحرير" }
         };
 
-        // Construct standard InsightItem document matching lib/insights.ts schema
         const liveArticle = {
           id: `insight-${Math.random().toString(36).substring(2, 11)}`,
           slug: slug,
-          title: title,
-          description: draft.content ? draft.content.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : topic,
+          title: {
+            en: title,
+            ar: titleAr,
+          },
+          description: {
+            en: draft.content ? draft.content.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : topic,
+            ar: contentAr ? contentAr.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : titleAr,
+          },
           link: `/insights/${slug}`,
           pubDate: new Date().toISOString(),
           source: "Arabia Khaleej",
           category: "gcc",
-          language: lang,
+          language: "en",
           image: draft.image_url || "/images/insights/default.png",
-          tags: ["gcc", isArabic ? "تحليل" : "intelligence"],
-          content: draft.content || "",
+          tags: ["gcc", "intelligence"],
+          content: {
+            en: draft.content || "",
+            ar: contentAr,
+          },
           status: "published",
           author: author,
           wordCount: draft.content ? draft.content.split(/\s+/).length : 0
         };
 
-        // 1. Commit full article detail store (insights:article:${slug})
-        // Why setWithCompression is used: Reduces storage footprint and mitigates Upstash free tier rate limits
-        // by compressing long markdown strings into optimized compressed-base64 representations.
+        // 1. Commit full bilingual document (insights:article:${slug})
         await setWithCompression(`insights:article:${slug}`, liveArticle, { ex: 2592000 });
 
-        // 2. Prepend live article to the localized main listings list (insights:list:${lang})
-        // Why list prepending is used: Ensures newly published insights appear instantly at the top of the homepage 
-        // and listing feeds chronologically without performing expensive re-queries or full cache invalidations.
-        const listKey = `insights:list:${lang}`;
-        const currentList = await getWithCompression<any[]>(listKey) ?? [];
-        const updatedList = [liveArticle, ...currentList.filter((item: any) => item.slug !== slug)].slice(0, 1000);
-        await setWithCompression(listKey, updatedList, { ex: 2592000 });
+        // 2. Pre-normalize and prepend to EN and AR main listings
+        const liveEn = normalizeArticle(liveArticle, 'en');
+        const liveAr = normalizeArticle(liveArticle, 'ar');
+
+        const listKeyEn = `insights:list:en`;
+        const currentListEn = await getWithCompression<any[]>(listKeyEn) ?? [];
+        const updatedListEn = [liveEn, ...currentListEn.filter((item: any) => item.slug !== slug)].slice(0, 1000);
+        await setWithCompression(listKeyEn, updatedListEn, { ex: 2592000 });
+
+        const listKeyAr = `insights:list:ar`;
+        const currentListAr = await getWithCompression<any[]>(listKeyAr) ?? [];
+        const updatedListAr = [liveAr, ...currentListAr.filter((item: any) => item.slug !== slug)].slice(0, 1000);
+        await setWithCompression(listKeyAr, updatedListAr, { ex: 2592000 });
       } else if (action === 'edit' && content) {
         draft.content = content;
       }
       await draftDb.setDraft(topic, draft);
-      console.log(`[admin] Updated and synchronized draft for "${topic}" | Action: "${action}"`);
+      console.log(`[admin] Updated manual draft for "${topic}" | Action: "${action}"`);
     } else {
-      console.warn(`[admin] Attempted to update non-existent draft for: "${topic}"`);
+      console.warn(`[admin] Attempted manual draft update for non-existent topic: "${topic}"`);
       return NextResponse.json({ error: 'Not Found' }, { status: 404 });
     }
     

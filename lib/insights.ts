@@ -40,6 +40,72 @@ export interface InsightItem {
   persistError?: string;
 }
 
+export interface BilingualInsightItem {
+  id: string;
+  slug: string;
+  title: string | { en: string; ar: string };
+  description: string | { en: string; ar: string };
+  link: string;
+  pubDate: string;
+  source: string;
+  category: 'gcc' | 'expat';
+  language: 'en' | 'ar' | 'regional';
+  image?: string;
+  tags?: string[];
+  content?: string | { en: string; ar: string };
+  status?: 'draft' | 'pending' | 'published' | 'rejected' | 'deleted' | 'failed';
+  author?: {
+    id: string;
+    name: string | { en: string; ar: string };
+    role: string | { en: string; ar: string };
+  };
+  humanEdited?: boolean;
+  editedAt?: string;
+  qualityScore?: number;
+  policyResult?: 'pass' | 'fail' | 'delete';
+  policyViolations?: { category: string; reason: string; severity: 'critical' | 'warning' | 'info'; location?: string }[];
+  wordCount?: number;
+  retryCount?: number;
+  maxRetries?: number;
+  country?: string;
+  topic?: string;
+  persistError?: string;
+}
+
+/**
+ * Normalizes a bilingual database article into a specific language version (plain strings)
+ * so that it is perfectly backward-compatible with all React client views.
+ * 
+ * Why this particular helper is used:
+ * Keeps the database representation unified in a single document while completely 
+ * shielding the client layout code from bilingual object parsing complexity.
+ */
+export function normalizeArticle(item: any, lang: 'en' | 'ar'): InsightItem {
+  if (!item) return null as any;
+  
+  const title = typeof item.title === 'string' ? item.title : (item.title?.[lang] || item.title?.en || '');
+  const description = typeof item.description === 'string' ? item.description : (item.description?.[lang] || item.description?.en || '');
+  const content = typeof item.content === 'string' ? item.content : (item.content?.[lang] || item.content?.en || '');
+  
+  let author = item.author;
+  if (author) {
+    author = {
+      id: author.id,
+      name: typeof author.name === 'string' ? author.name : (author.name?.[lang] || author.name?.en || ''),
+      role: typeof author.role === 'string' ? author.role : (author.role?.[lang] || author.role?.en || '')
+    };
+  }
+
+  return {
+    ...item,
+    title,
+    description,
+    content,
+    language: lang,
+    author
+  };
+}
+
 // ============================================================================
 // SOLID Design Principles Refactoring
 // ============================================================================
@@ -66,7 +132,9 @@ export class RedisInsightRepository implements IInsightRepository {
     try {
       const stored = await getWithCompression<InsightItem[]>(`insights:list:${lang}`);
       if (stored && Array.isArray(stored)) {
-        return stored;
+        // Why mapping normalization is used: Automatically flattens any bilingual 
+        // objects into standard strings for the requested language.
+        return stored.map(item => normalizeArticle(item, lang));
       }
     } catch (e) {
       console.error("Failed to fetch insights list from Redis:", e);
@@ -190,7 +258,7 @@ export class InsightService {
     
     // Attempt standard direct fetch
     const article = await this.repository.getRawArticle(normalized);
-    if (article) return article;
+    if (article) return normalizeArticle(article, lang);
 
     // Fallback to fuzzy slug search on the list
     const list = await this.getInsights(lang);
@@ -204,13 +272,13 @@ export class InsightService {
 
     if (fuzzyMatch) {
       const fullArticle = await this.repository.getRawArticle(fuzzyMatch.slug);
-      if (fullArticle) return fullArticle;
-      if (fuzzyMatch.content) return fuzzyMatch;
+      if (fullArticle) return normalizeArticle(fullArticle, lang);
+      if (fuzzyMatch.content) return normalizeArticle(fuzzyMatch, lang);
     }
 
     // Secondary fallback check
     const otherArticle = await this.repository.getRawArticle(normalized);
-    if (otherArticle) return otherArticle;
+    if (otherArticle) return normalizeArticle(otherArticle, lang);
 
     return null;
   }

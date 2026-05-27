@@ -1,14 +1,43 @@
 // Admin Workflows API - Simplified for External Agent Workflow
-// WHY: Removed workflow monitoring (init/trending/generate/policy/score steps)
-// The external agent handles article generation; this API only manages drafts
-// - GET: Fetch drafts or published articles for human verification
-// - POST: Approve (draft→published), reject, or delete articles
+// WHY: This API manages the review drafts and published insights list.
+// It is fully refactored to support the Unified Bilingual Document Model:
+// - GET: Returns normalized articles localized to the requested tab/language.
+// - POST: Approves (generates updated translations if human edits are present, then publishes to both EN & AR feeds), rejects, or deletes.
 import { NextRequest, NextResponse } from 'next/server';
 import { redis, getWithCompression, setWithCompression } from '@/lib/redis';
+import { translateMarkdown } from '@/lib/translate';
 
 const CACHE_TIMES = {
   INSIGHTS_ARCHIVE: 2592000,
 };
+
+// Why local normalization is used:
+// Keeps the dashboard and list databases fully backward-compatible by flinging
+// localized properties dynamically on retrieval.
+function normalizeArticle(item: any, lang: 'en' | 'ar'): any {
+  if (!item) return null;
+  const title = typeof item.title === 'string' ? item.title : (item.title?.[lang] || item.title?.en || '');
+  const description = typeof item.description === 'string' ? item.description : (item.description?.[lang] || item.description?.en || '');
+  const content = typeof item.content === 'string' ? item.content : (item.content?.[lang] || item.content?.en || '');
+  
+  let author = item.author;
+  if (author) {
+    author = {
+      ...author,
+      name: typeof author.name === 'string' ? author.name : (author.name?.[lang] || author.name?.en || ''),
+      role: typeof author.role === 'string' ? author.role : (author.role?.[lang] || author.role?.en || '')
+    };
+  }
+
+  return {
+    ...item,
+    title,
+    description,
+    content,
+    language: lang,
+    author
+  };
+}
 
 async function loadDrafts(lang: 'en' | 'ar') {
   const raw = await getWithCompression<any[]>(`insights:drafts:${lang}`);
@@ -18,15 +47,16 @@ async function loadDrafts(lang: 'en' | 'ar') {
       const slug = entry.slug;
       if (!slug) return null;
       const body = await getWithCompression<any>(`insights:draft:article:${slug}`).catch(() => null);
+      const normalized = body ? normalizeArticle(body, lang) : null;
       return {
         slug,
-        title: body?.title ?? entry.title ?? slug,
-        description: body?.description ?? entry.description ?? '',
+        title: normalized?.title ?? entry.title ?? slug,
+        description: normalized?.description ?? entry.description ?? '',
         language: lang,
-        status: body?.status ?? entry.status ?? 'pending',
-        qualityScore: body?.qualityScore,
-        wordCount: body?.wordCount,
-        content: body?.content ?? '',
+        status: normalized?.status ?? entry.status ?? 'pending',
+        qualityScore: normalized?.qualityScore,
+        wordCount: normalized?.wordCount,
+        content: normalized?.content ?? '',
       };
     })
   );
@@ -41,21 +71,23 @@ async function loadPublished(lang: 'en' | 'ar') {
       const slug = entry.slug;
       if (!slug) return null;
       const body = await getWithCompression<any>(`insights:article:${slug}`).catch(() => null);
-      if (!body || body.status !== 'published') return null;
+      if (!body) return null;
+      const normalized = normalizeArticle(body, lang);
+      if (normalized.status !== 'published') return null;
       return {
         slug,
         lang,
-        title: body.title ?? entry.title ?? slug,
-        description: body.description ?? entry.description ?? '',
+        title: normalized.title ?? entry.title ?? slug,
+        description: normalized.description ?? entry.description ?? '',
         language: lang,
         status: 'published',
-        qualityScore: body.qualityScore,
-        wordCount: body.wordCount,
-        content: body.content ?? '',
+        qualityScore: normalized.qualityScore,
+        wordCount: normalized.wordCount,
+        content: normalized.content ?? '',
         // image field so the admin card can render the thumbnail
-        image: body.image ?? entry.image ?? null,
+        image: normalized.image ?? entry.image ?? null,
         // topic is not always present in insights-store articles; fall back to title or slug
-        topic: body.topic ?? body.title ?? slug,
+        topic: normalized.topic ?? normalized.title ?? slug,
       };
     })
   );
@@ -114,22 +146,51 @@ export async function POST(request: NextRequest) {
       const article = await getWithCompression<any>(draftKey);
       if (!article) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-      if (content !== undefined) article.content = content;
-      if (title !== undefined) article.title = title;
+      // Handle edits and re-translation if human editor adjusted the English text
+      // Why: Re-translating ensures that manually corrected content propagates to Arabic.
+      if (title !== undefined) {
+        if (typeof article.title === 'string') {
+          article.title = { en: title, ar: await translateMarkdown(title, 'en', 'ar') };
+        } else {
+          article.title.en = title;
+          article.title.ar = await translateMarkdown(title, 'en', 'ar');
+        }
+      }
+      
+      if (content !== undefined) {
+        if (typeof article.content === 'string') {
+          article.content = { en: content, ar: await translateMarkdown(content, 'en', 'ar') };
+        } else {
+          article.content.en = content;
+          article.content.ar = await translateMarkdown(content, 'en', 'ar');
+        }
+      }
+
       article.status = 'published';
 
+      // 1. Commit the bilingual document to Redis (insights:article:${slug})
       await setWithCompression(`insights:article:${slug}`, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
 
-      const listKey = `insights:list:${lang}`;
-      const current = await getWithCompression<any[]>(listKey) ?? [];
-      await setWithCompression(listKey, [article, ...current].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+      // 2. Pre-normalize copies and prepend to English and Arabic main feeds
+      const liveArticleEn = normalizeArticle(article, 'en');
+      const liveArticleAr = normalizeArticle(article, 'ar');
 
+      const listKeyEn = `insights:list:en`;
+      const currentEn = await getWithCompression<any[]>(listKeyEn) ?? [];
+      await setWithCompression(listKeyEn, [liveArticleEn, ...currentEn.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+
+      const listKeyAr = `insights:list:ar`;
+      const currentAr = await getWithCompression<any[]>(listKeyAr) ?? [];
+      await setWithCompression(listKeyAr, [liveArticleAr, ...currentAr.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+
+      // 3. Delete drafts from queue lists
       for (const l of ['en', 'ar'] as const) {
         const dl = await getWithCompression<any[]>(`insights:drafts:${l}`) ?? [];
         await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
       }
 
       await redis.del(draftKey).catch(() => {});
+      console.log(`[admin] Approved and bilingual-published article: "${slug}"`);
       return NextResponse.json({ success: true });
     }
 
@@ -148,8 +209,6 @@ export async function POST(request: NextRequest) {
       const articleKey = `insights:article:${slug}`;
 
       // Remove from BOTH language listing caches regardless of which lang was provided.
-      // Why: an article may appear in en or ar lists (or both) depending on how it was published.
-      // Removing only the provided lang would leave a stale entry in the other language's feed.
       for (const l of ['en', 'ar'] as const) {
         const listKey = `insights:list:${l}`;
         const current = await getWithCompression<any[]>(listKey) ?? [];
@@ -161,7 +220,7 @@ export async function POST(request: NextRequest) {
 
       // Delete the full article detail key.
       await redis.del(articleKey).catch(() => {});
-
+      console.log(`[admin] Permanently deleted article details: "${slug}"`);
       return NextResponse.json({ success: true });
     }
 
