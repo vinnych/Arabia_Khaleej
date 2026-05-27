@@ -13,6 +13,7 @@ import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { getAuthorById } from "@/lib/authors";
 
 // ─── Content analysis helpers ────────────────────────────────────────────────
 
@@ -148,11 +149,20 @@ export default function InsightArticleClient({
   const { t, isRTL, language } = useLanguage();
   const router = useRouter();
   const [imgError, setImgError] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   // We removed translation and loading states since the side-by-side Perspective (AR)
   // translation block has been retired for a faster page load and clean UX.
   const [copied, setCopied] = useState(false);
   const article = initialArticle;
+
+  // WHY: Query the rich author object for biography rendering to support high-end E-E-A-T presentation
+  const fullAuthor = useMemo(() => {
+    if (!article.author?.id) return null;
+    // Normalize variant database IDs (e.g. zaid-alharbi vs zaid-al-harbi)
+    const nid = article.author.id === "zaid-alharbi" ? "zaid-al-harbi" : article.author.id;
+    return getAuthorById(nid);
+  }, [article.author?.id]);
 
   // ── Derived content metadata ──────────────────────────────────────────────
   const readTime = useMemo(() => article.content ? estimateReadTime(article.content) : null, [article.content]);
@@ -606,6 +616,63 @@ export default function InsightArticleClient({
                   */}
                   {preprocessMarkdown(article.content)}
                 </ReactMarkdown>
+              </div>
+            )}
+
+            {/* ── Sleek, Minimalist Author Signature Block ────────────────── */}
+            {/* WHY: Implements the premium hybrid publishing standard: keeps the top clutter-free and provides full visual credentials and bio at the end of the article. */}
+            {/* Added comprehensive error handling and safety fallbacks to prevent broken image displays or stray text markers if credentials are missing. */}
+            {fullAuthor && (
+              <div className={`mt-14 pt-8 border-t border-white/5 flex flex-col sm:flex-row gap-5 items-start ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}>
+                <div className="relative w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex-shrink-0 flex items-center justify-center border border-brand-gold/15 shrink-0 mx-auto sm:mx-0">
+                  {fullAuthor.image && !avatarError ? (
+                    <img
+                      src={fullAuthor.image}
+                      alt={isRTL ? (fullAuthor.nameAr || fullAuthor.name) : (fullAuthor.name || "Analyst")}
+                      className="w-full h-full object-cover animate-in fade-in duration-300"
+                      onError={() => {
+                        // Gracefully handles broken image assets: swaps to letter badge
+                        setAvatarError(true);
+                      }}
+                    />
+                  ) : (
+                    <span className="text-brand-gold text-base font-bold select-none">
+                      {((isRTL ? (fullAuthor.nameAr || fullAuthor.name) : (fullAuthor.name || "A"))[0] || "A").toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-1.5 flex-1 w-full">
+                  <div className={`flex flex-wrap items-baseline gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <h4 className="text-sm font-bold text-brand-gold">
+                      {isRTL ? (fullAuthor.nameAr || fullAuthor.name) : (fullAuthor.name || "Editorial Analyst")}
+                    </h4>
+                    {(isRTL ? (fullAuthor.roleAr || fullAuthor.role) : fullAuthor.role) && (
+                      <>
+                        <span className="text-[10px] opacity-40">•</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">
+                          {isRTL ? (fullAuthor.roleAr || fullAuthor.role) : fullAuthor.role}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  {(isRTL ? (fullAuthor.bioAr || fullAuthor.bio) : fullAuthor.bio) && (
+                    <p className="text-xs font-light leading-relaxed opacity-60 max-w-2xl">
+                      {isRTL ? (fullAuthor.bioAr || fullAuthor.bio) : fullAuthor.bio}
+                    </p>
+                  )}
+                  {fullAuthor.social?.[0] && (
+                    <div className="pt-1">
+                      <a
+                        href={fullAuthor.social[0]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] font-bold uppercase tracking-wider text-brand-gold/50 hover:text-brand-gold transition-colors"
+                      >
+                        {isRTL ? "الملف المهني ↗" : "Professional Profile ↗"}
+                      </a>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
         </div>

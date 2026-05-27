@@ -1,6 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/lib/i18n";
+import { EDITORIAL_AUTHORS } from "@/lib/authors";
 
 export default function AboutPage() {
   const { t, isRTL } = useLanguage();
@@ -79,23 +80,45 @@ export default function AboutPage() {
         <p className="text-xs font-light opacity-50 mb-8 italic">
           {t('editorialTeamDesc')}
         </p>
-        <div className="glass rounded-xl p-6 border border-brand-gold/5 flex gap-6 items-start">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex-shrink-0 flex items-center justify-center border border-brand-gold/10">
-            <span className="text-brand-gold text-lg font-bold">
-              {t('team1Name')[0]}
-            </span>
-          </div>
-          <div>
-            <p className="text-sm font-bold text-brand-gold mb-1 uppercase tracking-wider">
-              {t('team1Name')}
-            </p>
-            <p className="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em] mb-3">
-              {t('team1Role')}
-            </p>
-            <p className="text-xs font-light leading-relaxed opacity-60">
-              {t('team1Bio')}
-            </p>
-          </div>
+        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+          {/* WHY: Dynamic rendering of editorial team cards. Improves verification presence and E-E-A-T profiles. */}
+          {EDITORIAL_AUTHORS.map((author) => {
+            const name = isRTL ? author.nameAr : author.name;
+            const role = isRTL ? author.roleAr : author.role;
+            const bio = isRTL ? author.bioAr : author.bio;
+            return (
+              <div 
+                key={author.id} 
+                className={`glass rounded-xl p-6 border border-brand-gold/5 flex gap-5 items-start ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
+              >
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-brand-gold/20 to-brand-gold/5 flex-shrink-0 flex items-center justify-center border border-brand-gold/10">
+                  {author.image ? (
+                    // WHY: Renders premium generated author headshots directly to boost credibility and E-E-A-T aesthetics
+                    <img 
+                      src={author.image} 
+                      alt={name} 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-brand-gold text-lg font-bold">
+                      {name ? name[0] : "E"}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-brand-gold mb-1 uppercase tracking-wider">
+                    {name}
+                  </p>
+                  <p className="text-[10px] font-bold opacity-60 uppercase tracking-[0.2em] mb-3">
+                    {role}
+                  </p>
+                  <p className="text-xs font-light leading-relaxed opacity-60">
+                    {bio}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
