@@ -1,12 +1,103 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, TrendingUp, Newspaper, Mail, ArrowRight, ChevronRight } from "lucide-react";
+import { Clock, TrendingUp, Newspaper, Mail, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import PrayerLite from "@/components/prayer/PrayerLite";
 import FinanceTicker from "@/components/finance/FinanceTicker";
 import PublicSurvey from "@/components/insights/PublicSurvey";
+import { getDeterministicFallback } from "@/lib/fallbacks";
+import { InsightItem } from "@/lib/insights";
+
+// ─── WHY A SEPARATE SUB-COMPONENT ────────────────────────────────────────────
+// Each featured insight card needs its OWN imgError state. If we kept the map
+// inside the parent, all cards would share one error flag and a single broken
+// image would hide every card's image. Extracting to FeaturedInsightCard gives
+// each card independent error tracking — identical to the pattern in InsightCard.tsx.
+function FeaturedInsightCard({
+  insight,
+  formatDateSafe,
+  t,
+}: {
+  insight: InsightItem;
+  formatDateSafe: (d: string | undefined) => string;
+  t: (key: string) => string;
+}) {
+  // Per-card error flag: when the external news image 404s, fall back to deterministic Unsplash image.
+  const [imgError, setImgError] = useState(false);
+
+  // WHY unoptimized guard: insight.image can be from any external news agency (QNA, WAM, SPA, BNA…).
+  // Next.js image optimizer only works for domains listed in next.config.ts remotePatterns.
+  // For unlisted domains it throws a 400 error. So we detect external-unknown URLs and bypass
+  // the optimizer for them, while still optimizing local paths and known CDN URLs.
+  const KNOWN_DOMAINS = ['unsplash.com', 'pexels.com', 'qna.org.qa', 'wam.ae', 'spa.gov.sa', 'bna.bh', 'omannews.gov.om', 'app.com.pk', 'pna.gov.ph'];
+  const isExternalUnknown = !!insight.image && !insight.image.startsWith('/') && !KNOWN_DOMAINS.some(d => insight.image?.includes(d));
+
+  const imgSrc = imgError
+    ? getDeterministicFallback(insight.slug)         // deterministic Unsplash fallback
+    : (insight.image || getDeterministicFallback(insight.slug)); // real image or fallback
+
+  return (
+    <Link
+      key={insight.slug}
+      href={`/insights/${insight.slug}`}
+      className="group flex flex-col gap-5 glass rounded-xl p-5 hover:border-white/10 transition-all duration-350"
+    >
+      <div className="relative w-full h-56 rounded-lg overflow-hidden border border-white/5">
+        <Image
+          src={imgSrc}
+          alt={insight.title}
+          fill
+          // WHY sizes: Required for `fill` images. Tells the browser which image variant
+          // to fetch at each breakpoint. Without it, Next.js defaults to 100vw which
+          // downloads a needlessly large image for a 50%-wide grid column on desktop.
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-700"
+          // WHY unoptimized: Bypasses the Next.js image proxy for unknown external domains.
+          // Avoids 400 errors from the optimizer when an image comes from a non-allowlisted CDN.
+          unoptimized={isExternalUnknown}
+          onError={() => setImgError(true)}
+        />
+        <div className="absolute top-6 left-6 px-4 py-2 glass text-[10px] font-bold rounded-full text-brand-gold uppercase tracking-widest border-brand-gold/20">
+          {insight.tags?.[0] || 'Insight'}
+        </div>
+      </div>
+      <div className="flex flex-col gap-4 px-2">
+        <h3 className="text-2xl font-display font-bold text-foreground leading-tight group-hover:text-brand-gold transition-colors">
+          {insight.title}
+        </h3>
+        <p className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed font-light italic">
+          {insight.description}
+        </p>
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-brand-gold/10 p-0.5 border border-brand-gold/20">
+              {/* WHY: Author avatar mapped by ID to local static images. Width/height = container size (32px). */}
+              <Image
+                src={
+                  insight.author?.id === 'layla-mansour' ? '/images/authors/layla-mansour.png' :
+                  '/images/authors/zaid-alharbi.png'
+                }
+                alt={insight.author?.name || t('siteName')}
+                width={32}
+                height={32}
+                className="rounded-full grayscale group-hover:grayscale-0 transition-all"
+              />
+            </div>
+            <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-widest">
+              {insight.author?.name || t('siteName')}
+            </span>
+          </div>
+          <div className="text-[10px] font-bold text-brand-gold/50 uppercase tracking-tighter">
+            {formatDateSafe(insight.pubDate)}
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}
 
 const NAV_LINKS = [
   { key: 'prayerTimes', href: "/prayer", icon: Clock, desc: "prayerTimesDesc" },
@@ -23,8 +114,6 @@ const GCC_COUNTRIES = [
   { id: 'oman', key: 'oman', flag: '/flags/oman_new.png', code: 'OM' },
   { id: 'bahrain', key: 'bahrain', flag: '/flags/bahrain_new.png', code: 'BH' },
 ];
-
-import { InsightItem } from "@/lib/insights";
 
 interface HomeClientProps {
   initialInsights?: InsightItem[];
@@ -203,56 +292,17 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
               </Link>
             </div>
 
+            {/* WHY: Delegating each card to FeaturedInsightCard so each card gets its own
+                 independent imgError state. A shared flag in the parent would cause all cards
+                 to fall back simultaneously when just one image fails. */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {initialInsights.map((insight) => (
-                <Link
+                <FeaturedInsightCard
                   key={insight.slug}
-                  href={`/insights/${insight.slug}`}
-                  className="group flex flex-col gap-5 glass rounded-xl p-5 hover:border-white/10 transition-all duration-350"
-                >
-                  <div className="relative w-full h-56 rounded-lg overflow-hidden border border-white/5">
-                    <Image
-                      src={insight.image || "/images/insights/default.png"}
-                      alt={insight.title}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute top-6 left-6 px-4 py-2 glass text-[10px] font-bold rounded-full text-brand-gold uppercase tracking-widest border-brand-gold/20">
-                      {insight.tags?.[0] || 'Insight'}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-4 px-2">
-                    <h3 className="text-2xl font-display font-bold text-foreground leading-tight group-hover:text-brand-gold transition-colors">
-                      {insight.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground/80 line-clamp-2 leading-relaxed font-light italic">
-                      {insight.description}
-                    </p>
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-brand-gold/10 p-0.5 border border-brand-gold/20">
-                          <Image 
-                            src={
-                              insight.author?.id === 'layla-mansour' ? '/authors/layla.png' : 
-                              insight.author?.id === 'omar-qabbani' ? '/authors/omar.png' : 
-                              '/authors/zaid.png'
-                            } 
-                            alt={insight.author?.name || t('siteName')} 
-                            width={32} 
-                            height={32}
-                            className="rounded-full grayscale group-hover:grayscale-0 transition-all"
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-foreground/60 uppercase tracking-widest">
-                          {insight.author?.name || t('siteName')}
-                        </span>
-                      </div>
-                      <div className="text-[10px] font-bold text-brand-gold/50 uppercase tracking-tighter">
-                        {formatDateSafe(insight.pubDate)}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
+                  insight={insight}
+                  formatDateSafe={formatDateSafe}
+                  t={t}
+                />
               ))}
             </div>
           </section>
