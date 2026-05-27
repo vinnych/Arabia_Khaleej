@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { draftDb } from '@/lib/draftsDb';
 import { toSlug } from '@/lib/utils';
-import { getWithCompression, setWithCompression } from '@/lib/redis';
+import { redis, getWithCompression, setWithCompression } from '@/lib/redis';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -42,7 +42,12 @@ export async function GET(req: Request) {
   }
 }
 
-// DELETE a draft (Authorized)
+// DELETE an article (Authorized) - handles both drafts and live published articles.
+// Why this particular is used: If a published article is deleted from the dashboard,
+// we must remove its entry from Redis draft queue (`article:${topic}`), the live details key
+// (`insights:article:${slug}`), and the homepage listing feed caches (`insights:list:en` & `insights:list:ar`).
+// If we only deleted the draft key, the live page on the website would still be active and visible,
+// leaving broken routes and obsolete content.
 export async function DELETE(req: Request) {
   try {
     if (!isAuthorized(req)) {
@@ -56,14 +61,45 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Bad Request: "topic" string parameter required.' }, { status: 400 });
     }
 
-    await draftDb.delDraft(body.topic);
-    console.log(`[admin] Permanently deleted draft article for topic: "${body.topic}"`);
+    const topic = body.topic;
+    // Generate the URL-friendly slug matching the publish logic to determine target keys.
+    // Why: Consistent slug generation ensures we hit the exact same Redis keys created during publishing.
+    const slug = toSlug(topic);
+
+    // 1. Delete draft key from the queue (article:${topic})
+    // Why: Removes the article metadata from the admin dashboard list.
+    await draftDb.delDraft(topic);
+    console.log(`[admin] Permanently deleted draft article key for topic: "${topic}"`);
+
+    // 2. Delete live compressed article detail key (insights:article:${slug})
+    // Why: Prevents dangling SSR pages from continuing to resolve, ensuring search engines receive 404s.
+    const articleKey = `insights:article:${slug}`;
+    await redis.del(articleKey);
+    console.log(`[admin] Deleted live article details key: "${articleKey}"`);
+
+    // 3. Filter and remove from localized listings lists (insights:list:en & insights:list:ar)
+    // Why: Homepages and listings read from cached arrays to preserve Upstash API limits. Removing the item
+    // here ensures homepage feed items disappear immediately without waiting for a cache refresh.
+    for (const lang of ['en', 'ar']) {
+      const listKey = `insights:list:${lang}`;
+      const currentList = await getWithCompression<any[]>(listKey);
+      if (currentList && Array.isArray(currentList)) {
+        const updatedList = currentList.filter((item: any) => item.slug !== slug);
+        // Optimize operations: only update if the list actually contained the deleted item
+        if (updatedList.length !== currentList.length) {
+          await setWithCompression(listKey, updatedList, { ex: 2592000 });
+          console.log(`[admin] Successfully removed article from listing: "${listKey}"`);
+        }
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err: any) {
-    console.error('[article API] DELETE draft error:', err.message || err);
+    console.error('[article API] DELETE draft/article error:', err.message || err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
 
 // PUT (Update status or edit content) (Authorized)
 export async function PUT(req: Request) {
