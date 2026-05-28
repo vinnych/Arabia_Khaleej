@@ -26,7 +26,8 @@ export default function ContactClient() {
       if (res.ok) {
         setSubmitted(true);
       } else {
-        alert(t('systemError'));
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.message ? `Error: ${errorData.message}` : t('systemError'));
       }
     } catch (err) {
       alert(t('systemError'));

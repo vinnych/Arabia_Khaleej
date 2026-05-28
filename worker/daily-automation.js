@@ -7,6 +7,11 @@
  */
 
 export default {
+  // Add a simple fetch handler so visiting the URL in a browser doesn't throw an error
+  async fetch(request, env, ctx) {
+    return new Response("Arabia Khaleej Automation Worker is active and running on a schedule.", { status: 200 });
+  },
+
   async scheduled(event, env, ctx) {
     console.log(`Cron triggered: ${event.cron}`);
 
