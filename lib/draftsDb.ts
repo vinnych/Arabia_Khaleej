@@ -18,7 +18,10 @@ export const draftDb = {
   async getDraft(topic: string) {
     // Why standard fetch instead of Redis TCP: Cloudflare Pages / Workers do not support TCP connections out-of-the-box
     // without specialized configurations. The Upstash REST API is highly optimized for serverless environments.
-    const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/article:${topic}`, {
+    // Why encodeURIComponent: setDraft uses encodeURIComponent when writing keys.
+    // getDraft must use the same encoding so topics with spaces or special chars
+    // (e.g. "Dubai Real Estate" → "Dubai%20Real%20Estate") resolve to the same key.
+    const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/article:${encodeURIComponent(topic)}`, {
       headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
       cache: 'no-store'
     });
@@ -71,7 +74,10 @@ export const draftDb = {
   },
 
   async delDraft(topic: string) {
-    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/article:${topic}`, {
+    // Why encodeURIComponent: Must match the encoded key that setDraft wrote.
+    // Without this, deleting a topic like "Dubai Real Estate" targets the wrong Redis key
+    // and the draft stays stuck in the dashboard forever.
+    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/article:${encodeURIComponent(topic)}`, {
       headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` }
     });
   },
@@ -90,7 +96,11 @@ export const draftDb = {
     // - Promise.all runs all fetch requests in parallel, reducing the retrieval time to a single concurrent roundtrip.
     const drafts = await Promise.all(
       keys.map(async (key: string) => {
-        const topic = key.replace('article:', '');
+        // Why decodeURIComponent: Redis keys are stored as article:{encodedTopic} (e.g. article:Dubai%20Real%20Estate).
+        // getDraft re-encodes the topic with encodeURIComponent before the fetch call.
+        // Passing the already-encoded key directly would double-encode it (Dubai%2520Real%2520Estate),
+        // causing a Redis miss. We must decode first to restore the original plain-text topic.
+        const topic = decodeURIComponent(key.replace('article:', ''));
         return await this.getDraft(topic);
       })
     );

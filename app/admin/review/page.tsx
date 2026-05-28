@@ -24,8 +24,15 @@ interface Article {
 const getBadgeClass = (status: string, styles: any) => {
   switch (status) {
     case 'generating': return styles['badge-generating'];
+    // Why both 'pending' and 'pending_review': old draft-queue articles use 'pending_review'
+    // while new insights-store drafts (from /api/admin/workflows/callback) use 'pending'.
+    // Both represent the same editorial state: awaiting human review.
+    case 'pending': return styles['badge-pending_review'];
     case 'pending_review': return styles['badge-pending_review'];
     case 'published': return styles['badge-published'];
+    // Why 'error' case: drafts that fail agent generation have status 'error'.
+    // Without this, error articles show a blank unstyled badge, making them look like orphans.
+    case 'error': return styles['badge-error'];
     default: return '';
   }
 };
@@ -167,13 +174,30 @@ export default function Dashboard() {
     }
   };
 
-  const publishArticle = async (t: string) => {
+  // Why two publish paths:
+  // - Draft-queue articles (from /api/webhook) are identified by topic alone.
+  //   They are published via PUT /api/article with action:'publish'.
+  // - Insights-store drafts (from /api/admin/workflows/callback) are identified by slug+lang.
+  //   Calling PUT /api/article for these returns 404 (no article:{topic} key exists in Redis).
+  //   They must be approved via POST /api/admin/workflows with action:'approve'.
+  const publishArticle = async (art: Article) => {
     try {
-      const res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: t, action: 'publish' }),
-      });
+      let res;
+      if (art.slug && art.lang) {
+        // Insights-store draft → approve via workflows endpoint
+        res = await fetch(`/api/admin/workflows?secret=${encodeURIComponent(secret)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug: art.slug, lang: art.lang, action: 'approve' }),
+        });
+      } else {
+        // Draft-queue article → publish via article endpoint
+        res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic: art.topic, action: 'publish' }),
+        });
+      }
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
       if (data?.error) throw new Error(data.error);
@@ -282,7 +306,9 @@ export default function Dashboard() {
                 <button className={styles.btnView} onClick={() => viewArticle(art)}>Review / Edit</button>
                 <div style={{display: 'flex', gap: '0.5rem', marginTop: '0.5rem'}}>
                   {art.status !== 'published' && (
-                    <button className={styles.btnPublish} onClick={() => publishArticle(art.topic)}>Publish</button>
+                    // Pass full article object so publishArticle can route to the correct endpoint
+                    // (insights-store drafts need approve via /api/admin/workflows, not PUT /api/article)
+                    <button className={styles.btnPublish} onClick={() => publishArticle(art)}>Publish</button>
                   )}
                   <button className={styles.btnDelete} onClick={() => deleteArticle(art)}>Delete</button>
                 </div>

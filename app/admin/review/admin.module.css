@@ -180,6 +180,15 @@
   border-color: rgba(16, 185, 129, 0.3);
 }
 
+/* WHY: Error status drafts (agent rejected / timed out) need a distinct red badge
+   so editors can immediately spot and clean them up from the dashboard. */
+.badge-error {
+  background: rgba(239, 68, 68, 0.12) !important;
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+
 .cardImg { 
   width: 100%; 
   height: 190px; 

@@ -36,7 +36,10 @@ export async function POST(req: Request) {
       status: payload.status === 'success' ? 'pending_review' : 'error',
       error: payload.error || '',
       content: payload.article || '',
-      word_count: payload.word_count?.toString() || '0',
+      // Why parseInt: word_count must be stored as a number so the dashboard can display it correctly.
+      // Storing as a string ('0') causes truthy checks like (art.word_count || 0) to always resolve to
+      // the string '0' instead of the actual numeric value from the agent payload.
+      word_count: parseInt(payload.word_count, 10) || 0,
       image_url: payload.image_url || '',
       // WHY: Extract agent-supplied tags here so they survive into the draft and
       // eventually into the published article. Previously this field was never
