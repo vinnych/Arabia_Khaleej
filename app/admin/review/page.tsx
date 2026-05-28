@@ -60,14 +60,18 @@ export default function Dashboard() {
           ? `/api/admin/workflows?secret=${encodeURIComponent(currentSecret)}&tab=published`
           : `/api/article?secret=${encodeURIComponent(currentSecret)}`;
 
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) {
         console.error(`[dashboard] Fetch failed with status ${res.status}`);
         return;
       }
       const data = await res.json();
+      if (data.error) {
+        console.error('[dashboard] API returned error:', data.error);
+        return;
+      }
       setArticles(data.articles || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('[dashboard] Failed to fetch articles:', err);
     }
   };
@@ -136,23 +140,27 @@ export default function Dashboard() {
   const deleteArticle = async (art: Article) => {
     if (!confirm("Are you sure you want to permanently delete this article?")) return;
     try {
+      let res;
       if (art.slug && art.lang) {
         // Published insights-store article – remove via workflows API.
-        const res = await fetch(`/api/admin/workflows?secret=${encodeURIComponent(secret)}`, {
+        res = await fetch(`/api/admin/workflows?secret=${encodeURIComponent(secret)}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ slug: art.slug, lang: art.lang, action: 'delete' }),
         });
-        if (!res.ok) throw new Error(`Server returned status ${res.status}`);
       } else {
         // Draft-queue article – cascade-delete via article API.
-        const res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
+        res = await fetch(`/api/article?secret=${encodeURIComponent(secret)}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ topic: art.topic }),
         });
-        if (!res.ok) throw new Error(`Server returned status ${res.status}`);
       }
+      
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
+      if (data?.error) throw new Error(data.error);
+      
       fetchArticles(secret, activeTab);
     } catch (err: any) {
       alert('Failed to delete article: ' + (err.message || err));
@@ -166,9 +174,10 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic: t, action: 'publish' }),
       });
-      if (!res.ok) {
-        throw new Error(`Server returned status ${res.status}`);
-      }
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
+      if (data?.error) throw new Error(data.error);
+
       fetchArticles(secret, activeTab);
     } catch (err: any) {
       alert('Failed to publish article: ' + (err.message || err));
@@ -183,9 +192,10 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic: selectedArticle.topic, action: 'edit', content: editContent }),
       });
-      if (!res.ok) {
-        throw new Error(`Server returned status ${res.status}`);
-      }
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
+      if (data?.error) throw new Error(data.error);
+      
       fetchArticles(secret, activeTab);
       modalRef.current?.close();
     } catch (err: any) {
@@ -250,7 +260,7 @@ export default function Dashboard() {
         )}
         
         {displayedArticles.map((art) => (
-          <div key={art.slug || art.topic} className={styles.card}>
+          <div key={art.slug ? `${art.slug}-${art.lang || 'en'}` : art.topic} className={styles.card}>
             <span className={`${styles.badge} ${getBadgeClass(art.status, styles)}`}>
               {/* Added optional chaining and fallback 'unknown' to prevent UI rendering crashes if status is missing */}
               {art.status?.replace('_', ' ') || 'unknown'}

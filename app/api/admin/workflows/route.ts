@@ -73,14 +73,14 @@ async function loadPublished(lang: 'en' | 'ar') {
       const body = await getWithCompression<any>(`insights:article:${slug}`).catch(() => null);
       if (!body) return null;
       const normalized = normalizeArticle(body, lang);
-      if (normalized.status !== 'published') return null;
+      if (normalized.status === 'draft') return null;
       return {
         slug,
         lang,
         title: normalized.title ?? entry.title ?? slug,
         description: normalized.description ?? entry.description ?? '',
         language: lang,
-        status: 'published',
+        status: normalized.status || entry.status || 'published',
         qualityScore: normalized.qualityScore,
         wordCount: normalized.wordCount,
         content: normalized.content ?? '',

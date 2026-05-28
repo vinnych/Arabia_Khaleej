@@ -6,105 +6,211 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 ---
 
 ## 💎 Project Essence
-- **Visionary Editorial**: Expert-led long-form regional analysis (1500+ words) focused on GCC transformation.
+- **AI Editorial Pipeline**: Expert-curated long-form regional analysis (1500+ words) powered by an external Python agent, with mandatory human review before publication.
 - **Real-time Utility**: Precision prayer times via Adhan API and live GCC market indicators.
-- **Glassmorphic UI**: A premium, responsive interface built with Next.js 15 and Framer Motion.
-- **Privacy First**: No permanent database; transient caching via Upstash Redis.
+- **Bilingual**: Full English ↔ Arabic support across editorial content, UI, and metadata.
+- **Glassmorphic UI**: A premium, responsive interface built with Next.js 15 and Tailwind CSS.
+- **Privacy First**: No permanent database; transient caching via Upstash Redis with TTLs on every key.
 
 ---
 
 ## 🚀 Technology Stack
+
 | Layer | Technology |
 | :--- | :--- |
 | **Framework** | Next.js 15 (App Router) + TypeScript |
-| **AI Engine** | Groq (Llama 3.3 70B & Llama 3.1 8B) |
-| **Persistence** | Upstash Redis (Transient Cache) |
-| **Imagery** | Multi-tier fallback (Pexels → Unsplash → Geometric) |
-| **Styling** | Tailwind CSS + Framer Motion |
-| **Infrastructure** | Cloudflare Pages + Workers |
+| **Runtime** | Cloudflare Pages (Edge Runtime — all API routes) |
+| **AI Engine** | External Python agent on Render (LLM generation) |
+| **Persistence** | Upstash Redis (REST API, transient cache) |
+| **Imagery** | Pexels API + geometric fallback |
+| **Styling** | Tailwind CSS + custom CSS |
+| **Infrastructure** | Cloudflare Pages + Cloudflare Workers |
+| **i18n** | Custom `lib/i18n.tsx` — EN / AR |
 
 ---
 
-## 🤖 External Agent Editorial Workflow
+## 🤖 Article Editorial Workflow
 
-Arabia Khaleej delegates heavy article generation to an external Python agent. The platform itself does **not** run any cron jobs for generating content. 
+Arabia Khaleej delegates heavy article generation to an external Python agent hosted on Render. The platform itself **does not** run LLM calls — keeping edge functions lightweight and within timeout limits.
 
-### Architecture Flow
+### End-to-End Flow
 
-1. **Trigger**: A Cloudflare Automation Worker (`worker/daily-automation.js`) hits the website's `/api/cron/generate` route every 30 minutes. 
-   *(Note: The worker also pings the Render agent every 14 minutes to prevent cold starts).*
-2. **Trending Topics**: The Next.js API `/api/cron/generate` generates trending topics for the GCC region.
-3. **Dispatch**: The website sends these topics to the external Python agent (`article-agent-zk00.onrender.com`).
-4. **Agent Activation**: The Python agent receives the topics, activates its heavy AI processing (using Groq 70B), and writes the articles.
-5. **Callback**: The agent sends the final completed drafts back to the website via a secure webhook (`POST /api/webhook`).
-6. **Persistence**: Drafts are stored in Upstash Redis and appear in the admin panel for human review.
+```
+[Cloudflare Cron Worker]           [Admin Dashboard]
+  every 30 min                       manual topic
+       │                                  │
+       ▼                                  ▼
+  GET /api/cron/generate          POST /api/generate
+  • Fetches UAE Google News            • Validates ADMIN_SECRET
+    RSS via rss2json.com proxy         • Calls triggerAgentGeneration()
+  • Picks random headline
+       │
+       └──────────────┬────────────────────┘
+                      ▼
+             lib/agentHelper.ts
+             • Writes article:{topic} → status: generating  (TTL: 7 days)
+             • POST → Python agent on Render /v1/generate
+             • Passes callback_url built from WEBHOOK_SECRET env var
+                      │
+                      ▼ (async callback)
+             POST /api/webhook
+             • Validates WEBHOOK_SECRET
+             • Saves content, tags, image_url
+             • article:{topic} → status: pending_review  (no TTL — persists for admin)
+                      │
+                      ▼
+          /admin/review  (polls every 5s)
+          • Review / Edit markdown content
+          • Publish → translates EN→AR, writes to insights:article:{slug}
+                       prepends to insights:list:en + insights:list:ar
+          • Delete  → cascades: draft + live + both list caches
+                      │
+                      ▼
+          Public Pages: /insights  /insights/[slug]
+          Served by lib/insights.ts SOLID service pipeline
+```
 
-This decoupled architecture ensures the Next.js edge functions don't time out during heavy LLM generation, keeping the main website lightweight and fast.
+### Article Status States
+
+| Status | TTL | Meaning |
+|---|---|---|
+| `generating` | 7 days | Agent dispatched, awaiting callback |
+| `error` | 2 days | Agent rejected immediately; auto-cleans |
+| `pending_review` | None | Ready for admin action — persists until published/deleted |
+| `published` | N/A (draft key updated; live key: 30 days) | Live on public feed |
 
 ---
 
 ## 🛠️ API Architecture
 
-| Endpoint | Parameters | Purpose |
-| :--- | :--- | :--- |
-| `GET /api/insights` | `lang`, `slug`, `limit` | Article delivery & discovery |
-| `GET /api/prayer-times` | `lat`, `lng` | Location-based prayer timings |
-| `GET /api/exchange-rates` | — | Real-time GCC currency dynamics |
-| `GET /api/market-data` | — | GCC stock and commodity indices |
-
-The generation pipeline is triggered externally by the Cloudflare Automation Worker pinging `/api/cron/generate` or manually via POST to `/api/generate` with proper authentication.
+| Endpoint | Method | Auth | Purpose |
+| :--- | :--- | :--- | :--- |
+| `/api/generate` | POST | `ADMIN_SECRET` or `CRON_SECRET` Bearer | Manual article generation trigger |
+| `/api/cron/generate` | GET | `CRON_SECRET` Bearer or query param | Automated trending-topic generation |
+| `/api/webhook` | POST | `WEBHOOK_SECRET` query param | Python agent callback receiver |
+| `/api/article` | GET | `ADMIN_SECRET` query param | List draft queue |
+| `/api/article` | PUT | `ADMIN_SECRET` query param | Edit or publish a draft |
+| `/api/article` | DELETE | `ADMIN_SECRET` query param | Cascade-delete draft + live + lists |
+| `/api/admin/workflows` | GET | `ADMIN_SECRET` query param | List published insights-store articles |
+| `/api/admin/workflows` | POST | `ADMIN_SECRET` query param | Delete a live published article |
+| `/api/insights` | GET | Public | Article listing & slug delivery |
+| `/api/prayer-times` | GET | Public | Location-based prayer timings |
+| `/api/exchange-rates` | GET | Public | Real-time GCC currency dynamics |
+| `/api/market-data` | GET | Public | GCC stock and commodity indices |
 
 ---
 
 ## 🔑 Environment Configuration
-Required environment variables for production:
+
+All required environment variables for production:
 
 ```env
-UPSTASH_REDIS_REST_URL=      # Redis Connection URL
-UPSTASH_REDIS_REST_TOKEN=    # Redis Auth Token
-PEXELS_API_KEY=              # Primary Imagery Source
-CRON_SECRET=                 # Worker Cron Authentication
-ADMIN_SECRET=                # Admin Review Panel Access
-NEXT_PUBLIC_ADSENSE_ID=      # AdSense Publisher ID
-NEXT_PUBLIC_SITE_VERIFICATION= # Google Site Verification
-CONTACT_WORKER_URL=          # Contact Form API URL
+# Upstash Redis (transient cache + draft queue)
+UPSTASH_REDIS_REST_URL=        # Redis connection URL
+UPSTASH_REDIS_REST_TOKEN=      # Redis auth token
+
+# Imagery
+PEXELS_API_KEY=                # Primary image source
+
+# Authentication
+ADMIN_SECRET=                  # Admin dashboard + /api/article access
+CRON_SECRET=                   # Cloudflare Automation Worker auth
+WEBHOOK_SECRET=                # Python agent callback auth (/api/webhook)
+                               # (can be same value as ADMIN_SECRET)
+
+# Site
+NEXT_PUBLIC_SITE_URL=          # e.g. https://arabiakhaleej.com
+                               # Used to build agent callback URLs dynamically
+NEXT_PUBLIC_ADSENSE_ID=        # AdSense publisher ID
+NEXT_PUBLIC_SITE_VERIFICATION= # Google Search Console verification token
+CONTACT_WORKER_URL=            # Cloudflare contact form worker URL
+
+# Optional overrides
+AGENT_URL=                     # Override Python agent base URL (default: Render)
+DASHBOARD_CALLBACK_URL=        # Full override for agent callback URL
 ```
+
+> **Important**: `WEBHOOK_SECRET` and `NEXT_PUBLIC_SITE_URL` are required — without them `lib/agentHelper.ts` will throw a configuration error and block all generation. Add them in your Cloudflare Pages dashboard under **Settings → Environment Variables**.
 
 ---
 
 ## ☁️ Cloudflare Deployment
 
-### 1. Frontend (Cloudflare Pages)
+### 1. Frontend — Cloudflare Pages (GitHub Integration)
 
-1. Run `npm run build` — outputs to `.vercel/output`
-2. In Cloudflare Pages, select **Next.js framework preset** with **Output = Serverless Functions** (SSR)
-3. Connect your repo / upload the built output
+Cloudflare Pages is connected to the GitHub repository and deploys automatically on every `git push` to `main`.
 
-Required Pages environment variables (Settings → Variables → Add):
-`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `PEXELS_API_KEY`, `ADMIN_SECRET`, `NEXT_PUBLIC_ADSENSE_ID`, `NEXT_PUBLIC_SITE_VERIFICATION`, `CONTACT_WORKER_URL`
+1. Go to **Cloudflare Pages → your project → Settings → Builds & Deployments**
+2. Build command: `npx @cloudflare/next-on-pages`
+3. Output directory: `.vercel/output/static`
+4. Framework preset: **Next.js (Edge)**
 
-### 2. Automation & Contact Workers (Cloudflare Worker)
+**Required Pages environment variables** (Settings → Environment Variables → Add):
+
+| Variable | Required | Notes |
+|---|---|---|
+| `UPSTASH_REDIS_REST_URL` | ✅ | Redis REST endpoint |
+| `UPSTASH_REDIS_REST_TOKEN` | ✅ | Redis auth token |
+| `PEXELS_API_KEY` | ✅ | Image API |
+| `ADMIN_SECRET` | ✅ | Admin dashboard access |
+| `CRON_SECRET` | ✅ | Cron worker auth |
+| `WEBHOOK_SECRET` | ✅ | Python agent callback auth |
+| `NEXT_PUBLIC_SITE_URL` | ✅ | e.g. `https://arabiakhaleej.com` |
+| `NEXT_PUBLIC_ADSENSE_ID` | ✅ | AdSense publisher ID |
+| `NEXT_PUBLIC_SITE_VERIFICATION` | ✅ | Google Search Console |
+| `CONTACT_WORKER_URL` | ✅ | Contact form worker URL |
+
+> **Note**: `.env.local` and `.env*` files are gitignored — they never reach Cloudflare. All secrets must be set via the dashboard.
+
+---
+
+### 2. Automation & Contact Workers (Manual Deploy)
+
+Workers are **not** auto-deployed from GitHub. You must deploy them manually after any change:
 
 ```bash
+# From the project root:
 npm run automation-worker:deploy
 npm run contact-worker:deploy
 ```
 
-These deploy the background `worker/daily-automation.js` and the `worker/worker.js` (contact form).
+> ⚠️ **IMPORTANT — After every automation worker deploy**, you must re-set the `CRON_SECRET` worker secret or the cron will return 401 and silently skip generation:
+>
+> ```bash
+> npx wrangler secret put CRON_SECRET --config worker/wrangler-automation.toml
+> ```
+> When prompted, enter the same value as your `CRON_SECRET` environment variable.
 
-Required Worker secrets (via `wrangler secret put <KEY>`):
-`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `PEXELS_API_KEY`, `CRON_SECRET`
+**Worker secrets also needed** (set once, persisted by Cloudflare):
+- `CRON_SECRET` — must match the Pages env var
+
+### 3. Python Agent (Render)
+
+The external article agent runs at `https://article-agent-zk00.onrender.com`. The Cloudflare Automation Worker pings it every 14 minutes to prevent cold starts.
+
+---
+
+## 🔑 Redis Key Schema
+
+| Key Pattern | TTL | Content |
+|---|---|---|
+| `article:{topic}` | Varies by status (see above) | Draft queue entry |
+| `insights:article:{slug}` | 30 days | Full bilingual article document |
+| `insights:list:en` | 30 days | Normalized EN article listing (max 1000) |
+| `insights:list:ar` | 30 days | Normalized AR article listing (max 1000) |
 
 ---
 
 ## 🛡️ Security & Performance
-- **Edge Caching**: ISR/SWR (5-minute revalidation) for near-instant loading.
-- **Image Optimization**: Next.js Image Optimizer for regional news sources (WAM, QNA, SPA, etc.).
-- **Free-Tier Optimized**: Architected for Cloudflare Free + Upstash Redis Free limits.
+- **Edge-native**: All API routes use `export const runtime = 'edge'` for Cloudflare Pages compatibility.
+- **Fail-closed Auth**: Every sensitive endpoint validates secrets via environment variables. Missing secrets throw immediately.
+- **No Hardcoded Secrets**: Webhook and agent callback URLs are built dynamically from env vars. Nothing sensitive is in source code.
+- **Draft TTLs**: Generating (7 days) and error (2 days) draft keys auto-expire; `pending_review` drafts persist until admin action.
+- **Edge Caching**: ISR/SWR (5-minute revalidation) for near-instant loading on public pages.
 - **CSP**: Strict Content Security Policy managed via `middleware.ts` + `lib/csp.ts`.
-- **Rate Limiting**: IP-based throttling on sensitive utility routes.
-- **No-DB Strategy**: Transient storage using Redis with aggressive TTLs.
-- **AdSense Compliance**: Per-article policy audit node + human editorial review before publishing.
+- **Free-Tier Optimized**: Architected for Cloudflare Free + Upstash Redis Free limits.
+- **Human Editorial Gate**: All AI-generated articles require admin approval before going live. No auto-publish.
+- **AdSense Compliance**: Per-article content review before publishing.
 
 ---
 

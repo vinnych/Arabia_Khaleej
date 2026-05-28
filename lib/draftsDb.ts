@@ -2,6 +2,18 @@
 // Why: Cloudflare Pages/Workers do not support standard Node.js TCP connections out of the box without special bindings. 
 // Using the Upstash REST API via standard `fetch` is the official and most reliable way to connect to Redis on the edge.
 
+/**
+ * Options for setDraft.
+ * ttlSeconds: if set, the Redis key will auto-expire after this many seconds.
+ *   - Use for transient states: 'generating' (7 days), 'error' (2 days).
+ *   - Omit (no TTL) for 'pending_review' drafts that must survive until admin action.
+ * Why TTL matters: without it, orphaned draft keys accumulate in Redis forever,
+ * cluttering the dashboard and wasting Upstash storage quota.
+ */
+export interface SetDraftOptions {
+  ttlSeconds?: number;
+}
+
 export const draftDb = {
   async getDraft(topic: string) {
     // Why standard fetch instead of Redis TCP: Cloudflare Pages / Workers do not support TCP connections out-of-the-box
@@ -31,17 +43,30 @@ export const draftDb = {
     }
   },
 
-  async setDraft(topic: string, value: any) {
+  async setDraft(topic: string, value: any, options?: SetDraftOptions) {
     // Why single JSON.stringify: Previously, JSON.stringify(JSON.stringify(value)) double-serialized the data,
     // which caused data to be stored as an escaped string rather than a clean JSON structure in Redis.
     // Switching to standard single-stringification ensures proper data formatting and optimal storage space.
-    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/set/article:${topic}`, {
+    const body = JSON.stringify(value);
+
+    // Why conditional setex vs set:
+    // Upstash REST API exposes two distinct commands:
+    //   /set/{key}           → sets the key without expiry (persists until explicitly deleted)
+    //   /setex/{key}/{ttl}   → sets the key with an expiry in seconds (auto-cleaned by Redis)
+    // Using /setex for transient statuses ('generating', 'error') prevents orphaned keys
+    // from accumulating; using plain /set for 'pending_review' ensures admin-approved
+    // articles are not silently deleted before the editorial team publishes them.
+    const url = options?.ttlSeconds
+      ? `${process.env.UPSTASH_REDIS_REST_URL}/setex/article:${encodeURIComponent(topic)}/${options.ttlSeconds}`
+      : `${process.env.UPSTASH_REDIS_REST_URL}/set/article:${encodeURIComponent(topic)}`;
+
+    await fetch(url, {
       method: 'POST',
       headers: { 
         Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(value)
+      body
     });
   },
 
