@@ -530,7 +530,7 @@ export function StockExchangeSchema({
     tickerSymbol: ticker,
     exchangeCode: ticker,
     description: `${name} stock market index for ${country}`,
-    url: `${SITE_URL}/market-insight`,
+    url: `${SITE_URL}/currency-exchange`,
     provider: { "@id": `${SITE_URL}/#organization` },
     areaServed: { "@type": "Country", name: country },
     additionalProperty: [
@@ -553,7 +553,7 @@ export function ExchangeRateSchema({
     alternateName: "أسعار صرف العملات الخليجية مقابل الدولار",
     description:
       "Live exchange rates for all Gulf Cooperation Council currencies against the US Dollar, including AED, SAR, QAR, KWD, OMR, and BHD.",
-    url: `${SITE_URL}/market-insight`,
+    url: `${SITE_URL}/currency-exchange`,
     provider: { "@id": `${SITE_URL}/#organization` },
     dateModified: new Date().toISOString(),
     additionalProperty: currencies.map((c) => ({
@@ -588,7 +588,7 @@ export function CommoditySchema({
     alternateName: nameAr,
     description: `Live spot price for ${name} (${symbol}). Widely tracked commodity in GCC financial markets.`,
     tickerSymbol: symbol,
-    url: `${SITE_URL}/market-insight`,
+    url: `${SITE_URL}/currency-exchange`,
     provider: { "@id": `${SITE_URL}/#organization` },
     additionalProperty: [
       { "@type": "PropertyValue", name: "Spot Price", value: price, unitCode: priceCurrency },

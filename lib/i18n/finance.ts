@@ -40,4 +40,8 @@ export const finance: Translations = {
   diversificationSpeed: { en: "Diversification Speed", ar: "سرعة التنويع" },
   digitalInfrastructure: { en: "Digital Infrastructure", ar: "البنية التحتية الرقمية" },
   regionalIntegration: { en: "Regional Integration", ar: "التكامل الإقليمي" },
+  includeExchangeSpread: { en: "Include Bank/Exchange Spread", ar: "تضمين رسوم البنك/الصرافة" },
+  spreadDisclaimer: { en: "Simulates actual payout after average bank or exchange house profit margins.", ar: "يحاكي الدفع الفعلي بعد هوامش ربح البنك أو الصرافة المتوسطة." },
+  crossRateMatrix: { en: "Cross-Rate Matrix", ar: "مصفوفة أسعار الصرف" },
+  inverseRate: { en: "Inverse Rate", ar: "معدل عكسي" },
 };

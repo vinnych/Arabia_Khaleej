@@ -24,9 +24,9 @@ export default function manifest(): MetadataRoute.Manifest {
         description: "GCC Prayer Schedules",
       },
       {
-        name: "Market Insight",
-        url: "/market-insight",
-        description: "GCC Stocks & Gold",
+        name: "Currency Exchange",
+        url: "/currency-exchange",
+        description: "Live Currency Rates",
       }
     ]
   };

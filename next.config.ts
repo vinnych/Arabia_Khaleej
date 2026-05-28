@@ -62,11 +62,7 @@ const nextConfig: NextConfig = {
         destination: "https://arabiakhaleej.com/:path*",
         permanent: true,
       },
-      {
-        source: "/market-insight/((?!details).*)",
-        destination: "/market-insight",
-        permanent: true,
-      },
+
       {
         source: "/countries/uae",
         destination: "/countries/united-arab-emirates",

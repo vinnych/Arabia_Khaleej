@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 
 const NAV = [
   { key: 'prayerTimes', href: "/prayer" },
-  { key: 'marketInsights', href: "/market-insight" },
+  { key: 'currencyExchange', href: "/currency-exchange" },
   { key: 'pressTerminal', href: "/insights" },
 ];
 

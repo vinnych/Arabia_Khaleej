@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { ArrowDownUp, Search, Star, Clock, TrendingUp, ChevronDown, X, RefreshCw, Globe, Copy, Check, Share2 } from "lucide-react";
+import { ArrowDownUp, Search, Star, Clock, TrendingUp, ChevronDown, X, RefreshCw, Globe, Copy, Check, Share2, Settings2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import Link from "next/link";
 import { Breadcrumbs } from "@/lib/seo";
@@ -33,6 +33,11 @@ export default function CurrencyExchangeClient() {
   const [copied, setCopied] = useState(false);
   const [isSwapping, setIsSwapping] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [includeSpread, setIncludeSpread] = useState(false);
+  const [spreadValue, setSpreadValue] = useState("1.5");
+  const [historicalRates, setHistoricalRates] = useState<number[]>([]);
+  const [historicalLoading, setHistoricalLoading] = useState(false);
+  const [matrixCurrencies, setMatrixCurrencies] = useState(["USD", "EUR", "GBP", "AED", "SAR"]);
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
   const { t, isRTL, language } = useLanguage();
@@ -63,25 +68,40 @@ export default function CurrencyExchangeClient() {
     return () => clearInterval(interval);
   }, [fetchRates]);
 
-  // Close pickers on outside click
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (fromRef.current && !fromRef.current.contains(e.target as Node)) setShowFromPicker(false);
-      if (toRef.current && !toRef.current.contains(e.target as Node)) setShowToPicker(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+    async function fetchHistory() {
+      setHistoricalLoading(true);
+      try {
+        const res = await fetch(`/api/historical-rates?from=${fromCode}&to=${toCode}`);
+        const data = await res.json();
+        if (data.status === 'success') {
+          setHistoricalRates(data.rates);
+        }
+      } catch(e) {
+        setHistoricalRates([]);
+      } finally {
+        setHistoricalLoading(false);
+      }
+    }
+    fetchHistory();
+  }, [fromCode, toCode]);
 
   const convert = useCallback((val: number, from: string, to: string): number => {
     if (!rates[from] || !rates[to]) return 0;
-    return (val / rates[from]) * rates[to];
-  }, [rates]);
+    let rate = rates[to] / rates[from];
+    if (includeSpread) {
+      const spread = parseFloat(spreadValue) || 0;
+      rate = rate * (1 - (spread / 100));
+    }
+    return val * rate;
+  }, [rates, includeSpread, spreadValue]);
 
   const parsedAmount = parseFloat(amount) || 0;
   const result = convert(parsedAmount, fromCode, toCode);
-  const exchangeRate = convert(1, fromCode, toCode);
-  const inverseRate = convert(1, toCode, fromCode);
+  const baseRate = rates[toCode] && rates[fromCode] ? rates[toCode] / rates[fromCode] : 0;
+  const spreadDeduction = includeSpread ? (parsedAmount * baseRate) - result : 0;
+  const exchangeRate = baseRate;
+  const inverseRate = rates[toCode] && rates[fromCode] ? rates[fromCode] / rates[toCode] : 0;
 
   const fromCurrency = currencies.find(c => c.code === fromCode);
   const toCurrency = currencies.find(c => c.code === toCode);
@@ -164,7 +184,6 @@ export default function CurrencyExchangeClient() {
 
   const breadcrumbItems = [
     { name: t("home"), href: "/" },
-    { name: t("marketInsights"), href: "/market-insight" },
     { name: t("currencyExchange"), href: "/currency-exchange" },
   ];
 
@@ -172,66 +191,78 @@ export default function CurrencyExchangeClient() {
     isOpen: boolean,
     onSelect: (code: string) => void,
     currentCode: string,
-    id?: string
+    id?: string,
+    onClose?: () => void
   ) => {
     if (!isOpen) return null;
     return (
-      <div id={id} role="listbox" className="absolute top-full mt-2 left-0 right-0 z-50 glass rounded-3xl border border-brand-gold/20 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-        {/* Search */}
-        <div className="p-4 border-b border-brand-gold/10">
-          <div className="relative">
-            <Search size={14} className={`absolute top-1/2 -translate-y-1/2 text-foreground/30 ${isRTL ? 'right-4' : 'left-4'}`} />
-            <input
-              id="currency-search"
-              name="currency-search"
-              aria-label={t("searchCurrency")}
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t("searchCurrency")}
-              className={`w-full py-3 ${isRTL ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4'} bg-foreground/5 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-gold/30 border border-transparent focus:border-brand-gold/20 placeholder:text-foreground/30`}
-              autoFocus
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery("")} className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'} text-foreground/30 hover:text-foreground`}>
-                <X size={14} />
-              </button>
-            )}
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-brand-obsidian/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+        <div 
+          id={id} 
+          role="dialog" 
+          aria-modal="true"
+          className="relative w-full max-w-md max-h-[85vh] flex flex-col glass rounded-[2.5rem] border border-brand-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between p-6 pb-4 border-b border-white/5">
+             <h3 className="text-lg font-black tracking-wide text-foreground">{t("searchCurrency") || "Select Currency"}</h3>
+             <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors text-foreground/50 hover:text-foreground" aria-label="Close">
+               <X size={20} />
+             </button>
           </div>
-        </div>
-        {/* Currency List */}
-        <div className="max-h-[360px] overflow-y-auto overscroll-contain">
-          {/* Favorites */}
-          {grouped.favList.length > 0 && (
-            <div className="px-4 pt-3">
-              <p className={`text-[9px] uppercase font-black tracking-[0.3em] text-accent mb-2 ${isRTL ? 'text-right' : ''}`}>
-                ★ {t("favorites")}
-              </p>
-              {grouped.favList.map(c => (
-                <CurrencyRow key={`fav-${c.code}`} currency={c} isRTL={isRTL} lang={language} isActive={c.code === currentCode} isFav onToggleFav={() => toggleFavorite(c.code)} onSelect={() => { onSelect(c.code); setSearchQuery(""); }} />
-              ))}
+          
+          <div className="p-4 px-6 border-b border-brand-gold/10 bg-brand-obsidian/30">
+            <div className="relative">
+              <Search size={14} className={`absolute top-1/2 -translate-y-1/2 text-foreground/30 ${isRTL ? 'right-4' : 'left-4'}`} />
+              <input
+                id="currency-search"
+                name="currency-search"
+                aria-label={t("searchCurrency")}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t("searchCurrency")}
+                className={`w-full py-3 ${isRTL ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4'} bg-foreground/5 rounded-2xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-gold/30 border border-transparent focus:border-brand-gold/20 placeholder:text-foreground/30`}
+                autoFocus
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'} text-foreground/30 hover:text-foreground`}>
+                  <X size={14} />
+                </button>
+              )}
             </div>
-          )}
-          {/* Grouped Regions */}
-          {["gcc", "major", "mena", "asia", "other"].map(region => {
-            const list = grouped.groups[region];
-            if (!list || list.length === 0) return null;
-            return (
-              <div key={region} className="px-4 pt-3 pb-1">
-                <p className={`text-[9px] uppercase font-black tracking-[0.3em] text-foreground/30 mb-2 ${isRTL ? 'text-right' : ''}`}>
-                  {REGION_LABELS[region]?.[language] || region}
+          </div>
+          <div className="flex-1 overflow-y-auto overscroll-contain p-2 px-4 pb-6 [&::-webkit-scrollbar]:hidden">
+            {grouped.favList.length > 0 && (
+              <div className="px-2 pt-3">
+                <p className={`text-[9px] uppercase font-black tracking-[0.3em] text-accent mb-2 ${isRTL ? 'text-right' : ''}`}>
+                  ★ {t("favorites")}
                 </p>
-                {list.map(c => (
-                  <CurrencyRow key={c.code} currency={c} isRTL={isRTL} lang={language} isActive={c.code === currentCode} isFav={favorites.includes(c.code)} onToggleFav={() => toggleFavorite(c.code)} onSelect={() => { onSelect(c.code); setSearchQuery(""); }} />
+                {grouped.favList.map(c => (
+                  <CurrencyRow key={`fav-${c.code}`} currency={c} isRTL={isRTL} lang={language} isActive={c.code === currentCode} isFav onToggleFav={() => toggleFavorite(c.code)} onSelect={() => { onSelect(c.code); setSearchQuery(""); }} />
                 ))}
               </div>
-            );
-          })}
-          {filteredCurrencies.length === 0 && (
-            <div className="p-8 text-center">
-              <p className="text-foreground/30 text-sm font-medium">{t("noResults")}</p>
-            </div>
-          )}
+            )}
+            {["gcc", "major", "mena", "asia", "other"].map(region => {
+              const list = grouped.groups[region];
+              if (!list || list.length === 0) return null;
+              return (
+                <div key={region} className="px-2 pt-3 pb-1">
+                  <p className={`text-[9px] uppercase font-black tracking-[0.3em] text-foreground/30 mb-2 ${isRTL ? 'text-right' : ''}`}>
+                    {REGION_LABELS[region]?.[language] || region}
+                  </p>
+                  {list.map(c => (
+                    <CurrencyRow key={c.code} currency={c} isRTL={isRTL} lang={language} isActive={c.code === currentCode} isFav={favorites.includes(c.code)} onToggleFav={() => toggleFavorite(c.code)} onSelect={() => { onSelect(c.code); setSearchQuery(""); }} />
+                  ))}
+                </div>
+              );
+            })}
+            {filteredCurrencies.length === 0 && (
+              <div className="p-8 text-center">
+                <p className="text-foreground/30 text-sm font-medium">{t("noResults")}</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -289,7 +320,6 @@ export default function CurrencyExchangeClient() {
                   </div>
                   <ChevronDown size={14} className={`text-foreground/30 transition-transform ${showFromPicker ? 'rotate-180' : ''}`} />
                 </button>
-                {renderPicker(showFromPicker, (code) => { setFromCode(code); setShowFromPicker(false); }, fromCode, "from-currency-list")}
               </div>
               {/* Amount Input */}
               <div className="flex-1 relative">
@@ -349,28 +379,122 @@ export default function CurrencyExchangeClient() {
                   </div>
                   <ChevronDown size={14} className={`text-foreground/30 transition-transform ${showToPicker ? 'rotate-180' : ''}`} />
                 </button>
-                {renderPicker(showToPicker, (code) => { setToCode(code); setShowToPicker(false); }, toCode, "to-currency-list")}
               </div>
               {/* Result */}
               <div className={`flex-1 flex flex-col justify-center ${isRTL ? 'text-left' : 'text-right'}`}>
                 <p className="text-3xl md:text-4xl font-black tabular-nums tracking-tight text-accent">
                   {result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 })}
                 </p>
-                <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">
-                  {toCurrency?.symbol}
-                </p>
+                <div className={`flex items-center gap-2 mt-1 ${isRTL ? 'justify-start flex-row-reverse' : 'justify-end'}`}>
+                  <p className="text-[9px] font-bold text-foreground/20 uppercase tracking-widest">
+                    {toCurrency?.symbol}
+                  </p>
+                  {includeSpread && spreadDeduction > 0 && (
+                    <span className="text-[9px] font-black text-red-500/90 bg-red-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      -{spreadDeduction.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {toCode} {t('fee') || 'Fee'}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Rate Info Bar */}
-          <div className={`flex flex-wrap items-center justify-between gap-3 pt-5 border-t border-brand-gold/10 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <TrendingUp size={12} className="text-green-500" />
-              <p className="text-[10px] font-bold text-foreground/50 tabular-nums">
-                1 {fromCode} = {exchangeRate.toFixed(4)} {toCode}
-              </p>
+          {/* Remittance Spread Toggle */}
+          <div className="mb-6 flex flex-col gap-2 p-4 rounded-2xl bg-foreground/5 border border-brand-gold/10">
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={includeSpread}
+                  onChange={(e) => setIncludeSpread(e.target.checked)}
+                />
+                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-1 ${includeSpread ? 'bg-brand-gold' : 'bg-foreground/20'}`}>
+                  <div className={`w-4 h-4 rounded-full bg-white transition-transform ${includeSpread ? 'translate-x-4' : 'translate-x-0'}`} />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-foreground/60">{t('includeExchangeSpread') || 'Include Bank/Exchange Spread'}</span>
+              </label>
+              {includeSpread && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={spreadValue}
+                    onChange={(e) => setSpreadValue(e.target.value)}
+                    className="w-16 bg-transparent border-b border-brand-gold/30 text-right text-sm font-black focus:outline-none focus:border-brand-gold"
+                    step="0.1"
+                  />
+                  <span className="text-xs font-bold text-foreground/40">%</span>
+                </div>
+              )}
             </div>
+            {includeSpread && (
+              <p className="text-[10px] text-foreground/40 leading-relaxed">
+                {t('spreadDisclaimer') || 'Simulates actual payout after average bank or exchange house profit margins.'}
+              </p>
+            )}
+          </div>
+
+          {/* Rate Info Bar with Sparkline */}
+          <div className={`flex flex-col gap-4 pt-5 border-t border-brand-gold/10`}>
+            {/* Sparkline */}
+            {!historicalLoading && historicalRates.length > 1 && (
+              <div className="w-full h-12 relative flex items-end border-b border-white/5 pb-2">
+                <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 10 100 90">
+                  <defs>
+                    <linearGradient id="sparkGradient" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor={historicalRates[historicalRates.length - 1] >= historicalRates[0] ? '#22c55e' : '#ef4444'} stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d={`M 0 100 L 0 ${100 - (((historicalRates[0] - Math.min(...historicalRates)) / (Math.max(...historicalRates) - Math.min(...historicalRates) || 1)) * 80 + 10)} ${historicalRates.slice(1).map((rate, i) => {
+                      const max = Math.max(...historicalRates);
+                      const min = Math.min(...historicalRates);
+                      const range = max === min ? 1 : max - min;
+                      const x = ((i + 1) / (historicalRates.length - 1)) * 100;
+                      const y = 100 - (((rate - min) / range) * 80 + 10);
+                      return `L ${x} ${y}`;
+                    }).join(' ')} L 100 100 Z`}
+                    fill="url(#sparkGradient)"
+                  />
+                  <path
+                    d={`M 0 ${100 - (((historicalRates[0] - Math.min(...historicalRates)) / (Math.max(...historicalRates) - Math.min(...historicalRates) || 1)) * 80 + 10)} ${historicalRates.slice(1).map((rate, i) => {
+                      const max = Math.max(...historicalRates);
+                      const min = Math.min(...historicalRates);
+                      const range = max === min ? 1 : max - min;
+                      const x = ((i + 1) / (historicalRates.length - 1)) * 100;
+                      const y = 100 - (((rate - min) / range) * 80 + 10);
+                      return `L ${x} ${y}`;
+                    }).join(' ')}`}
+                    fill="none"
+                    stroke={historicalRates[historicalRates.length - 1] >= historicalRates[0] ? '#22c55e' : '#ef4444'}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex justify-between items-end pb-1 text-[8px] font-bold text-foreground/30 uppercase tracking-widest pointer-events-none">
+                  <span>7D Ago</span>
+                  <span>Today</span>
+                </div>
+              </div>
+            )}
+            
+            <div className={`flex flex-wrap items-center justify-between gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <TrendingUp size={12} className="text-green-500" />
+                  <p className="text-[10px] font-bold text-foreground/50 tabular-nums">
+                    1 {fromCode} = {exchangeRate.toFixed(4)} {toCode}
+                  </p>
+                </div>
+                <div className={`flex items-center gap-1.5 bg-foreground/5 px-2 py-1 rounded-md border border-brand-gold/10 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Globe size={10} className="text-foreground/40" />
+                  <p className="text-[9px] font-bold text-foreground/40 tabular-nums">
+                    1 {toCode} = {inverseRate.toFixed(4)} {fromCode}
+                  </p>
+                </div>
+              </div>
             <div className="flex items-center gap-2">
               <button onClick={handleShare} className="p-2 rounded-xl hover:bg-foreground/5 transition-all text-foreground/30 hover:text-accent" aria-label={t('shareResult')}>
                 <Share2 size={14} />
@@ -383,6 +507,38 @@ export default function CurrencyExchangeClient() {
               </button>
             </div>
           </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══ CROSS-RATE MATRIX ═══ */}
+      <div className="w-full max-w-4xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
+        <p className={`text-[10px] uppercase font-black tracking-[0.3em] text-foreground/30 mb-4 ${isRTL ? 'text-right' : ''}`}>
+          {t("crossRateMatrix") || "Cross-Rate Matrix"}
+        </p>
+        <div className="glass rounded-[2rem] p-6 border-brand-gold/10 overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr>
+                <th className="p-3 border-b border-white/5 bg-brand-obsidian sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]"></th>
+                {matrixCurrencies.map(c => (
+                  <th key={`th-${c}`} className="p-3 border-b border-white/5 text-xs font-bold text-brand-gold tracking-widest text-center">{c}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {matrixCurrencies.map(rowC => (
+                <tr key={`tr-${rowC}`} className="hover:bg-white/5 transition-colors">
+                  <td className="p-3 border-b border-white/5 font-black text-sm bg-brand-obsidian sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]">{rowC}</td>
+                  {matrixCurrencies.map(colC => {
+                    if (rowC === colC) return <td key={`${rowC}-${colC}`} className="p-3 border-b border-white/5 text-foreground/20 text-xs text-center">-</td>;
+                    const r = rates[colC] && rates[rowC] ? rates[colC] / rates[rowC] : 0;
+                    return <td key={`${rowC}-${colC}`} className="p-3 border-b border-white/5 text-foreground/80 tabular-nums text-sm font-medium text-center">{r.toFixed(4)}</td>;
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -408,21 +564,6 @@ export default function CurrencyExchangeClient() {
         </div>
       </div>
 
-      {/* ═══ INVERSE RATE ═══ */}
-      <div className="w-full max-w-2xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-400">
-        <div className="glass rounded-[2rem] p-6 border-brand-gold/10">
-          <div className={`flex items-center gap-3 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <div className="w-8 h-8 rounded-xl bg-brand-gold/10 flex items-center justify-center text-accent">
-              <Globe size={16} />
-            </div>
-            <p className="text-sm font-black">{t("inverseRate")}</p>
-          </div>
-          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <p className="text-foreground/50 text-sm font-medium">1 {toCode}</p>
-            <p className="text-lg font-black tabular-nums">{inverseRate.toFixed(4)} <span className="text-foreground/40 text-sm">{fromCode}</span></p>
-          </div>
-        </div>
-      </div>
 
       {/* ═══ GCC RATE CARDS ═══ */}
       <div className="w-full max-w-4xl mb-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
@@ -476,10 +617,14 @@ export default function CurrencyExchangeClient() {
 
       {/* Back */}
       <div className="mt-8">
-        <Link href="/market-insight" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
-          {isRTL ? `← ${t('marketInsights')}` : `← ${t('marketInsights')}`}
+        <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
+          {isRTL ? `← ${t('home')}` : `← ${t('home')}`}
         </Link>
       </div>
+
+      {/* MODALS */}
+      {showFromPicker && renderPicker(showFromPicker, (code) => { setFromCode(code); setShowFromPicker(false); }, fromCode, "from-currency-list", () => setShowFromPicker(false))}
+      {showToPicker && renderPicker(showToPicker, (code) => { setToCode(code); setShowToPicker(false); }, toCode, "to-currency-list", () => setShowToPicker(false))}
     </div>
   );
 }

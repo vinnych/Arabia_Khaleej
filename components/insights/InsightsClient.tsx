@@ -18,7 +18,6 @@ export default function InsightsClient() {
    const [error, setError] = useState(false);
    const [displayCount, setDisplayCount] = useState(12);
    const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-   const [autoRefresh, setAutoRefresh] = useState(true);
    const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
    const categories = [...new Set(insights.map(i => i.category))].filter(Boolean);
@@ -56,12 +55,11 @@ export default function InsightsClient() {
    }, [fetchInsights]);
 
    useEffect(() => {
-     if (!autoRefresh) return;
      const interval = setInterval(() => {
        fetchInsights(true);
      }, 60000);
      return () => clearInterval(interval);
-   }, [autoRefresh, fetchInsights]);
+   }, [fetchInsights]);
 
   return (
     <div className={`w-full max-w-6xl mx-auto px-4 pt-6 pb-12 ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
@@ -89,13 +87,10 @@ export default function InsightsClient() {
              <RefreshCw size={14} className={`${loading ? 'animate-spin' : ''} text-accent`} />
              <span className="text-xs font-bold uppercase tracking-widest text-foreground/70">{loading ? t('processing') : t('refresh')}</span>
            </button>
-           <button
-             onClick={() => setAutoRefresh(!autoRefresh)}
-             aria-label="Toggle live refresh"
-             className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${autoRefresh ? 'bg-brand-gold/20 text-brand-gold' : 'bg-gray-800/50 text-gray-400'}`}
-           >
-             {autoRefresh ? '🔴 Live' : '⚪ Paused'}
-           </button>
+           <div className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest bg-brand-gold/20 text-brand-gold cursor-default">
+             {/* WHY: User requested to make 'Live' a normal indicator rather than an interactive toggle button, as auto-refresh is an always-on feature. */}
+             🔴 Live
+           </div>
            {lastUpdate && (
              <span className="text-xs text-gray-400">
                Updated: {lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

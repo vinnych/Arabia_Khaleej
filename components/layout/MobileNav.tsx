@@ -17,8 +17,8 @@ export default function MobileNav() {
       icon: Home,
     },
     {
-      label: t("navMarket"),
-      href: "/market-insight",
+      label: t("currencyExchange"),
+      href: "/currency-exchange",
       icon: TrendingUp,
     },
     {

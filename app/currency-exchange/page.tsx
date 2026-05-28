@@ -26,7 +26,6 @@ export default async function CurrencyExchangePage() {
   const t = await getT();
   const breadcrumbItems = [
     { name: t("home"), item: "/" },
-    { name: t("marketInsights"), item: "/market-insight" },
     { name: t("currencyExchange"), item: "/currency-exchange" },
   ];
 

@@ -101,7 +101,7 @@ function FeaturedInsightCard({
 
 const NAV_LINKS = [
   { key: 'prayerTimes', href: "/prayer", icon: Clock, desc: "prayerTimesDesc" },
-  { key: 'marketInsights', href: "/market-insight", icon: TrendingUp, desc: "marketInsightsDesc" },
+  { key: 'currencyExchange', href: "/currency-exchange", icon: TrendingUp, desc: "currencyExchangeDesc" },
   { key: 'pressTerminal', href: "/insights", icon: Newspaper, desc: "pressTerminalDesc" },
   { key: 'boutiqueEnquiry', href: "/join", icon: Mail, desc: "boutiqueEnquiryDesc" },
 ];
