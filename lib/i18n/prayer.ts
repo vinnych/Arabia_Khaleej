@@ -14,6 +14,8 @@ export const prayer: Translations = {
   hijriSchedule: { en: "7-Day Hijri & Prayer Schedule", ar: "جدول الصلاة والتقويم الهجري - 7 أيام" },
   ummAlQuraUnified: { en: "Umm Al-Qura Unified", ar: "توحيد أم القرى" },
   prayerDesc: { en: "Local & regional Islamic prayer schedules for major GCC cities, calculated with high precision using the Umm Al-Qura University method.", ar: "جداول الصلاة الإسلامية المحلية والإقليمية للمدن الخليجية الكبرى، محسوبة بدقة عالية باستخدام طريقة جامعة أم القرى." },
+  prayerDetailTitle: { en: "Islamic Prayer Precision", ar: "دقة مواقيت الصلاة" },
+  prayerDetailBody: { en: "Arabia Khaleej calculates daily Islamic prayer times using the official Umm Al-Qura University algorithm, the authoritative standard across the Kingdom of Saudi Arabia and widely adopted throughout the GCC. This mathematical model provides precise astronomical calculations for Fajr, Sunrise, Dhuhr, Asr, Maghrib, and Isha.", ar: "تحسب أريبيا خليج مواقيت الصلاة الإسلامية اليومية باستخدام خوارزمية جامعة أم القرى الرسمية، وهي المعيار المعتمد في المملكة العربية السعودية والمُتبنى على نطاق واسع في دول مجلس التعاون الخليجي. يوفر هذا النموذج الرياضي حسابات فلكية دقيقة للفجر، الشروق، الظهر، العصر، المغرب، والعشاء." },
   
   // Hijri Months
   muharram: { en: "Muharram", ar: "محرم" },
