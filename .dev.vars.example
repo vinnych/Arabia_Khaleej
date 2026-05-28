@@ -1,8 +1,0 @@
-# Cloudflare Worker Local Environment Variables (Secrets)
-# Rename this file to .dev.vars and fill in the values.
-
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
-PEXELS_API_KEY=
-CRON_SECRET=
-ADMIN_SECRET=
