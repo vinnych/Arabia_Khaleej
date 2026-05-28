@@ -31,7 +31,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       
       <MobileNav />
 
-      <footer className="w-full py-12 border-t border-brand-gold/5 bg-brand-obsidian/20 backdrop-blur-sm">
+      {/* Why: We replaced hardcoded bg-brand-obsidian/20 with bg-card/25 in the footer to ensure that
+               the footer container blends dynamically with the primary card theme in both daylight and night mode. */}
+      <footer className="w-full py-12 border-t border-brand-gold/5 bg-card/25 backdrop-blur-sm">
         <div className="w-full flex flex-col items-center gap-6">
           <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
             <Link href="/about" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('about')}</Link>

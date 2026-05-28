@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Coins, TrendingUp, TrendingDown, ArrowLeftRight, Globe } from "lucide-react";
 import Link from "next/link";
-import FinanceTicker from "@/components/finance/FinanceTicker";
 import { useLanguage } from "@/lib/i18n";
 
 export default function FinanceClient() {
@@ -59,9 +58,6 @@ export default function FinanceClient() {
 
 
       <div className="w-full max-w-5xl space-y-8">
-        {/* Main Ticker - Repurposed as a Featured Bar */}
-        <FinanceTicker />
-
         {/* Detailed Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
           {gccCurrencies.map((curr) => (

@@ -237,14 +237,14 @@ export default function CurrencyExchangeClient() {
           className="relative w-full max-w-md max-h-[85vh] flex flex-col glass rounded-[2.5rem] border border-brand-gold/20 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-6 pb-4 border-b border-white/5">
+          <div className="flex items-center justify-between p-6 pb-4 border-b border-foreground/5">
              <h3 className="text-lg font-black tracking-wide text-foreground">{t("searchCurrency") || "Select Currency"}</h3>
-             <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 transition-colors text-foreground/50 hover:text-foreground" aria-label="Close">
+             <button onClick={onClose} className="p-2 rounded-full hover:bg-foreground/10 transition-colors text-foreground/50 hover:text-foreground" aria-label="Close">
                <X size={20} />
              </button>
           </div>
           
-          <div className="p-4 px-6 border-b border-brand-gold/10 bg-brand-obsidian/30">
+          <div className="p-4 px-6 border-b border-brand-gold/10 bg-foreground/5">
             <div className="relative">
               <Search size={14} className={`absolute top-1/2 -translate-y-1/2 text-foreground/30 ${isRTL ? 'right-4' : 'left-4'}`} />
               <input
@@ -352,7 +352,7 @@ export default function CurrencyExchangeClient() {
                 <button
                   id="from-currency-selector"
                   onClick={() => { setShowFromPicker(!showFromPicker); setShowToPicker(false); setSearchQuery(""); }}
-                  className={`flex items-center gap-2.5 px-4 py-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-transparent hover:border-brand-gold/20 transition-all min-w-[140px] ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-center gap-2.5 px-4 py-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-transparent hover:border-brand-gold/20 transition-all min-w-[120px] sm:min-w-[140px] ${isRTL ? 'flex-row-reverse' : ''}`}
                   aria-haspopup="listbox"
                   aria-expanded={showFromPicker}
                   aria-controls="from-currency-list"
@@ -415,7 +415,7 @@ export default function CurrencyExchangeClient() {
                 <button
                   id="to-currency-selector"
                   onClick={() => { setShowToPicker(!showToPicker); setShowFromPicker(false); setSearchQuery(""); }}
-                  className={`flex items-center gap-2.5 px-4 py-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-transparent hover:border-brand-gold/20 transition-all min-w-[140px] ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-center gap-2.5 px-4 py-4 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-transparent hover:border-brand-gold/20 transition-all min-w-[120px] sm:min-w-[140px] ${isRTL ? 'flex-row-reverse' : ''}`}
                   aria-haspopup="listbox"
                   aria-expanded={showToPicker}
                   aria-controls="to-currency-list"
@@ -522,7 +522,7 @@ export default function CurrencyExchangeClient() {
               }));
 
               return (
-                <div className="w-full h-16 relative flex items-end border-b border-white/5 pb-2">
+                <div className="w-full h-16 relative flex items-end border-b border-foreground/5 pb-2">
                   <svg
                     className="w-full h-full cursor-crosshair"
                     preserveAspectRatio="none"
@@ -581,7 +581,7 @@ export default function CurrencyExchangeClient() {
                         transform: 'translateX(-50%)',
                       }}
                     >
-                      <div className="bg-brand-obsidian/90 backdrop-blur border border-brand-gold/20 rounded-lg px-2 py-1 text-[9px] font-black tabular-nums text-foreground whitespace-nowrap">
+                      <div className="bg-background/90 backdrop-blur border border-brand-gold/20 rounded-lg px-2 py-1 text-[9px] font-black tabular-nums text-foreground whitespace-nowrap">
                         {historicalRates[sparkHoverIdx].toFixed(4)}
                         <span className="text-foreground/40 ml-1">{toCode}/{fromCode}</span>
                       </div>
@@ -646,9 +646,9 @@ export default function CurrencyExchangeClient() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr>
-                <th className="p-3 border-b border-white/5 bg-brand-obsidian sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]"></th>
+                <th className="p-3 border-b border-foreground/5 bg-background sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]"></th>
                 {withSelected.map(c => (
-                  <th key={`th-${c}`} className={`p-3 border-b border-white/5 text-xs font-bold tracking-widest text-center ${
+                  <th key={`th-${c}`} className={`p-3 border-b border-foreground/5 text-xs font-bold tracking-widest text-center ${
                     c === fromCode || c === toCode ? 'text-accent' : 'text-brand-gold'
                   }`}>{c}</th>
                 ))}
@@ -656,14 +656,14 @@ export default function CurrencyExchangeClient() {
             </thead>
             <tbody>
               {withSelected.map(rowC => (
-                <tr key={`tr-${rowC}`} className="hover:bg-white/5 transition-colors">
-                  <td className={`p-3 border-b border-white/5 font-black text-sm bg-brand-obsidian sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)] ${
+                <tr key={`tr-${rowC}`} className="hover:bg-foreground/5 transition-colors">
+                  <td className={`p-3 border-b border-foreground/5 font-black text-sm bg-background sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)] ${
                     rowC === fromCode || rowC === toCode ? 'text-accent' : ''
                   }`}>{rowC}</td>
                   {withSelected.map(colC => {
-                    if (rowC === colC) return <td key={`${rowC}-${colC}`} className="p-3 border-b border-white/5 text-foreground/20 text-xs text-center">—</td>;
+                    if (rowC === colC) return <td key={`${rowC}-${colC}`} className="p-3 border-b border-foreground/5 text-foreground/20 text-xs text-center">—</td>;
                     const r = rates[colC] && rates[rowC] ? rates[colC] / rates[rowC] : 0;
-                    return <td key={`${rowC}-${colC}`} className={`p-3 border-b border-white/5 tabular-nums text-sm font-medium text-center ${
+                    return <td key={`${rowC}-${colC}`} className={`p-3 border-b border-foreground/5 tabular-nums text-sm font-medium text-center ${
                       (rowC === fromCode && colC === toCode) || (rowC === toCode && colC === fromCode)
                         ? 'text-accent font-black' : 'text-foreground/80'
                     }`}>{r.toFixed(4)}</td>;

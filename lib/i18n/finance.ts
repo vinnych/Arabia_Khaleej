@@ -1,13 +1,7 @@
 import { Translations } from "../i18n-data";
 
 export const finance: Translations = {
-  marketSummary: { en: "Comprehensive real-time GCC market intelligence. We track major indices across the Gulf Cooperation Council, including Tadawul, ADX, DFM, and Boursa Kuwait, alongside commodities like Gold and Brent Crude, and all regional currencies pegged to the USD.", ar: "استخبارات شاملة للسوق الخليجية في الوقت الفعلي. نحن نتتبع المؤشرات الرئيسية عبر دول مجلس التعاون الخليجي، بما في ذلك تداول وسوق أبوظبي وسوق دبي المالي وبورصة الكويت، إلى جانب السلع مثل الذهب وخام برنت، وجميع العملات الإقليمية المرتبطة بالدولار." },
-  stockMarkets: { en: "Stock Markets", ar: "أسواق الأسهم" },
-  marketsOpen: { en: "Markets Open", ar: "الأسواق مفتوحة" },
-  marketsClosed: { en: "Markets Closed", ar: "الأسواق مغلقة" },
-  gold: { en: "Gold", ar: "الذهب" },
-  brentCrude: { en: "Brent Crude", ar: "خام برنت" },
-  commodities: { en: "Commodities", ar: "السلع" },
+  marketSummary: { en: "Comprehensive real-time GCC currency intelligence. We track major currency dynamics across the Gulf Cooperation Council, including all regional currencies pegged to the USD, alongside high-fidelity global conversions.", ar: "استخبارات شاملة للعملات الخليجية في الوقت الفعلي. نحن نتتبع ديناميكيات العملات الرئيسية عبر دول مجلس التعاون الخليجي، بما في ذلك جميع العملات الإقليمية المرتبطة بالدولار الأمريكي، إلى جانب تحويلات عالمية عالية الدقة." },
   currencies: { en: "Currencies", ar: "العملات" },
   peggedStatus: { en: "Most GCC Currencies are strictly pegged to the US Dollar to ensure economic stability and facilitate international trade within the energy sector.", ar: "ترتبط معظم العملات الخليجية ارتباطاً وثيقاً بالدولار الأمريكي لضمان الاستقرار الاقتصادي وتسهيل التجارة الدولية داخل قطاع الطاقة." },
   marketInsights: { en: "Market Insights", ar: "رؤى السوق" },
@@ -19,7 +13,7 @@ export const finance: Translations = {
   marketsLive: { en: "Live", ar: "مباشر" },
   closedSession: { en: "Closed", ar: "مغلق" },
   sentimentTitle: { en: "The regional landscape remains stable with positive indicators.", ar: "لا يزال المشهد الإقليمي مستقراً مع مؤشرات إيجابية." },
-  sentimentDesc: { en: "Arabia Khaleej tracks real-time market sentiment across major GCC exchanges for executive precision.", ar: "عربية خليج تتتبع نبض السوق الفوري عبر البورصات الخليجية الرئيسية لدقة التنفيذيين." },
+  sentimentDesc: { en: "Arabia Khaleej tracks real-time currency dynamics and financial indicators across the GCC for executive precision.", ar: "عربية خليج تتتبع ديناميكيات العملات والمؤشرات المالية الفورية عبر دول الخليج لدقة التنفيذيين." },
   currencyExchange: { en: "Currency Exchange", ar: "تحويل العملات" },
   currencyConverter: { en: "Currency Converter", ar: "محوّل العملات" },
   currencyExchangeDesc: { 

@@ -509,39 +509,6 @@ export function PrayerServiceSchema({
   return <StructuredData type="Service" data={data} />;
 }
 
-// ─── GCC Stock Market ─────────────────────────────────────────────────────────
-export function StockExchangeSchema({
-  name,
-  ticker,
-  country,
-  currency,
-  value,
-  change,
-}: {
-  name: string;
-  ticker: string;
-  country: string;
-  currency: string;
-  value: number;
-  change: number;
-}) {
-  const data = {
-    name,
-    tickerSymbol: ticker,
-    exchangeCode: ticker,
-    description: `${name} stock market index for ${country}`,
-    url: `${SITE_URL}/currency-exchange`,
-    provider: { "@id": `${SITE_URL}/#organization` },
-    areaServed: { "@type": "Country", name: country },
-    additionalProperty: [
-      { "@type": "PropertyValue", name: "Last Value", value, unitCode: currency },
-      { "@type": "PropertyValue", name: "Daily Change (%)", value: change },
-      { "@type": "PropertyValue", name: "Currency", value: currency },
-    ],
-  };
-  return <StructuredData type="Service" data={data} />;
-}
-
 // ─── Currency Exchange Rate ───────────────────────────────────────────────────
 export function ExchangeRateSchema({
   currencies,
@@ -565,38 +532,6 @@ export function ExchangeRateSchema({
     })),
   };
   return <StructuredData type="Dataset" data={data} />;
-}
-
-// ─── Gold / Commodity ─────────────────────────────────────────────────────────
-export function CommoditySchema({
-  name,
-  nameAr,
-  symbol,
-  priceCurrency,
-  price,
-  change,
-}: {
-  name: string;
-  nameAr: string;
-  symbol: string;
-  priceCurrency: string;
-  price: number;
-  change: number;
-}) {
-  const data = {
-    name,
-    alternateName: nameAr,
-    description: `Live spot price for ${name} (${symbol}). Widely tracked commodity in GCC financial markets.`,
-    tickerSymbol: symbol,
-    url: `${SITE_URL}/currency-exchange`,
-    provider: { "@id": `${SITE_URL}/#organization` },
-    additionalProperty: [
-      { "@type": "PropertyValue", name: "Spot Price", value: price, unitCode: priceCurrency },
-      { "@type": "PropertyValue", name: "Daily Change (%)", value: change },
-      { "@type": "PropertyValue", name: "Currency", value: priceCurrency },
-    ],
-  };
-  return <StructuredData type="Service" data={data} />;
 }
 
 // ─── FAQ Page ─────────────────────────────────────────────────────────────────

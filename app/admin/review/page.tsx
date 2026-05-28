@@ -303,12 +303,30 @@ export default function Dashboard() {
               <h3>{art.title || art.topic}</h3>
               <p className={styles.meta}>Words: {art.word_count || art.wordCount || 0}</p>
               <div className={styles.actions}>
-                <button className={styles.btnView} onClick={() => viewArticle(art)}>Review / Edit</button>
+                {/* Why disable Review/Edit during generation: A draft in 'generating' status has no content yet (0 words). 
+                    Disabling the button prevents editors from opening a blank and broken edit modal. */}
+                <button 
+                  className={styles.btnView} 
+                  onClick={() => viewArticle(art)}
+                  disabled={art.status === 'generating'}
+                  style={art.status === 'generating' ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+                >
+                  Review / Edit
+                </button>
                 <div style={{display: 'flex', gap: '0.5rem', marginTop: '0.5rem'}}>
                   {art.status !== 'published' && (
                     // Pass full article object so publishArticle can route to the correct endpoint
                     // (insights-store drafts need approve via /api/admin/workflows, not PUT /api/article)
-                    <button className={styles.btnPublish} onClick={() => publishArticle(art)}>Publish</button>
+                    // Why disable Publish during generation: Publishing a generating draft would result in
+                    // a blank article with 0 words being pushed onto the public-facing live insights feed.
+                    <button 
+                      className={styles.btnPublish} 
+                      onClick={() => publishArticle(art)}
+                      disabled={art.status === 'generating'}
+                      style={art.status === 'generating' ? { opacity: 0.4, cursor: 'not-allowed', backgroundColor: '#6b7280', boxShadow: 'none' } : undefined}
+                    >
+                      Publish
+                    </button>
                   )}
                   <button className={styles.btnDelete} onClick={() => deleteArticle(art)}>Delete</button>
                 </div>

@@ -75,24 +75,24 @@ export default function ContactClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         {/* Info Cards */}
         <div className="space-y-6">
-          <div className={`glass rounded-2xl p-8 border border-brand-gold/10 flex ${isRTL ? 'flex-row-reverse text-right' : ''} gap-6 items-center`}>
+          <div className={`glass rounded-2xl p-6 sm:p-8 border border-brand-gold/10 flex ${isRTL ? 'flex-row-reverse text-right' : ''} gap-4 sm:gap-6 items-center`}>
             <div className="w-12 h-12 rounded-xl bg-brand-gold/10 flex items-center justify-center text-brand-gold flex-shrink-0">
               <Mail size={24} />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{t('email')}</p>
-              <p className="text-lg font-bold">connect@arabiakhaleej.com</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold break-all">connect@arabiakhaleej.com</p>
             </div>
           </div>
 
 
-          <div className={`glass rounded-2xl p-8 border border-brand-gold/10 flex ${isRTL ? 'flex-row-reverse text-right' : ''} gap-6 items-center`}>
+          <div className={`glass rounded-2xl p-6 sm:p-8 border border-brand-gold/10 flex ${isRTL ? 'flex-row-reverse text-right' : ''} gap-4 sm:gap-6 items-center`}>
             <div className="w-12 h-12 rounded-xl bg-brand-gold/10 flex items-center justify-center text-brand-gold flex-shrink-0">
               <Globe size={24} />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <p className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{t('status')}</p>
-              <p className="text-lg font-bold">{t('independentGccRef')}</p>
+              <p className="text-sm sm:text-base lg:text-lg font-bold break-words">{t('independentGccRef')}</p>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ export default function ContactClient() {
             <input 
               required
               name="name"
-              className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors ${isRTL ? 'text-right' : ''}`}
+              className={`w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors ${isRTL ? 'text-right' : ''}`}
             />
           </div>
 
@@ -117,7 +117,7 @@ export default function ContactClient() {
             <input 
               required
               name="email"
-              className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors ${isRTL ? 'text-right' : ''}`}
+              className={`w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors ${isRTL ? 'text-right' : ''}`}
             />
           </div>
 
@@ -129,7 +129,7 @@ export default function ContactClient() {
               required
               name="message"
               placeholder={t('messagePlaceholder')}
-              className={`w-full bg-white/5 border border-white/10 rounded-xl px-4 py-4 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors resize-none ${isRTL ? 'text-right' : ''}`}
+              className={`w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-4 text-sm focus:outline-none focus:border-brand-gold/50 transition-colors resize-none ${isRTL ? 'text-right' : ''}`}
             />
           </div>
 

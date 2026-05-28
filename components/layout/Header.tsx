@@ -17,7 +17,9 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] h-16 flex items-center border-b border-white/5 bg-brand-obsidian/60 backdrop-blur-xl px-4 sm:px-8">
+    /* Why: We replaced hardcoded bg-brand-obsidian/60 with bg-background/60 and border-white/5 with border-border/40
+             to ensure the header background and bottom border adjust dynamically between daylight and night themes. */
+    <header className="fixed top-0 left-0 right-0 z-[100] h-16 flex items-center border-b border-border/40 bg-background/60 backdrop-blur-xl px-4 sm:px-8">
       <div className={`flex items-center justify-between w-full max-w-7xl mx-auto`}>
 
         {/* Logo */}

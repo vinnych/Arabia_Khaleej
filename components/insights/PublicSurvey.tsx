@@ -128,13 +128,13 @@ export default function PublicSurvey() {
 
   return (
     <div className={`w-full max-w-4xl mx-auto px-4 my-12 ${isRTL ? 'font-serif-ar' : ''}`}>
-      <div className="glass p-8 sm:p-12 rounded-[3rem] border-brand-gold/20 shadow-2xl relative overflow-hidden">
+      <div className="glass p-8 sm:p-12 rounded-xl border-brand-gold/20 shadow-lg relative overflow-hidden">
         {/* Decorative background element */}
         <div className="absolute top-0 right-0 w-48 h-48 bg-brand-gold/5 rounded-full -mr-24 -mt-24 blur-3xl animate-pulse" />
         
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-brand-gold/10 text-brand-gold">
+            <div className="p-2 rounded bg-brand-gold/10 text-brand-gold">
               <TrendingUp size={22} />
             </div>
             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-gold">
@@ -184,7 +184,7 @@ export default function PublicSurvey() {
                   aria-pressed={votedIds.get(currentSurvey.id) === option.id}
                   className={`w-full text-left relative group outline-none select-none transition-all ${votedIds.has(currentSurvey.id) ? 'cursor-default' : 'cursor-pointer active:scale-[0.99]'}`}
                 >
-                  <div className="flex justify-between items-center mb-2.5 px-2">
+                  <div className="flex justify-between items-center mb-2 px-1">
                     <span className={`text-sm sm:text-base font-bold transition-colors ${
                       votedIds.get(currentSurvey.id) === option.id ? 'text-brand-gold' : 'text-foreground/80 group-hover:text-foreground'
                     }`}>
@@ -202,12 +202,12 @@ export default function PublicSurvey() {
                       )}
                     </AnimatePresence>
                   </div>
-                  <div className="h-4 w-full bg-brand-gold/5 rounded-full overflow-hidden border border-brand-gold/10 relative">
+                  <div className="h-2 w-full bg-brand-gold/5 rounded overflow-hidden border border-brand-gold/10 relative">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: votedIds.has(currentSurvey.id) ? `${option.percentage}%` : "0%" }}
                       transition={{ duration: 1.2, ease: "circOut", delay: idx * 0.05 }}
-                      className={`h-full rounded-full ${
+                      className={`h-full rounded ${
                         votedIds.get(currentSurvey.id) === option.id 
                         ? 'bg-gradient-to-r from-brand-gold/60 to-brand-gold shadow-[0_0_15px_rgba(212,175,55,0.4)]' 
                         : 'bg-brand-gold/20'

@@ -31,6 +31,15 @@ export async function POST(req: Request) {
       return new NextResponse('Bad Request: Missing or invalid "topic" property.', { status: 400 });
     }
 
+    // Why verify draft existence: If the user explicitly deleted this draft from the dashboard
+    // while it was still in the 'generating' status, writing it back now would resurrect the
+    // deleted draft and cause it to reappear unexpectedly. Discarding the callback preserves the user's action.
+    const existingDraft = await draftDb.getDraft(payload.topic);
+    if (!existingDraft) {
+      console.warn(`[webhook] Discarding incoming agent callback for deleted draft: "${payload.topic}"`);
+      return NextResponse.json({ message: 'Callback discarded because draft was deleted by user' });
+    }
+
     const data = {
       topic: payload.topic,
       status: payload.status === 'success' ? 'pending_review' : 'error',

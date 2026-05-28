@@ -39,14 +39,14 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
   return (
     <Link
       href={`/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`}
-      /* WHY: Replaced heavy visual shadow layers, glow rings, and bubbly rounded-[2.5rem] corners with crisp, modern rounded-xl geometries and subtle borders. */
-      className="group relative glass p-0 rounded-xl border-brand-gold/10 hover:border-brand-gold/25 active:scale-[0.99] transition-all duration-300 flex flex-col h-full overflow-hidden select-none border border-white/5"
+      /* WHY: Replaced dynamic mouse highlights and bubbly borders with a simple, compact, static golden border color transition on hover, preserving maximum rendering performance. */
+      className="group relative glass p-0 rounded-xl border-brand-gold/10 hover:border-brand-gold/25 active:scale-[0.99] transition-all duration-300 flex flex-col h-full overflow-hidden select-none border border-foreground/5"
     >
       {/* Premium Reflection Overlay */}
       <div className="absolute inset-0 bg-gradient-to-tr from-white/5 via-transparent to-transparent pointer-events-none z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       {/* Article Image Container */}
-      <div className="relative w-full h-56 sm:h-64 overflow-hidden shrink-0 border-b border-white/5">
+      <div className="relative w-full h-56 sm:h-64 overflow-hidden shrink-0 border-b border-foreground/5">
         <Image
           src={imgError ? getDeterministicFallback(item.slug) : (item.image || getDeterministicFallback(item.slug))}
           alt={item.title}
@@ -63,7 +63,7 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
         <div className="absolute top-4 right-4 flex flex-col gap-2 z-30 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button 
             onClick={handleShare}
-            className="w-8 h-8 rounded glass border-white/10 flex items-center justify-center text-white hover:bg-brand-gold hover:text-brand-obsidian transition-all"
+            className="w-8 h-8 rounded glass border-foreground/10 flex items-center justify-center text-foreground hover:bg-brand-gold hover:text-brand-obsidian transition-all"
             aria-label={t('shareArticle')}
           >
             {sharing ? <CheckCircle2 size={14} /> : <Share2 size={14} />}
@@ -77,7 +77,7 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
             <span className="w-1.5 h-1.5 rounded-full bg-brand-obsidian animate-pulse" />
             {t('premium')}
           </div>
-          <div className="px-2.5 py-1 rounded glass border-white/10 text-white text-[8px] font-black uppercase tracking-[0.15em] flex items-center gap-1.5">
+          <div className="px-2.5 py-1 rounded glass border-foreground/10 text-foreground text-[8px] font-black uppercase tracking-[0.15em] flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
             {t('analystPerspective')}
           </div>
@@ -102,7 +102,7 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
             </span>
           </div>
           {/* WHY: Converted bubbly 2xl/shadow container into a tight, flat geometric chevron square. */}
-          <div className="w-9 h-9 rounded bg-white/5 border border-white/5 flex items-center justify-center group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all duration-300">
+          <div className="w-9 h-9 rounded bg-foreground/5 border border-foreground/5 flex items-center justify-center group-hover:bg-brand-gold group-hover:text-brand-obsidian transition-all duration-300">
             <ExternalLink size={14} className="opacity-45 group-hover:opacity-100" />
           </div>
         </div>

@@ -22,11 +22,11 @@ export async function generateMetadata() {
     lang,
     keywords: [
       "Arabia Khaleej", "GCC guide", "Gulf Cooperation Council",
-      "prayer times GCC", "GCC gold rates", "GCC stock markets",
+      "prayer times GCC", "GCC currency rates", "GCC currency dynamics",
       "Qatar guide", "UAE guide", "Saudi Arabia guide",
       "Kuwait guide", "Oman guide", "Bahrain guide",
       "expat GCC", "GCC regional intelligence",
-      "عربية خليج", "دليل الخليج", "مواقيت الصلاة", "أسعار الذهب",
+      "عربية خليج", "دليل الخليج", "مواقيت الصلاة", "أسعار صرف العملات",
       "مجلس التعاون الخليجي",
     ],
   });
@@ -72,9 +72,9 @@ export default async function Home() {
         description={t("homeDatasetDesc")}
         url="/"
         keywords={[
-          "GCC", "prayer times", "gold rates", "stock markets", "currencies",
+          "GCC", "prayer times", "currency exchange", "currency dynamics", "currencies",
           "Qatar", "UAE", "Saudi Arabia", "Kuwait", "Oman", "Bahrain",
-          "مجلس التعاون", "مواقيت الصلاة", "أسعار الذهب",
+          "مجلس التعاون", "مواقيت الصلاة", "أسعار صرف العملات",
         ]}
       />
       <FAQSchema questions={faqQuestions} />

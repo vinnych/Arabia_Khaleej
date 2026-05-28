@@ -39,7 +39,7 @@ export default function JoinClient() {
         <h1 className="text-xs tracking-[0.6em] uppercase font-bold text-brand-gold mb-4">
           {t('contact')}
         </h1>
-        <p className="text-4xl font-black serif text-foreground tracking-tight">{t('boutiqueEnquiry')}</p>
+        <p className="text-3xl sm:text-4xl font-black serif text-foreground tracking-tight">{t('boutiqueEnquiry')}</p>
         <div className="w-12 h-1 bg-brand-gold/30 mx-auto mt-6 rounded-full" />
       </div>
 

@@ -10,6 +10,11 @@ export const common: Translations = {
   privacy: { en: "Privacy", ar: "الخصوصية" },
   terms: { en: "Terms", ar: "الشروط" },
   disclaimer: { en: "Disclaimer", ar: "إخلاء المسؤولية" },
+  contactTitle: { en: "Contact Us", ar: "اتصل بنا" },
+  contactDesc: { en: "For formal editorial, compliance, or institutional enquiries, please use our professional contact channel. We do not accept advertising or sponsored content.", ar: "للاستفسارات التحريرية أو الامتثال أو المؤسسية الرسمية، يرجى استخدام قناة الاتصال المهنية لدينا. لا نقبل الإعلانات أو المحتوى المدعوم." },
+  legal: { en: "Legal", ar: "قانوني" },
+  email: { en: "Email", ar: "البريد الإلكتروني" },
+  status: { en: "Status", ar: "الحالة" },
   back: { en: "Back", ar: "رجوع" },
   backHome: { en: "Back to Home", ar: "العودة للرئيسية" },
   submit: { en: "Submit", ar: "إرسال" },
@@ -47,15 +52,15 @@ export const common: Translations = {
 
   // ── Home — nav card descriptions ────────────────────────────────────────────
   prayerTimesDesc:     { en: "Precise Islamic prayer times for all GCC cities.", ar: "مواقيت الصلاة الدقيقة لجميع مدن الخليج." },
-  marketInsightsDesc:  { en: "Live GCC stock markets, gold & currency rates.", ar: "أسواق الأسهم الخليجية ومعدلات الذهب والعملات." },
+  marketInsightsDesc:  { en: "Live GCC currency exchange rates & fiscal data.", ar: "معدلات صرف العملات الخليجية الحية والبيانات المالية." },
   pressTerminalDesc:   { en: "Long-form editorial intelligence from our regional desk.", ar: "تحليلات تحريرية معمّقة من مكتبنا الإقليمي." },
   boutiqueEnquiryDesc: { en: "Direct channel for institutional & professional enquiries.", ar: "قناة مباشرة للاستفسارات المؤسسية والمهنية." },
 
   // ── Home — welcome section ──────────────────────────────────────────────────
   welcomeSectionTitle: { en: "The GCC Standard", ar: "المعيار الخليجي" },
   welcomeSectionBody: {
-    en: "Arabia Khaleej is an independent regional intelligence platform built for residents, expatriates, and visitors across the Gulf Cooperation Council.\n\nWe aggregate and surface high-fidelity information — prayer schedules, currency dynamics, market intelligence, and long-form editorial analysis — in a single, clean destination.",
-    ar: "عربية خليج منصة استخبارات إقليمية مستقلة مبنية للمقيمين والوافدين والزوار في دول مجلس التعاون الخليجي.\n\nنجمع ونعرض المعلومات عالية الدقة — مواقيت الصلاة وديناميكيات العملات واستخبارات السوق والتحليلات التحريرية المعمّقة — في وجهة واحدة نظيفة.",
+    en: "Arabia Khaleej is an independent regional intelligence platform built for residents, expatriates, and visitors across the Gulf Cooperation Council.\n\nWe aggregate and surface high-fidelity information — prayer schedules, currency dynamics, and long-form editorial analysis — in a single, clean destination.",
+    ar: "عربية خليج منصة استخبارات إقليمية مستقلة مبنية للمقيمين والوافدين والزوار في دول مجلس التعاون الخليجي.\n\nنجمع ونعرض المعلومات عالية الدقة — مواقيت الصلاة وديناميكيات العملات والتحليلات التحريرية المعمّقة — في وجهة واحدة نظيفة.",
   },
   engagement: { en: "Community Intelligence", ar: "الاستخبارات المجتمعية" },
 
@@ -65,7 +70,7 @@ export const common: Translations = {
   // ── About page ──────────────────────────────────────────────────────────────
   aboutDesc:         { en: "An independent digital platform serving the Gulf Cooperation Council with precision, clarity, and regional intelligence.", ar: "منصة رقمية مستقلة تخدم دول مجلس التعاون الخليجي بدقة ووضوح واستخبارات إقليمية." },
   mission:           { en: "Mission", ar: "الرسالة" },
-  missionDesc:       { en: "To aggregate, simplify, and surface authoritative regional information — prayer schedules, market intelligence, and sovereign country data — for every resident and visitor across the GCC.", ar: "جمع وتبسيط وإظهار المعلومات الإقليمية الموثوقة — جداول الصلاة واستخبارات السوق وبيانات الدول السيادية — لكل مقيم وزائر في دول الخليج." },
+  missionDesc:       { en: "To aggregate, simplify, and surface authoritative regional information — prayer schedules, currency dynamics, and sovereign country data — for every resident and visitor across the GCC.", ar: "جمع وتبسيط وإظهار المعلومات الإقليمية الموثوقة — جداول الصلاة وديناميكيات العملات وبيانات الدول السيادية — لكل مقيم وزائر في دول الخليج." },
   pillars:           { en: "Our Pillars", ar: "ركائزنا" },
   editorialTeam:     { en: "Editorial Team", ar: "هيئة التحرير" },
   editorialTeamDesc: { en: "Our intelligence desks are led by named regional specialists, each responsible for a defined content category.", ar: "تقودها مكاتب متخصصة بقيادة خبراء إقليميين مُسمَّيين، كل منهم مسؤول عن فئة محتوى محددة." },
@@ -79,7 +84,7 @@ export const common: Translations = {
   transparencyTitle:       { en: "Transparency", ar: "الشفافية" },
   transparencyBody:        { en: "We believe the region deserves intelligence it can trust. Every data point, methodology, and editorial decision is disclosed openly.", ar: "نؤمن بأن المنطقة تستحق استخبارات يمكنها الوثوق بها. كل نقطة بيانات ومنهجية وقرار تحريري يُفصح عنه بشكل مفتوح." },
   dataProvenance:          { en: "Data Provenance", ar: "مصدر البيانات" },
-  dataProvenanceDesc:      { en: "Prayer times are sourced from the Aladhan API using the Umm Al-Qura University method. Currency rates are pulled from open exchange rate APIs. Market data is sourced from public GCC exchange feeds.", ar: "مواقيت الصلاة مصدرها واجهة برمجة Aladhan. أسعار العملات من واجهات أسعار الصرف المفتوحة. بيانات السوق من بورصات الخليج العامة." },
+  dataProvenanceDesc:      { en: "Prayer times are sourced from the Aladhan API using the Umm Al-Qura University method. Currency rates are pulled from open exchange rate APIs.", ar: "مواقيت الصلاة مصدرها واجهة برمجة Aladhan. أسعار العملات من واجهات أسعار الصرف المفتوحة." },
   editorialIntegrity:      { en: "Editorial Integrity", ar: "النزاهة التحريرية" },
   editorialIntegrityDesc:  { en: "All editorial articles are produced by named analysts on our team and reviewed against our style and accuracy guidelines before publication.", ar: "جميع المقالات التحريرية تُنتج من قبل محللين مُسمَّيين في فريقنا وتُراجع وفق إرشادات الأسلوب والدقة قبل النشر." },
   ethicalIntelligence:     { en: "Ethical Intelligence", ar: "الاستخبارات الأخلاقية" },
@@ -93,14 +98,14 @@ export const common: Translations = {
 
   // ── FAQ schema (homepage structured data) ────────────────────────────────────
   faqWhatIsTitle:    { en: "What is Arabia Khaleej?", ar: "ما هي عربية خليج؟" },
-  faqWhatIsBody:     { en: "Arabia Khaleej is an independent regional intelligence platform providing prayer times, currency rates, market data, and editorial analysis for the GCC.", ar: "عربية خليج منصة استخبارات إقليمية مستقلة توفر مواقيت الصلاة وأسعار العملات وبيانات السوق والتحليلات لدول الخليج." },
+  faqWhatIsBody:     { en: "Arabia Khaleej is an independent regional intelligence platform providing prayer times, currency rates, and editorial analysis for the GCC.", ar: "عربية خليج منصة استخبارات إقليمية مستقلة توفر مواقيت الصلاة وأسعار العملات والتحليلات لدول الخليج." },
   faqCountriesTitle: { en: "Which GCC countries does Arabia Khaleej cover?", ar: "ما هي دول الخليج التي تغطيها عربية خليج؟" },
   faqCountriesBody:  { en: "We cover all six GCC member states: Saudi Arabia, UAE, Qatar, Kuwait, Oman, and Bahrain.", ar: "نغطي جميع دول الخليج الست: المملكة العربية السعودية والإمارات وقطر والكويت وعُمان والبحرين." },
   faqPrayerTitle:    { en: "How accurate are the prayer times?", ar: "ما مدى دقة مواقيت الصلاة؟" },
   faqPrayerBody:     { en: "Prayer times are calculated using the Umm Al-Qura University method via the Aladhan API, the most widely used standard across the GCC.", ar: "تُحسب مواقيت الصلاة باستخدام طريقة جامعة أم القرى عبر واجهة Aladhan." },
   faqBilingualTitle: { en: "Is Arabia Khaleej available in Arabic?", ar: "هل عربية خليج متاحة باللغة العربية؟" },
   faqBilingualBody:  { en: "Yes. Arabia Khaleej is fully bilingual with complete RTL support.", ar: "نعم. عربية خليج ثنائية اللغة بالكامل مع دعم كامل من اليمين لليسار." },
-  faqMarketTitle:    { en: "What market data does Arabia Khaleej provide?", ar: "ما بيانات السوق التي توفرها عربية خليج؟" },
-  faqMarketBody:     { en: "We track major GCC stock exchanges, gold spot prices, Brent crude, and all GCC currency exchange rates against the USD.", ar: "نتتبع البورصات الخليجية الكبرى وأسعار الذهب وخام برنت وأسعار صرف جميع عملات الخليج." },
-  homeDatasetDesc:   { en: "Comprehensive GCC regional dataset including prayer times, currency rates, market indices, and editorial intelligence across all six GCC member states.", ar: "مجموعة بيانات إقليمية خليجية شاملة تضم مواقيت الصلاة وأسعار العملات ومؤشرات السوق والاستخبارات التحريرية." },
+  faqMarketTitle:    { en: "What currency data does Arabia Khaleej provide?", ar: "ما بيانات العملات التي توفرها عربية خليج؟" },
+  faqMarketBody:     { en: "We track all GCC currency exchange rates and currency dynamics against the USD and other major world currencies.", ar: "نتتبع جميع أسعار صرف العملات الخليجية وديناميكيات العملات مقابل الدولار الأمريكي والعملات العالمية الرئيسية الأخرى." },
+  homeDatasetDesc:   { en: "Comprehensive GCC regional dataset including prayer times, currency rates, and editorial intelligence across all six GCC member states.", ar: "مجموعة بيانات إقليمية خليجية شاملة تضم مواقيت الصلاة وأسعار العملات والاستخبارات التحريرية." },
 };

@@ -6,8 +6,6 @@ import Link from "next/link";
 import { Clock, TrendingUp, Newspaper, Mail, ArrowRight } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import PrayerLite from "@/components/prayer/PrayerLite";
-import FinanceTicker from "@/components/finance/FinanceTicker";
-import PublicSurvey from "@/components/insights/PublicSurvey";
 import { getDeterministicFallback } from "@/lib/fallbacks";
 import { InsightItem } from "@/lib/insights";
 
@@ -43,7 +41,10 @@ function FeaturedInsightCard({
     <Link
       key={insight.slug}
       href={`/insights/${insight.slug}`}
-      className="group flex flex-col gap-5 glass rounded-xl p-5 hover:border-white/10 transition-all duration-350"
+      /* Why standard static hover classes are used instead of mouse coordinates:
+         To keep the UI extremely simple, compact, and highly performant on all devices (including mobile touchscreens).
+         A clean border color shift and low-profile background tint transition provides excellent visual feedback with zero client-side script overhead. */
+      className="group flex flex-col gap-5 glass rounded-xl p-5 hover:border-brand-gold/20 hover:bg-white/[0.01] transition-all duration-300 border border-white/5 relative overflow-hidden"
     >
       <div className="relative w-full h-56 rounded-lg overflow-hidden border border-white/5">
         <Image
@@ -99,6 +100,46 @@ function FeaturedInsightCard({
   );
 }
 
+// Why a separate sub-component QuickNavLinkCard is used:
+// Keeping the card separate segregates link logic and keeps layouts modular.
+// Standardizing on clean CSS transitions keeps the visual style extremely minimal, compact, and highly performant.
+function QuickNavLinkCard({
+  link,
+  t,
+}: {
+  link: typeof NAV_LINKS[number];
+  t: (key: string) => string;
+}) {
+  const Icon = link.icon;
+
+  return (
+    <Link
+      key={link.href}
+      href={link.href}
+      /* Why standard static hover classes are used:
+         To maintain a simple, compact, and beautiful dark interface, pure CSS transitions are the absolute best choice.
+         They load instantly and offer perfect visual feedback with zero client-side React rerenders. */
+      className="group relative mesh-surface rounded-xl p-6 flex flex-col gap-4 hover:border-brand-gold/20 hover:bg-white/[0.01] transition-all duration-300 border border-white/5 overflow-hidden"
+    >
+      <div className="w-10 h-10 rounded bg-brand-gold/10 flex items-center justify-center group-hover:bg-brand-gold/15 transition-colors">
+        <Icon size={18} className="text-brand-gold" />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <span className="text-lg font-display font-bold text-foreground group-hover:text-brand-gold transition-colors">
+          {t(link.key)}
+        </span>
+        <span className="text-xs text-muted-foreground/75 leading-relaxed font-light">
+           {t(link.desc)}
+         </span>
+      </div>
+      <div className="flex items-center gap-1.5 text-brand-gold opacity-60 group-hover:opacity-100 transition-opacity mt-2">
+        <span className="text-[10px] font-bold uppercase tracking-wider">{t('explore')}</span>
+        <ArrowRight size={12} className="transition-transform group-hover:translate-x-1 duration-200" />
+      </div>
+    </Link>
+  );
+}
+
 const NAV_LINKS = [
   { key: 'prayerTimes', href: "/prayer", icon: Clock, desc: "prayerTimesDesc" },
   { key: 'currencyExchange', href: "/currency-exchange", icon: TrendingUp, desc: "currencyExchangeDesc" },
@@ -136,7 +177,9 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
       {/* WHY: Completely stripped the absolute floating gradient blurs to maintain a solid, clean, dark-obsidian background. */}
 
       {/* ── HERO ── */}
-      <section className="relative w-full pt-32 pb-24 px-4 flex flex-col items-center text-center overflow-hidden z-10">
+      {/* Why: We reduced bottom padding from pb-24 to pb-12 to tighten the layout and prevent a giant gap
+               now that the horizontal FinanceTicker strip is removed. */}
+      <section className="relative w-full pt-32 pb-12 px-4 flex flex-col items-center text-center overflow-hidden z-10">
         {/* Subtle Noise Overlay */}
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] pointer-events-none"></div>
 
@@ -158,7 +201,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
 
         {/* Hero Content */}
         <div className="animate-fade-up max-w-4xl mx-auto" style={{ animationDelay: "100ms" }}>
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-display font-bold text-foreground mb-6 leading-[0.9] tracking-tighter">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl font-display font-bold text-gold-gradient mb-6 leading-[0.9] tracking-tighter">
             {t('siteName')}
           </h1>
           <p className="text-xs sm:text-sm font-bold text-brand-gold tracking-[0.5em] uppercase mb-6 opacity-80">
@@ -199,44 +242,20 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         </div>
       </section>
 
-{/* ── MARKET TICKER ── */}
-       <div className="w-full border-y border-border/50 bg-brand-obsidian/40 backdrop-blur-md z-10">
-         <FinanceTicker />
-       </div>
+
 
        {/* ── MAIN CONTENT AREA ── */}
-       <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-24 flex flex-col gap-24 z-10">
+       {/* Why: We changed py-24 to pt-10 pb-24 to shrink the top spacing now that the ticker strip is removed,
+                re-balancing vertical grid flow for a tighter, premium editorial look. */}
+       <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 pt-10 pb-24 flex flex-col gap-24 z-10">
 
         {/* ── QUICK NAV CARDS ── */}
         <section className="animate-fade-up" style={{ animationDelay: "120ms" }}>
           {/* WHY: Redesigned the cards grid with minimal geometries, removing heavy translation lifts, bubbles, and visual shadows. */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {NAV_LINKS.map((link) => {
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="group mesh-surface rounded-xl p-6 flex flex-col gap-4 hover:border-brand-gold/20 transition-all duration-300 border border-white/5"
-                >
-                  <div className="w-10 h-10 rounded bg-brand-gold/10 flex items-center justify-center group-hover:bg-brand-gold/15 transition-colors">
-                    <Icon size={18} className="text-brand-gold" />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <span className="text-lg font-display font-bold text-foreground group-hover:text-brand-gold transition-colors">
-                      {t(link.key)}
-                    </span>
-                    <span className="text-xs text-muted-foreground/75 leading-relaxed font-light">
-                       {t(link.desc)}
-                     </span>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-brand-gold opacity-60 group-hover:opacity-100 transition-opacity mt-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider">{t('explore')}</span>
-                    <ArrowRight size={12} className="transition-transform group-hover:translate-x-1 duration-200" />
-                  </div>
-                </Link>
-              );
-            })}
+            {NAV_LINKS.map((link) => (
+              <QuickNavLinkCard key={link.href} link={link} t={t} />
+            ))}
           </div>
         </section>
 
@@ -308,19 +327,6 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
           </section>
         )}
 
-        {/* ── SURVEY ── */}
-        {/* WHY: Tightened survey boundary from bubbly rounded-[4rem] to sleek, unified rounded-xl container. */}
-        <section className="relative py-20 px-8 glass rounded-xl text-center overflow-hidden">
-           {/* Decor */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/5 blur-[80px] rounded-full"></div>
-          
-          <div className="relative z-10 max-w-2xl mx-auto">
-            <span className="text-xs font-bold text-brand-gold uppercase tracking-[0.5em] mb-6 block">
-              {t('engagement')}
-            </span>
-            <PublicSurvey />
-          </div>
-        </section>
 
       </div>
 
