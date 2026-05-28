@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { ArrowDownUp, Search, Star, Clock, TrendingUp, ChevronDown, X, RefreshCw, Globe, Copy, Check, Share2, Settings2 } from "lucide-react";
+// WHY: Settings2 removed (unused import kept previously), Zap added for live badge
+import { ArrowDownUp, Search, Star, Clock, TrendingUp, ChevronDown, X, RefreshCw, Globe, Copy, Check, Share2, Zap } from "lucide-react";
 import { useLanguage } from "@/lib/i18n";
 import Link from "next/link";
 import { Breadcrumbs } from "@/lib/seo";
@@ -37,9 +38,14 @@ export default function CurrencyExchangeClient() {
   const [spreadValue, setSpreadValue] = useState("1.5");
   const [historicalRates, setHistoricalRates] = useState<number[]>([]);
   const [historicalLoading, setHistoricalLoading] = useState(false);
-  const [matrixCurrencies, setMatrixCurrencies] = useState(["USD", "EUR", "GBP", "AED", "SAR"]);
+  // Sparkline hover: index of hovered data point (-1 = none)
+  const [sparkHoverIdx, setSparkHoverIdx] = useState(-1);
   const fromRef = useRef<HTMLDivElement>(null);
   const toRef = useRef<HTMLDivElement>(null);
+  // WHY useRef Map: caches fetched historical pairs client-side so swapping
+  // back to a previously viewed pair doesn't trigger a new network request.
+  // We use useRef (not useState) because cache changes shouldn't cause re-renders.
+  const historicalCache = useRef<Map<string, number[]>>(new Map());
   const { t, isRTL, language } = useLanguage();
 
   const fetchRates = useCallback(async (isRefresh = false) => {
@@ -64,17 +70,34 @@ export default function CurrencyExchangeClient() {
     } catch (e) {
       console.warn("localStorage unavailable for favorites");
     }
-    const interval = setInterval(() => fetchRates(), 60000);
+    // WHY 1800000ms (30 min) not 60000ms (1 min):
+    // The /api/exchange-rates endpoint caches for 1800 seconds (revalidate: 1800).
+    // Polling every 60 seconds hammers the edge worker with requests that always
+    // return the same cached response — wasteful and adds unnecessary latency.
+    // 30-minute polling aligns exactly with the server cache window.
+    const interval = setInterval(() => fetchRates(), 1_800_000);
     return () => clearInterval(interval);
   }, [fetchRates]);
 
   useEffect(() => {
     async function fetchHistory() {
+      const cacheKey = `${fromCode}-${toCode}`;
+
+      // WHY client-side cache: every currency swap fires a fetch.
+      // The server caches the result, but we still incur a network round-trip.
+      // A simple Map in useRef avoids re-fetching pairs the user already viewed.
+      // We use useRef (not useState) so cache updates don't trigger re-renders.
+      if (historicalCache.current.has(cacheKey)) {
+        setHistoricalRates(historicalCache.current.get(cacheKey)!);
+        return;
+      }
+
       setHistoricalLoading(true);
       try {
         const res = await fetch(`/api/historical-rates?from=${fromCode}&to=${toCode}`);
         const data = await res.json();
         if (data.status === 'success') {
+          historicalCache.current.set(cacheKey, data.rates);
           setHistoricalRates(data.rates);
         }
       } catch(e) {
@@ -129,9 +152,19 @@ export default function CurrencyExchangeClient() {
 
   const handleCopy = () => {
     const text = `${parsedAmount} ${fromCode} = ${result.toFixed(4)} ${toCode}`;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    // WHY try/catch: navigator.clipboard.writeText() throws a DOMException
+    // when clipboard permission is denied or the page is not focused.
+    // Without this, the copy button silently fails with no user feedback.
+    try {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(() => {
+        // Clipboard API rejected — nothing to show, avoid console spam
+      });
+    } catch (err) {
+      // Clipboard API not available in this context (e.g., non-HTTPS)
+    }
   };
 
   const handleShare = async () => {
@@ -276,9 +309,22 @@ export default function CurrencyExchangeClient() {
 
       {/* Header */}
       <div className="w-full mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-        <p className="text-[10px] tracking-[0.5em] uppercase font-bold text-accent mb-3">
-          {t("currencyExchange")}
-        </p>
+        <div className="flex items-center gap-3 mb-3">
+          <p className="text-[10px] tracking-[0.5em] uppercase font-bold text-accent">
+            {t("currencyExchange")}
+          </p>
+          {/* WHY inline live badge: lastUpdated is shown at the bottom of the page
+              but users scrolling the converter never see it. The badge gives
+              immediate confidence that rates are fresh without cluttering the header. */}
+          {lastUpdated && (
+            <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/20 rounded-full px-2.5 py-1">
+              <Zap size={8} className="text-green-400 animate-pulse" />
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-green-400">
+                {t('live') || 'Live'} · {new Date(lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
+        </div>
         <h1 className="text-4xl md:text-5xl font-black serif text-foreground mb-4">
           {t("currencyConverter")}
         </h1>
@@ -357,7 +403,11 @@ export default function CurrencyExchangeClient() {
 
           {/* To Section */}
           <div className="mb-6">
-            <label className={`text-[10px] uppercase font-black tracking-[0.3em] text-foreground/40 mb-3 block ${isRTL ? 'text-right' : ''}`}>
+            {/* WHY htmlFor="to-currency-selector": accessibility requires labels
+                to be associated with their control. The "from" label correctly
+                uses htmlFor="from-amount". This makes screen readers announce
+                "To: [button]" when the selector receives focus. */}
+            <label htmlFor="to-currency-selector" className={`text-[10px] uppercase font-black tracking-[0.3em] text-foreground/40 mb-3 block ${isRTL ? 'text-right' : ''}`}>
               {t("to")}
             </label>
             <div className={`flex gap-3 items-stretch ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -402,28 +452,39 @@ export default function CurrencyExchangeClient() {
           {/* Remittance Spread Toggle */}
           <div className="mb-6 flex flex-col gap-2 p-4 rounded-2xl bg-foreground/5 border border-brand-gold/10">
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
+              <label htmlFor="spread-toggle" className="flex items-center gap-2 cursor-pointer select-none">
+                {/* WHY explicit id="spread-toggle": the checkbox is sr-only (visually hidden),
+                    so without an explicit id + htmlFor, assistive tech cannot find or
+                    announce this control when the user navigates by form elements. */}
                 <input
+                  id="spread-toggle"
                   type="checkbox"
                   className="sr-only"
                   checked={includeSpread}
                   onChange={(e) => setIncludeSpread(e.target.checked)}
                 />
-                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-1 ${includeSpread ? 'bg-brand-gold' : 'bg-foreground/20'}`}>
+                <div className={`w-10 h-6 rounded-full transition-colors flex items-center px-1 ${includeSpread ? 'bg-brand-gold' : 'bg-foreground/20'}`} aria-hidden="true">
                   <div className={`w-4 h-4 rounded-full bg-white transition-transform ${includeSpread ? 'translate-x-4' : 'translate-x-0'}`} />
                 </div>
                 <span className="text-xs font-bold uppercase tracking-widest text-foreground/60">{t('includeExchangeSpread') || 'Include Bank/Exchange Spread'}</span>
               </label>
               {includeSpread && (
                 <div className="flex items-center gap-2">
+                  {/* WHY aria-label: without a label, screen readers announce this
+                      as "unlabeled number input". The label makes it clear what
+                      value the user is adjusting. */}
                   <input
+                    id="spread-percent"
                     type="number"
                     value={spreadValue}
                     onChange={(e) => setSpreadValue(e.target.value)}
                     className="w-16 bg-transparent border-b border-brand-gold/30 text-right text-sm font-black focus:outline-none focus:border-brand-gold"
                     step="0.1"
+                    min="0"
+                    max="20"
+                    aria-label={t('spreadPercentLabel') || 'Spread percentage'}
                   />
-                  <span className="text-xs font-bold text-foreground/40">%</span>
+                  <span className="text-xs font-bold text-foreground/40" aria-hidden="true">%</span>
                 </div>
               )}
             </div>
@@ -437,48 +498,103 @@ export default function CurrencyExchangeClient() {
           {/* Rate Info Bar with Sparkline */}
           <div className={`flex flex-col gap-4 pt-5 border-t border-brand-gold/10`}>
             {/* Sparkline */}
-            {!historicalLoading && historicalRates.length > 1 && (
-              <div className="w-full h-12 relative flex items-end border-b border-white/5 pb-2">
-                <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 10 100 90">
-                  <defs>
-                    <linearGradient id="sparkGradient" x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor={historicalRates[historicalRates.length - 1] >= historicalRates[0] ? '#22c55e' : '#ef4444'} stopOpacity="0.2" />
-                      <stop offset="100%" stopColor="transparent" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path
-                    d={`M 0 100 L 0 ${100 - (((historicalRates[0] - Math.min(...historicalRates)) / (Math.max(...historicalRates) - Math.min(...historicalRates) || 1)) * 80 + 10)} ${historicalRates.slice(1).map((rate, i) => {
-                      const max = Math.max(...historicalRates);
-                      const min = Math.min(...historicalRates);
-                      const range = max === min ? 1 : max - min;
-                      const x = ((i + 1) / (historicalRates.length - 1)) * 100;
-                      const y = 100 - (((rate - min) / range) * 80 + 10);
-                      return `L ${x} ${y}`;
-                    }).join(' ')} L 100 100 Z`}
-                    fill="url(#sparkGradient)"
-                  />
-                  <path
-                    d={`M 0 ${100 - (((historicalRates[0] - Math.min(...historicalRates)) / (Math.max(...historicalRates) - Math.min(...historicalRates) || 1)) * 80 + 10)} ${historicalRates.slice(1).map((rate, i) => {
-                      const max = Math.max(...historicalRates);
-                      const min = Math.min(...historicalRates);
-                      const range = max === min ? 1 : max - min;
-                      const x = ((i + 1) / (historicalRates.length - 1)) * 100;
-                      const y = 100 - (((rate - min) / range) * 80 + 10);
-                      return `L ${x} ${y}`;
-                    }).join(' ')}`}
-                    fill="none"
-                    stroke={historicalRates[historicalRates.length - 1] >= historicalRates[0] ? '#22c55e' : '#ef4444'}
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex justify-between items-end pb-1 text-[8px] font-bold text-foreground/30 uppercase tracking-widest pointer-events-none">
-                  <span>7D Ago</span>
-                  <span>Today</span>
+            {!historicalLoading && historicalRates.length > 1 && (() => {
+              // WHY pre-compute min/max outside the SVG path render:
+              // The original code called Math.min(...historicalRates) and
+              // Math.max(...historicalRates) FOUR times inside the render loop.
+              // This is both wasteful (O(n) × 4 per render) and fragile —
+              // spread syntax on large arrays can hit JS argument stack limits.
+              // Pre-computing once is correct, efficient, and readable.
+              const sparkMin = historicalRates.reduce((a, b) => Math.min(a, b), Infinity);
+              const sparkMax = historicalRates.reduce((a, b) => Math.max(a, b), -Infinity);
+              const sparkRange = sparkMax === sparkMin ? 1 : sparkMax - sparkMin;
+              const isUp = historicalRates[historicalRates.length - 1] >= historicalRates[0];
+              const sparkColor = isUp ? '#22c55e' : '#ef4444';
+
+              // Helper: convert a rate value to an SVG Y coordinate (0-100 scale)
+              const toY = (rate: number) =>
+                100 - (((rate - sparkMin) / sparkRange) * 80 + 10);
+
+              // Build SVG path points once, reused for both fill and line paths
+              const points = historicalRates.map((rate, i) => ({
+                x: (i / (historicalRates.length - 1)) * 100,
+                y: toY(rate),
+              }));
+
+              return (
+                <div className="w-full h-16 relative flex items-end border-b border-white/5 pb-2">
+                  <svg
+                    className="w-full h-full cursor-crosshair"
+                    preserveAspectRatio="none"
+                    viewBox="0 10 100 90"
+                    // WHY onMouseMove / onMouseLeave: the original sparkline had no
+                    // tooltip. Users saw a trend direction but no rate values.
+                    // This makes the chart interactive: hovering a point shows the
+                    // exact rate for that day above the chart.
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const pct = (e.clientX - rect.left) / rect.width;
+                      const idx = Math.round(pct * (historicalRates.length - 1));
+                      setSparkHoverIdx(Math.max(0, Math.min(idx, historicalRates.length - 1)));
+                    }}
+                    onMouseLeave={() => setSparkHoverIdx(-1)}
+                  >
+                    <defs>
+                      <linearGradient id="sparkGradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor={sparkColor} stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="transparent" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    {/* Fill area under the line */}
+                    <path
+                      d={`M 0 100 L ${points.map(p => `${p.x} ${p.y}`).join(' L ')} L 100 100 Z`}
+                      fill="url(#sparkGradient)"
+                    />
+                    {/* The line itself */}
+                    <path
+                      d={`M ${points.map(p => `${p.x} ${p.y}`).join(' L ')}`}
+                      fill="none"
+                      stroke={sparkColor}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    {/* Hover dot — shown when user hovers a specific point */}
+                    {sparkHoverIdx >= 0 && points[sparkHoverIdx] && (
+                      <circle
+                        cx={points[sparkHoverIdx].x}
+                        cy={points[sparkHoverIdx].y}
+                        r="2"
+                        fill={sparkColor}
+                        stroke="white"
+                        strokeWidth="0.5"
+                      />
+                    )}
+                  </svg>
+
+                  {/* Hover tooltip — shows rate value for hovered day */}
+                  {sparkHoverIdx >= 0 && (
+                    <div
+                      className="absolute top-0 pointer-events-none z-10"
+                      style={{
+                        left: `${(sparkHoverIdx / (historicalRates.length - 1)) * 100}%`,
+                        transform: 'translateX(-50%)',
+                      }}
+                    >
+                      <div className="bg-brand-obsidian/90 backdrop-blur border border-brand-gold/20 rounded-lg px-2 py-1 text-[9px] font-black tabular-nums text-foreground whitespace-nowrap">
+                        {historicalRates[sparkHoverIdx].toFixed(4)}
+                        <span className="text-foreground/40 ml-1">{toCode}/{fromCode}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="absolute inset-0 flex justify-between items-end pb-1 text-[8px] font-bold text-foreground/30 uppercase tracking-widest pointer-events-none">
+                    <span>7D Ago</span>
+                    <span>Today</span>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
             
             <div className={`flex flex-wrap items-center justify-between gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -512,6 +628,16 @@ export default function CurrencyExchangeClient() {
       </div>
 
       {/* ═══ CROSS-RATE MATRIX ═══ */}
+      {/* WHY auto-include fromCode/toCode: the matrix was hardcoded to
+          ["USD","EUR","GBP","AED","SAR"]. If the user converts INR→PKR
+          for example, those currencies don't appear in the matrix at all.
+          Auto-including the active pair makes the matrix contextually relevant
+          and encourages the user to discover related rates. */}
+      {(() => {
+        // Build matrix: start with base 5, deduplicate, then add selected pair
+        const base = ["USD", "EUR", "GBP", "AED", "SAR"];
+        const withSelected = Array.from(new Set([...base, fromCode, toCode])).slice(0, 7);
+        return (
       <div className="w-full max-w-4xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
         <p className={`text-[10px] uppercase font-black tracking-[0.3em] text-foreground/30 mb-4 ${isRTL ? 'text-right' : ''}`}>
           {t("crossRateMatrix") || "Cross-Rate Matrix"}
@@ -521,19 +647,26 @@ export default function CurrencyExchangeClient() {
             <thead>
               <tr>
                 <th className="p-3 border-b border-white/5 bg-brand-obsidian sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]"></th>
-                {matrixCurrencies.map(c => (
-                  <th key={`th-${c}`} className="p-3 border-b border-white/5 text-xs font-bold text-brand-gold tracking-widest text-center">{c}</th>
+                {withSelected.map(c => (
+                  <th key={`th-${c}`} className={`p-3 border-b border-white/5 text-xs font-bold tracking-widest text-center ${
+                    c === fromCode || c === toCode ? 'text-accent' : 'text-brand-gold'
+                  }`}>{c}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {matrixCurrencies.map(rowC => (
+              {withSelected.map(rowC => (
                 <tr key={`tr-${rowC}`} className="hover:bg-white/5 transition-colors">
-                  <td className="p-3 border-b border-white/5 font-black text-sm bg-brand-obsidian sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)]">{rowC}</td>
-                  {matrixCurrencies.map(colC => {
-                    if (rowC === colC) return <td key={`${rowC}-${colC}`} className="p-3 border-b border-white/5 text-foreground/20 text-xs text-center">-</td>;
+                  <td className={`p-3 border-b border-white/5 font-black text-sm bg-brand-obsidian sticky left-0 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.1)] ${
+                    rowC === fromCode || rowC === toCode ? 'text-accent' : ''
+                  }`}>{rowC}</td>
+                  {withSelected.map(colC => {
+                    if (rowC === colC) return <td key={`${rowC}-${colC}`} className="p-3 border-b border-white/5 text-foreground/20 text-xs text-center">—</td>;
                     const r = rates[colC] && rates[rowC] ? rates[colC] / rates[rowC] : 0;
-                    return <td key={`${rowC}-${colC}`} className="p-3 border-b border-white/5 text-foreground/80 tabular-nums text-sm font-medium text-center">{r.toFixed(4)}</td>;
+                    return <td key={`${rowC}-${colC}`} className={`p-3 border-b border-white/5 tabular-nums text-sm font-medium text-center ${
+                      (rowC === fromCode && colC === toCode) || (rowC === toCode && colC === fromCode)
+                        ? 'text-accent font-black' : 'text-foreground/80'
+                    }`}>{r.toFixed(4)}</td>;
                   })}
                 </tr>
               ))}
@@ -541,6 +674,8 @@ export default function CurrencyExchangeClient() {
           </table>
         </div>
       </div>
+        );
+      })()}
 
       {/* ═══ QUICK AMOUNTS ═══ */}
       <div className="w-full max-w-2xl mb-12 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
@@ -589,14 +724,21 @@ export default function CurrencyExchangeClient() {
       {/* Currency Peg Detail - Substantive Content for AdSense */}
       <div className="w-full max-w-4xl mx-auto mt-24 px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-gold mb-8 tracking-tight">
-          {t('currencyDetailTitle')}
+          {t('currencyDetailTitle') || 'Understanding GCC Currency Exchange'}
         </h2>
         <div className="space-y-6">
-          {t('currencyDetailBody').split('\n\n').map((paragraph, index) => (
-            <p key={index} className="text-base sm:text-lg text-foreground/70 leading-relaxed">
-              {paragraph}
-            </p>
-          ))}
+          {/* WHY fallback text: if the translation key 'currencyDetailBody' is missing
+              or returns an empty string, .split('\n\n') produces [''] which renders
+              an empty <p> block — silently blank. The fallback ensures AdSense-relevant
+              content is always visible and the section never appears broken. */}
+          {(t('currencyDetailBody') || 'The GCC currencies — UAE Dirham (AED), Saudi Riyal (SAR), Qatari Riyal (QAR), Kuwaiti Dinar (KWD), Omani Rial (OMR), and Bahraini Dinar (BHD) — maintain fixed pegs to the US Dollar. This peg provides monetary stability and predictability for trade and remittances across the Gulf Cooperation Council region.\n\nExchange rates shown are mid-market rates sourced from open financial data providers. Actual rates at banks, exchange houses, or remittance services will include a spread or fee. Use the Bank Spread Simulator above to estimate your real-world payout.')
+            .split('\n\n')
+            .filter(Boolean)
+            .map((paragraph, index) => (
+              <p key={index} className="text-base sm:text-lg text-foreground/70 leading-relaxed">
+                {paragraph}
+              </p>
+            ))}
         </div>
       </div>
 
@@ -617,8 +759,11 @@ export default function CurrencyExchangeClient() {
 
       {/* Back */}
       <div className="mt-8">
+        {/* WHY different arrows: in RTL layouts (Arabic), "back" means going right
+            not left, so the arrow should face right (→). The original used ← for
+            both branches, making the Arabic experience visually incorrect. */}
         <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
-          {isRTL ? `← ${t('home')}` : `← ${t('home')}`}
+          {isRTL ? `${t('home')} →` : `← ${t('home')}`}
         </Link>
       </div>
 
