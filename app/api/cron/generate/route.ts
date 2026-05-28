@@ -34,8 +34,16 @@ export async function GET(req: Request) {
     // NOTE: Direct requests from Edge/Cloudflare IPs are blocked by Google News (403 Forbidden).
     // To bypass this, we proxy the request through api.rss2json.com which safely fetches it 
     // and conveniently returns JSON instead of XML.
+    //
+    // Why we use RSS2JSON_API_KEY: Without an API key, rss2json.com rate-limits requests by IP.
+    // Because Cloudflare Pages share outgoing IP ranges, we easily hit the "429 Too Many Requests"
+    // limit due to other people's traffic. Adding our own free API key isolates our quota (10k/day).
     const googleNewsUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
-    const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}`;
+    const apiKey = process.env.RSS2JSON_API_KEY;
+    const rssUrl = apiKey
+      ? `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}&api_key=${apiKey}`
+      : `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}`;
+
     const rssRes = await fetch(rssUrl, { cache: 'no-store' });
     
     if (!rssRes.ok) {
