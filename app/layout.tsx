@@ -30,6 +30,8 @@ export const viewport = {
   viewportFit: 'cover',
 };
 
+export const runtime = 'edge';
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const headList = await headers();
   const nonce = headList.get('x-nonce') || undefined;
