@@ -11,11 +11,9 @@ import { OrganizationSchema, WebSiteSchema } from "@/components/seo/StructuredDa
 import { Language } from "@/lib/i18n";
 import CookieConsent from "@/components/ui/CookieConsent";
 
-
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const amiri = Amiri({ weight: ["400", "700"], subsets: ["arabic"], variable: "--font-amiri" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
-
 
 export const runtime = 'edge';
 
@@ -32,8 +30,6 @@ export const viewport = {
   initialScale: 1,
   viewportFit: 'cover',
 };
-
-
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const headList = await headers();
@@ -69,16 +65,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {children}
             </main>
           </ClientLayout>
-<CookieConsent />
-         </Providers>
-<Script
-             id="adsense-init"
-             async
-             src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`}
-             crossOrigin="anonymous"
-             nonce={nonce}
-             strategy="afterInteractive"
-           />
+          <CookieConsent />
+        </Providers>
         <Script 
           async 
           src="https://www.googletagmanager.com/gtag/js?id=G-WRXQ5H9Z7K" 

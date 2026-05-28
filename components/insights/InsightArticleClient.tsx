@@ -315,12 +315,7 @@ export default function InsightArticleClient({
             <div className="flex items-center gap-4">
               <div className="relative w-12 h-12 rounded-full overflow-hidden border border-brand-gold/30 shrink-0">
                 <Image
-                  src={
-                    article.author?.id === 'zaid-alharbi' ? "/authors/zaid.png" :
-                    article.author?.id === 'layla-mansour' ? "/authors/layla.png" :
-                    article.author?.id === 'omar-qabbani' ? "/authors/omar.png" :
-                    "/authors/zaid.png"
-                  }
+                  src={fullAuthor?.image || "/authors/zaid.png"}
                   alt={article.author?.name || article.source}
                   fill
                   className="object-cover"
@@ -722,7 +717,7 @@ export default function InsightArticleClient({
                 <Link
                   key={insight.id}
                   href={`/insights/${insight.slug}${language === 'ar' ? '?lang=ar' : ''}`}
-                  className="glass overflow-hidden rounded-3xl border border-white/5 hover:border-brand-gold/30 transition-all group flex flex-col"
+                  className="glass overflow-hidden rounded-xl border border-white/5 hover:border-brand-gold/30 transition-all group flex flex-col"
                 >
                   {insight.image && (
                     <div className="relative w-full aspect-video overflow-hidden">

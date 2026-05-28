@@ -6,23 +6,7 @@ import Image from "next/image";
 import { ExternalLink, Share2, CheckCircle2 } from "lucide-react";
 import { getDeterministicFallback } from "@/lib/fallbacks";
 
-interface InsightItem {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  link: string;
-  pubDate: string;
-  source: string;
-  category: string;
-  language: 'en' | 'ar' | 'regional';
-  image?: string;
-  author?: {
-    id: string;
-    name: string;
-    role: string;
-  };
-}
+import { InsightItem } from "@/lib/insights";
 
 interface InsightCardProps {
   item: InsightItem;
@@ -101,11 +85,11 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
       </div>
 
       <div className="p-6 flex flex-col flex-1 relative z-20">
-        <h2 className={`text-base sm:text-xl font-bold text-foreground leading-tight group-hover:text-brand-gold transition-colors duration-300 line-clamp-3 flex-1 ${
+        <h3 className={`text-base sm:text-xl font-bold text-foreground leading-tight group-hover:text-brand-gold transition-colors duration-300 line-clamp-3 flex-1 ${
           item.language === 'regional' ? 'font-serif-hi' : 'font-sans'
         }`}>
           {item.title}
-        </h2>
+        </h3>
         
         <div className="flex items-center justify-between mt-6 pt-5 border-t border-brand-gold/5">
           <div className="flex flex-col gap-0.5">

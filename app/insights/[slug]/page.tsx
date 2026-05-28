@@ -7,7 +7,7 @@ import { getT } from "@/lib/i18n-server";
 import { getAuthorById, EDITORIAL_AUTHORS } from "@/lib/authors";
 
 // Use direct server-side data access for performance and GSC reliability
-export const dynamic = 'force-dynamic';
+export const revalidate = 600;
 
 export async function generateMetadata({ 
   params, 
@@ -132,7 +132,7 @@ export default async function InsightArticlePage({
         description={article.description}
         image={article.image}
         datePublished={article.pubDate}
-        dateModified={article.pubDate}
+        dateModified={article.editedAt || article.pubDate}
         author={richAuthor}
         url={canonicalUrl}
         language={article.language === 'ar' ? 'ar' : 'en'}
@@ -152,32 +152,13 @@ export default async function InsightArticlePage({
         />
       ) : null}
 
-      {(article.title.toLowerCase().includes('review') || article.tags?.includes('review')) && (
-        <ReviewSchema 
-          itemReviewed={{ name: article.title.replace(/review/i, '').trim() }}
-          reviewRating={5} // Default to 5 for premium insights
-          author={richAuthor.name}
-          datePublished={article.pubDate}
-          reviewBody={article.description}
-          url={canonicalUrl}
-        />
-      )}
-
-      {(article.title.toLowerCase().includes('why') || article.content?.includes('?')) && (
-        <FAQSchema 
-          questions={[
-            { question: article.title, answer: article.description }
-          ]}
-        />
-      )}
-
       <BreadcrumbSchema items={breadcrumbs} />
       <WebPageSchema 
         name={article.title}
         description={article.description}
         url={canonicalUrl}
         datePublished={article.pubDate}
-        dateModified={article.pubDate}
+        dateModified={article.editedAt || article.pubDate}
       />
 
       <InsightArticleClient initialArticle={article} moreInsights={filteredMoreInsights} />

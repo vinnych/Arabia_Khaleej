@@ -8,7 +8,7 @@ export const metadata = pageMeta({
   description: "Original editorial insights, expert deep dives, and exclusive high-fidelity updates from Arabia Khaleej.",
   descriptionAr: "رؤى تحريرية أصلية، تحليلات خبراء، وتحديثات حصرية عالية الدقة من عربية خليج.",
   path: "/insights",
-  keywords: ["GCC insights", "Middle East editorials", "Arabia Khaleej original", "GCC economy deep dive"],
+  keywords: ["Middle East editorials", "Arabia Khaleej original", "GCC economy deep dive"],
 });
 
 export default function InsightsPage() {

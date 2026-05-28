@@ -9,23 +9,7 @@ import { getDeterministicFallback } from "@/lib/fallbacks";
 import MobileFAB from "@/components/layout/MobileFAB";
 import InsightCard from "./InsightCard";
 
-interface InsightItem {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  link: string;
-  pubDate: string;
-  source: string;
-  category: string;
-  language: 'en' | 'ar' | 'regional';
-  image?: string;
-  author?: {
-    id: string;
-    name: string;
-    role: string;
-  };
-}
+import { InsightItem } from "@/lib/insights";
 
 export default function InsightsClient() {
    const { t, isRTL, language } = useLanguage();
@@ -35,15 +19,22 @@ export default function InsightsClient() {
    const [displayCount, setDisplayCount] = useState(12);
    const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
    const [autoRefresh, setAutoRefresh] = useState(true);
+   const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+   const categories = [...new Set(insights.map(i => i.category))].filter(Boolean);
+   const filteredInsights = activeCategory ? insights.filter(i => i.category === activeCategory) : insights;
 
    const fetchInsights = useCallback(async (forceRefresh = false) => {
      setLoading(true);
      setError(false);
      try {
+       const controller = new AbortController();
+       const id = setTimeout(() => controller.abort(), 10000);
        const res = await fetch(`/api/insights?lang=${language}${forceRefresh ? '&t=' + Date.now() : ''}`, {
-         signal: AbortSignal.timeout(10000),
+         signal: controller.signal,
          cache: forceRefresh ? 'no-store' : 'force-cache'
        });
+       clearTimeout(id);
        if (!res.ok) throw new Error('Network response was not ok');
        const data = await res.json();
        if (data.status === 'success') {
@@ -100,6 +91,7 @@ export default function InsightsClient() {
            </button>
            <button
              onClick={() => setAutoRefresh(!autoRefresh)}
+             aria-label="Toggle live refresh"
              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${autoRefresh ? 'bg-brand-gold/20 text-brand-gold' : 'bg-gray-800/50 text-gray-400'}`}
            >
              {autoRefresh ? '🔴 Live' : '⚪ Paused'}
@@ -113,7 +105,7 @@ export default function InsightsClient() {
       </div>
 
       {/* Editorial Intro Section */}
-      <div className="w-full max-w-4xl mx-auto mb-24 px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <div className="w-full max-w-4xl mx-auto mb-24 px-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-1000 hidden md:block">
         <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-gold mb-8 tracking-tight uppercase tracking-[0.1em]">
           {t('insightsIntroTitle')}
         </h2>
@@ -152,7 +144,7 @@ export default function InsightsClient() {
               >
                 <Image
                   src={item.image || getDeterministicFallback(item.slug)}
-                  alt={item.title}
+                  alt={`${item.category} — ${item.source}`}
                   fill
                   className="object-cover group-hover:scale-103 transition-transform duration-[1200ms] ease-out"
                   priority={idx === 0}
@@ -168,6 +160,10 @@ export default function InsightsClient() {
                   <h3 className="text-xl sm:text-2xl font-black text-white leading-tight group-hover:text-brand-gold transition-colors duration-300">
                     {item.title}
                   </h3>
+                  <p className="text-sm text-white/70 line-clamp-2 mt-2">{item.description}</p>
+                  <span className="text-[9px] text-white/40 uppercase tracking-widest mt-3 block">
+                    {new Date(item.pubDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </span>
                 </div>
               </Link>
             ))}
@@ -196,8 +192,29 @@ export default function InsightsClient() {
         </div>
       ) : (
         <>
+          {/* Categories */}
+          {categories.length > 0 && (
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+              <button
+                onClick={() => setActiveCategory(null)}
+                className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${!activeCategory ? 'bg-brand-gold text-brand-obsidian' : 'bg-white/5 text-foreground/60 hover:bg-white/10 hover:text-foreground'}`}
+              >
+                {t('all')}
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all duration-300 ${activeCategory === cat ? 'bg-brand-gold text-brand-obsidian' : 'bg-white/5 text-foreground/60 hover:bg-white/10 hover:text-foreground'}`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-            {insights.slice(0, displayCount).map((item) => (
+            {filteredInsights.slice(0, displayCount).map((item) => (
               <InsightCard
                 key={item.id}
                 item={item}
@@ -208,7 +225,7 @@ export default function InsightsClient() {
             ))}
           </div>
           
-{displayCount < insights.length && (
+          {displayCount < filteredInsights.length && (
              <div className="mt-20 flex justify-center">
                <button
                  onClick={() => setDisplayCount(prev => prev + 12)}
