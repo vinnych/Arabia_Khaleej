@@ -1,0 +1,10 @@
+name = "arabiakhaleej-automation"
+main = "daily-automation.js"
+compatibility_date = "2025-02-04"
+
+# Dual schedule for preventing cold starts and generating articles
+[triggers]
+crons = ["*/14 * * * *", "*/30 * * * *"]
+
+# Note: Set your CRON_SECRET securely using:
+# npx wrangler secret put CRON_SECRET --config worker/wrangler-automation.toml

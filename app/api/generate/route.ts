@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
-import { draftDb } from '@/lib/draftsDb';
+import { triggerAgentGeneration } from '@/lib/agentHelper';
 
 export const runtime = 'edge';
-
-const AGENT_URL = process.env.AGENT_URL || 'https://article-agent-zk00.onrender.com';
-const CALLBACK_URL = process.env.DASHBOARD_CALLBACK_URL || 'https://arabiakhaleej.com/api/webhook?secret=sherly';
 
 export async function POST(req: Request) {
   try {
@@ -41,34 +38,11 @@ export async function POST(req: Request) {
     }
     const topic = body.topic.trim();
     
-    // Create initial tracking draft
-    await draftDb.setDraft(topic, {
-      topic,
-      status: 'generating',
-      timestamp: Date.now()
-    });
-
-    // Forward the request to the Python generation agent
-    const res = await fetch(`${AGENT_URL}/v1/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        topic,
-        callback_url: CALLBACK_URL
-      })
-    });
-
-    if (!res.ok) {
-      // Why self-healing state: If the Python agent rejects our request, we immediately update
-      // the status of the topic in Redis to 'error' to avoid leaving the dashboard in a perpetual 'generating' state.
-      console.error(`[generate] External article agent rejected generation for: "${topic}". Status: ${res.status}`);
-      await draftDb.setDraft(topic, { 
-        topic, 
-        status: 'error', 
-        error: `Agent rejected with status: ${res.status}`, 
-        timestamp: Date.now() 
-      });
-      return NextResponse.json({ error: 'Agent rejected request' }, { status: 500 });
+    // Use the shared helper to trigger agent and save initial draft state
+    try {
+      await triggerAgentGeneration(topic);
+    } catch (agentErr: any) {
+      return NextResponse.json({ error: agentErr.message || 'Agent rejected request' }, { status: 500 });
     }
 
     return NextResponse.json({ message: 'Generation started', topic });

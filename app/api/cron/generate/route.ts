@@ -1,0 +1,91 @@
+import { NextResponse } from 'next/server';
+import { triggerAgentGeneration } from '@/lib/agentHelper';
+
+export const runtime = 'edge';
+
+// Disable caching for this route so it fetches fresh RSS data each time
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
+  try {
+    const authHeader = req.headers.get('authorization');
+    const cronSecret = process.env.CRON_SECRET;
+
+    // Why secure cron route: To prevent malicious actors from triggering generation 
+    // loops that deplete API limits or Upstash quota, we enforce CRON_SECRET validation.
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+      // In Vercel, cron jobs might pass the secret in the Authorization header.
+      // Alternatively, we check searchParams for flexibility with different cron providers (like cron-job.org).
+      const { searchParams } = new URL(req.url);
+      const urlSecret = searchParams.get('secret');
+      
+      if (!cronSecret || urlSecret !== cronSecret) {
+         console.warn('[security] Unauthorized access attempt blocked on /api/cron/generate.');
+         return NextResponse.json(
+           { error: 'Unauthorized: Invalid or missing cron secret.' }, 
+           { status: 401 }
+         );
+      }
+    }
+
+    // 1. Fetch UAE Trending Topics from Google News RSS (last 24 hours)
+    // WHY: Google News RSS provides high-quality, up-to-date headlines relevant to the UAE, 
+    // eliminating the need for paid APIs while staying highly contextual to Arabia Khaleej's audience.
+    const rssUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
+    const rssRes = await fetch(rssUrl, { cache: 'no-store' });
+    
+    if (!rssRes.ok) {
+      throw new Error(`Failed to fetch RSS feed. Status: ${rssRes.status}`);
+    }
+    
+    const xmlData = await rssRes.text();
+    
+    // 2. Extract up to 15 headlines and pick one randomly
+    // Note: We use Regex for speed and zero-dependencies on edge environments.
+    const titleRegex = /<item>[\s\S]*?<title>(.*?)<\/title>/g;
+    let match;
+    const headlines: string[] = [];
+    while ((match = titleRegex.exec(xmlData)) !== null && headlines.length < 15) {
+      if (match[1]) headlines.push(match[1]);
+    }
+
+    if (headlines.length === 0) {
+      throw new Error('Failed to parse any articles from the RSS feed.');
+    }
+    
+    // Pick a random headline from the extracted array
+    let rawHeadline = headlines[Math.floor(Math.random() * headlines.length)];
+    
+    // 3. Clean up the headline
+    // Google News appends the publisher to the end of the title (e.g. "Dubai property market booms - Khaleej Times")
+    // We strip off the publisher to leave just the pure topic.
+    rawHeadline = rawHeadline.replace(/\s-\s[^<]+$/, '').trim();
+    
+    // Decode HTML entities if any (like &apos;, &quot;, &amp;)
+    rawHeadline = rawHeadline
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&apos;/g, "'")
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>');
+
+    console.log(`[cron] Fetched trending topic: "${rawHeadline}"`);
+
+    // 4. Trigger the generation
+    await triggerAgentGeneration(rawHeadline);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Automated generation triggered successfully.',
+      topic: rawHeadline
+    });
+
+  } catch (err: any) {
+    console.error('[cron] Automated generation dispatch failed:', err.message || err);
+    return NextResponse.json(
+      { error: 'Internal server error: ' + (err.message || 'Unknown Error') }, 
+      { status: 500 }
+    );
+  }
+}
