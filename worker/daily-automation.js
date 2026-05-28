@@ -2,20 +2,25 @@
  * Arabia Khaleej — Cloudflare Automation Worker
  *
  * Responsibilities:
- *   1. Every ~14 min  → Ping the Render agent to prevent 50-second cold starts.
- *   2. Every ~30 min  → Call /api/cron/generate to trigger one article generation.
+ *   1. Every ~15 min  → Call /api/cron/generate to trigger one article generation.
+ *   
+ *   WHY 15 MINUTES IS THE IDEAL INTERVAL:
+ *   Because Render's free tier inactivity timeout is exactly 15 minutes, triggering 
+ *   an article generation every 15 minutes ensures the Render agent naturally stays 
+ *   warm 24/7. This completely eliminates cold starts without requiring separate 
+ *   keep-alive triggers.
  *
  * Why we no longer use event.cron string matching:
  *   Cloudflare delivers the cron expression to `event.cron` but the exact string format
  *   (whitespace, normalisation) is not guaranteed to match what's in wrangler-automation.toml.
  *   A mismatch causes the if/else if to fall through to the no-op fallback block, silently
  *   skipping all work. Instead, we derive intent from `Date.now()` — if the current minute
- *   is divisible by 30 we generate; otherwise we just ping Render. This makes the worker
+ *   is divisible by 15 we generate; otherwise we just ping Render. This makes the worker
  *   resilient to any cron string normalisation Cloudflare may apply.
  *
- * Why both tasks run on the 30-min tick:
- *   The Render ping is cheap (< 1 s, no side-effects) so we always run it.
- *   Generation is only triggered every 30 min to respect rate limits.
+ * Why both tasks run on the 15-min tick:
+ *   The Render ping is cheap (< 1 s, no side-effects) so we always run it first as a sanity check.
+ *   Generation is triggered every 15 min.
  */
 
 const AGENT_HEALTH_URL = 'https://article-agent-zk00.onrender.com/';
@@ -68,13 +73,17 @@ export default {
       console.error('[automation] Render ping failed (non-fatal):', err?.message || err);
     }
 
-    // ── Step 2: Trigger article generation every 30 minutes ───────────────────
+    // ── Step 2: Trigger article generation every 15 minutes ───────────────────
     // Why minute-based check instead of cron string matching:
     //   event.cron is not guaranteed to exactly match the wrangler TOML string after
-    //   Cloudflare normalisation. We derive the 30-min boundary from wall-clock time,
+    //   Cloudflare normalisation. We derive the 15-min boundary from wall-clock time,
     //   which is always reliable.
+    //
+    // WHY MODULO 15: 
+    //   We trigger article generation every 15 minutes (at minutes :00, :15, :30, and :45).
+    //   This provides 4 articles per hour while naturally keeping the Render instance warm.
     const minuteOfHour = new Date(event.scheduledTime).getUTCMinutes();
-    const isGenerationTick = minuteOfHour % 30 === 0; // true at :00 and :30
+    const isGenerationTick = minuteOfHour % 15 === 0; // true at :00, :15, :30, and :45
 
     if (isGenerationTick) {
       if (!env.CRON_SECRET) {

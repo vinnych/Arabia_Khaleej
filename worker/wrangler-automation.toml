@@ -2,20 +2,19 @@ name = "arabiakhaleej-automation"
 main = "daily-automation.js"
 compatibility_date = "2025-02-04"
 
-# Two cron schedules:
-#   */14 * * * *  — fires at minutes 0,14,28,42,56 → keeps Render agent warm (prevents 50s cold starts)
-#   */30 * * * *  — fires at minutes 0 and 30 → triggers article generation via /api/cron/generate
+# Single cron schedule:
+#   */15 * * * *  — fires at minutes 0, 15, 30, 45 → triggers article generation via /api/cron/generate
 #
-# Why two separate schedules instead of one:
-#   A single */14 schedule would trigger generation too often (4-5x/hour).
-#   A single */30 schedule would let the Render agent go cold for 30 min between pings.
-#   The worker code uses UTC minute-of-hour (% 30 === 0) to decide whether to generate,
-#   so both schedules share the same handler safely.
+# Why a single */15 schedule works perfectly:
+#   Because Render's inactivity timeout is exactly 15 minutes, triggering an article
+#   generation every 15 minutes (4 times per hour) naturally keeps the Render agent warm.
+#   This eliminates the need for separate keep-alive pings or dual schedules, 
+#   simplifying worker architecture while ensuring zero cold starts.
 #
 # IMPORTANT: After deploying, set the CRON_SECRET worker secret:
 #   npx wrangler secret put CRON_SECRET --config worker/wrangler-automation.toml
 [triggers]
-crons = ["*/14 * * * *", "*/30 * * * *"]
+crons = ["*/15 * * * *"]
 
 # Observability: logs enabled, traces disabled (saves quota on free tier)
 [observability]
