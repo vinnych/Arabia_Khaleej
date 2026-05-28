@@ -8,6 +8,8 @@ import { NextResponse } from 'next/server';
 import { getUnifiedInsights, getArticleBySlug } from '@/lib/insights';
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

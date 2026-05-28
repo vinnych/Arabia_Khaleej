@@ -25,61 +25,21 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 
 ---
 
-## 🤖 Agentic Editorial Workflow
+## 🤖 External Agent Editorial Workflow
 
-The platform uses a **LangGraph state machine** to generate, validate, and persist editorial content. The workflow runs entirely in `/api/workflow/daily` via `workflow.invoke()`, returning the final result after processing all articles sequentially.
+Arabia Khaleej delegates heavy article generation to an external Python agent. The platform itself does **not** run any cron jobs for generating content. 
 
-### Architecture
+### Architecture Flow
 
-```
-Worker (CF Worker)  →  POST /api/workflow/daily
-                           │
-                           ▼
-                      LangGraph State Graph
-                           │
-        ┌─────────────────┬─┴─┬─────────────────┐
-        ▼                 ▼   ▼                 ▼
-     trending          policy  score       persist
-        │                  │     │              │
-        ▼                  ▼     │              ▼
-     generate ──────► retry/passthrough  drafts list
-        │
-        ▼
-   [LLM Article]
-   [Image Fetch]
-```
+1. **Trigger**: A Cloudflare Automation Worker (`worker/daily-automation.js`) hits the website's `/api/cron/generate` route every 30 minutes. 
+   *(Note: The worker also pings the Render agent every 14 minutes to prevent cold starts).*
+2. **Trending Topics**: The Next.js API `/api/cron/generate` generates trending topics for the GCC region.
+3. **Dispatch**: The website sends these topics to the external Python agent (`article-agent-zk00.onrender.com`).
+4. **Agent Activation**: The Python agent receives the topics, activates its heavy AI processing (using Groq 70B), and writes the articles.
+5. **Callback**: The agent sends the final completed drafts back to the website via a secure webhook (`POST /api/webhook`).
+6. **Persistence**: Drafts are stored in Upstash Redis and appear in the admin panel for human review.
 
-### Node Flow
-
-Each article flows through 6 agent nodes:
-
-| Node | Step | What it does |
-|------|------|--------------|
-| **init** | Creates placeholder articles for each requested count |
-| **trending** | Fetches GCC topics from Groq LLM; sorts by AdSense score |
-| **generate** | Groq 70B writes article; Pexels/Unsplash image; saves draft |
-| **policy** | AdSense compliance check (1100+ words, richness); retries once on fail |
-| **score** | 0–100 quality score (word count, sections, citations, stats, entities) |
-| **persist** | Saves to `insights:drafts:{lang}`; deletes workflow state |
-
-### Cron Trigger
-
-- **Worker**: `worker/daily-automation.js` (Cloudflare Worker)
-- **Schedule**: `0 */2 * * *` — every 2 hours
-- **Articles per run**: 3
-- **Daily output**: up to 36
-
-### Deleted Article Handling
-
-When an article fails policy checks after retries, it is marked `deleted`. The workflow **continues** to the next article (previously this would terminate the entire run — bug fixed in LangGraph version).
-
-### Code Quality
-
-- **LangGraph v1.3.2**: Annotation.Root pattern for state schema
-- **State Persistence**: Redis state saved between nodes for debugging
-- **Error Isolation**: Failed articles don't block other articles
-- **ADSENSE_RULES**: Single source of truth in `lib/workflow/prompts.ts`
-- **Analysis**: Richness/scoring functions in `lib/workflow/analysis.ts`
+This decoupled architecture ensures the Next.js edge functions don't time out during heavy LLM generation, keeping the main website lightweight and fast.
 
 ---
 
@@ -92,7 +52,7 @@ When an article fails policy checks after retries, it is marked `deleted`. The w
 | `GET /api/exchange-rates` | — | Real-time GCC currency dynamics |
 | `GET /api/market-data` | — | GCC stock and commodity indices |
 
-The agentic editorial pipeline is triggered by the Cloudflare Worker cron (`worker/daily-automation.js`) or manually via POST to `/api/workflow/daily` with proper authentication.
+The generation pipeline is triggered externally by the Cloudflare Automation Worker pinging `/api/cron/generate` or manually via POST to `/api/generate` with proper authentication.
 
 ---
 
@@ -102,11 +62,12 @@ Required environment variables for production:
 ```env
 UPSTASH_REDIS_REST_URL=      # Redis Connection URL
 UPSTASH_REDIS_REST_TOKEN=    # Redis Auth Token
-GROQ_API_KEY=                # AI Generation Key
 PEXELS_API_KEY=              # Primary Imagery Source
-UNSPLASH_ACCESS_KEY=         # Fallback Imagery Source
 CRON_SECRET=                 # Worker Cron Authentication
 ADMIN_SECRET=                # Admin Review Panel Access
+NEXT_PUBLIC_ADSENSE_ID=      # AdSense Publisher ID
+NEXT_PUBLIC_SITE_VERIFICATION= # Google Site Verification
+CONTACT_WORKER_URL=          # Contact Form API URL
 ```
 
 ---
@@ -120,18 +81,19 @@ ADMIN_SECRET=                # Admin Review Panel Access
 3. Connect your repo / upload the built output
 
 Required Pages environment variables (Settings → Variables → Add):
-`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `GROQ_API_KEY`, `PEXELS_API_KEY`, `ADMIN_SECRET`, `NEXT_PUBLIC_ADSENSE_ID`, `NEXT_PUBLIC_SITE_VERIFICATION`
+`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `PEXELS_API_KEY`, `ADMIN_SECRET`, `NEXT_PUBLIC_ADSENSE_ID`, `NEXT_PUBLIC_SITE_VERIFICATION`, `CONTACT_WORKER_URL`
 
-### 2. Automation Worker (Cloudflare Worker)
+### 2. Automation & Contact Workers (Cloudflare Worker)
 
 ```bash
-npm run worker:deploy
+npm run automation-worker:deploy
+npm run contact-worker:deploy
 ```
 
-This deploys `worker/daily-automation.js` with `worker/wrangler.toml` (schedule: every 2 h).
+These deploy the background `worker/daily-automation.js` and the `worker/worker.js` (contact form).
 
 Required Worker secrets (via `wrangler secret put <KEY>`):
-`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `GROQ_API_KEY`, `PEXELS_API_KEY`, `CRON_SECRET`
+`UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `PEXELS_API_KEY`, `CRON_SECRET`
 
 ---
 

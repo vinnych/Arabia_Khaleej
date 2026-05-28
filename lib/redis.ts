@@ -86,7 +86,9 @@ const upstashClient: RedisLike | null = (
 ) ? new UpstashRedisClient({
     url:    process.env.UPSTASH_REDIS_REST_URL,
     token:  process.env.UPSTASH_REDIS_REST_TOKEN,
-  }) : null;
+    // fetch override is supported at runtime by the internal requester
+    fetch: (url: any, init: any) => fetch(url, { ...init, cache: 'no-store' })
+  } as any) : null;
 
 type NodeHelpers = {
   redis: RedisLike;

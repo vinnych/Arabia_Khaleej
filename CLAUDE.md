@@ -11,6 +11,7 @@ Next.js 15 (App Router) optimized for Cloudflare Pages + Cloudflare Workers.
 - `npm run build` — Production build
 - `npm run lint` — ESLint
 - `npm test` — Jest tests
+- `npm run automation-worker:deploy` — Deploy daily automation worker
 - `npm run contact-worker:deploy` — Deploy Cloudflare contact form & email worker
 
 ## 📝 Coding Standards

@@ -15,7 +15,6 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const amiri = Amiri({ weight: ["400", "700"], subsets: ["arabic"], variable: "--font-amiri" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
-export const runtime = 'edge';
 
 export const metadata = pageMeta({
   title: "Arabia Khaleej — The GCC Standard",

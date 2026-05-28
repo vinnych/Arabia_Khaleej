@@ -31,23 +31,22 @@ export async function GET(req: Request) {
     // 1. Fetch UAE Trending Topics from Google News RSS (last 24 hours)
     // WHY: Google News RSS provides high-quality, up-to-date headlines relevant to the UAE, 
     // eliminating the need for paid APIs while staying highly contextual to Arabia Khaleej's audience.
-    const rssUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
+    // NOTE: Direct requests from Edge/Cloudflare IPs are blocked by Google News (403 Forbidden).
+    // To bypass this, we proxy the request through api.rss2json.com which safely fetches it 
+    // and conveniently returns JSON instead of XML.
+    const googleNewsUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
+    const rssUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}`;
     const rssRes = await fetch(rssUrl, { cache: 'no-store' });
     
     if (!rssRes.ok) {
-      throw new Error(`Failed to fetch RSS feed. Status: ${rssRes.status}`);
+      throw new Error(`Failed to fetch RSS feed via proxy. Status: ${rssRes.status}`);
     }
     
-    const xmlData = await rssRes.text();
+    const data = await rssRes.json();
     
     // 2. Extract up to 15 headlines and pick one randomly
-    // Note: We use Regex for speed and zero-dependencies on edge environments.
-    const titleRegex = /<item>[\s\S]*?<title>(.*?)<\/title>/g;
-    let match;
-    const headlines: string[] = [];
-    while ((match = titleRegex.exec(xmlData)) !== null && headlines.length < 15) {
-      if (match[1]) headlines.push(match[1]);
-    }
+    const items = data.items || [];
+    const headlines: string[] = items.slice(0, 15).map((item: any) => item.title).filter(Boolean);
 
     if (headlines.length === 0) {
       throw new Error('Failed to parse any articles from the RSS feed.');

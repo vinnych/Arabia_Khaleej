@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+// Force static rendering for the admin panel to avoid Cloudflare 1102 Worker limits.
+// The dashboard fetches data strictly on the client side, so SSR is unnecessary.
+export const dynamic = 'force-static';
+
 // Admin layout for review pages
 // Uses glass morphism design consistent with the Arabia Khaleej brand
 // Provides navigation back to the main site and a clean content area
