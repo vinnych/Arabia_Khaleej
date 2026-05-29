@@ -9,7 +9,6 @@ export const dynamic = 'force-dynamic';
 
 function getAdminSecret(): string | null {
   const adminSecret = process.env.ADMIN_SECRET;
-  
   if (!adminSecret) {
     console.error('[security] Server Configuration Error: ADMIN_SECRET environment variable is missing.');
     return null;
@@ -18,12 +17,14 @@ function getAdminSecret(): string | null {
 }
 
 function isAuthorized(req: Request): boolean {
-  const { searchParams } = new URL(req.url);
-  const secret = searchParams.get('secret');
   const adminSecret = getAdminSecret();
-  
   if (!adminSecret) return false;
-  return secret === adminSecret;
+  
+  // Why Authorization header instead of query param:
+  // Passing secrets via ?secret=... leaks them into Cloudflare access logs, browser history,
+  // and screen-shareable address bars. HTTP headers are not logged by proxies or CDNs.
+  const authHeader = req.headers.get('authorization');
+  return authHeader === `Bearer ${adminSecret}`;
 }
 
 // Local helper to normalize bilingual items
@@ -83,26 +84,38 @@ export async function DELETE(req: Request) {
     const topic = body.topic;
     const slug = toSlug(topic);
 
-    // 1. Delete draft key from the queue (article:${topic})
-    await draftDb.delDraft(topic);
-    console.log(`[admin] Permanently deleted draft article key for topic: "${topic}"`);
+    // Why Redis Lock: Deleting from the lists requires reading the array, filtering, and writing back.
+    // A mutex lock prevents a race condition where simultaneous actions overwrite the array.
+    const lockKey = `lock:insights:list`;
+    const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+    if (!lock) {
+      return NextResponse.json({ error: 'System is busy updating the feed. Please try again in a few seconds.' }, { status: 409 });
+    }
 
-    // 2. Delete live compressed article detail key (insights:article:${slug})
-    const articleKey = `insights:article:${slug}`;
-    await redis.del(articleKey);
-    console.log(`[admin] Deleted live article details key: "${articleKey}"`);
+    try {
+      // 1. Delete draft key from the queue (article:${topic})
+      await draftDb.delDraft(topic);
+      console.log(`[admin] Permanently deleted draft article key for topic: "${topic}"`);
 
-    // 3. Filter and remove from localized listings lists (insights:list:en & insights:list:ar)
-    for (const lang of ['en', 'ar']) {
-      const listKey = `insights:list:${lang}`;
-      const currentList = await getWithCompression<any[]>(listKey);
-      if (currentList && Array.isArray(currentList)) {
-        const updatedList = currentList.filter((item: any) => item.slug !== slug);
-        if (updatedList.length !== currentList.length) {
-          await setWithCompression(listKey, updatedList, { ex: 2592000 });
-          console.log(`[admin] Successfully removed article from listing: "${listKey}"`);
+      // 2. Delete live compressed article detail key (insights:article:${slug})
+      const articleKey = `insights:article:${slug}`;
+      await redis.del(articleKey);
+      console.log(`[admin] Deleted live article details key: "${articleKey}"`);
+
+      // 3. Filter and remove from localized listings lists (insights:list:en & insights:list:ar)
+      for (const lang of ['en', 'ar']) {
+        const listKey = `insights:list:${lang}`;
+        const currentList = await getWithCompression<any[]>(listKey);
+        if (currentList && Array.isArray(currentList)) {
+          const updatedList = currentList.filter((item: any) => item.slug !== slug);
+          if (updatedList.length !== currentList.length) {
+            await setWithCompression(listKey, updatedList, { ex: 2592000 });
+            console.log(`[admin] Successfully removed article from listing: "${listKey}"`);
+          }
         }
       }
+    } finally {
+      await redis.del(lockKey);
     }
 
     return NextResponse.json({ success: true });
@@ -111,7 +124,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-
 
 // PUT (Update status or edit content) (Authorized)
 export async function PUT(req: Request) {
@@ -145,6 +157,7 @@ export async function PUT(req: Request) {
         console.log(`[admin] Publishing manually generated draft: "${topic}". Starting automated translations.`);
 
         // Translate manual draft dynamically on publication
+        // This is done BEFORE acquiring the lock to keep the critical section extremely short (<50ms).
         const titleAr = await translateMarkdown(title, 'en', 'ar');
         const contentAr = await translateMarkdown(draft.content || '', 'en', 'ar');
 
@@ -162,7 +175,12 @@ export async function PUT(req: Request) {
             ar: titleAr,
           },
           description: {
-            en: draft.content ? draft.content.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : topic,
+            // Why draft.description is preferred over substring:
+            // The Python agent generates a clean 1-2 sentence meta description from the article body.
+            // Slicing raw markdown often captures headers (# Title) or image tags (![](...)) 
+            // which corrupt the SEO <meta description> shown in Google search results.
+            // draft.description is already clean plain text, optimised for SEO.
+            en: draft.description || (draft.content ? draft.content.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : topic),
             ar: contentAr ? contentAr.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : titleAr,
           },
           link: `/insights/${slug}`,
@@ -188,26 +206,37 @@ export async function PUT(req: Request) {
           wordCount: draft.content ? draft.content.split(/\s+/).length : 0
         };
 
-        // 1. Commit full bilingual document (insights:article:${slug})
-        await setWithCompression(`insights:article:${slug}`, liveArticle, { ex: 2592000 });
+        // Why Redis Lock: We must lock before doing read-modify-write on the feed array lists.
+        const lockKey = `lock:insights:list`;
+        const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+        if (!lock) {
+          return NextResponse.json({ error: 'System is busy updating the feed. Please try again in a few seconds.' }, { status: 409 });
+        }
 
-        // 2. Pre-normalize copies and prepend to English and Arabic main feeds
-        const liveEn = normalizeArticle(liveArticle, 'en');
-        const liveAr = normalizeArticle(liveArticle, 'ar');
+        try {
+          // 1. Commit full bilingual document (insights:article:${slug})
+          await setWithCompression(`insights:article:${slug}`, liveArticle, { ex: 2592000 });
 
-        // FIX: Strip heavy content payloads from the list arrays to prevent Edge CPU exhaustion (1102 / 503)
-        delete liveEn.content;
-        delete liveAr.content;
+          // 2. Pre-normalize copies and prepend to English and Arabic main feeds
+          const liveEn = normalizeArticle(liveArticle, 'en');
+          const liveAr = normalizeArticle(liveArticle, 'ar');
 
-        const listKeyEn = `insights:list:en`;
-        const currentListEn = await getWithCompression<any[]>(listKeyEn) ?? [];
-        const updatedListEn = [liveEn, ...currentListEn.filter((item: any) => item.slug !== slug)].slice(0, 1000);
-        await setWithCompression(listKeyEn, updatedListEn, { ex: 2592000 });
+          // FIX: Strip heavy content payloads from the list arrays to prevent Edge CPU exhaustion
+          delete liveEn.content;
+          delete liveAr.content;
 
-        const listKeyAr = `insights:list:ar`;
-        const currentListAr = await getWithCompression<any[]>(listKeyAr) ?? [];
-        const updatedListAr = [liveAr, ...currentListAr.filter((item: any) => item.slug !== slug)].slice(0, 1000);
-        await setWithCompression(listKeyAr, updatedListAr, { ex: 2592000 });
+          const listKeyEn = `insights:list:en`;
+          const currentListEn = await getWithCompression<any[]>(listKeyEn) ?? [];
+          const updatedListEn = [liveEn, ...currentListEn.filter((item: any) => item.slug !== slug)].slice(0, 1000);
+          await setWithCompression(listKeyEn, updatedListEn, { ex: 2592000 });
+
+          const listKeyAr = `insights:list:ar`;
+          const currentListAr = await getWithCompression<any[]>(listKeyAr) ?? [];
+          const updatedListAr = [liveAr, ...currentListAr.filter((item: any) => item.slug !== slug)].slice(0, 1000);
+          await setWithCompression(listKeyAr, updatedListAr, { ex: 2592000 });
+        } finally {
+          await redis.del(lockKey);
+        }
       } else if (action === 'edit' && content) {
         draft.content = content;
       }
@@ -224,3 +253,4 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

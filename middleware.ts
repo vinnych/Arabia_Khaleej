@@ -51,9 +51,12 @@ export default function middleware(request: NextRequest) {
   // This prevents XSS attacks by restricting script sources to nonce-authorized scripts
   response.headers.set('Content-Security-Policy', cspHeader);
 
-  // Add noindex for admin pages to prevent search engines from indexing admin UI
+  // Add noindex for admin pages to prevent search engines from indexing admin UI.
+  // Also set Cache-Control: no-store, private to prevent Cloudflare CDN from caching
+  // the admin page and serving a cached version to other users.
   if (isAdminPage) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    response.headers.set('Cache-Control', 'no-store, private');
   }
 
   // Set language cookie if language preference changed

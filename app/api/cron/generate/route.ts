@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { triggerAgentGeneration } from '@/lib/agentHelper';
+import { XMLParser } from 'fast-xml-parser';
+import { getUnifiedInsights } from '@/lib/insights';
+import { draftDb } from '@/lib/draftsDb';
 
 export const runtime = 'edge';
 
@@ -11,75 +14,83 @@ export async function GET(req: Request) {
     const authHeader = req.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
 
-    // Why secure cron route: To prevent malicious actors from triggering generation 
-    // loops that deplete API limits or Upstash quota, we enforce CRON_SECRET validation.
+    // Why strictly use Bearer token authorization:
+    // We enforce strictly HTTP Headers to secure the cron route.
+    // Query parameters are routinely exposed in access logs, proxy logs, and analytics.
+    // By failing closed if the header is missing, we ensure maximum security.
     if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      // In Vercel, cron jobs might pass the secret in the Authorization header.
-      // Alternatively, we check searchParams for flexibility with different cron providers (like cron-job.org).
-      const { searchParams } = new URL(req.url);
-      const urlSecret = searchParams.get('secret');
-      
-      if (!cronSecret || urlSecret !== cronSecret) {
-         console.warn('[security] Unauthorized access attempt blocked on /api/cron/generate.');
-         return NextResponse.json(
-           { error: 'Unauthorized: Invalid or missing cron secret.' }, 
-           { status: 401 }
-         );
-      }
+       console.warn('[security] Unauthorized access attempt blocked on /api/cron/generate.');
+       return NextResponse.json(
+         { error: 'Unauthorized: Invalid or missing cron secret in Authorization header.' }, 
+         { status: 401 }
+       );
     }
 
-    // 1. Fetch UAE Trending Topics from Google News RSS (last 24 hours)
-    // WHY: Google News RSS provides high-quality, up-to-date headlines relevant to the UAE, 
-    // eliminating the need for paid APIs while staying highly contextual to Arabia Khaleej's audience.
-    // NOTE: Direct requests from Edge/Cloudflare IPs are blocked by Google News (403 Forbidden).
-    // To bypass this, we proxy the request through api.rss2json.com which safely fetches it 
-    // and conveniently returns JSON instead of XML.
-    //
-    // Why we use RSS2JSON_API_KEY: Without an API key, rss2json.com rate-limits requests by IP.
-    // Because Cloudflare Pages share outgoing IP ranges, we easily hit the "429 Too Many Requests"
-    // limit due to other people's traffic. Adding our own free API key isolates our quota (10k/day).
+    // 1. Fetch UAE Trending Topics from Google News RSS natively
+    // Why native fetch vs. rss2json: Cloudflare Workers have vast IP pools that rarely get rate-limited.
+    // We fetch the XML directly to remove an unstable third-party dependency, spoofing a realistic browser User-Agent
+    // just in case Google checks for it.
     const googleNewsUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
-    const apiKey = process.env.RSS2JSON_API_KEY;
-    const rssUrl = apiKey
-      ? `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}&api_key=${apiKey}`
-      : `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}`;
-
-    const rssRes = await fetch(rssUrl, { cache: 'no-store' });
+    const rssRes = await fetch(googleNewsUrl, { 
+      cache: 'no-store',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
     
     if (!rssRes.ok) {
-      throw new Error(`Failed to fetch RSS feed via proxy. Status: ${rssRes.status}`);
+      throw new Error(`Failed to fetch RSS feed from Google. Status: ${rssRes.status}`);
     }
     
-    const data = await rssRes.json();
+    const xmlText = await rssRes.text();
+    const parser = new XMLParser();
+    const data = parser.parse(xmlText);
     
-    // 2. Extract up to 15 headlines and pick one randomly
-    const items = data.items || [];
-    const headlines: string[] = items.slice(0, 15).map((item: any) => item.title).filter(Boolean);
+    // 2. Extract headlines
+    const items = data.rss?.channel?.item || [];
+    // fast-xml-parser handles single item vs array automatically, but ensure array
+    const itemsArray = Array.isArray(items) ? items : [items];
+    const headlines: string[] = itemsArray.map((item: any) => item.title).filter(Boolean);
 
     if (headlines.length === 0) {
       throw new Error('Failed to parse any articles from the RSS feed.');
     }
-    
-    // Pick a random headline from the extracted array
-    let rawHeadline = headlines[Math.floor(Math.random() * headlines.length)];
-    
-    // 3. Clean up the headline
-    // Google News appends the publisher to the end of the title (e.g. "Dubai property market booms - Khaleej Times")
-    // We strip off the publisher to leave just the pure topic.
-    rawHeadline = rawHeadline.replace(/\s-\s[^<]+$/, '').trim();
-    
-    // Decode HTML entities if any (like &apos;, &quot;, &amp;)
-    rawHeadline = rawHeadline
-      .replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"')
-      .replace(/&apos;/g, "'")
-      .replace(/&#39;/g, "'")
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>');
 
-    console.log(`[cron] Fetched trending topic: "${rawHeadline}"`);
+    // 3. Clean up the headlines
+    const cleanedHeadlines = headlines.map(headline => {
+      let clean = headline.replace(/\s-\s[^<]+$/, '').trim();
+      // Decode HTML entities
+      clean = clean
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .replace(/&#39;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>');
+      return clean;
+    });
 
-    // 4. Trigger the generation
+    // 4. Implement Deduplication
+    // Fetch recent insights and drafts to ensure we don't generate the same topic twice
+    const recentInsights = await getUnifiedInsights({ lang: 'en', limit: 30 });
+    const activeDrafts = await draftDb.getAllDrafts();
+    
+    const seenTopics = new Set<string>();
+    recentInsights.forEach(insight => seenTopics.add(insight.title.toLowerCase()));
+    activeDrafts.forEach(draft => seenTopics.add(draft.topic.toLowerCase()));
+
+    // Filter out headlines that have already been generated recently
+    const unseenHeadlines = cleanedHeadlines.filter(h => !seenTopics.has(h.toLowerCase()));
+
+    // If all headlines have been generated (rare), fallback to the full list to avoid failing
+    const targetPool = unseenHeadlines.length > 0 ? unseenHeadlines : cleanedHeadlines;
+
+    // Pick a random headline from the un-generated pool
+    const rawHeadline = targetPool[Math.floor(Math.random() * targetPool.length)];
+
+    console.log(`[cron] Fetched trending topic: "${rawHeadline}" (Pool size: ${targetPool.length})`);
+
+    // 5. Trigger the generation
     await triggerAgentGeneration(rawHeadline);
 
     return NextResponse.json({ 

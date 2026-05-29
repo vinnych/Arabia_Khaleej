@@ -460,20 +460,76 @@ export default function InsightArticleClient({
                       <p className="mb-7 last:mb-0" {...props} />
                     ),
 
-                    // Block quote — styled as pull quote
-                    blockquote: ({ node, children, ...props }) => (
-                      /* WHY: Simplified blockquotes from heavy rounded backing shapes with gold fills to a classic, elegant, minimal editorial pull-quote style (thin border-l-2 and italic text). */
-                      <blockquote
-                        className="relative my-8 pl-6 pr-4 border-l-2 border-brand-gold/60 text-foreground/75 italic"
-                        {...props}
-                      >
-                        <Quote
-                          size={22}
-                          className="absolute -top-2.5 left-1 text-brand-gold/50 rotate-180 fill-brand-gold/15"
-                        />
-                        {children}
-                      </blockquote>
-                    ),
+                    // Block quote — styled as pull quote or GitHub Alert
+                    blockquote: ({ node, children, ...props }) => {
+                      // Extract the raw text from the blockquote to detect GitHub alerts
+                      // children can be an array of React elements (paragraphs, etc.)
+                      let isAlert = false;
+                      let alertType = 'TIP';
+                      let alertContent: React.ReactNode[] = [];
+                      
+                      // We need to inspect the children. Usually, a blockquote contains a paragraph <p>.
+                      // A simplistic approach: just render it and use CSS, or inspect the text of the first child.
+                      // Since remark-gfm doesn't parse alerts natively, the `[!TIP]` text is usually at the start of the first paragraph.
+                      if (Array.isArray(children)) {
+                        const firstChild: any = children[0];
+                        if (firstChild?.props?.children) {
+                          const firstText = Array.isArray(firstChild.props.children) 
+                            ? firstChild.props.children[0] 
+                            : firstChild.props.children;
+                          
+                          if (typeof firstText === 'string') {
+                            const match = firstText.match(/^\[!(TIP|NOTE|IMPORTANT|WARNING|CAUTION)\]/i);
+                            if (match) {
+                              isAlert = true;
+                              alertType = match[1].toUpperCase();
+                              
+                              // Strip the [!TIP] text from the first child
+                              const newFirstText = firstText.replace(/^\[!(TIP|NOTE|IMPORTANT|WARNING|CAUTION)\]\s*/i, '');
+                              
+                              // Reconstruct the first paragraph without the alert tag
+                              const newFirstChild = {
+                                ...firstChild,
+                                props: {
+                                  ...firstChild.props,
+                                  children: Array.isArray(firstChild.props.children)
+                                    ? [newFirstText, ...firstChild.props.children.slice(1)]
+                                    : newFirstText
+                                }
+                              };
+                              
+                              alertContent = [newFirstChild, ...children.slice(1)];
+                            }
+                          }
+                        }
+                      }
+
+                      if (isAlert) {
+                        return (
+                          /* WHY: GitHub Alerts are rendered as premium callout cards using brand-aligned emerald styling. */
+                          <div className="my-8 p-5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex gap-4 items-start shadow-sm">
+                            <span className="text-emerald-500 text-xl select-none mt-1">✨</span>
+                            <div className="text-sm text-emerald-500/90 font-medium leading-relaxed m-0 text-left w-full [&>p]:mb-2 [&>p:last-child]:mb-0">
+                              {alertContent}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      /* WHY: Standard blockquotes use a classic, elegant, minimal editorial pull-quote style. */
+                      return (
+                        <blockquote
+                          className="relative my-8 pl-6 pr-4 border-l-2 border-brand-gold/60 text-foreground/75 italic"
+                          {...props}
+                        >
+                          <Quote
+                            size={22}
+                            className="absolute -top-2.5 left-1 text-brand-gold/50 rotate-180 fill-brand-gold/15"
+                          />
+                          {children}
+                        </blockquote>
+                      );
+                    },
 
                     // Lists
                     ul: ({ node, ...props }) => (

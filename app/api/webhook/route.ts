@@ -1,69 +1,103 @@
 import { NextResponse } from 'next/server';
 import { draftDb } from '@/lib/draftsDb';
+import { z } from 'zod';
+import { sanitizeAgentMarkdown } from '@/lib/agentHelper';
 
 export const runtime = 'edge';
 
+// Define strict schema for incoming Python agent payload.
+// Why Zod schema validation: We must not blindly trust external agent payloads.
+// Zod enforces a strict data contract, ensuring types are correct (e.g. word_count is a number)
+// and throwing detailed validation errors if the external agent breaks the contract.
+const WebhookPayloadSchema = z.object({
+  topic: z.string().min(1),
+  // Why 'discarded' is included: The Python agent sends this terminal state when an article
+  // fails AdSense compliance checks 3 times. Without it, Zod returns 400, causing tenacity
+  // to retry the callback 5 times on an endpoint that will never accept the payload.
+  status: z.enum(['success', 'error', 'discarded']),
+  error: z.string().optional().default(''),
+  article: z.string().optional().default(''),
+  word_count: z.preprocess((val) => parseInt(String(val), 10) || 0, z.number().min(0)),
+  image_url: z.string().optional().default(''),
+  // Why description is included: The Python agent generates a clean meta description from the
+  // article content. This field was previously silently dropped, leaving published articles
+  // with no SEO description. Now it is stored in Redis and used during the publish flow.
+  description: z.string().optional().default(''),
+  tags: z.array(z.string()).optional().default([]),
+});
+
 export async function POST(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const secret = searchParams.get('secret');
+    const authHeader = req.headers.get('authorization');
     const webhookSecret = process.env.WEBHOOK_SECRET || process.env.ADMIN_SECRET;
 
-    // Why environment variables & fail-closed check: Hardcoding secret tokens (like 'sherly') directly 
-    // inside the repository is a high-risk security vulnerability. Moving the secret to process.env and
-    // throwing an internal configuration error if both secrets are undefined ensures a "fail-closed" security
-    // posture where the endpoint cannot be triggered if not configured properly.
     if (!webhookSecret) {
       console.error('[security] Server Configuration Error: WEBHOOK_SECRET or ADMIN_SECRET is not configured.');
       return new NextResponse('Configuration Error: Server secret credentials not found.', { status: 500 });
     }
 
-    if (secret !== webhookSecret) {
+    // Security: Strictly check HTTP Authorization header only.
+    // The insecure URL query parameter is fully deprecated and no longer accepted.
+    if (authHeader !== `Bearer ${webhookSecret}`) {
       console.warn('[security] Unauthorized attempt to invoke article callback webhook.');
       return new NextResponse('Unauthorized: Invalid webhook credential.', { status: 403 });
     }
 
-    // Why payload schema validation: Parsing incoming JSON inside try/catch blocks with structural checks
-    // prevents crashing the server route if the external agent sends an empty or malformed payload.
-    const payload = await req.json().catch(() => null);
-    if (!payload || !payload.topic || typeof payload.topic !== 'string') {
-      console.error('[webhook] Received invalid payload body: ', payload);
-      return new NextResponse('Bad Request: Missing or invalid "topic" property.', { status: 400 });
+    // Safely parse JSON
+    const rawPayload = await req.json().catch(() => null);
+    if (!rawPayload) {
+      return new NextResponse('Bad Request: Invalid JSON payload.', { status: 400 });
     }
 
-    // Why verify draft existence: If the user explicitly deleted this draft from the dashboard
-    // while it was still in the 'generating' status, writing it back now would resurrect the
-    // deleted draft and cause it to reappear unexpectedly. Discarding the callback preserves the user's action.
-    const existingDraft = await draftDb.getDraft(payload.topic);
-    if (!existingDraft) {
-      console.warn(`[webhook] Discarding incoming agent callback for deleted draft: "${payload.topic}"`);
-      return NextResponse.json({ message: 'Callback discarded because draft was deleted by user' });
+    // Validate using Zod schema
+    const validationResult = WebhookPayloadSchema.safeParse(rawPayload);
+    if (!validationResult.success) {
+      console.error('[webhook] Payload validation failed:', validationResult.error.format());
+      return NextResponse.json(
+        { error: 'Validation failed', details: validationResult.error.format() },
+        { status: 400 }
+      );
+    }
+
+    const payload = validationResult.data;
+
+    // Why handle 'discarded' separately with 200 OK:
+    // A discarded article means the Python agent ran compliance checks 3 times and gave up.
+    // The original Redis draft key (status: generating) will auto-expire in 7 days.
+    // There is nothing to save. We just acknowledge cleanly so tenacity stops retrying.
+    if (payload.status === 'discarded') {
+      console.warn(`[webhook] Article discarded by agent for topic: "${payload.topic}". Reason: ${payload.error || 'Compliance failure.'}`);
+      return NextResponse.json({ message: 'Discarded callback acknowledged. Draft will auto-expire.' });
     }
 
     const data = {
       topic: payload.topic,
       status: payload.status === 'success' ? 'pending_review' : 'error',
-      error: payload.error || '',
-      content: payload.article || '',
-      // Why parseInt: word_count must be stored as a number so the dashboard can display it correctly.
-      // Storing as a string ('0') causes truthy checks like (art.word_count || 0) to always resolve to
-      // the string '0' instead of the actual numeric value from the agent payload.
-      word_count: parseInt(payload.word_count, 10) || 0,
-      image_url: payload.image_url || '',
-      // WHY: Extract agent-supplied tags here so they survive into the draft and
-      // eventually into the published article. Previously this field was never
-      // mapped, so all AI-generated tags were silently dropped at this boundary.
-      // We validate it is an array of strings; malformed values are discarded safely.
-      tags: Array.isArray(payload.tags)
-        ? payload.tags.filter((t: unknown) => typeof t === 'string')
-        : undefined,
+      error: payload.error,
+      content: sanitizeAgentMarkdown(payload.article),
+      word_count: payload.word_count,
+      image_url: payload.image_url,
+      // Why description is saved here: Required for SEO meta tags at publish time.
+      // The Python agent extracts a clean 1-2 sentence description from the article body.
+      description: payload.description,
+      tags: payload.tags,
       timestamp: Date.now()
     };
 
-    await draftDb.setDraft(payload.topic, data);
-    console.log(`[webhook] Successfully saved draft callback for: "${payload.topic}" with status: "${data.status}"`);
-    
+    // Why Atomic Idempotent Update (updateDraftIfExist):
+    // The Lua script atomically checks BOTH: (1) the draft key exists AND (2) its status
+    // is still 'generating'. This prevents a second callback retry from wiping admin edits
+    // if an article was already received and moved to pending_review.
+    const updated = await draftDb.updateDraftIfExist(payload.topic, data);
+
+    if (!updated) {
+      console.warn(`[webhook] Discarding callback for "${payload.topic}": draft was deleted or already processed.`);
+      return NextResponse.json({ message: 'Callback discarded: draft was deleted or already updated.' });
+    }
+
+    console.log(`[webhook] Successfully saved draft for: "${payload.topic}" → status: "${data.status}"`);
     return NextResponse.json({ message: 'Callback received and saved as draft' });
+
   } catch (err: any) {
     console.error('[webhook] Callback processing failed:', err.message || err);
     return new NextResponse('Internal Server Error: ' + (err.message || 'Unknown Error'), { status: 500 });

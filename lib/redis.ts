@@ -33,7 +33,7 @@ const BACKEND: Backend = (() => {
 
 interface RedisLike {
   get(key: string): Promise<string | null>;
-  set(key: string, value: any, options?: { ex?: number }): Promise<string>;
+  set(key: string, value: any, options?: { ex?: number; nx?: boolean }): Promise<string | null>;
   del(key: string): Promise<number>;
   keys(pattern: string): Promise<string[]>;
   incr(key: string): Promise<number>;
@@ -49,7 +49,10 @@ const memoryClient: RedisLike = {
     const c = memoryCache[key];
     return (c && c.expiresAt > Date.now()) ? c.value : null;
   },
-  async set(key: string, value: any, options?: { ex?: number }) {
+  async set(key: string, value: any, options?: { ex?: number; nx?: boolean }) {
+    if (options?.nx && memoryCache[key] && memoryCache[key].expiresAt > Date.now()) {
+      return null;
+    }
     memoryCache[key] = { value, expiresAt: Date.now() + ((options?.ex || 3600) * 1000) };
     return 'OK';
   },
@@ -93,7 +96,7 @@ const upstashClient: RedisLike | null = (
 type NodeHelpers = {
   redis: RedisLike;
   getWithCompression: <T>(k: string) => Promise<T | null>;
-  setWithCompression: (k: string, v: any, o?: { ex?: number }) => Promise<string>;
+  setWithCompression: (k: string, v: any, o?: { ex?: number; nx?: boolean }) => Promise<string | null>;
   compressValue:  (d: unknown) => string;
   decompressValue: (s: string) => unknown;
   rateLimit: (ip: string, limit?: number, ws?: number, r?: string) => Promise<{ success: boolean; current: number; limit: number }>;
@@ -155,8 +158,8 @@ export async function getWithCompression<T>(key: string): Promise<T | null> {
 export async function setWithCompression(
   key: string,
   value: any,
-  options?: { ex?: number }
-): Promise<string> {
+  options?: { ex?: number; nx?: boolean }
+): Promise<string | null> {
   try {
     const json = JSON.stringify(value);
     if (json.length > 1024) {

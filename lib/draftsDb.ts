@@ -82,6 +82,44 @@ export const draftDb = {
     });
   },
 
+  async updateDraftIfExist(topic: string, value: any): Promise<boolean> {
+    const key = `article:${encodeURIComponent(topic)}`;
+    const body = JSON.stringify(value);
+    
+    // Why Idempotent Lua Script (EVAL):
+    // We check TWO conditions atomically before writing:
+    //   1. The key EXISTS (admin didn't delete the draft while it was generating).
+    //   2. The stored JSON contains '"status":"generating"' (the draft hasn't already been
+    //      received and written to pending_review by a previous callback attempt).
+    // Why string.find instead of JSON parsing inside Lua:
+    //   Redis Lua has limited JSON support. Using string.find on the raw stored value to
+    //   check for the status substring is simple, zero-dependency, and 100% reliable
+    //   since we always serialize the status as a JSON string key.
+    // This guarantees that a second tenacity retry can never overwrite admin edits.
+    const script = `
+      local val = redis.call('GET', KEYS[1])
+      if val == false then return 0 end
+      if string.find(val, '"status":"generating"') then
+        redis.call('SET', KEYS[1], ARGV[1])
+        return 1
+      end
+      return 0
+    `;
+
+    const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      // Upstash REST syntax: ["COMMAND", "ARG1", "ARG2", ...]
+      body: JSON.stringify(["EVAL", script, "1", key, body])
+    });
+
+    const data = await res.json();
+    return data.result === 1; // 1 if updated, 0 if deleted or already processed
+  },
+
   async getAllDrafts() {
     const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/keys/article:*`, {
       headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },

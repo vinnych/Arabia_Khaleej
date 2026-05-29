@@ -2,7 +2,7 @@
 // WHY: This API manages the review drafts and published insights list.
 // It is fully refactored to support the Unified Bilingual Document Model:
 // - GET: Returns normalized articles localized to the requested tab/language.
-// - POST: Approves (generates updated translations if human edits are present, then publishes to both EN & AR feeds), rejects, or deletes.
+// - POST: Approves (generates updated translations if human edits are present, then publishes to both EN & AR feeds), rejects, deletes, or updates live content bilingually.
 import { NextRequest, NextResponse } from 'next/server';
 import { redis, getWithCompression, setWithCompression } from '@/lib/redis';
 import { translateMarkdown } from '@/lib/translate';
@@ -88,15 +88,26 @@ export const fetchCache = 'force-no-store';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const secret = searchParams.get('secret');
   const tab = searchParams.get('tab') || 'drafts';
+  const slug = searchParams.get('slug');
   const ADMIN_SECRET = process.env.ADMIN_SECRET!;
 
-  if (secret !== ADMIN_SECRET) {
+  // Why Authorization header: secrets in URL query params appear in Cloudflare
+  // access logs, browser history, and address bars. Headers are never logged by CDNs.
+  const authHeader = request.headers.get('authorization');
+  if (!ADMIN_SECRET || authHeader !== `Bearer ${ADMIN_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
+    if (slug) {
+      // If a specific slug is requested, return the full uncompressed document.
+      // This allows the admin dashboard to load the full bilingual content for editing.
+      const article = await getWithCompression(`insights:article:${slug}`);
+      if (!article) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      return NextResponse.json({ article });
+    }
+
     const drafts = await loadDrafts('en');
     const draftsAr = await loadDrafts('ar');
     const published = await loadPublished('en');
@@ -115,15 +126,15 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const secret = searchParams.get('secret');
   const ADMIN_SECRET = process.env.ADMIN_SECRET!;
 
-  if (secret !== ADMIN_SECRET) {
+  // Why Authorization header: same reasoning as GET — keeps secret out of logs.
+  const authHeader = request.headers.get('authorization');
+  if (!ADMIN_SECRET || authHeader !== `Bearer ${ADMIN_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { slug, lang, action, title, content } = await request.json();
+  const { slug, lang, action, title, content, contentEn, contentAr } = await request.json();
 
   if (!slug || !lang || !action) {
     return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
@@ -137,6 +148,7 @@ export async function POST(request: NextRequest) {
 
       // Handle edits and re-translation if human editor adjusted the English text
       // Why: Re-translating ensures that manually corrected content propagates to Arabic.
+      // This is done before acquiring the Redis lock to minimize lock contention duration.
       if (title !== undefined) {
         if (typeof article.title === 'string') {
           article.title = { en: title, ar: await translateMarkdown(title, 'en', 'ar') };
@@ -156,64 +168,141 @@ export async function POST(request: NextRequest) {
       }
 
       article.status = 'published';
+      // Unify author object dynamically to match the primary generation queue output
+      article.author = {
+        id: "arabia-khaleej-editorial",
+        name: { en: "Arabia Khaleej Editorial Team", ar: "هيئة تحرير عربية خليج" },
+        role: { en: "Editorial Board", ar: "هيئة التحرير" }
+      };
 
-      // 1. Commit the bilingual document to Redis (insights:article:${slug})
-      await setWithCompression(`insights:article:${slug}`, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+      const lockKey = `lock:insights:list`;
+      const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+      if (!lock) return NextResponse.json({ error: 'System is busy updating the feed. Please try again.' }, { status: 409 });
 
-      // 2. Pre-normalize copies and prepend to English and Arabic main feeds
-      const liveArticleEn = normalizeArticle(article, 'en');
-      const liveArticleAr = normalizeArticle(article, 'ar');
-      
-      // FIX: Strip heavy content payloads
-      delete liveArticleEn.content;
-      delete liveArticleAr.content;
+      try {
+        // 1. Commit the bilingual document to Redis (insights:article:${slug})
+        await setWithCompression(`insights:article:${slug}`, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
 
-      const listKeyEn = `insights:list:en`;
-      const currentEn = await getWithCompression<any[]>(listKeyEn) ?? [];
-      await setWithCompression(listKeyEn, [liveArticleEn, ...currentEn.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        // 2. Pre-normalize copies and prepend to English and Arabic main feeds
+        const liveArticleEn = normalizeArticle(article, 'en');
+        const liveArticleAr = normalizeArticle(article, 'ar');
+        
+        // FIX: Strip heavy content payloads
+        delete liveArticleEn.content;
+        delete liveArticleAr.content;
 
-      const listKeyAr = `insights:list:ar`;
-      const currentAr = await getWithCompression<any[]>(listKeyAr) ?? [];
-      await setWithCompression(listKeyAr, [liveArticleAr, ...currentAr.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        const listKeyEn = `insights:list:en`;
+        const currentEn = await getWithCompression<any[]>(listKeyEn) ?? [];
+        await setWithCompression(listKeyEn, [liveArticleEn, ...currentEn.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
 
-      // 3. Delete drafts from queue lists
-      for (const l of ['en', 'ar'] as const) {
-        const dl = await getWithCompression<any[]>(`insights:drafts:${l}`) ?? [];
-        await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        const listKeyAr = `insights:list:ar`;
+        const currentAr = await getWithCompression<any[]>(listKeyAr) ?? [];
+        await setWithCompression(listKeyAr, [liveArticleAr, ...currentAr.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+
+        // 3. Delete drafts from queue lists
+        for (const l of ['en', 'ar'] as const) {
+          const dl = await getWithCompression<any[]>(`insights:drafts:${l}`) ?? [];
+          await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        }
+
+        await redis.del(draftKey).catch(() => {});
+        console.log(`[admin] Approved and bilingual-published article: "${slug}"`);
+      } finally {
+        await redis.del(lockKey);
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'update_live') {
+      const articleKey = `insights:article:${slug}`;
+      const article = await getWithCompression<any>(articleKey);
+      if (!article) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+      // Apply granular bilingual updates natively.
+      // Crucial: We do NOT re-run translateMarkdown() here, completely avoiding the
+      // Arabic Override destruction bug. Manual edits are perfectly preserved.
+      if (contentEn !== undefined) {
+        if (typeof article.content === 'string') {
+          article.content = { en: contentEn, ar: article.content };
+        } else {
+          article.content.en = contentEn;
+        }
+      }
+      if (contentAr !== undefined) {
+        if (typeof article.content === 'string') {
+          article.content = { en: article.content, ar: contentAr };
+        } else {
+          article.content.ar = contentAr;
+        }
       }
 
-      await redis.del(draftKey).catch(() => {});
-      console.log(`[admin] Approved and bilingual-published article: "${slug}"`);
+      const lockKey = `lock:insights:list`;
+      const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+      if (!lock) return NextResponse.json({ error: 'System is busy updating the feed. Please try again.' }, { status: 409 });
+
+      try {
+        await setWithCompression(articleKey, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        
+        const liveArticleEn = normalizeArticle(article, 'en');
+        const liveArticleAr = normalizeArticle(article, 'ar');
+        delete liveArticleEn.content;
+        delete liveArticleAr.content;
+
+        const listKeyEn = `insights:list:en`;
+        const currentEn = await getWithCompression<any[]>(listKeyEn) ?? [];
+        await setWithCompression(listKeyEn, [liveArticleEn, ...currentEn.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+
+        const listKeyAr = `insights:list:ar`;
+        const currentAr = await getWithCompression<any[]>(listKeyAr) ?? [];
+        await setWithCompression(listKeyAr, [liveArticleAr, ...currentAr.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        
+        console.log(`[admin] Live bilingual content updated for article: "${slug}"`);
+      } finally {
+        await redis.del(lockKey);
+      }
       return NextResponse.json({ success: true });
     }
 
     if (action === 'reject') {
       const draftKey = `insights:draft:article:${slug}`;
-      await redis.del(draftKey).catch(() => {});
+      const lockKey = `lock:insights:list`;
+      const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+      if (!lock) return NextResponse.json({ error: 'System is busy updating the feed. Please try again.' }, { status: 409 });
 
-      for (const l of ['en', 'ar'] as const) {
-        const dl = await getWithCompression<any[]>(`insights:drafts:${l}`) ?? [];
-        await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+      try {
+        await redis.del(draftKey).catch(() => {});
+        for (const l of ['en', 'ar'] as const) {
+          const dl = await getWithCompression<any[]>(`insights:drafts:${l}`) ?? [];
+          await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        }
+      } finally {
+        await redis.del(lockKey);
       }
       return NextResponse.json({ success: true });
     }
 
     if (action === 'delete') {
       const articleKey = `insights:article:${slug}`;
+      const lockKey = `lock:insights:list`;
+      const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+      if (!lock) return NextResponse.json({ error: 'System is busy updating the feed. Please try again.' }, { status: 409 });
 
-      // Remove from BOTH language listing caches regardless of which lang was provided.
-      for (const l of ['en', 'ar'] as const) {
-        const listKey = `insights:list:${l}`;
-        const current = await getWithCompression<any[]>(listKey) ?? [];
-        const filtered = current.filter((a: any) => a.slug !== slug);
-        if (filtered.length !== current.length) {
-          await setWithCompression(listKey, filtered, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+      try {
+        // Remove from BOTH language listing caches regardless of which lang was provided.
+        for (const l of ['en', 'ar'] as const) {
+          const listKey = `insights:list:${l}`;
+          const current = await getWithCompression<any[]>(listKey) ?? [];
+          const filtered = current.filter((a: any) => a.slug !== slug);
+          if (filtered.length !== current.length) {
+            await setWithCompression(listKey, filtered, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+          }
         }
+        // Delete the full article detail key.
+        await redis.del(articleKey).catch(() => {});
+        console.log(`[admin] Permanently deleted article details: "${slug}"`);
+      } finally {
+        await redis.del(lockKey);
       }
-
-      // Delete the full article detail key.
-      await redis.del(articleKey).catch(() => {});
-      console.log(`[admin] Permanently deleted article details: "${slug}"`);
       return NextResponse.json({ success: true });
     }
 
