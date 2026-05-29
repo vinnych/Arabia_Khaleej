@@ -191,9 +191,13 @@ export async function PUT(req: Request) {
         // 1. Commit full bilingual document (insights:article:${slug})
         await setWithCompression(`insights:article:${slug}`, liveArticle, { ex: 2592000 });
 
-        // 2. Pre-normalize and prepend to EN and AR main listings
+        // 2. Pre-normalize copies and prepend to English and Arabic main feeds
         const liveEn = normalizeArticle(liveArticle, 'en');
         const liveAr = normalizeArticle(liveArticle, 'ar');
+
+        // FIX: Strip heavy content payloads from the list arrays to prevent Edge CPU exhaustion (1102 / 503)
+        delete liveEn.content;
+        delete liveAr.content;
 
         const listKeyEn = `insights:list:en`;
         const currentListEn = await getWithCompression<any[]>(listKeyEn) ?? [];

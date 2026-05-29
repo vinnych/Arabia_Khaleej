@@ -42,56 +42,44 @@ function normalizeArticle(item: any, lang: 'en' | 'ar'): any {
 async function loadDrafts(lang: 'en' | 'ar') {
   const raw = await getWithCompression<any[]>(`insights:drafts:${lang}`);
   if (!raw || !Array.isArray(raw)) return [];
-  const articles = await Promise.all(
-    raw.map(async (entry) => {
-      const slug = entry.slug;
-      if (!slug) return null;
-      const body = await getWithCompression<any>(`insights:draft:article:${slug}`).catch(() => null);
-      const normalized = body ? normalizeArticle(body, lang) : null;
-      return {
-        slug,
-        title: normalized?.title ?? entry.title ?? slug,
-        description: normalized?.description ?? entry.description ?? '',
-        language: lang,
-        status: normalized?.status ?? entry.status ?? 'pending',
-        qualityScore: normalized?.qualityScore,
-        wordCount: normalized?.wordCount,
-        content: normalized?.content ?? '',
-      };
-    })
-  );
-  return articles.filter(Boolean);
+  
+  // FIX: Avoid running Promise.all to fetch full draft bodies.
+  // Return the metadata array directly to save Edge CPU limits.
+  return raw.map((entry) => {
+    return {
+      slug: entry.slug,
+      title: entry.title ?? entry.slug,
+      description: entry.description ?? '',
+      language: lang,
+      status: entry.status ?? 'pending',
+      qualityScore: entry.qualityScore,
+      wordCount: entry.wordCount,
+      content: 'Content omitted from dashboard for performance.',
+    };
+  }).filter(Boolean);
 }
 
 async function loadPublished(lang: 'en' | 'ar') {
   const raw = await getWithCompression<any[]>(`insights:list:${lang}`);
   if (!raw || !Array.isArray(raw)) return [];
-  const articles = await Promise.all(
-    raw.map(async (entry) => {
-      const slug = entry.slug;
-      if (!slug) return null;
-      const body = await getWithCompression<any>(`insights:article:${slug}`).catch(() => null);
-      if (!body) return null;
-      const normalized = normalizeArticle(body, lang);
-      if (normalized.status === 'draft') return null;
-      return {
-        slug,
-        lang,
-        title: normalized.title ?? entry.title ?? slug,
-        description: normalized.description ?? entry.description ?? '',
-        language: lang,
-        status: normalized.status || entry.status || 'published',
-        qualityScore: normalized.qualityScore,
-        wordCount: normalized.wordCount,
-        content: normalized.content ?? '',
-        // image field so the admin card can render the thumbnail
-        image: normalized.image ?? entry.image ?? null,
-        // topic is not always present in insights-store articles; fall back to title or slug
-        topic: normalized.topic ?? normalized.title ?? slug,
-      };
-    })
-  );
-  return articles.filter(Boolean);
+  
+  // FIX: Avoid running Promise.all over hundreds of items to fetch individual full bodies.
+  // This exhausted the Edge CPU limits. Just return the cached metadata array directly.
+  return raw.map((entry) => {
+    return {
+      slug: entry.slug,
+      lang,
+      title: entry.title ?? entry.slug,
+      description: entry.description ?? '',
+      language: lang,
+      status: entry.status || 'published',
+      qualityScore: entry.qualityScore,
+      wordCount: entry.wordCount || 0,
+      content: 'Content omitted from dashboard for performance. Please view live article.',
+      image: entry.image ?? entry.image_url ?? null,
+      topic: entry.topic ?? entry.title ?? entry.slug,
+    };
+  }).filter(Boolean);
 }
 
 export const runtime = 'edge';
@@ -175,6 +163,10 @@ export async function POST(request: NextRequest) {
       // 2. Pre-normalize copies and prepend to English and Arabic main feeds
       const liveArticleEn = normalizeArticle(article, 'en');
       const liveArticleAr = normalizeArticle(article, 'ar');
+      
+      // FIX: Strip heavy content payloads
+      delete liveArticleEn.content;
+      delete liveArticleAr.content;
 
       const listKeyEn = `insights:list:en`;
       const currentEn = await getWithCompression<any[]>(listKeyEn) ?? [];
