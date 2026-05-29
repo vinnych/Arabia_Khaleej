@@ -96,11 +96,12 @@ export const draftDb = {
     // - Promise.all runs all fetch requests in parallel, reducing the retrieval time to a single concurrent roundtrip.
     const drafts = await Promise.all(
       keys.map(async (key: string) => {
-        // Why decodeURIComponent: Redis keys are stored as article:{encodedTopic} (e.g. article:Dubai%20Real%20Estate).
-        // getDraft re-encodes the topic with encodeURIComponent before the fetch call.
-        // Passing the already-encoded key directly would double-encode it (Dubai%2520Real%2520Estate),
-        // causing a Redis miss. We must decode first to restore the original plain-text topic.
-        const topic = decodeURIComponent(key.replace('article:', ''));
+        // Why we NO LONGER use decodeURIComponent: The Upstash REST API URL-decodes the path before
+        // executing the Redis command. So the key stored in Redis is the raw, unencoded string 
+        // (e.g., "article:Dubai Real Estate" or "article:... 42.1%"). If we call decodeURIComponent
+        // on a raw string containing a '%' symbol (like 42.1%), it throws a fatal URIError and 
+        // crashes the entire drafts dashboard. We just strip the prefix to get the raw topic.
+        const topic = key.replace('article:', '');
         return await this.getDraft(topic);
       })
     );
