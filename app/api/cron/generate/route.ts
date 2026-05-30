@@ -28,12 +28,13 @@ export async function GET(req: Request) {
 
     // 1. Fetch UAE Trending Topics
     let headlines: string[] = [];
+    const bingNewsUrl = 'https://www.bing.com/news/search?q=UAE&format=rss';
 
     try {
-      // Primary: Google News RSS via rss2json
-      // Why rss2json: Google News aggressively blocks Cloudflare IPs (503 error). rss2json proxies the request reliably.
-      const googleNewsUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
-      const rss2jsonUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}`;
+      // Primary: Bing News RSS via rss2json
+      // Why rss2json: It provides a clean, easy-to-use JSON API proxy for RSS feeds, reducing parsing complexity.
+      // We removed Google News as it aggressively blocks cloud IPs resulting in 503 errors.
+      const rss2jsonUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(bingNewsUrl)}`;
       
       const rssRes = await fetch(rss2jsonUrl, { cache: 'no-store' });
       
@@ -47,12 +48,11 @@ export async function GET(req: Request) {
       if (headlines.length === 0) throw new Error('rss2json returned empty items.');
 
     } catch (error: any) {
-      console.warn(`[cron] Google News via rss2json failed (${error.message}). Falling back to Bing News natively...`);
+      console.warn(`[cron] Bing News via rss2json failed (${error.message}). Falling back to Bing News natively...`);
       
       // Fallback: Bing News RSS natively
-      // Why Bing News fallback: In case rss2json fails or limits our requests, Bing News provides a highly reliable, 
-      // native RSS alternative that does not aggressively block Cloudflare datacenter IPs.
-      const bingNewsUrl = 'https://www.bing.com/news/search?q=UAE&format=rss';
+      // Why Bing News fallback: In case rss2json API goes down or hits rate limits, we fetch the XML feed directly.
+      // Bing News is highly reliable and does not aggressively block datacenter IPs.
       const bingRes = await fetch(bingNewsUrl, { 
         cache: 'no-store',
         headers: {
