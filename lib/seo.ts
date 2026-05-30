@@ -59,7 +59,14 @@ export function pageMeta({
 }: PageMetaOptions): Metadata {
   const og = ogTitle ?? (lang === "ar" && titleAr ? titleAr : title);
   const ogDesc = ogDescription ?? (lang === "ar" && descriptionAr ? descriptionAr : description);
-  const img = image ?? `${SITE_URL}/opengraph-image`;
+  
+  // CRITICAL CLOUDFLARE BUILD FIX: We reference the static "/opengraph-image.png" asset from the "public/" folder.
+  // We explicitly use a static public asset instead of Next.js's file-based "app/opengraph-image.png" convention because
+  // Next.js compiles the "app/" file-based convention into an internal dynamic Route Handler. In Cloudflare Pages,
+  // this dynamic Route Handler triggers build errors unless configured with Edge runtime exports, which cannot be injected
+  // into Next.js's automatic internal handler. Moving the image to "public/opengraph-image.png" and linking it here 
+  // avoids the route compiler altogether, runs completely statically at maximum speed, and achieves 100% SEO alignment.
+  const img = image ?? `${SITE_URL}/opengraph-image.png`;
 
   let baseRoute = path.split('?')[0];
   if (baseRoute.startsWith('/en/') || baseRoute === '/en') baseRoute = baseRoute.replace(/^\/en/, '') || '/';

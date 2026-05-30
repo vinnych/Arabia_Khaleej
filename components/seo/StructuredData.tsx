@@ -40,7 +40,9 @@ export function OrganizationSchema({ nonce }: { nonce?: string } = {}) {
       width: 512,
       height: 512,
     },
-    image: `${SITE_URL}/opengraph-image`,
+    // We explicitly use the static "/opengraph-image.png" asset from the "public/" folder.
+    // This avoids Next.js's file-based dynamic route handler compilation issue on Cloudflare Pages.
+    image: `${SITE_URL}/opengraph-image.png`,
     foundingDate: "2026",
     areaServed: [
       { "@type": "Country", name: "Qatar", sameAs: "https://www.wikidata.org/wiki/Q846" },
@@ -177,7 +179,9 @@ export function InsightArticleSchema({
   const data = {
     headline: title,
     description,
-    image: image ? [image] : [`${SITE_URL}/opengraph-image`],
+    // We explicitly use the static "/opengraph-image.png" asset from the "public/" folder.
+    // This avoids Next.js's file-based dynamic route handler compilation issue on Cloudflare Pages.
+    image: image ? [image] : [`${SITE_URL}/opengraph-image.png`],
     datePublished,
     dateModified: dateModified ?? datePublished,
     inLanguage: language,
@@ -226,7 +230,9 @@ export function HowToSchema({
   const data = {
     name,
     description,
-    image: image ? [image] : [`${SITE_URL}/opengraph-image`],
+    // We explicitly use the static "/opengraph-image.png" asset from the "public/" folder.
+    // This avoids Next.js's file-based dynamic route handler compilation issue on Cloudflare Pages.
+    image: image ? [image] : [`${SITE_URL}/opengraph-image.png`],
     step: steps.map((s, i) => ({
       "@type": "HowToStep",
       position: i + 1,
