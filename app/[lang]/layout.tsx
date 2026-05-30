@@ -4,7 +4,6 @@ import "../globals.css";
 import { Providers } from "@/components/layout/Providers";
 import ClientLayout from "@/components/layout/ClientLayout";
 import Script from "next/script";
-import { GoogleAdSense } from '@next/third-parties/google';
 import { headers } from "next/headers";
 import Header from "@/components/layout/Header";
 import { pageMeta, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
@@ -75,7 +74,12 @@ export default async function RootLayout({ children, params }: { children: React
           gtag('config', 'G-WRXQ5H9Z7K');
         `}</Script>
         {process.env.NEXT_PUBLIC_ADSENSE_ID && (
-          <GoogleAdSense publisherId={process.env.NEXT_PUBLIC_ADSENSE_ID} />
+          <Script 
+            async 
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_ID}`} 
+            crossOrigin="anonymous" 
+            strategy="afterInteractive"
+          />
         )}
       </body>
     </html>
