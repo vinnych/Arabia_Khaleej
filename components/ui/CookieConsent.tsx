@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/lib/i18n";
 import { X, ShieldCheck } from "lucide-react";
+// Next.js Link component is imported to allow client-side client-side navigation
+// which is significantly faster and smoother than full-page reloads using native <a> tags.
+import Link from "next/link";
 
 export default function CookieConsent() {
   const [show, setShow] = useState(false);
@@ -50,9 +53,16 @@ export default function CookieConsent() {
               {language === 'ar' 
                 ? 'نستخدم ملفات تعريف الارتباط لضمان أمن البيانات وتحليل الزيارات.' 
                 : 'We use cookies for data security, analytics, and targeted insights.'}
-              <a href="/privacy" className="ml-1 text-brand-gold hover:underline">
+              {/* 
+                We use the Next.js <Link> component instead of a standard HTML <a> tag.
+                - Performance: It pre-fetches the page's code in the background for instant navigation.
+                - UX: It updates the URL and switches components dynamically without a full document load.
+                - Compatibility: Resolves the Next.js/ESLint "no-html-link-for-pages" warning that prevents builds.
+              */}
+              <Link href="/privacy" className="ml-1 text-brand-gold hover:underline">
                 {language === 'ar' ? 'اعرف أكثر' : 'Learn more'}
-              </a>
+              </Link>
+
             </p>
           </div>
         </div>
