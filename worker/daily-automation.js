@@ -55,21 +55,9 @@ export default {
 
     // Route logic based on the cron expression that triggered the event.
     // Cloudflare normalizes the cron string to remove extra whitespace.
-    const isKeepAliveTick = event.cron === "*/14 * * * *";
-    const isGenerationTick = event.cron === "0,30 * * * *";
+    const isGenerationTick = event.cron === "*/15 * * * *";
 
-    if (isKeepAliveTick) {
-      // ── Keep-Alive Ping ──────────────
-      try {
-        console.log('[automation] Pinging Render agent health endpoint...');
-        const renderRes = await fetch(AGENT_HEALTH_URL, {
-          signal: AbortSignal.timeout(10_000), // 10 s max
-        });
-        console.log(`[automation] Render ping responded: HTTP ${renderRes.status}`);
-      } catch (err) {
-        console.error('[automation] Render ping failed (non-fatal):', err?.message || err);
-      }
-    } else if (isGenerationTick) {
+    if (isGenerationTick) {
       // ── Generation Trigger ───────────────────
       if (!env.CRON_SECRET) {
         console.error('[automation] Skipping generation: CRON_SECRET is undefined. Set it via wrangler secret.');

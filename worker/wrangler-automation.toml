@@ -3,19 +3,12 @@ main = "daily-automation.js"
 compatibility_date = "2025-02-04"
 
 # Single cron schedule:
-#   */14 * * * *  — fires every 14 minutes → keep-alive ping for Render
-#   0,30 * * * *  — fires at minutes 0 and 30 → triggers article generation
-#
-# Why separate schedules works perfectly:
-#   Because Render's inactivity timeout is exactly 15 minutes, triggering a
-#   ping every 14 minutes ensures the agent stays warm.
-#   Separating the generation logic (0,30) prevents them from colliding and makes
-#   the worker cleaner.
+#   */15 * * * *  — fires every 15 minutes → triggers article generation
 #
 # IMPORTANT: After deploying, set the CRON_SECRET worker secret:
 #   npx wrangler secret put CRON_SECRET --config worker/wrangler-automation.toml
 [triggers]
-crons = ["*/14 * * * *", "0,30 * * * *"]
+crons = ["*/15 * * * *"]
 
 # Observability: logs enabled, traces disabled (saves quota on free tier)
 [observability]
