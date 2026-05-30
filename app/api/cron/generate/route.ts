@@ -26,31 +26,52 @@ export async function GET(req: Request) {
        );
     }
 
-    // 1. Fetch UAE Trending Topics from Google News RSS natively
-    // Why native fetch vs. rss2json: Cloudflare Workers have vast IP pools that rarely get rate-limited.
-    // We fetch the XML directly to remove an unstable third-party dependency, spoofing a realistic browser User-Agent
-    // just in case Google checks for it.
-    const googleNewsUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
-    const rssRes = await fetch(googleNewsUrl, { 
-      cache: 'no-store',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    // 1. Fetch UAE Trending Topics
+    let headlines: string[] = [];
+
+    try {
+      // Primary: Google News RSS via rss2json
+      // Why rss2json: Google News aggressively blocks Cloudflare IPs (503 error). rss2json proxies the request reliably.
+      const googleNewsUrl = 'https://news.google.com/rss/search?q=UAE+when:24h&hl=en-US&gl=US&ceid=US:en';
+      const rss2jsonUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(googleNewsUrl)}`;
+      
+      const rssRes = await fetch(rss2jsonUrl, { cache: 'no-store' });
+      
+      if (!rssRes.ok) throw new Error(`Status: ${rssRes.status}`);
+      const data = await rssRes.json();
+      if (data.status !== 'ok') throw new Error(`API Error: ${data.message}`);
+      
+      const itemsArray = data.items || [];
+      headlines = itemsArray.map((item: any) => item.title).filter(Boolean);
+      
+      if (headlines.length === 0) throw new Error('rss2json returned empty items.');
+
+    } catch (error: any) {
+      console.warn(`[cron] Google News via rss2json failed (${error.message}). Falling back to Bing News natively...`);
+      
+      // Fallback: Bing News RSS natively
+      // Why Bing News fallback: In case rss2json fails or limits our requests, Bing News provides a highly reliable, 
+      // native RSS alternative that does not aggressively block Cloudflare datacenter IPs.
+      const bingNewsUrl = 'https://www.bing.com/news/search?q=UAE&format=rss';
+      const bingRes = await fetch(bingNewsUrl, { 
+        cache: 'no-store',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
+      
+      if (!bingRes.ok) {
+        throw new Error(`Fallback failed: Bing News returned status ${bingRes.status}`);
       }
-    });
-    
-    if (!rssRes.ok) {
-      throw new Error(`Failed to fetch RSS feed from Google. Status: ${rssRes.status}`);
+      
+      const xmlText = await bingRes.text();
+      const parser = new XMLParser();
+      const data = parser.parse(xmlText);
+      
+      const items = data.rss?.channel?.item || [];
+      const itemsArray = Array.isArray(items) ? items : [items];
+      headlines = itemsArray.map((item: any) => item.title).filter(Boolean);
     }
-    
-    const xmlText = await rssRes.text();
-    const parser = new XMLParser();
-    const data = parser.parse(xmlText);
-    
-    // 2. Extract headlines
-    const items = data.rss?.channel?.item || [];
-    // fast-xml-parser handles single item vs array automatically, but ensure array
-    const itemsArray = Array.isArray(items) ? items : [items];
-    const headlines: string[] = itemsArray.map((item: any) => item.title).filter(Boolean);
 
     if (headlines.length === 0) {
       throw new Error('Failed to parse any articles from the RSS feed.');
