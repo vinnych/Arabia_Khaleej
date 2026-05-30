@@ -64,6 +64,36 @@ export default {
         return;
       }
 
+      // ── Pre-flight Wake-up Ping for Render Agent ───────────────────
+      // Why: Render's free tier automatically spins down the Python article-agent container after 15 minutes of inactivity.
+      // Waking up the container (a "cold start") can take 30-50 seconds.
+      // If we directly trigger the Next.js generation route, it will fetch the Render agent and block waiting for it.
+      // Since the Next.js route runs in an Edge function, it has a strict 25-second execution limit and will time out (504 Gateway Timeout).
+      // By sending a direct, pre-flight wake-up ping from the Cloudflare Worker first, we can leverage the Worker's very generous
+      // scheduled-event execution time limit (up to 15 minutes) to wait for the cold start.
+      // Once the ping completes, the Render agent is warm, and the subsequent Next.js route call will succeed instantly (< 1s).
+      const agentHealthUrl = env.AGENT_URL ? `${env.AGENT_URL}/` : AGENT_HEALTH_URL;
+      console.log(`[automation] Sending pre-flight wake-up ping to Render agent at ${agentHealthUrl} ...`);
+      try {
+        const pingStartTime = Date.now();
+        const pingRes = await fetch(agentHealthUrl, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'ArabiaKhaleej-AutomationWorker/1.0',
+          },
+          // Why 60 seconds: Waking up a cold Render container can take 30-50 seconds.
+          // A 60s timeout provides ample runway to handle the slow spin-up.
+          signal: AbortSignal.timeout(60_000),
+        });
+        const duration = ((Date.now() - pingStartTime) / 1000).toFixed(2);
+        console.log(`[automation] Render agent wake-up ping responded with status ${pingRes.status} in ${duration}s.`);
+      } catch (pingErr) {
+        // Why we catch and warn instead of throwing:
+        // Even if the ping fails due to a temporary network blip or DNS resolution issue, we still want to attempt
+        // to call the generation endpoint to ensure the system is self-healing and has the best chance to succeed.
+        console.warn(`[automation] Warning: Render agent wake-up ping failed or timed out: ${pingErr?.message || pingErr}. Proceeding with generation call anyway.`);
+      }
+
       console.log(`[automation] Generation tick at ${new Date(event.scheduledTime).toISOString()}. Calling ${GENERATE_URL} ...`);
       try {
         const genRes = await fetch(GENERATE_URL, {
