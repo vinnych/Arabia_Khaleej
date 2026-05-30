@@ -81,13 +81,18 @@ export async function GET(req: Request) {
     const cleanedHeadlines = headlines.map(headline => {
       let clean = headline.replace(/\s-\s[^<]+$/, '').trim();
       // Decode HTML entities
+      // Why we use regex here instead of an external library like 'he':
+      // It keeps the edge function lightweight and avoids adding dependencies.
+      // This specifically fixes numeric entities (e.g. &#233; for é) common in French/Portuguese RSS titles.
       clean = clean
         .replace(/&amp;/g, '&')
         .replace(/&quot;/g, '"')
         .replace(/&apos;/g, "'")
         .replace(/&#39;/g, "'")
         .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>');
+        .replace(/&gt;/g, '>')
+        .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(Number(dec)))
+        .replace(/&#x([0-9a-f]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)));
       return clean;
     });
 
