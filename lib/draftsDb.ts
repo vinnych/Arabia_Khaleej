@@ -83,11 +83,13 @@ export const draftDb = {
   },
 
   async updateDraftIfExist(topic: string, value: any): Promise<boolean> {
-    const key = `article:${encodeURIComponent(topic)}`;
+    // Why NO encodeURIComponent here: 
+    // Unlike get/set/del which pass the key in the URL path (which Upstash auto-decodes),
+    // this command passes the key in a JSON body array for the EVAL command.
+    // Upstash does NOT decode JSON body elements. If we encode here, Redis will look for the 
+    // literal key "article:Tour%20UAE%202026" instead of "article:Tour UAE 2026", causing a miss.
+    const key = `article:${topic}`;
     const body = JSON.stringify(value);
-    
-    // Why Idempotent Lua Script (EVAL):
-    // We check TWO conditions atomically before writing:
     //   1. The key EXISTS (admin didn't delete the draft while it was generating).
     //   2. The stored JSON contains '"status":"generating"' (the draft hasn't already been
     //      received and written to pending_review by a previous callback attempt).
