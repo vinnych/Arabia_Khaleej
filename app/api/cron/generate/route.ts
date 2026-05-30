@@ -9,6 +9,33 @@ export const runtime = 'edge';
 // Disable caching for this route so it fetches fresh RSS data each time
 export const dynamic = 'force-dynamic';
 
+// Helper: Extract normalized, meaningful words (>= 3 chars) from a text string
+// Why: Removing punctuation and short words (like "a", "an", "the") ensures we only compare the core meaning of the headline.
+function getWords(text: string): Set<string> {
+  return new Set(
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length > 2)
+  );
+}
+
+// Helper: Calculate Jaccard similarity between two texts
+// Why Jaccard: It measures overlap between two sets of words, making it invariant to word reordering
+// (e.g., "Dubai Real Estate" == "Real Estate Dubai"). It's also computationally O(N), perfect for Edge runtimes.
+function calculateSimilarity(text1: string, text2: string): number {
+  const set1 = getWords(text1);
+  const set2 = getWords(text2);
+  let intersection = 0;
+  for (const word of set1) {
+    if (set2.has(word)) intersection++;
+  }
+  const union = set1.size + set2.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
+
 export async function GET(req: Request) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -96,17 +123,27 @@ export async function GET(req: Request) {
       return clean;
     });
 
-    // 4. Implement Deduplication
+    // 4. Implement Deduplication (Jaccard Similarity)
     // Fetch recent insights and drafts to ensure we don't generate the same topic twice
     const recentInsights = await getUnifiedInsights({ lang: 'en', limit: 30 });
     const activeDrafts = await draftDb.getAllDrafts();
     
-    const seenTopics = new Set<string>();
-    recentInsights.forEach(insight => seenTopics.add(insight.title.toLowerCase()));
-    activeDrafts.forEach((draft: any) => seenTopics.add(draft.topic.toLowerCase()));
+    // Combine all existing titles into one array for comparison
+    const existingTopics: string[] = [
+      ...recentInsights.map(insight => insight.title),
+      ...activeDrafts.map((draft: any) => draft.topic)
+    ];
 
-    // Filter out headlines that have already been generated recently
-    const unseenHeadlines = cleanedHeadlines.filter(h => !seenTopics.has(h.toLowerCase()));
+    // Filter out headlines that share 60% or more vocabulary with any existing topic
+    // Why 0.6 threshold: It provides a strong balance between catching slightly rephrased headlines 
+    // while not aggressively blocking completely different topics that happen to share a few keywords.
+    const unseenHeadlines = cleanedHeadlines.filter(h => {
+      const isDuplicate = existingTopics.some(existingTopic => calculateSimilarity(h, existingTopic) >= 0.6);
+      if (isDuplicate) {
+        console.log(`[cron] Filtered duplicate headline: "${h}" (Too similar to an existing topic)`);
+      }
+      return !isDuplicate;
+    });
 
     // If all headlines have been generated (rare), fallback to the full list to avoid failing
     const targetPool = unseenHeadlines.length > 0 ? unseenHeadlines : cleanedHeadlines;
