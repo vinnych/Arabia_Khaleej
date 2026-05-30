@@ -772,7 +772,7 @@ export default function InsightArticleClient({
               {moreInsights.map((insight) => (
                 <Link
                   key={insight.id}
-                  href={`/insights/${insight.slug}${language === 'ar' ? '?lang=ar' : ''}`}
+                  href={`/${language === 'ar' ? 'ar' : 'en'}/insights/${insight.slug}`}
                   className="glass overflow-hidden rounded-xl border border-white/5 hover:border-brand-gold/30 transition-all group flex flex-col"
                 >
                   {insight.image && (

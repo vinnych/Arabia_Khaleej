@@ -133,7 +133,7 @@ export default function InsightsClient() {
             {insights.slice(0, 2).map((item, idx) => (
               <Link
                 key={`top-${item.id}-${idx}`}
-                href={`/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`}
+                href={`/${language === 'ar' ? 'ar' : 'en'}/insights/${item.slug}`}
                 /* WHY: Standardized rounded boundaries to rounded-xl and stripped shadow highlights for clean editorial framing. */
                 className="group relative h-[400px] rounded-xl overflow-hidden border border-brand-gold/15 hover:border-brand-gold/30 transition-all duration-500"
               >

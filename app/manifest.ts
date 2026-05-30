@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Arabia Khaleej",
     description:
       "The definitive regional reference for the GCC: accurate prayer times, country insights, and protocols.",
-    start_url: "/",
+    start_url: "/en/",
     display: "standalone",
     background_color: "#faf9f6",
     theme_color: "#0f172a",
@@ -19,12 +19,12 @@ export default function manifest(): MetadataRoute.Manifest {
     shortcuts: [
       {
         name: "Prayer Times",
-        url: "/prayer",
+        url: "/en/prayer",
         description: "GCC Prayer Schedules",
       },
       {
         name: "Currency Exchange",
-        url: "/currency-exchange",
+        url: "/en/currency-exchange",
         description: "Live Currency Rates",
       }
     ]

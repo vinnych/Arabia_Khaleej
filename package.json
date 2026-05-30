@@ -15,6 +15,7 @@
     "contact-worker:deploy": "wrangler deploy worker/worker.js --config worker/wrangler.jsonc"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.6",
     "@upstash/redis": "^1.37.0",
     "adhan": "^4.4.3",
     "clsx": "^2.1.1",

@@ -34,7 +34,7 @@ import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 import { getAllInsightSlugs } from '@/lib/insights';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // Cache for 1 hour
 export const runtime = 'edge';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -52,54 +52,56 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // 1. Static Base Routes
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
-    { url: `${SITE_URL}/insights`, lastModified: new Date(), changeFrequency: 'always', priority: 0.9 },
-    { url: `${SITE_URL}/prayer`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${SITE_URL}/currency-exchange`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${SITE_URL}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${SITE_URL}/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/disclaimer`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/transparency`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${SITE_URL}/en/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
+    { url: `${SITE_URL}/en/insights`, lastModified: new Date(), changeFrequency: 'always', priority: 0.9 },
+    { url: `${SITE_URL}/en/prayer`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
+    { url: `${SITE_URL}/en/currency-exchange`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
+    { url: `${SITE_URL}/en/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${SITE_URL}/en/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${SITE_URL}/en/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${SITE_URL}/en/disclaimer`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${SITE_URL}/en/transparency`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${SITE_URL}/en/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
   ];
 
   // 2. Prayer Times (Country-level)
   const prayerRoutes: MetadataRoute.Sitemap = countries.map(country => ({
-    url: `${SITE_URL}/prayer/${country}`,
+    url: `${SITE_URL}/en/prayer/${country}`,
     lastModified: new Date(),
     changeFrequency: 'daily',
     priority: 0.8,
     alternates: {
       languages: {
-        'en': `${SITE_URL}/prayer/${country}`,
-        'en-US': `${SITE_URL}/prayer/${country}`,
-        'en-GB': `${SITE_URL}/prayer/${country}`,
-        'ar': `${SITE_URL}/prayer/${country}?lang=ar`,
-        'ar-SA': `${SITE_URL}/prayer/${country}?lang=ar`,
-        'ar-AE': `${SITE_URL}/prayer/${country}?lang=ar`,
-        'ar-QA': `${SITE_URL}/prayer/${country}?lang=ar`,
-        'ar-KW': `${SITE_URL}/prayer/${country}?lang=ar`,
-        'ar-OM': `${SITE_URL}/prayer/${country}?lang=ar`,
-        'ar-BH': `${SITE_URL}/prayer/${country}?lang=ar`,
+        'en': `${SITE_URL}/en/prayer/${country}`,
+        'x-default': `${SITE_URL}/en/prayer/${country}`,
+        'en-US': `${SITE_URL}/en/prayer/${country}`,
+        'en-GB': `${SITE_URL}/en/prayer/${country}`,
+        'ar': `${SITE_URL}/ar/prayer/${country}`,
+        'ar-SA': `${SITE_URL}/ar/prayer/${country}`,
+        'ar-AE': `${SITE_URL}/ar/prayer/${country}`,
+        'ar-QA': `${SITE_URL}/ar/prayer/${country}`,
+        'ar-KW': `${SITE_URL}/ar/prayer/${country}`,
+        'ar-OM': `${SITE_URL}/ar/prayer/${country}`,
+        'ar-BH': `${SITE_URL}/ar/prayer/${country}`,
       }
     }
   }));
 
   // 3. Country Guides
   const countryRoutes: MetadataRoute.Sitemap = fullCountrySlugs.map(slug => ({
-    url: `${SITE_URL}/countries/${slug}`,
+    url: `${SITE_URL}/en/countries/${slug}`,
     lastModified: new Date('2026-01-01'),
     changeFrequency: 'monthly',
     priority: 0.8,
     alternates: {
       languages: {
-        'en': `${SITE_URL}/countries/${slug}`,
-        'en-US': `${SITE_URL}/countries/${slug}`,
-        'ar': `${SITE_URL}/countries/${slug}?lang=ar`,
-        'ar-SA': `${SITE_URL}/countries/${slug}?lang=ar`,
-        'ar-AE': `${SITE_URL}/countries/${slug}?lang=ar`,
-        'ar-QA': `${SITE_URL}/countries/${slug}?lang=ar`,
+        'en': `${SITE_URL}/en/countries/${slug}`,
+        'x-default': `${SITE_URL}/en/countries/${slug}`,
+        'en-US': `${SITE_URL}/en/countries/${slug}`,
+        'ar': `${SITE_URL}/ar/countries/${slug}`,
+        'ar-SA': `${SITE_URL}/ar/countries/${slug}`,
+        'ar-AE': `${SITE_URL}/ar/countries/${slug}`,
+        'ar-QA': `${SITE_URL}/ar/countries/${slug}`,
       }
     }
 }));
@@ -129,21 +131,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     insightRoutes = sortedInsights.map(item => ({
-      url: `${SITE_URL}/insights/${item.slug}${item.lang === 'ar' ? '?lang=ar' : ''}`,
+      url: `${SITE_URL}/${item.lang === 'ar' ? 'ar' : 'en'}/insights/${item.slug}`,
       lastModified: new Date(item.pubDate),
       changeFrequency: 'monthly',
       priority: 0.6,
       alternates: {
         languages: {
-          'en': `${SITE_URL}/insights/${item.slug}`,
-          'en-US': `${SITE_URL}/insights/${item.slug}`,
-          'ar': `${SITE_URL}/insights/${item.slug}?lang=ar`,
-          'ar-SA': `${SITE_URL}/insights/${item.slug}?lang=ar`,
-          'ar-AE': `${SITE_URL}/insights/${item.slug}?lang=ar`,
-          'ar-QA': `${SITE_URL}/insights/${item.slug}?lang=ar`,
-          'ar-KW': `${SITE_URL}/insights/${item.slug}?lang=ar`,
-          'ar-OM': `${SITE_URL}/insights/${item.slug}?lang=ar`,
-          'ar-BH': `${SITE_URL}/insights/${item.slug}?lang=ar`,
+          'en': `${SITE_URL}/en/insights/${item.slug}`,
+          'x-default': `${SITE_URL}/en/insights/${item.slug}`,
+          'en-US': `${SITE_URL}/en/insights/${item.slug}`,
+          'ar': `${SITE_URL}/ar/insights/${item.slug}`,
+          'ar-SA': `${SITE_URL}/ar/insights/${item.slug}`,
+          'ar-AE': `${SITE_URL}/ar/insights/${item.slug}`,
+          'ar-QA': `${SITE_URL}/ar/insights/${item.slug}`,
+          'ar-KW': `${SITE_URL}/ar/insights/${item.slug}`,
+          'ar-OM': `${SITE_URL}/ar/insights/${item.slug}`,
+          'ar-BH': `${SITE_URL}/ar/insights/${item.slug}`,
         }
       }
     }));

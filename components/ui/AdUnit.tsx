@@ -27,28 +27,18 @@ export default function AdUnit({
    const { t } = useLanguage();
    const pushed = useRef(false);
 
-useEffect(() => {
+    useEffect(() => {
       if (variant === "premium") return;
       if (slot.startsWith("REPLACE_")) return;
       if (pushed.current) return;
 
       try {
         if (typeof window !== "undefined") {
-          const timeoutId = setTimeout(() => {
-            try {
-              const unfilledAds = document.querySelectorAll('ins.adsbygoogle:not([data-adsbygoogle-status="done"])');
-              if (unfilledAds.length > 0 && !pushed.current) {
-                (window.adsbygoogle = window.adsbygoogle || []).push({});
-                pushed.current = true;
-              }
-            } catch (e) {
-              console.error("AdSense push error:", e);
-            }
-          }, 150);
-          return () => clearTimeout(timeoutId);
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          pushed.current = true;
         }
       } catch (e) {
-        console.error("Ad setup error:", e);
+        console.error("AdSense push error:", e);
       }
     }, [slot, variant]);
 
@@ -76,7 +66,7 @@ useEffect(() => {
        <ins
          className="adsbygoogle"
          style={{ display: "block" }}
-         data-ad-client="ca-pub-7212871157824722"
+         data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_ID || "ca-pub-7212871157824722"}
          data-ad-slot={slot}
          data-ad-format="auto"
          data-full-width-responsive="true"

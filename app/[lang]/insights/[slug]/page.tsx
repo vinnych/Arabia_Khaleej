@@ -32,7 +32,7 @@ export async function generateMetadata({
     return pageMeta({
       title: article.title,
       description: seoDescription,
-      path: `/insights/${article.slug}${lang === 'ar' ? '?lang=ar' : ''}`,
+      path: `/insights/${article.slug}`,
       image: article.image,
       type: 'article',
       lang,
@@ -82,7 +82,7 @@ export default async function InsightArticlePage({
     { name: article.title, item: `/insights/${resolvedParams.slug}` }
   ];
 
-  const canonicalUrl = `https://arabiakhaleej.com/insights/${article.slug}${lang === 'ar' ? '?lang=ar' : ''}`;
+  const canonicalUrl = `https://arabiakhaleej.com/${lang}/insights/${article.slug}`;
 
   // High-Fidelity Author Mapping for E-E-A-T
   const getRichAuthor = (article: InsightItem) => {
@@ -139,18 +139,31 @@ export default async function InsightArticlePage({
       />
 
       {/* Supplemental Rich Results based on content type */}
-      {(article.title.toLowerCase().includes('how to') || article.content?.toLowerCase().includes('step-by-step')) && article.content ? (
-        <HowToSchema 
-          name={article.title}
-          description={article.description}
-          image={article.image}
-          url={canonicalUrl}
-          steps={article.content.split('\n')
-            .filter(l => /^\d+\./.test(l.trim()))
-            .map(l => ({ name: l.replace(/^\d+\.\s*/, '').split(':')[0], text: l.replace(/^\d+\.\s*/, '') }))
-            .slice(0, 10)}
-        />
-      ) : null}
+      {(() => {
+        if ((article.title.toLowerCase().includes('how to') || article.content?.toLowerCase().includes('step-by-step')) && article.content) {
+          try {
+            const steps = article.content.split('\n')
+              .filter(l => /^\d+\./.test(l.trim()))
+              .map(l => ({ name: l.replace(/^\d+\.\s*/, '').split(':')[0], text: l.replace(/^\d+\.\s*/, '') }))
+              .slice(0, 10);
+            
+            if (steps.length > 0) {
+              return (
+                <HowToSchema 
+                  name={article.title}
+                  description={article.description}
+                  image={article.image}
+                  url={canonicalUrl}
+                  steps={steps}
+                />
+              );
+            }
+          } catch (e) {
+            console.error("Failed to parse HowToSchema steps", e);
+          }
+        }
+        return null;
+      })()}
 
       <BreadcrumbSchema items={breadcrumbs} />
       <WebPageSchema 

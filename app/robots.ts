@@ -1,7 +1,6 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 
-export const dynamic = 'force-dynamic';
 export const runtime = 'edge';
 
 export default function robots(): MetadataRoute.Robots {
@@ -12,7 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: [
           '/api/', 
-          '/_next/data/', // Block JSON data for client-side transitions
           '/admin/', // Block admin panel - protected, non-public content
         ],
       },

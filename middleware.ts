@@ -17,18 +17,51 @@ export default function middleware(request: NextRequest) {
     return NextResponse.redirect(destination.toString(), 301);
   }
 
-  // Add noindex header for admin pages (not public content)
   const isAdminPage = pathname.startsWith('/admin');
 
-  const langParam = searchParams.get('lang');
-  const cookieLang = request.cookies.get('NEXT_LOCALE')?.value;
+  // If there's a legacy lang query param, redirect to the new subpath structure
+  if (searchParams.has('lang') && !isAdminPage) {
+    const lang = searchParams.get('lang') === 'ar' ? 'ar' : 'en';
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.searchParams.delete('lang');
+    
+    // strip existing locale if any
+    let cleanPath = pathname;
+    if (cleanPath.startsWith('/en/') || cleanPath === '/en') cleanPath = cleanPath.replace(/^\/en/, '') || '/';
+    if (cleanPath.startsWith('/ar/') || cleanPath === '/ar') cleanPath = cleanPath.replace(/^\/ar/, '') || '/';
+    
+    redirectUrl.pathname = `/${lang}${cleanPath === '/' ? '' : cleanPath}`;
+    return NextResponse.redirect(redirectUrl, 301);
+  }
 
-  // Sync lang param with cookie for i18n support
-  // This allows users to switch languages via URL parameter while persisting preference
+  // Handle i18n routing for public pages
+  if (!isAdminPage) {
+    const locales = ['en', 'ar'];
+    const pathnameHasLocale = locales.some(
+      (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+    );
+
+    if (!pathnameHasLocale) {
+      // Get preferred language from cookie or default to en
+      const cookieLang = request.cookies.get('NEXT_LOCALE')?.value;
+      const locale = cookieLang === 'ar' ? 'ar' : 'en';
+      
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = `/${locale}${pathname === '/' ? '' : pathname}`;
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  // Extract current language from URL for cookie syncing if it changed
   let langToSet = null;
-  if (langParam && (langParam === 'en' || langParam === 'ar')) {
-    if (cookieLang !== langParam) {
-      langToSet = langParam;
+  if (!isAdminPage) {
+    const match = pathname.match(/^\/(en|ar)(\/|$)/);
+    if (match) {
+      const currentLang = match[1];
+      const cookieLang = request.cookies.get('NEXT_LOCALE')?.value;
+      if (cookieLang !== currentLang) {
+        langToSet = currentLang;
+      }
     }
   }
 

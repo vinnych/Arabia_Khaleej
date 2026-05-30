@@ -61,8 +61,14 @@ export function pageMeta({
   const ogDesc = ogDescription ?? (lang === "ar" && descriptionAr ? descriptionAr : description);
   const img = image ?? `${SITE_URL}/opengraph-image`;
 
-  const cleanPath = path.split('?')[0];
-  const canonical = cleanPath === "/" ? SITE_URL : `${SITE_URL}${cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`}`;
+  let baseRoute = path.split('?')[0];
+  if (baseRoute.startsWith('/en/') || baseRoute === '/en') baseRoute = baseRoute.replace(/^\/en/, '') || '/';
+  if (baseRoute.startsWith('/ar/') || baseRoute === '/ar') baseRoute = baseRoute.replace(/^\/ar/, '') || '/';
+  
+  const formattedBase = baseRoute === '/' ? '' : baseRoute.startsWith('/') ? baseRoute : `/${baseRoute}`;
+  const canonicalEn = `${SITE_URL}/en${formattedBase}`;
+  const canonicalAr = `${SITE_URL}/ar${formattedBase}`;
+  const canonical = lang === "ar" ? canonicalAr : canonicalEn;
 
   const now = new Date().toISOString();
   const published = datePublished ?? "2026-01-01T00:00:00Z";
@@ -88,9 +94,9 @@ export function pageMeta({
     alternates: {
       canonical,
       languages: {
-        "en": canonical,
-        "ar": `${canonical}?lang=ar`,
-        "x-default": canonical,
+        "en": canonicalEn,
+        "ar": canonicalAr,
+        "x-default": canonicalEn,
       },
     },
     robots: {

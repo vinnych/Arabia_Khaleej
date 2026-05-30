@@ -22,7 +22,7 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = `${window.location.origin}/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`;
+    const url = `${window.location.origin}/${language === 'ar' ? 'ar' : 'en'}/insights/${item.slug}`;
     try {
       if (navigator.share) {
         await navigator.share({ title: item.title, url });
@@ -38,7 +38,7 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
 
   return (
     <Link
-      href={`/insights/${item.slug}${language === 'ar' ? '?lang=ar' : ''}`}
+      href={`/${language === 'ar' ? 'ar' : 'en'}/insights/${item.slug}`}
       /* WHY: Replaced dynamic mouse highlights and bubbly borders with a simple, compact, static golden border color transition on hover, preserving maximum rendering performance. */
       className="group relative glass p-0 rounded-xl border-brand-gold/10 hover:border-brand-gold/25 active:scale-[0.99] transition-all duration-300 flex flex-col h-full overflow-hidden select-none border border-foreground/5"
     >

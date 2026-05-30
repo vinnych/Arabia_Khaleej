@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Amiri, Playfair_Display, Inter } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { Providers } from "@/components/layout/Providers";
 import ClientLayout from "@/components/layout/ClientLayout";
 import Script from "next/script";
+import { GoogleAdSense } from '@next/third-parties/google';
 import { headers } from "next/headers";
 import Header from "@/components/layout/Header";
 import { pageMeta, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
@@ -32,14 +33,12 @@ export const viewport = {
 
 export const runtime = 'edge';
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children, params }: { children: React.ReactNode, params: Promise<{ lang: string }> }) {
   const headList = await headers();
   const nonce = headList.get('x-nonce') || undefined;
   
-  // Extract user's preferred language from cookies to avoid hydration mismatch
-  // This runs on the server before the client hydrates
-  const cookieHeader = headList.get('cookie') || '';
-  const initialLanguage = (cookieHeader.split('; ').find(row => row.startsWith('NEXT_LOCALE='))?.split('=')[1] || 'en') as Language;
+  const resolvedParams = await params;
+  const initialLanguage = (resolvedParams.lang === 'ar' ? 'ar' : 'en') as Language;
 
   return (
     <html lang={initialLanguage} dir={initialLanguage === 'ar' ? 'rtl' : 'ltr'} suppressHydrationWarning className={`${inter.variable} ${amiri.variable} ${playfair.variable}`}>
@@ -47,11 +46,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="preconnect" href="https://open.er-api.com" />
-        <link rel="preconnect" href="https://api.aladhan.com" />
-        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
-        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-        <link rel="dns-prefetch" href="https://va.vercel-scripts.com" />
         <OrganizationSchema nonce={nonce} />
         <WebSiteSchema nonce={nonce} />
       </head>
@@ -80,6 +74,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           gtag('js', new Date());
           gtag('config', 'G-WRXQ5H9Z7K');
         `}</Script>
+        {process.env.NEXT_PUBLIC_ADSENSE_ID && (
+          <GoogleAdSense publisherId={process.env.NEXT_PUBLIC_ADSENSE_ID} />
+        )}
       </body>
     </html>
   );
