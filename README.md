@@ -25,7 +25,7 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 | **Imagery** | Pexels API + geometric fallback |
 | **Styling** | Tailwind CSS + custom CSS |
 | **Infrastructure** | Cloudflare Pages + Cloudflare Workers |
-| **i18n** | Custom `lib/i18n.tsx` — EN / AR |
+| **i18n** | Next.js App Router subpath routing (`/[lang]/`) + Custom `lib/i18n.tsx` — EN / AR |
 
 ---
 
@@ -66,7 +66,7 @@ Arabia Khaleej delegates heavy article generation to an external Python agent ho
           • Delete  → cascades: draft + live + both list caches
                       │
                       ▼
-          Public Pages: /insights  /insights/[slug]
+          Public Pages: /[lang]/insights  /[lang]/insights/[slug]
           Served by lib/insights.ts SOLID service pipeline
 ```
 

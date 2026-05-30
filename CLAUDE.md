@@ -12,6 +12,7 @@ Next.js 15 (App Router) fully optimized for **Cloudflare Pages + Cloudflare Work
 - **Database**: No permanent DB. Upstash Redis (Free) via REST API is the only persistence layer (transient cache + draft queue).
 - **AI / Article Generation**: Fully delegated to an external Python agent on Render. The Next.js app never calls LLMs directly.
 - **Bilingual**: All editorial content is stored bilingually `{ en: string, ar: string }` in Redis and normalized at read-time.
+- **i18n Routing**: Native Next.js App Router subpath routing (e.g., `/en/insights`). All internal `<Link>` components and sitemap entries must use the locale prefix.
 
 ---
 
@@ -132,7 +133,7 @@ worker/
   worker.js                 — Cloudflare Worker: Contact form email handler
 
 app/admin/review/page.tsx   — Admin dashboard (polls every 5s; drafts + published tabs)
-middleware.ts               — CSP insertion, language cookie, www→non-www redirect
+middleware.ts               — CSP insertion, i18n locale subpath routing, www→non-www redirect
 ```
 
 ---
