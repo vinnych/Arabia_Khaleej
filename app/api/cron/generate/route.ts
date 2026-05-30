@@ -98,7 +98,7 @@ export async function GET(req: Request) {
     
     const seenTopics = new Set<string>();
     recentInsights.forEach(insight => seenTopics.add(insight.title.toLowerCase()));
-    activeDrafts.forEach(draft => seenTopics.add(draft.topic.toLowerCase()));
+    activeDrafts.forEach((draft: any) => seenTopics.add(draft.topic.toLowerCase()));
 
     // Filter out headlines that have already been generated recently
     const unseenHeadlines = cleanedHeadlines.filter(h => !seenTopics.has(h.toLowerCase()));

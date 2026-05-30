@@ -130,25 +130,44 @@ export const draftDb = {
     const data = await res.json();
     const keys = data.result || [];
     
-    // Concurrently fetch all drafts from Redis in parallel using Promise.all
-    // Why Promise.all is used instead of a sequential for-of loop:
-    // - A sequential loop does O(N) sequential HTTP calls, causing high network latency.
-    // - Promise.all runs all fetch requests in parallel, reducing the retrieval time to a single concurrent roundtrip.
-    const drafts = await Promise.all(
-      keys.map(async (key: string) => {
-        // Why we NO LONGER use decodeURIComponent: The Upstash REST API URL-decodes the path before
-        // executing the Redis command. So the key stored in Redis is the raw, unencoded string 
-        // (e.g., "article:Dubai Real Estate" or "article:... 42.1%"). If we call decodeURIComponent
-        // on a raw string containing a '%' symbol (like 42.1%), it throws a fatal URIError and 
-        // crashes the entire drafts dashboard. We just strip the prefix to get the raw topic.
-        const topic = key.replace('article:', '');
-        return await this.getDraft(topic);
-      })
-    );
+    if (keys.length === 0) return [];
+
+    // Why MGET instead of Promise.all(keys.map(...getDraft)):
+    // Cloudflare Workers have a hard limit of 50 subrequests per invocation.
+    // If we have 50 drafts, Promise.all triggers 50 concurrent fetch requests, 
+    // immediately crashing the worker with "Too many subrequests by single Worker invocation".
+    // MGET fetches all keys in a single network request, reducing subrequests from (1 + N) to exactly 2.
+    const resMget = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/`, {
+      method: 'POST',
+      headers: { 
+        Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      // Upstash REST syntax: ["COMMAND", "ARG1", "ARG2", ...]
+      body: JSON.stringify(["MGET", ...keys]),
+      cache: 'no-store'
+    });
+
+    const mgetData = await resMget.json();
+    const rawValues = mgetData.result || [];
+
+    const drafts = rawValues.map((val: any) => {
+      if (!val) return null;
+      try {
+        let parsed = JSON.parse(val);
+        // Self-healing check for double-serialized strings (backward compatibility)
+        if (typeof parsed === 'string') {
+          parsed = JSON.parse(parsed);
+        }
+        return parsed;
+      } catch (err) {
+        return null;
+      }
+    });
     
     // Filter out empty results and sort by timestamp descending
     return drafts
       .filter(Boolean)
-      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));
   }
 };
