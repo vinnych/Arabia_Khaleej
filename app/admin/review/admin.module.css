@@ -6,15 +6,16 @@
 */
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2.5rem 1.5rem;
   font-family: var(--font-sans);
   color: #f8fafc;
-  /* WHY: Matches the deep obsidian gradient background of the public-facing platform */
-  background-color: #04070e;
-  min-height: 100vh;
+  /* 
+    WHY: We removed the hardcoded background-color, min-height, max-width and duplicate paddings.
+    Letting the AdminLayout wrapper handle the page structure prevents double-padding 
+    and nested boundary glitches (squeezed box layouts) inside the main admin panel.
+  */
+  background: transparent;
 }
+
 
 .header {
   display: flex;
@@ -223,8 +224,18 @@
 .placeholder { 
   background: linear-gradient(135deg, rgba(4, 7, 14, 0.9), rgba(15, 23, 42, 0.8)); 
   display: flex; 
+  /* 
+    WHY: We explicitly declare vertical flex orientation and text alignment.
+    This guarantees that the text and icon elements stack vertically and center 
+    properly, avoiding squeezed horizontal rendering glitches when Tailwind 
+    classes are parsed at runtime.
+  */
+  flex-direction: column;
+  gap: 0.5rem;
   align-items: center; 
   justify-content: center; 
+  text-align: center;
+  padding: 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
   color: hsl(45, 74%, 55%);

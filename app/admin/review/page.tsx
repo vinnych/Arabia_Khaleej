@@ -2,7 +2,11 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+// WHY: We import standard Lucide React icons to upgrade raw HTML elements 
+// (such as closing cross marks and emoji tags) into high-fidelity premium visual assets.
+import { X, Globe, Sparkles } from "lucide-react";
 import styles from './admin.module.css';
+
 
 interface Article {
   topic: string;
@@ -381,24 +385,45 @@ export default function Dashboard() {
       <dialog ref={modalRef} className={styles.modal}>
         {selectedArticle && (
           <div>
-            <div style={{display:'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
-              <h2 style={{margin: 0}}>{selectedArticle.title || selectedArticle.topic}</h2>
-              <button onClick={() => modalRef.current?.close()} style={{fontSize:'2rem', color:'white', background:'none', border:'none', cursor:'pointer'}}>&times;</button>
+            <div style={{display:'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
+              <h2 style={{margin: 0, fontFamily: 'var(--font-display)', fontWeight: 800, color: 'white'}}>{selectedArticle.title || selectedArticle.topic}</h2>
+              {/* WHY: Replaced raw, thick &times; string with a beautiful Lucide X icon inside a padded rounded button */}
+              <button 
+                onClick={() => modalRef.current?.close()} 
+                style={{
+                  color: 'rgba(255, 255, 255, 0.4)', 
+                  background: 'rgba(255, 255, 255, 0.05)', 
+                  border: '1px solid rgba(255, 255, 255, 0.1)', 
+                  cursor: 'pointer',
+                  padding: '0.5rem',
+                  borderRadius: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease'
+                }}
+                className="hover:bg-white/10 hover:text-white"
+              >
+                <X size={16} />
+              </button>
             </div>
 
             {selectedArticle.slug && (
               <div className="flex gap-2 my-4">
+                {/* WHY: Added Lucide Globe icon to language switch buttons and updated colors to use Arabia Khaleej gold brand palette */}
                 <button 
                   onClick={() => setEditLang('en')}
-                  className={`px-4 py-2 text-sm font-bold rounded-lg border-2 transition-all ${editLang === 'en' ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-[#334155] text-slate-400 hover:border-slate-500'}`}
+                  className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border-2 transition-all ${editLang === 'en' ? 'border-brand-gold text-brand-gold bg-brand-gold/10' : 'border-[#334155] text-slate-400 hover:border-slate-500'}`}
                 >
-                  English Content
+                  <Globe size={14} />
+                  English
                 </button>
                 <button 
                   onClick={() => setEditLang('ar')}
-                  className={`px-4 py-2 text-sm font-bold rounded-lg border-2 transition-all ${editLang === 'ar' ? 'border-amber-500 text-amber-500 bg-amber-500/10' : 'border-[#334155] text-slate-400 hover:border-slate-500'}`}
+                  className={`flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border-2 transition-all ${editLang === 'ar' ? 'border-brand-gold text-brand-gold bg-brand-gold/10' : 'border-[#334155] text-slate-400 hover:border-slate-500'}`}
                 >
-                  Arabic Content
+                  <Globe size={14} />
+                  العربية
                 </button>
               </div>
             )}
@@ -416,9 +441,10 @@ export default function Dashboard() {
             />
 
             {selectedArticle.slug && (
-              <div className="my-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex gap-3 items-center">
-                <span className="text-emerald-500 text-lg select-none">✨</span>
-                <p className="text-xs text-emerald-500/90 font-medium leading-relaxed m-0 text-left">
+              /* WHY: Replaced raw ✨ emoji with an animated pulsing Sparkles icon, matching the luxury premium look. */
+              <div className="my-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex gap-3 items-start md:items-center">
+                <Sparkles className="text-emerald-400 shrink-0 mt-0.5 md:mt-0 animate-pulse" size={18} />
+                <p className="text-xs text-emerald-400/90 font-medium leading-relaxed m-0 text-left">
                   <strong>Live Editorial Edit Mode:</strong> You can now safely fix typos in either language. Saving will instantly update the live public feed without overriding the other language.
                 </p>
               </div>
