@@ -41,7 +41,7 @@ Arabia Khaleej delegates heavy article generation to an external Python agent ho
        │                                  │
        ▼                                  ▼
   GET /api/cron/generate          POST /api/generate
-  • Fetches UAE Google News            • Validates ADMIN_SECRET
+  • Fetches GCC/UAE Google News        • Validates ADMIN_SECRET
     RSS via rss2json.com proxy         • Calls triggerAgentGeneration()
   • Picks random headline
        │
