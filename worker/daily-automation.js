@@ -85,8 +85,18 @@ export default {
           // A 60s timeout provides ample runway to handle the slow spin-up.
           signal: AbortSignal.timeout(60_000),
         });
-        const duration = ((Date.now() - pingStartTime) / 1000).toFixed(2);
-        console.log(`[automation] Render agent wake-up ping responded with status ${pingRes.status} in ${duration}s.`);
+        const duration = (Date.now() - pingStartTime) / 1000;
+        console.log(`[automation] Render agent wake-up ping responded with status ${pingRes.status} in ${duration.toFixed(2)}s.`);
+
+        // Why a 3-second delay for cold starts:
+        // If the ping took more than 2 seconds, it indicates a cold start where Render is booting the container.
+        // Even after the port is open and responds 200, the internal Python WSGI/ASGI application worker inside
+        // may still be completing its worker boot sequence or experience initial CPU-throttling.
+        // A 3-second breathing room guarantees the application is fully idle and ready for heavy POST requests.
+        if (duration > 2.0) {
+          console.log('[automation] Cold start detected. Giving the Render agent 3 seconds of breathing room...');
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
       } catch (pingErr) {
         // Why we catch and warn instead of throwing:
         // Even if the ping fails due to a temporary network blip or DNS resolution issue, we still want to attempt

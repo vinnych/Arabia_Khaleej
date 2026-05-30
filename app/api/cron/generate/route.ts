@@ -44,7 +44,12 @@ async function fetchWithRetry(url: string, options: RequestInit = {}, maxRetries
   let lastError: any;
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const response = await fetch(url, options);
+      // Why AbortSignal.timeout: If an external RSS proxy or feed hangs, the default fetch timeout can be >60 seconds.
+      // A 5-second timeout per attempt ensures we fail-fast, allowing retries or fallbacks to run within the route's 25s execution budget.
+      const response = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(5_000)
+      });
       if (response.ok) {
         return response;
       }

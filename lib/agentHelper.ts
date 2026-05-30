@@ -76,7 +76,10 @@ export async function triggerAgentGeneration(topic: string) {
     body: JSON.stringify({
       topic,
       callback_url: callbackUrl
-    })
+    }),
+    // Why AbortSignal.timeout: Since this is an async dispatch, the agent should respond with HTTP 200/202 instantly.
+    // Setting a 15-second timeout prevents the Edge route from hanging if the agent's server experiences high latency or locking.
+    signal: AbortSignal.timeout(15_000)
   });
 
   if (!res.ok) {
