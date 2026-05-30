@@ -198,6 +198,19 @@ The external article agent runs at `https://article-agent-zk00.onrender.com`. Th
 | `insights:article:{slug}` | 30 days | Full bilingual article document |
 | `insights:list:en` | 30 days | Normalized EN article listing (max 1000) |
 | `insights:list:ar` | 30 days | Normalized AR article listing (max 1000) |
+---
+
+## 🧪 Testing
+
+We maintain a comprehensive, edge-native Jest test suite to ensure the stability of all translation, data access, and routing systems:
+- **Run all tests**: `npm test`
+- **Watch mode**: `npm run test:watch`
+- **Coverage report**: `npm test -- --coverage`
+
+The test suite covers:
+- **Edge Translation Engine** (`lib/__tests__/translate.test.ts`): Verification of HTML/markdown translation, code block placeholder shielding, sequential chunk parsing, and self-healing HTTP linear backoff retries.
+- **SOLID Insights Pipeline** (`lib/__tests__/insights.test.ts`): Verification of data repositories, standard SSR-safe validators, deduplication, date sorting, category filters, and fuzzy slug variant routing.
+- **Common Utilities** (`lib/__tests__/utils.test.ts`): Verification of slugification, URL safety, date parsing, and SSRF prevention.
 
 ---
 

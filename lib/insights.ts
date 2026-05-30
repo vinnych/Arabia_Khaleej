@@ -267,7 +267,7 @@ export class InsightService {
       if (pSlug === normalized) return true;
       // Match base slug for variant URLs (e.g., article-title-2 -> article-title)
       const basePart = normalized.includes('-') ? normalized.split('-').slice(0, -1).join('-') : normalized;
-      return pSlug.startsWith(basePart + '-');
+      return pSlug === basePart || pSlug.startsWith(basePart + '-');
     });
 
     if (fuzzyMatch) {

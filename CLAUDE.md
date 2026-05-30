@@ -49,6 +49,15 @@ npm run contact-worker:deploy       # Deploy Cloudflare contact form worker (man
 | **Types** | Always use TypeScript types. Avoid `any`. |
 | **Errors** | No silent catch blocks. Always `console.error(...)` with context. |
 | **Comments** | Add `// Why: ...` comments explaining non-obvious decisions. |
+---
+
+## 🧪 Testing Standards
+
+We maintain a Jest unit test suite covering core edge engines, utilities, and read-side pipeline services.
+
+- **Test Files Location**: Always put test files in `lib/__tests__/` with the suffix `.test.ts`.
+- **Mocking External Services**: Never make real network requests in unit tests. Mock `global.fetch` and any cache services (like `lib/redis.ts` and `getWithCompression`) so that tests run instantly and offline.
+- **Run Tests**: Execute `npm test` before submitting changes. All tests must pass successfully.
 
 ---
 
