@@ -4,8 +4,15 @@
 import { useState, useEffect, useRef } from 'react';
 // WHY: We import standard Lucide React icons to upgrade raw HTML elements 
 // (such as closing cross marks and emoji tags) into high-fidelity premium visual assets.
-import { X, Globe, Sparkles, Lock, KeyRound, ShieldAlert, LogOut } from "lucide-react";
+// Added check, edit, eye, and column icons for the premium Markdown editor toolbar.
+import { X, Globe, Sparkles, Lock, KeyRound, ShieldAlert, LogOut, Check, Edit2, Eye, Columns } from "lucide-react";
 import styles from './admin.module.css';
+
+// WHY: We import ReactMarkdown and remarkGfm to support rich HTML previewing of generated draft files.
+// This allows editors to instantly review, format, and check typography before publishing live,
+// instead of reading raw markdown text blocks.
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // WHY: We implement a resilient localStorage wrapper. Accessing raw localStorage in private browsing,
 // inside sandboxed web views, or with strict privacy extensions triggers a DOMException security error.
@@ -95,12 +102,36 @@ export default function Dashboard() {
   const [inputSecret, setInputSecret] = useState<string>('');
   const [isAuthValidating, setIsAuthValidating] = useState<boolean>(false);
 
+  // Toast Queue State
+  // WHY: We implement a custom, non-blocking React-based toast alert system to completely eliminate browser-blocking window.alert() popups.
+  // This maintains luxury, unified aesthetics and avoids halting JavaScript thread execution.
+  const [toasts, setToasts] = useState<{ id: string; message: string; type: 'success' | 'error' | 'info' }[]>([]);
+
+  // Confirmation Modal State
+  // WHY: Replaces native window.confirm() dialogs with high-fidelity gold-and-obsidian portals.
+  // Improves user validation security while ensuring consistent visuals during administrative operations.
+  const [confirmAction, setConfirmAction] = useState<{ message: string; onConfirm: () => void } | null>(null);
+
+  // Markdown Editor Tabs State
+  // WHY: Allows the editor to switch between writing raw Markdown syntax (Write), inspecting a formatted HTML preview (Preview),
+  // or engaging in a side-by-side editing grid (Split Screen) on large displays, greatly enhancing editing productivity.
+  const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('edit');
+
   const modalRef = useRef<HTMLDialogElement>(null);
   const secretRef = useRef('');
   const activeTabRef = useRef<'drafts' | 'published'>('drafts');
 
   useEffect(() => { secretRef.current = secret; }, [secret]);
   useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
+
+  // WHY: Helper function to push elegant toast alerts to the admin panel's notification container.
+  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = Math.random().toString(36).substring(2, 9);
+    setToasts((prev) => [...prev, { id, message, type }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 4000);
+  };
 
   const fetchArticles = async (currentSecret: string, tab: 'drafts' | 'published') => {
     try {
@@ -206,26 +237,35 @@ export default function Dashboard() {
       secretRef.current = inputSecret;
       safeLocalStorage.setItem('ak_admin_secret', inputSecret);
       setAuthError('');
+      addToast('Console authenticated successfully.', 'success');
     }
 
     setIsAuthValidating(false);
   };
 
   const handleLock = () => {
-    if (confirm('Are you sure you want to lock the administrative console?')) {
-      setSecret('');
-      secretRef.current = '';
-      safeLocalStorage.removeItem('ak_admin_secret');
-      setIsAuthenticated(false);
-      setArticles([]);
-      setAuthError('');
-      setInputSecret('');
-    }
+    // WHY: Replaced standard browser confirm popup with our beautiful React custom portal overlay.
+    setConfirmAction({
+      message: 'Are you sure you want to lock the administrative console and end your session?',
+      onConfirm: () => {
+        setSecret('');
+        secretRef.current = '';
+        safeLocalStorage.removeItem('ak_admin_secret');
+        setIsAuthenticated(false);
+        setArticles([]);
+        setAuthError('');
+        setInputSecret('');
+        addToast('Console locked.', 'info');
+      }
+    });
   };
 
 
   const generateArticle = async () => {
-    if (!topic.trim()) return alert('Enter a topic');
+    if (!topic.trim()) {
+      addToast('Please enter a trending topic to generate.', 'error');
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch('/api/generate', {
@@ -240,50 +280,57 @@ export default function Dashboard() {
         const errorText = await res.text();
         throw new Error(errorText || `Status code ${res.status}`);
       }
+      addToast('Draft generation queued successfully.', 'success');
       setTopic('');
       handleTabChange('drafts');
     } catch (err: any) {
-      alert('Failed to start generation: ' + (err.message || err));
+      addToast('Failed to start generation: ' + (err.message || err), 'error');
     }
     setLoading(false);
   };
 
   const deleteArticle = async (art: Article) => {
-    if (!confirm("Are you sure you want to permanently delete this article?")) return;
-    const key = art.slug ? `${art.slug}-${art.lang}` : art.topic;
-    setProcessingTopic(key);
-    try {
-      let res;
-      if (art.slug && art.lang) {
-        res = await fetch(`/api/admin/workflows`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${secret}`
-          },
-          body: JSON.stringify({ slug: art.slug, lang: art.lang, action: 'delete' }),
-        });
-      } else {
-        res = await fetch(`/api/article`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${secret}`
-          },
-          body: JSON.stringify({ topic: art.topic }),
-        });
+    // WHY: Replaced standard blocking browser confirm() with an elegant React portal modal confirmation.
+    setConfirmAction({
+      message: `Are you sure you want to permanently delete the article "${art.title || art.topic}"?`,
+      onConfirm: async () => {
+        const key = art.slug ? `${art.slug}-${art.lang}` : art.topic;
+        setProcessingTopic(key);
+        try {
+          let res;
+          if (art.slug && art.lang) {
+            res = await fetch(`/api/admin/workflows`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${secret}`
+              },
+              body: JSON.stringify({ slug: art.slug, lang: art.lang, action: 'delete' }),
+            });
+          } else {
+            res = await fetch(`/api/article`, {
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${secret}`
+              },
+              body: JSON.stringify({ topic: art.topic }),
+            });
+          }
+
+          const data = await res.json().catch(() => null);
+          if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
+          if (data?.error) throw new Error(data.error);
+
+          addToast('Article deleted successfully.', 'success');
+          fetchArticles(secret, activeTab);
+        } catch (err: any) {
+          addToast('Failed to delete article: ' + (err.message || err), 'error');
+        } finally {
+          setProcessingTopic(null);
+        }
       }
-
-      const data = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
-      if (data?.error) throw new Error(data.error);
-
-      fetchArticles(secret, activeTab);
-    } catch (err: any) {
-      alert('Failed to delete article: ' + (err.message || err));
-    } finally {
-      setProcessingTopic(null);
-    }
+    });
   };
 
   const publishArticle = async (art: Article) => {
@@ -314,9 +361,10 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
       if (data?.error) throw new Error(data.error);
 
+      addToast('Article published live to public feed.', 'success');
       fetchArticles(secret, activeTab);
     } catch (err: any) {
-      alert('Failed to publish article: ' + (err.message || err));
+      addToast('Failed to publish article: ' + (err.message || err), 'error');
     } finally {
       setProcessingTopic(null);
     }
@@ -359,16 +407,19 @@ export default function Dashboard() {
       if (!res.ok) throw new Error(data?.error || `Server returned status ${res.status}`);
       if (data?.error) throw new Error(data.error);
 
+      addToast('Article changes saved successfully.', 'success');
       fetchArticles(secret, activeTab);
       modalRef.current?.close();
     } catch (err: any) {
-      alert('Failed to save article modifications: ' + (err.message || err));
+      addToast('Failed to save article modifications: ' + (err.message || err), 'error');
     }
   };
 
   const viewArticle = async (art: Article) => {
     setSelectedArticle(art);
     setEditLang('en');
+    // WHY: Reset markdown editor view tab to 'edit' (Write mode) on loading a new article.
+    setViewMode('edit');
     
     if (art.slug) {
       // It's a published article; fetch full bilingual content
@@ -467,8 +518,54 @@ export default function Dashboard() {
 
   return (
     <div className={styles.container}>
+      {/* WHY: Custom non-blocking Toast Stack rendered fixed in viewport layout */}
+      <div className={styles.toastContainer}>
+        {toasts.map((toast) => (
+          <div key={toast.id} className={`${styles.toast} ${styles[`toast-${toast.type}`]}`}>
+            {toast.type === 'success' && <Check size={16} className={styles.toastIcon} />}
+            {toast.type === 'error' && <ShieldAlert size={16} className={styles.toastIcon} />}
+            {toast.type === 'info' && <KeyRound size={16} className={styles.toastIcon} />}
+            <span className={styles.toastMessage}>{toast.message}</span>
+            <button className={styles.toastClose} onClick={() => setToasts(prev => prev.filter(t => t.id !== toast.id))}>
+              <X size={12} />
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* WHY: Elegant custom React Portal-like confirmation overlay for deleting/locking */}
+      {confirmAction && (
+        <div className={styles.confirmOverlay}>
+          <div className={styles.confirmCard}>
+            <div className={styles.confirmIconWrapper}>
+              <ShieldAlert size={28} />
+            </div>
+            <h3 className={styles.confirmTitle}>Administrative Action</h3>
+            <p className={styles.confirmMessage}>{confirmAction.message}</p>
+            <div className={styles.confirmActions}>
+              <button 
+                className={styles.btnConfirmCancel} 
+                onClick={() => setConfirmAction(null)}
+              >
+                Cancel
+              </button>
+              <button 
+                className={styles.btnConfirmSubmit} 
+                onClick={() => {
+                  confirmAction.onConfirm();
+                  setConfirmAction(null);
+                }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <header className={styles.header}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+        {/* WHY: Removed inline style and used CSS class helper to style header layout */}
+        <div className={styles.headerText}>
           <h1>Arabia Khaleej AI Admin</h1>
           <div className={styles.status}>System Status: <span className={styles.online}>Online</span></div>
         </div>
@@ -512,7 +609,8 @@ export default function Dashboard() {
 
       <div className={styles.grid}>
         {displayedArticles.length === 0 && (
-          <p style={{color: '#94a3b8'}}>No {activeTab} articles yet.</p>
+          // WHY: Replaced inline styles with clean CSS class
+          <p className={styles.noArticles}>No {activeTab} articles yet.</p>
         )}
 
         {displayedArticles.map((art) => {
@@ -527,7 +625,8 @@ export default function Dashboard() {
               {(art.image_url || art.image) ? (
                  <img src={art.image_url || art.image} alt="Hero" className={styles.cardImg} />
               ) : (
-                 <div className={`${styles.cardImg} ${styles.placeholder} flex flex-col gap-2`}>
+                 // WHY: Removed redundant flex Tailwind utilities, styles already fully defined in .placeholder class
+                 <div className={`${styles.cardImg} ${styles.placeholder}`}>
                    <span className="text-[28px] opacity-40">✍️</span>
                    <span className="text-[9px] font-black uppercase tracking-[0.25em] opacity-40">Editorial Insight Draft</span>
                  </div>
@@ -544,7 +643,8 @@ export default function Dashboard() {
                   >
                     Review / Edit
                   </button>
-                  <div style={{display: 'flex', gap: '0.5rem', marginTop: '0.5rem'}}>
+                  {/* WHY: Replaced inline styles with a class name helper */}
+                  <div className={styles.actionsRow}>
                     {art.status !== 'published' && (
                       <button
                         className={styles.btnPublish}
@@ -574,24 +674,13 @@ export default function Dashboard() {
       <dialog ref={modalRef} className={styles.modal}>
         {selectedArticle && (
           <div>
-            <div style={{display:'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem'}}>
-              <h2 style={{margin: 0, fontFamily: 'var(--font-display)', fontWeight: 800, color: 'white'}}>{selectedArticle.title || selectedArticle.topic}</h2>
+            {/* WHY: Replaced inline style block with high-fidelity CSS class structure */}
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalHeaderTitle}>{selectedArticle.title || selectedArticle.topic}</h2>
               {/* WHY: Replaced raw, thick &times; string with a beautiful Lucide X icon inside a padded rounded button */}
               <button 
                 onClick={() => modalRef.current?.close()} 
-                style={{
-                  color: 'rgba(255, 255, 255, 0.4)', 
-                  background: 'rgba(255, 255, 255, 0.05)', 
-                  border: '1px solid rgba(255, 255, 255, 0.1)', 
-                  cursor: 'pointer',
-                  padding: '0.5rem',
-                  borderRadius: '0.5rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease'
-                }}
-                className="hover:bg-white/10 hover:text-white"
+                className={styles.modalCloseBtn}
               >
                 <X size={16} />
               </button>
@@ -617,17 +706,76 @@ export default function Dashboard() {
               </div>
             )}
 
-            <textarea
-              className={styles.textarea}
-              value={editLang === 'en' ? editContent : editContentAr}
-              onChange={(e) => editLang === 'en' ? setEditContent(e.target.value) : setEditContentAr(e.target.value)}
-              placeholder={`Article markdown content (${editLang.toUpperCase()})...`}
-              disabled={isFetchingFull}
-              style={{
-                direction: editLang === 'ar' ? 'rtl' : 'ltr',
-                opacity: isFetchingFull ? 0.5 : 1
-              }}
-            />
+            {/* WHY: High-Fidelity Custom Markdown and Layout View Mode Toolbar */}
+            <div className={styles.editorControls}>
+              <div className={styles.viewModeTabs}>
+                <button
+                  onClick={() => setViewMode('edit')}
+                  className={`${styles.viewModeBtn} ${viewMode === 'edit' ? styles.viewModeBtnActive : ''}`}
+                >
+                  <Edit2 size={13} />
+                  Write
+                </button>
+                <button
+                  onClick={() => setViewMode('preview')}
+                  className={`${styles.viewModeBtn} ${viewMode === 'preview' ? styles.viewModeBtnActive : ''}`}
+                >
+                  <Eye size={13} />
+                  Preview
+                </button>
+                <button
+                  onClick={() => setViewMode('split')}
+                  className={`${styles.viewModeBtn} ${viewMode === 'split' ? styles.viewModeBtnActive : ''} hidden lg:flex`}
+                >
+                  <Columns size={13} />
+                  Split Screen
+                </button>
+              </div>
+            </div>
+
+            {/* WHY: Conditional rendering for the three Editorial view modes */}
+            {viewMode === 'edit' && (
+              <textarea
+                className={`${styles.textarea} ${editLang === 'ar' ? styles.rtlText : styles.ltrText}`}
+                value={editLang === 'en' ? editContent : editContentAr}
+                onChange={(e) => editLang === 'en' ? setEditContent(e.target.value) : setEditContentAr(e.target.value)}
+                placeholder={`Article markdown content (${editLang.toUpperCase()})...`}
+                disabled={isFetchingFull}
+                style={{ opacity: isFetchingFull ? 0.5 : 1 }}
+              />
+            )}
+
+            {viewMode === 'preview' && (
+              <div className={`${styles.previewContainer} ${editLang === 'ar' ? styles.rtlText : styles.ltrText} article-body`}>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {editLang === 'en' ? editContent : editContentAr}
+                </ReactMarkdown>
+              </div>
+            )}
+
+            {viewMode === 'split' && (
+              <div className={styles.splitGrid}>
+                <div className={styles.splitCol}>
+                  <h4 className={styles.splitColTitle}>Source Editor</h4>
+                  <textarea
+                    className={`${styles.splitTextarea} ${editLang === 'ar' ? styles.rtlText : styles.ltrText}`}
+                    value={editLang === 'en' ? editContent : editContentAr}
+                    onChange={(e) => editLang === 'en' ? setEditContent(e.target.value) : setEditContentAr(e.target.value)}
+                    placeholder={`Article markdown content (${editLang.toUpperCase()})...`}
+                    disabled={isFetchingFull}
+                    style={{ opacity: isFetchingFull ? 0.5 : 1 }}
+                  />
+                </div>
+                <div className={styles.splitCol}>
+                  <h4 className={styles.splitColTitle}>Live Render Preview</h4>
+                  <div className={`${styles.splitPreview} ${editLang === 'ar' ? styles.rtlText : styles.ltrText} article-body`}>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {editLang === 'en' ? editContent : editContentAr}
+                    </ReactMarkdown>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {selectedArticle.slug && (
               /* WHY: Replaced raw ✨ emoji with an animated pulsing Sparkles icon, matching the luxury premium look. */
@@ -639,7 +787,8 @@ export default function Dashboard() {
               </div>
             )}
 
-            <div style={{display: 'flex', justifyContent: 'flex-end'}}>
+            {/* WHY: Replaced dynamic inline style with styled .modalFooter class */}
+            <div className={styles.modalFooter}>
               <button
                 className={styles.btnSave}
                 onClick={saveArticle}

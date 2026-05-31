@@ -342,10 +342,11 @@
   border-radius: 1.5rem;
   padding: 2.25rem;
   width: 92%;
-  max-width: 800px;
+  max-width: 1100px; /* Upgraded from 800px to accommodate split-screen side-by-side editor view */
   max-height: 85vh;
   box-shadow: var(--shadow-lg), 0 0 40px rgba(212, 175, 55, 0.05);
   overflow-y: auto;
+  transition: max-width 0.3s ease;
 }
 
 .modal::backdrop {
@@ -616,5 +617,384 @@
   color: hsl(45, 74%, 55%);
   background: rgba(212, 175, 55, 0.05);
   border-color: rgba(212, 175, 55, 0.2);
+}
+
+/* --- High-Fidelity Custom Toasts --- */
+.toastContainer {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 380px;
+  width: calc(100% - 3rem);
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(4, 7, 14, 0.85);
+  backdrop-filter: blur(24px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.05);
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.toast-success {
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.toast-error {
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.toast-info {
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: hsl(45, 74%, 55%);
+}
+
+.toastIcon {
+  flex-shrink: 0;
+}
+
+.toastMessage {
+  flex-grow: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.toastClose {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.toastClose:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* --- High-Fidelity Custom Confirmation Modals --- */
+.confirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(4, 7, 14, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  padding: 1rem;
+}
+
+.confirmCard {
+  background: rgba(10, 15, 25, 0.95);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 1.25rem;
+  padding: 2.25rem;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.05);
+  animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.confirmIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  color: hsl(45, 74%, 55%);
+  margin-bottom: 1.25rem;
+}
+
+.confirmTitle {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+.confirmMessage {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}
+
+.btnConfirmCancel {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btnConfirmCancel:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btnConfirmSubmit {
+  flex: 1;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, hsl(45, 74%, 55%), hsl(45, 74%, 35%));
+  color: #04070e;
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+}
+
+.btnConfirmSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(212, 175, 55, 0.25);
+}
+
+/* --- High-Fidelity Custom Markdown Preview and Split View --- */
+.editorControls {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.viewModeTabs {
+  display: flex;
+  background: rgba(10, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  gap: 0.25rem;
+}
+
+.viewModeBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.45);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 0.35rem;
+  transition: all 0.2s ease;
+}
+
+.viewModeBtn:hover {
+  color: #ffffff;
+}
+
+.viewModeBtnActive {
+  color: hsl(45, 74%, 55%);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.previewContainer {
+  background: rgba(10, 15, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 1.5rem;
+  min-height: 380px;
+  max-height: 500px;
+  overflow-y: auto;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.splitGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .splitGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.splitCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.splitColTitle {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+}
+
+.splitTextarea {
+  width: 100%;
+  height: 440px;
+  background: rgba(10, 15, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 1.25rem;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  resize: none;
+  transition: all 0.3s ease;
+}
+
+.splitTextarea:focus {
+  outline: none;
+  border-color: hsl(45, 74%, 55%);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.08);
+}
+
+.splitPreview {
+  width: 100%;
+  height: 440px;
+  background: rgba(10, 15, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* --- Language Text Alignment helpers --- */
+.rtlText {
+  direction: rtl;
+  text-align: right;
+}
+
+.ltrText {
+  direction: ltr;
+  text-align: left;
+}
+
+/* --- JSX Inline Refactoring Helpers --- */
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.noArticles {
+  color: #94a3b8;
+}
+
+.actionsRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modalHeaderTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: white;
+}
+
+.modalCloseBtn {
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.modalCloseBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
 }
 

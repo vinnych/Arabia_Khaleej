@@ -109,11 +109,11 @@ Arabia Khaleej delegates heavy article generation to an external Python agent. D
 
 | Route | Method | Auth | Purpose |
 |---|---|---|---|
-| `POST /api/generate` | POST | `ADMIN_SECRET` / `CRON_SECRET` Bearer | Manual generation trigger |
-| `GET /api/cron/generate` | GET | `CRON_SECRET` Bearer or query param | Automated trending-topic generation |
-| `POST /api/webhook` | POST | `WEBHOOK_SECRET` query param | Agent callback receiver |
-| `/api/article` | GET/PUT/DELETE | `ADMIN_SECRET` query param | Draft CRUD |
-| `/api/admin/workflows` | GET/POST | `ADMIN_SECRET` query param | Published articles management |
+| `POST /api/generate` | POST | `ADMIN_SECRET` / `CRON_SECRET` Bearer header | Manual generation trigger |
+| `GET /api/cron/generate` | GET | `CRON_SECRET` Bearer header | Automated trending-topic generation |
+| `POST /api/webhook` | POST | `WEBHOOK_SECRET` Bearer header | Agent callback receiver |
+| `/api/article` | GET/PUT/DELETE | `ADMIN_SECRET` Bearer header | Draft CRUD |
+| `/api/admin/workflows` | GET/POST | `ADMIN_SECRET` Bearer header | Published articles management |
 
 ---
 
@@ -169,6 +169,9 @@ CONTACT_WORKER_URL=            # Cloudflare contact form worker URL
 # Imagery
 PEXELS_API_KEY=                # Primary image source
 
+# RSS Proxy Configuration
+RSS2JSON_API_KEY=              # API key for rss2json.com (prevents "429 Too Many Requests" on shared IP ranges)
+
 # Optional overrides
 AGENT_URL=                     # Python agent base URL (default: Render)
 DASHBOARD_CALLBACK_URL=        # Full override for agent callback URL
@@ -200,6 +203,8 @@ DASHBOARD_CALLBACK_URL=        # Full override for agent callback URL
 - **Do not rename `middleware.ts`** — Cloudflare/Next.js resolves it by exact filename.
 - **No auto-publish** — all AI articles must go through human review in `/admin/review`.
 - **Do not forget `wrangler secret put CRON_SECRET`** after every automation worker deploy — without it every cron call returns 401 and generation silently stops.
+- **No URL query parameters for secret authentication** — always validate credentials via HTTP `Authorization: Bearer` header tokens to prevent leaking secrets in logs or browser histories.
+- **No multiple concurrent subrequests in Cloudflare Workers** — when querying listings or drafts, always use `MGET` or bulk fetch commands instead of `Promise.all(keys.map(...))` to prevent exceeding Cloudflare's strict 50-subrequest limit.
 
 ---
 

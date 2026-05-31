@@ -85,14 +85,14 @@ Arabia Khaleej delegates heavy article generation to an external Python agent ho
 
 | Endpoint | Method | Auth | Purpose |
 | :--- | :--- | :--- | :--- |
-| `/api/generate` | POST | `ADMIN_SECRET` or `CRON_SECRET` Bearer | Manual article generation trigger |
-| `/api/cron/generate` | GET | `CRON_SECRET` Bearer or query param | Automated trending-topic generation |
-| `/api/webhook` | POST | `WEBHOOK_SECRET` query param | Python agent callback receiver |
-| `/api/article` | GET | `ADMIN_SECRET` query param | List draft queue |
-| `/api/article` | PUT | `ADMIN_SECRET` query param | Edit or publish a draft |
-| `/api/article` | DELETE | `ADMIN_SECRET` query param | Cascade-delete draft + live + lists |
-| `/api/admin/workflows` | GET | `ADMIN_SECRET` query param | List published insights-store articles |
-| `/api/admin/workflows` | POST | `ADMIN_SECRET` query param | Delete a live published article |
+| `/api/generate` | POST | `ADMIN_SECRET` or `CRON_SECRET` Bearer header | Manual article generation trigger |
+| `/api/cron/generate` | GET | `CRON_SECRET` Bearer header | Automated trending-topic generation |
+| `/api/webhook` | POST | `WEBHOOK_SECRET` Bearer header | Python agent callback receiver |
+| `/api/article` | GET | `ADMIN_SECRET` Bearer header | List draft queue |
+| `/api/article` | PUT | `ADMIN_SECRET` Bearer header | Edit or publish a draft |
+| `/api/article` | DELETE | `ADMIN_SECRET` Bearer header | Cascade-delete draft + live + lists |
+| `/api/admin/workflows` | GET | `ADMIN_SECRET` Bearer header | List published insights-store articles |
+| `/api/admin/workflows` | POST | `ADMIN_SECRET` Bearer header | Delete a live published article |
 | `/api/insights` | GET | Public | Article listing & slug delivery |
 | `/api/prayer-times` | GET | Public | Location-based prayer timings |
 | `/api/exchange-rates` | GET | Public | Real-time GCC currency dynamics |
@@ -111,6 +111,9 @@ UPSTASH_REDIS_REST_TOKEN=      # Redis auth token
 
 # Imagery
 PEXELS_API_KEY=                # Primary image source
+
+# RSS Proxy Configuration
+RSS2JSON_API_KEY=              # API key for rss2json.com (prevents "429 Too Many Requests" on shared IP ranges)
 
 # Authentication
 ADMIN_SECRET=                  # Admin dashboard + /api/article access
@@ -159,6 +162,7 @@ Cloudflare Pages is connected to the GitHub repository and deploys automatically
 | `NEXT_PUBLIC_ADSENSE_ID` | ✅ | AdSense publisher ID |
 | `NEXT_PUBLIC_SITE_VERIFICATION` | ✅ | Google Search Console |
 | `CONTACT_WORKER_URL` | ✅ | Contact form worker URL |
+| `RSS2JSON_API_KEY` | ✅ | rss2json.com proxy API key |
 
 > **Note**: `.env.local` and `.env*` files are gitignored — they never reach Cloudflare. All secrets must be set via the dashboard.
 
