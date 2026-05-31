@@ -12,7 +12,6 @@ export function getCSPHeader(nonce: string, isDev: boolean): string {
     'script-src': [
       "'self'",
       `'nonce-${nonce}'`,
-      "'strict-dynamic'",
       "https:",
       "'unsafe-inline'",
       // 'unsafe-eval' disabled in prod to prevent code injection attacks
