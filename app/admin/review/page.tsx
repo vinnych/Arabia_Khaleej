@@ -99,6 +99,10 @@ export default function Dashboard() {
       return true;
     } catch (err: any) {
       console.error('[dashboard] Failed to fetch articles:', err);
+      // WHY: If the API request fails due to network issues, CORS, or backend crashes, 
+      // we must transition the app out of the initial `null` state to prevent an infinite loader screen.
+      setIsAuthenticated(false);
+      setAuthError(err.message || 'Failed to connect to the administrative server. Please try again.');
       return false;
     }
   };
