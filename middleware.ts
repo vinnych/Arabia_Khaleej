@@ -66,7 +66,14 @@ export default function middleware(request: NextRequest) {
   }
 
   const isDev = process.env.NODE_ENV === 'development';
-  const cspHeader = getCSPHeader(nonce, isDev);
+  
+  // WHY: Next.js pre-compiles and optimizes static pages (like the admin review console) at build-time.
+  // Static pages carry pre-rendered Next.js inline scripts that do not have access to our dynamic request-time nonce.
+  // Under the CSP spec, if a nonce is present, browsers ignore 'unsafe-inline'.
+  // By passing an empty string for the nonce on admin pages, we cleanly omit the nonce from the CSP header,
+  // allowing the browser to respect 'unsafe-inline' and execute Next.js's hydration scripts successfully.
+  const activeNonce = isAdminPage ? '' : nonce;
+  const cspHeader = getCSPHeader(activeNonce, isDev);
 
   // Set the nonce in request headers so Server Components can inline scripts securely
   // The nonce must match in both the CSP header and script tags

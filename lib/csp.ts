@@ -11,7 +11,12 @@ export function getCSPHeader(nonce: string, isDev: boolean): string {
     'default-src': ["'self'"],
     'script-src': [
       "'self'",
-      `'nonce-${nonce}'`,
+      // WHY: If the active request is routed to a pre-compiled static page (such as the admin review dashboard),
+      // we must omit the nonce from the CSP script-src array. When the browser sees a 'nonce-...' token in the CSP,
+      // it completely ignores the 'unsafe-inline' fallback, which immediately blocks pre-rendered Next.js inline scripts
+      // carrying the critical hydration payload (which are statically generated at build-time without request-time nonces).
+      // Surgically returning an empty string here ensures the invalid "'nonce-'" value is not emitted and gets filtered out.
+      nonce ? `'nonce-${nonce}'` : '',
       "https:",
       "'unsafe-inline'",
       // 'unsafe-eval' disabled in prod to prevent code injection attacks
