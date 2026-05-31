@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 // WHY: We import standard Lucide React icons to upgrade raw HTML elements 
 // (such as closing cross marks and emoji tags) into high-fidelity premium visual assets.
-import { X, Globe, Sparkles } from "lucide-react";
+import { X, Globe, Sparkles, Lock, KeyRound, ShieldAlert, LogOut } from "lucide-react";
 import styles from './admin.module.css';
 
 
@@ -51,6 +51,14 @@ export default function Dashboard() {
   const [secret, setSecret] = useState<string>('');
   const [processingTopic, setProcessingTopic] = useState<string | null>(null);
 
+  // Authentication State
+  // WHY: We add these client-side authentication states to manage access controls natively
+  // without relying exclusively on fragile URL query parameters, resolving empty screen errors.
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null means initial mount validation
+  const [authError, setAuthError] = useState<string>('');
+  const [inputSecret, setInputSecret] = useState<string>('');
+  const [isAuthValidating, setIsAuthValidating] = useState<boolean>(false);
+
   const modalRef = useRef<HTMLDialogElement>(null);
   const secretRef = useRef('');
   const activeTabRef = useRef<'drafts' | 'published'>('drafts');
@@ -65,12 +73,33 @@ export default function Dashboard() {
         cache: 'no-store',
         headers: { 'Authorization': `Bearer ${currentSecret}` }
       });
-      if (!res.ok) return;
+      
+      // WHY: Handle 401 Unauthorized errors specifically to trigger the login overlay.
+      // This ensures that the user is prompted for password entry rather than getting stuck in an empty state.
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setAuthError('Access denied: Invalid administrative secret key.');
+        return false;
+      }
+      
+      if (!res.ok) {
+        throw new Error(`Server returned status code ${res.status}`);
+      }
+      
       const data = await res.json();
-      if (data.error) return;
+      if (data.error) {
+        setIsAuthenticated(false);
+        setAuthError(data.error);
+        return false;
+      }
+      
       setArticles(data.articles || []);
+      setIsAuthenticated(true);
+      setAuthError('');
+      return true;
     } catch (err: any) {
       console.error('[dashboard] Failed to fetch articles:', err);
+      return false;
     }
   };
 
@@ -78,13 +107,31 @@ export default function Dashboard() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const urlSecret = params.get('secret') || '';
-      setSecret(urlSecret);
-      secretRef.current = urlSecret;
+      
+      // WHY: Read credentials from localStorage if absent in query parameters.
+      // This is a much more premium UX than forcing URL parameter preservation on every reload.
+      const savedSecret = localStorage.getItem('ak_admin_secret') || '';
+      const activeSecret = urlSecret || savedSecret;
 
-      fetchArticles(urlSecret, 'drafts');
+      if (activeSecret) {
+        setSecret(activeSecret);
+        secretRef.current = activeSecret;
+        localStorage.setItem('ak_admin_secret', activeSecret);
+
+        // WHY: Strip credentials from URL address bar once registered.
+        // This stops secret keys leaking when screen-sharing, copy-pasting links, or in browser history logs.
+        if (urlSecret) {
+          const cleanUrl = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanUrl);
+        }
+
+        fetchArticles(activeSecret, 'drafts');
+      } else {
+        setIsAuthenticated(false);
+      }
 
       const interval = setInterval(() => {
-        if (document.visibilityState === 'visible') {
+        if (document.visibilityState === 'visible' && secretRef.current) {
           fetchArticles(secretRef.current, activeTabRef.current);
         }
       }, 5000);
@@ -95,8 +142,47 @@ export default function Dashboard() {
   const handleTabChange = (tab: 'drafts' | 'published') => {
     activeTabRef.current = tab;
     setActiveTab(tab);
-    fetchArticles(secret, tab);
+    if (secret) {
+      fetchArticles(secret, tab);
+    }
   };
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputSecret.trim()) {
+      setAuthError('Please enter a secret key.');
+      return;
+    }
+
+    setIsAuthValidating(true);
+    setAuthError('');
+
+    // WHY: Verify entered secret by trying to query drafts list.
+    // This is secure and doesn't require a dedicated validation route.
+    const isValid = await fetchArticles(inputSecret, activeTab);
+
+    if (isValid) {
+      setSecret(inputSecret);
+      secretRef.current = inputSecret;
+      localStorage.setItem('ak_admin_secret', inputSecret);
+      setAuthError('');
+    }
+
+    setIsAuthValidating(false);
+  };
+
+  const handleLock = () => {
+    if (confirm('Are you sure you want to lock the administrative console?')) {
+      setSecret('');
+      secretRef.current = '';
+      localStorage.removeItem('ak_admin_secret');
+      setIsAuthenticated(false);
+      setArticles([]);
+      setAuthError('');
+      setInputSecret('');
+    }
+  };
+
 
   const generateArticle = async () => {
     if (!topic.trim()) return alert('Enter a topic');
@@ -283,11 +369,76 @@ export default function Dashboard() {
       ? articles.filter(art => art.status !== 'published')
       : articles;
 
+  // WHY: Gating render structure to prevent flashes and ensure strict administrative security.
+  if (isAuthenticated === null) {
+    return (
+      <div className={styles.container} style={{ display: 'flex', minHeight: '50vh', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.25rem' }}>
+        {/* WHY: Sleek pulsing loader to hold layout shell while restoring localStorage credential sessions. */}
+        <Lock className="animate-pulse" size={32} style={{ color: 'hsl(45, 74%, 55%)' }} />
+        <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Verifying security credentials...</span>
+      </div>
+    );
+  }
+
+  // WHY: Gating access. If not authenticated, we block dashboard render completely and display the lock console screen.
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.authOverlay}>
+          <div className={styles.authCard}>
+            <div className={styles.authIconWrapper}>
+              <Lock size={32} />
+            </div>
+            <h1 className={styles.authTitle}>Arabia Khaleej</h1>
+            <p className={styles.authSubtitle}>
+              Editorial Intelligence Console.<br />
+              Please authenticate using your administrative secret key.
+            </p>
+            <form onSubmit={handleAuthSubmit} className={styles.authForm}>
+              <div className={styles.authInputWrapper}>
+                <input
+                  type="password"
+                  value={inputSecret}
+                  onChange={(e) => setInputSecret(e.target.value)}
+                  placeholder="ENTER SECRET ACCESS KEY"
+                  className={styles.authInput}
+                  disabled={isAuthValidating}
+                  autoFocus
+                />
+              </div>
+              
+              {authError && (
+                <div className={styles.authError}>
+                  {authError}
+                </div>
+              )}
+              
+              <button
+                type="submit"
+                className={styles.btnAuthSubmit}
+                disabled={isAuthValidating}
+              >
+                {isAuthValidating ? 'Verifying access...' : 'Authenticate'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1>Arabia Khaleej AI Admin</h1>
-        <div className={styles.status}>System Status: <span className={styles.online}>Online</span></div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <h1>Arabia Khaleej AI Admin</h1>
+          <div className={styles.status}>System Status: <span className={styles.online}>Online</span></div>
+        </div>
+        {/* WHY: Logout lock action in header to allow clearing active localStorage sessions easily. */}
+        <button className={styles.lockBtn} onClick={handleLock}>
+          <LogOut size={12} />
+          Lock Console
+        </button>
       </header>
 
       <div className={styles.topicCard}>
