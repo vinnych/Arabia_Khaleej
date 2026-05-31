@@ -9,6 +9,18 @@ export default function middleware(request: NextRequest) {
   
   const { searchParams, hostname, pathname } = new URL(request.url);
 
+  // WHY: Do not apply i18n redirects, middleware routing logic, or security header wrappers to static assets 
+  // (such as webmanifest, sitemaps, robots.txt, or root public files). Intercepting these requests mistakenly
+  // redirects them to /[locale]/static-file (e.g. /en/manifest.webmanifest) which does not exist and returns a 404.
+  // Returning NextResponse.next() immediately allows the static file server to resolve and serve them natively.
+  const isStaticAsset = pathname.includes('.') || 
+                        pathname.endsWith('.webmanifest') || 
+                        pathname.endsWith('.xml') || 
+                        pathname.endsWith('.txt');
+  if (isStaticAsset) {
+    return NextResponse.next();
+  }
+
   // Redirect from .pages.dev to the main domain for SEO consistency
   // This ensures only the canonical domain appears in search results
   if (hostname.endsWith('.pages.dev')) {
