@@ -7,6 +7,41 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Globe, Sparkles, Lock, KeyRound, ShieldAlert, LogOut } from "lucide-react";
 import styles from './admin.module.css';
 
+// WHY: We implement a resilient localStorage wrapper. Accessing raw localStorage in private browsing,
+// inside sandboxed web views, or with strict privacy extensions triggers a DOMException security error.
+// Wrapping this in try-catch blocks ensures client-side hydration doesn't crash on boot.
+const safeLocalStorage = {
+  getItem(key: string): string {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        return window.localStorage.getItem(key) || '';
+      }
+    } catch (e) {
+      console.warn('[storage] Failed to read from localStorage:', e);
+    }
+    return '';
+  },
+  setItem(key: string, value: string): void {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(key, value);
+      }
+    } catch (e) {
+      console.warn('[storage] Failed to write to localStorage:', e);
+    }
+  },
+  removeItem(key: string): void {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem(key);
+      }
+    } catch (e) {
+      console.warn('[storage] Failed to remove from localStorage:', e);
+    }
+  }
+};
+
+
 
 interface Article {
   topic: string;
