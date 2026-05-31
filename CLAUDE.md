@@ -44,7 +44,7 @@ npm run contact-worker:deploy       # Deploy Cloudflare contact form worker (man
 | **Redis TTL** | Every `redis.set()` / `setWithCompression()` call must include `{ ex: N }`. Draft keys use `setDraft(..., { ttlSeconds: N })`. |
 | **No hardcoded secrets** | All secrets come from `process.env.*`. Never put a token/password in source code. |
 | **Images** | External hostnames must be added to `next.config.ts` `remotePatterns` |
-| **CSP** | Defined in `lib/csp.ts`, applied in `middleware.ts`. Never inline CSP strings. |
+| **CSP** | Defined in `lib/csp.ts`, applied in `middleware.ts`. Never inline CSP strings. Static pre-rendered routes (like `/admin`) must omit the nonce to prevent blocking static inline scripts. |
 | **Naming** | camelCase vars/fns · PascalCase components |
 | **Types** | Always use TypeScript types. Avoid `any`. |
 | **Errors** | No silent catch blocks. Always `console.error(...)` with context. |
@@ -193,6 +193,8 @@ DASHBOARD_CALLBACK_URL=        # Full override for agent callback URL
 - **No `redis.set()` without TTL** — use `{ ex: N }` or `{ ttlSeconds: N }` on `setDraft`.
 - **No hardcoded secrets** — all tokens/passwords must come from `process.env.*`.
 - **No hardcoded CSP strings** — always use `lib/csp.ts`.
+- **No nonces in CSP on static pre-rendered routes** — dynamic nonces on static routes block build-time inline hydration scripts, causing solid black blank page crashes.
+- **No middleware i18n routing for static files** — always bypass static files and metadata assets (like `.webmanifest`, `.xml`, `.txt`) directly via `NextResponse.next()` to prevent `404` redirects.
 - **No silent catch blocks** — always log with `console.error('[context] message', err)`.
 - **No `any` types** — use proper TypeScript types.
 - **Do not rename `middleware.ts`** — Cloudflare/Next.js resolves it by exact filename.
