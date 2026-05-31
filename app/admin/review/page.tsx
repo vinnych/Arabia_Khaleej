@@ -187,8 +187,8 @@ export default function Dashboard() {
     }
   };
 
-  const handleAuthSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAuthSubmit = async (e?: React.SyntheticEvent) => {
+    if (e) e.preventDefault();
     if (!inputSecret.trim()) {
       setAuthError('Please enter a secret key.');
       return;
@@ -426,12 +426,17 @@ export default function Dashboard() {
               Editorial Intelligence Console.<br />
               Please authenticate using your administrative secret key.
             </p>
-            <form onSubmit={handleAuthSubmit} className={styles.authForm}>
+            <div className={styles.authForm}>
               <div className={styles.authInputWrapper}>
                 <input
                   type="password"
                   value={inputSecret}
                   onChange={(e) => setInputSecret(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleAuthSubmit(e);
+                    }
+                  }}
                   placeholder="ENTER SECRET ACCESS KEY"
                   className={styles.authInput}
                   disabled={isAuthValidating}
@@ -446,13 +451,14 @@ export default function Dashboard() {
               )}
               
               <button
-                type="submit"
+                type="button"
+                onClick={() => handleAuthSubmit()}
                 className={styles.btnAuthSubmit}
                 disabled={isAuthValidating}
               >
                 {isAuthValidating ? 'Verifying access...' : 'Authenticate'}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>
