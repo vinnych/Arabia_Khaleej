@@ -147,15 +147,15 @@ export default function Dashboard() {
       const params = new URLSearchParams(window.location.search);
       const urlSecret = params.get('secret') || '';
       
-      // WHY: Read credentials from localStorage if absent in query parameters.
+      // WHY: Read credentials from safeLocalStorage if absent in query parameters.
       // This is a much more premium UX than forcing URL parameter preservation on every reload.
-      const savedSecret = localStorage.getItem('ak_admin_secret') || '';
+      const savedSecret = safeLocalStorage.getItem('ak_admin_secret') || '';
       const activeSecret = urlSecret || savedSecret;
 
       if (activeSecret) {
         setSecret(activeSecret);
         secretRef.current = activeSecret;
-        localStorage.setItem('ak_admin_secret', activeSecret);
+        safeLocalStorage.setItem('ak_admin_secret', activeSecret);
 
         // WHY: Strip credentials from URL address bar once registered.
         // This stops secret keys leaking when screen-sharing, copy-pasting links, or in browser history logs.
@@ -203,7 +203,7 @@ export default function Dashboard() {
     if (isValid) {
       setSecret(inputSecret);
       secretRef.current = inputSecret;
-      localStorage.setItem('ak_admin_secret', inputSecret);
+      safeLocalStorage.setItem('ak_admin_secret', inputSecret);
       setAuthError('');
     }
 
@@ -214,7 +214,7 @@ export default function Dashboard() {
     if (confirm('Are you sure you want to lock the administrative console?')) {
       setSecret('');
       secretRef.current = '';
-      localStorage.removeItem('ak_admin_secret');
+      safeLocalStorage.removeItem('ak_admin_secret');
       setIsAuthenticated(false);
       setArticles([]);
       setAuthError('');
