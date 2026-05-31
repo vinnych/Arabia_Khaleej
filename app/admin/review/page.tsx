@@ -89,7 +89,8 @@ export default function Dashboard() {
   // Authentication State
   // WHY: We add these client-side authentication states to manage access controls natively
   // without relying exclusively on fragile URL query parameters, resolving empty screen errors.
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null means initial mount validation
+  // Defaults to false to immediately render the secure login console and avoid infinite loading loops.
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string>('');
   const [inputSecret, setInputSecret] = useState<string>('');
   const [isAuthValidating, setIsAuthValidating] = useState<boolean>(false);
@@ -408,16 +409,8 @@ export default function Dashboard() {
       ? articles.filter(art => art.status !== 'published')
       : articles;
 
-  // WHY: Gating render structure to prevent flashes and ensure strict administrative security.
-  if (isAuthenticated === null) {
-    return (
-      <div className={styles.container} style={{ display: 'flex', minHeight: '50vh', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.25rem' }}>
-        {/* WHY: Sleek pulsing loader to hold layout shell while restoring localStorage credential sessions. */}
-        <Lock className="animate-pulse" size={32} style={{ color: 'hsl(45, 74%, 55%)' }} />
-        <span className="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Verifying security credentials...</span>
-      </div>
-    );
-  }
+  // WHY: Gating render structure loader has been safely bypassed to prevent any loading hangs.
+  // Gating access is handled immediately via the conditional state transition below.
 
   // WHY: Gating access. If not authenticated, we block dashboard render completely and display the lock console screen.
   if (!isAuthenticated) {
