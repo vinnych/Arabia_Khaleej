@@ -9,7 +9,7 @@
 Next.js 15 (App Router) fully optimized for **Cloudflare Pages + Cloudflare Workers**.
 
 - **Runtime**: Every API route must declare `export const runtime = 'edge'`. No Node.js-only packages.
-- **Database**: No permanent DB. Upstash Redis (Free) via REST API is the only persistence layer (transient cache + draft queue).
+- **Database**: No permanent DB. Upstash Redis (Free) via REST API is the persistence layer (transient cache + draft queue + permanent articles with a 9,500 keys FIFO eviction policy).
 - **AI / Article Generation**: Fully delegated to an external Python agent on Render. The Next.js app never calls LLMs directly.
 - **Bilingual**: All editorial content is stored bilingually `{ en: string, ar: string }` in Redis and normalized at read-time.
 - **i18n Routing**: Native Next.js App Router subpath routing (e.g., `/en/insights`). All internal `<Link>` components and sitemap entries must use the locale prefix.
@@ -187,6 +187,10 @@ DASHBOARD_CALLBACK_URL=        # Full override for agent callback URL
 | `insights:article:{slug}` | None (Indefinite) | Full bilingual article |
 | `insights:list:en` | None (Indefinite) | EN article listing (max 3000) |
 | `insights:list:ar` | None (Indefinite) | AR article listing (max 3000) |
+
+### 🧹 Cache Eviction Policy
+- **Thresholds**: Eviction triggers when DB size >= `9,500` keys (Upstash Free Tier limit is 10,000) or feed capacity exceeds `3,000` articles.
+- **Action**: Evicts a batch of 10 oldest articles by deleting their details key (`insights:article:{slug}`) and slicing them off listing arrays to prevent database fullness errors.
 
 ---
 

@@ -202,6 +202,15 @@ The external article agent runs at `https://article-agent-zk00.onrender.com`. Th
 | `insights:article:{slug}` | None (Indefinite) | Full bilingual article document |
 | `insights:list:en` | None (Indefinite) | Normalized EN article listing (max 3000) |
 | `insights:list:ar` | None (Indefinite) | Normalized AR article listing (max 3000) |
+
+### 🧹 Free-Tier Cache Eviction Policy
+To optimize storage on your Upstash Redis Free Tier (10,000 keys limit), Arabia Khaleej implements an application-level FIFO (First-In, First-Out) cache eviction policy during article publication:
+- **Feed Listing Cap:** Feeds are limited to a generous maximum of `3,000` articles to prevent high Edge CPU/payload latencies on Cloudflare.
+- **Dynamic DB-Size Safety Threshold:** The system queries `redis.dbsize()` in real-time. If the total number of keys in Redis meets or exceeds `9,500` keys:
+  1. The system slices off the oldest 10 articles from the lists.
+  2. Runs `redis.del` on their full bilingual details (`insights:article:{slug}`) to erase them from Redis.
+  3. Evicts oldest content first to keep the database running smoothly without ever breaching Upstash Free Tier quotas.
+
 ---
 
 ## 🧪 Testing
