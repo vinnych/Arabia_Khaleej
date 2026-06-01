@@ -2,25 +2,23 @@
  * Arabia Khaleej — Cloudflare Automation Worker
  *
  * Responsibilities:
- *   1. Every ~15 min  → Call /api/cron/generate to trigger one article generation.
+ *   1. Once per hour → Call /api/cron/generate to trigger one article generation.
  *   
- *   WHY 15 MINUTES IS THE IDEAL INTERVAL:
- *   Because Render's free tier inactivity timeout is exactly 15 minutes, triggering 
- *   an article generation every 15 minutes ensures the Render agent naturally stays 
- *   warm 24/7. This completely eliminates cold starts without requiring separate 
- *   keep-alive triggers.
+ *   WHY ONCE PER HOUR:
+ *   The cron schedule was changed from every 15 minutes to once per hour (0 * * * *) 
+ *   to conserve API quotas and database writes. Since the Render free-tier container
+ *   spins down after 15 minutes of inactivity, it will be cold when this hourly cron triggers.
+ *   Our pre-flight wake-up ping is essential here to wake the Render container first.
  *
- * Why we no longer use event.cron string matching:
- *   Cloudflare delivers the cron expression to `event.cron` but the exact string format
- *   (whitespace, normalisation) is not guaranteed to match what's in wrangler-automation.toml.
- *   A mismatch causes the if/else if to fall through to the no-op fallback block, silently
- *   skipping all work. Instead, we derive intent from `Date.now()` — if the current minute
- *   is divisible by 15 we generate; otherwise we just ping Render. This makes the worker
- *   resilient to any cron string normalisation Cloudflare may apply.
+ * Why we check event.cron string matching:
+ *   Cloudflare delivers the normalized cron expression to `event.cron`. Since we only
+ *   have a single cron trigger "0 * * * *" registered in wrangler-automation.toml,
+ *   we check if event.cron matches this exactly to confirm a generation tick.
  *
- * Why both tasks run on the 15-min tick:
- *   The Render ping is cheap (< 1 s, no side-effects) so we always run it first as a sanity check.
- *   Generation is triggered every 15 min.
+ * Why we run the pre-flight ping first:
+ *   Waking up Render takes 30-50 seconds. Workers have generous execution limits (up to 15 min),
+ *   allowing us to wait for the spin-up here. Next.js edge functions have a strict 25-second limit;
+ *   pinging Render first ensures Next.js won't time out.
  */
 
 const AGENT_HEALTH_URL = 'https://article-agent-zk00.onrender.com/';
@@ -55,7 +53,8 @@ export default {
 
     // Route logic based on the cron expression that triggered the event.
     // Cloudflare normalizes the cron string to remove extra whitespace.
-    const isGenerationTick = event.cron === "*/15 * * * *";
+    // We check for "0 * * * *" since the cron schedule triggers once per hour.
+    const isGenerationTick = event.cron === "0 * * * *";
 
     if (isGenerationTick) {
       // ── Generation Trigger ───────────────────

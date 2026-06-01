@@ -3,12 +3,15 @@ main = "daily-automation.js"
 compatibility_date = "2025-02-04"
 
 # Single cron schedule:
-#   */15 * * * *  — fires every 15 minutes → triggers article generation
+#   0 * * * *  — fires once per hour (at minute 0) → triggers article generation.
+#   Why once per hour: Reduces execution frequency to conserve API quota and database writes.
+#   Why "0 * * * *": Standard crontab notation only accepts 0-59 for minutes, so */60 is invalid.
+#   0 * * * * is the most compatible way to declare a once-per-hour cron schedule.
 #
 # IMPORTANT: After deploying, set the CRON_SECRET worker secret:
 #   npx wrangler secret put CRON_SECRET --config worker/wrangler-automation.toml
 [triggers]
-crons = ["*/15 * * * *"]
+crons = ["0 * * * *"]
 
 # Observability: logs enabled, traces disabled (saves quota on free tier)
 [observability]
