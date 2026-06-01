@@ -77,7 +77,7 @@ Arabia Khaleej delegates heavy article generation to an external Python agent ho
 | `generating` | 7 days | Agent dispatched, awaiting callback |
 | `error` | 2 days | Agent rejected immediately; auto-cleans |
 | `pending_review` | None | Ready for admin action — persists until published/deleted |
-| `published` | N/A (draft key updated; live key: 30 days) | Live on public feed |
+| `published` | None (Indefinite) | Live on public feed |
 
 ---
 
@@ -199,9 +199,9 @@ The external article agent runs at `https://article-agent-zk00.onrender.com`. Th
 | Key Pattern | TTL | Content |
 |---|---|---|
 | `article:{topic}` | Varies by status (see above) | Draft queue entry |
-| `insights:article:{slug}` | 30 days | Full bilingual article document |
-| `insights:list:en` | 30 days | Normalized EN article listing (max 1000) |
-| `insights:list:ar` | 30 days | Normalized AR article listing (max 1000) |
+| `insights:article:{slug}` | None (Indefinite) | Full bilingual article document |
+| `insights:list:en` | None (Indefinite) | Normalized EN article listing (max 3000) |
+| `insights:list:ar` | None (Indefinite) | Normalized AR article listing (max 3000) |
 ---
 
 ## 🧪 Testing

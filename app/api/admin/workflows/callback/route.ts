@@ -7,6 +7,7 @@ import { getWithCompression, setWithCompression } from '@/lib/redis';
 import { translateMarkdown } from '@/lib/translate';
 
 const CACHE_TIMES = {
+  // Legacy baseline, incoming drafts persist indefinitely until admin action
   INSIGHTS_ARCHIVE: 2592000, // 30 days
 };
 
@@ -67,7 +68,8 @@ export async function POST(request: NextRequest) {
 
     // Save the detailed bilingual article body to Redis
     const draftKey = `insights:draft:article:${slug}`;
-    await setWithCompression(draftKey, draftArticle, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+    // Why no TTL: Draft articles persist indefinitely so that the editorial board never loses drafted articles before review
+    await setWithCompression(draftKey, draftArticle);
 
     // Update the master queue list so it appears in the dashboard UI
     // Why: Save to both english drafts queue so they are visible under one main review tab.
@@ -77,7 +79,8 @@ export async function POST(request: NextRequest) {
     // Check if it already exists to avoid duplicates
     const exists = currentDrafts.find((d: any) => d.slug === slug);
     if (!exists) {
-      await setWithCompression(listKey, [{ slug, title: topic, status: 'pending' }, ...currentDrafts], { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+      // Why no TTL: Active draft listings persist indefinitely until explicitly published or rejected
+      await setWithCompression(listKey, [{ slug, title: topic, status: 'pending' }, ...currentDrafts]);
     }
 
     console.log(`[webhook] Successfully saved unified bilingual draft for slug: "${slug}"`);

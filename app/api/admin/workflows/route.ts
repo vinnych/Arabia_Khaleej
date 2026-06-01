@@ -4,10 +4,11 @@
 // - GET: Returns normalized articles localized to the requested tab/language.
 // - POST: Approves (generates updated translations if human edits are present, then publishes to both EN & AR feeds), rejects, deletes, or updates live content bilingually.
 import { NextRequest, NextResponse } from 'next/server';
-import { redis, getWithCompression, setWithCompression } from '@/lib/redis';
+import { redis, getWithCompression, setWithCompression, MAX_PUBLISHED_ARTICLES, MAX_REDIS_KEYS_THRESHOLD } from '@/lib/redis';
 import { translateMarkdown } from '@/lib/translate';
 
 const CACHE_TIMES = {
+  // Legacy baseline, published articles and drafts lists now persist indefinitely
   INSIGHTS_ARCHIVE: 2592000,
 };
 
@@ -181,7 +182,8 @@ export async function POST(request: NextRequest) {
 
       try {
         // 1. Commit the bilingual document to Redis (insights:article:${slug})
-        await setWithCompression(`insights:article:${slug}`, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        // Why no TTL: Published articles are stored permanently in Redis to preserve digital content archive
+        await setWithCompression(`insights:article:${slug}`, article);
 
         // 2. Pre-normalize copies and prepend to English and Arabic main feeds
         const liveArticleEn = normalizeArticle(article, 'en');
@@ -193,16 +195,60 @@ export async function POST(request: NextRequest) {
 
         const listKeyEn = `insights:list:en`;
         const currentEn = await getWithCompression<any[]>(listKeyEn) ?? [];
-        await setWithCompression(listKeyEn, [liveArticleEn, ...currentEn.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        const filteredEn = currentEn.filter((a: any) => a.slug !== slug);
+        let updatedEn = [liveArticleEn, ...filteredEn];
+        
+        // Dynamic Cache Eviction: 
+        // 1. Check current database key count size.
+        // 2. If close to Upstash Free Tier limit (9500 keys) or feed length exceeds generous cap (3000), 
+        //    evict the oldest articles to free up storage space.
+        const currentDbSize = await redis.dbsize().catch(() => 0);
+        const needsEvictionEn = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD || updatedEn.length > MAX_PUBLISHED_ARTICLES;
+
+        if (needsEvictionEn) {
+          // If the database is full, evict a batch of 10 oldest articles to create a safe buffer
+          const targetSize = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD
+            ? Math.max(10, updatedEn.length - 10)
+            : MAX_PUBLISHED_ARTICLES;
+
+          const evicted = updatedEn.slice(targetSize);
+          for (const item of evicted) {
+            await redis.del(`insights:article:${item.slug}`).catch(() => {});
+            console.log(`[eviction] Evicted oldest English article from Redis (Workflow): "${item.slug}" (DB Size: ${currentDbSize} keys)`);
+          }
+          updatedEn = updatedEn.slice(0, targetSize);
+        }
+        // Why no TTL: Live listings are stored permanently to maintain persistent user feeds
+        await setWithCompression(listKeyEn, updatedEn);
 
         const listKeyAr = `insights:list:ar`;
         const currentAr = await getWithCompression<any[]>(listKeyAr) ?? [];
-        await setWithCompression(listKeyAr, [liveArticleAr, ...currentAr.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        const filteredAr = currentAr.filter((a: any) => a.slug !== slug);
+        let updatedAr = [liveArticleAr, ...filteredAr];
+        
+        // Dynamic Cache Eviction: Apply identical safety checks for the Arabic feed
+        const needsEvictionAr = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD || updatedAr.length > MAX_PUBLISHED_ARTICLES;
+
+        if (needsEvictionAr) {
+          const targetSize = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD
+            ? Math.max(10, updatedAr.length - 10)
+            : MAX_PUBLISHED_ARTICLES;
+
+          const evicted = updatedAr.slice(targetSize);
+          for (const item of evicted) {
+            await redis.del(`insights:article:${item.slug}`).catch(() => {});
+            console.log(`[eviction] Evicted oldest Arabic article from Redis (Workflow): "${item.slug}" (DB Size: ${currentDbSize} keys)`);
+          }
+          updatedAr = updatedAr.slice(0, targetSize);
+        }
+        // Why no TTL: Live listings are stored permanently to maintain persistent user feeds
+        await setWithCompression(listKeyAr, updatedAr);
 
         // 3. Delete drafts from queue lists
         for (const l of ['en', 'ar'] as const) {
           const dl = await getWithCompression<any[]>(`insights:drafts:${l}`) ?? [];
-          await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+          // Why no TTL: Active draft lists are kept permanently until explicitly reviewed and published/deleted
+          await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug));
         }
 
         await redis.del(draftKey).catch(() => {});
@@ -241,7 +287,8 @@ export async function POST(request: NextRequest) {
       if (!lock) return NextResponse.json({ error: 'System is busy updating the feed. Please try again.' }, { status: 409 });
 
       try {
-        await setWithCompression(articleKey, article, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        // Why no TTL: Live modifications preserve the permanent storage of the published article
+        await setWithCompression(articleKey, article);
         
         const liveArticleEn = normalizeArticle(article, 'en');
         const liveArticleAr = normalizeArticle(article, 'ar');
@@ -250,11 +297,13 @@ export async function POST(request: NextRequest) {
 
         const listKeyEn = `insights:list:en`;
         const currentEn = await getWithCompression<any[]>(listKeyEn) ?? [];
-        await setWithCompression(listKeyEn, [liveArticleEn, ...currentEn.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        // Why no TTL: Live lists persist permanently
+        await setWithCompression(listKeyEn, [liveArticleEn, ...currentEn.filter((a: any) => a.slug !== slug)].slice(0, 1000));
 
         const listKeyAr = `insights:list:ar`;
         const currentAr = await getWithCompression<any[]>(listKeyAr) ?? [];
-        await setWithCompression(listKeyAr, [liveArticleAr, ...currentAr.filter((a: any) => a.slug !== slug)].slice(0, 1000), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+        // Why no TTL: Live lists persist permanently
+        await setWithCompression(listKeyAr, [liveArticleAr, ...currentAr.filter((a: any) => a.slug !== slug)].slice(0, 1000));
         
         console.log(`[admin] Live bilingual content updated for article: "${slug}"`);
       } finally {
@@ -273,7 +322,8 @@ export async function POST(request: NextRequest) {
         await redis.del(draftKey).catch(() => {});
         for (const l of ['en', 'ar'] as const) {
           const dl = await getWithCompression<any[]>(`insights:drafts:${l}`) ?? [];
-          await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug), { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+          // Why no TTL: Active draft lists are kept permanently until processed
+          await setWithCompression(`insights:drafts:${l}`, dl.filter((d: any) => d.slug !== slug));
         }
       } finally {
         await redis.del(lockKey);
@@ -294,7 +344,8 @@ export async function POST(request: NextRequest) {
           const current = await getWithCompression<any[]>(listKey) ?? [];
           const filtered = current.filter((a: any) => a.slug !== slug);
           if (filtered.length !== current.length) {
-            await setWithCompression(listKey, filtered, { ex: CACHE_TIMES.INSIGHTS_ARCHIVE });
+            // Why no TTL: Listings updates are stored permanently
+            await setWithCompression(listKey, filtered);
           }
         }
         // Delete the full article detail key.

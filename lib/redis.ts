@@ -40,6 +40,7 @@ interface RedisLike {
   expire(key: string, seconds: number): Promise<number>;
   lrange(key: string, start: number, stop: number): Promise<string[] | null>;
   lpush(key: string, value: string): Promise<number>;
+  dbsize(): Promise<number>;
 }
 
 const memoryCache: Record<string, { value: any; expiresAt: number }> = {};
@@ -80,6 +81,9 @@ const memoryClient: RedisLike = {
     memoryCache[key] = c;
     return c.value.length;
   },
+  async dbsize() {
+    return Object.keys(memoryCache).filter(k => memoryCache[k].expiresAt > Date.now()).length;
+  }
 };
 
 import { Redis as UpstashRedisClient } from '@upstash/redis';
@@ -209,9 +213,18 @@ export async function rateLimit(
 
 export const CACHE_TIMES = {
   INSIGHTS: 3600,
+  // Note: INSIGHTS_ARCHIVE (30 days) is kept as a legacy baseline,
+  // but published articles and active draft lists now persist indefinitely.
   INSIGHTS_ARCHIVE: 2592000,
   MARKET: 1800,
   FX: 1800,
 };
+
+// Why 3000: Generous maximum capacity limit of the main feed listings to prevent massive JSON stringify/parse latency on edge.
+export const MAX_PUBLISHED_ARTICLES = 3000;
+
+// Why 9500: Dynamic Upstash Free Tier key-count limit threshold (out of 10,000 keys max).
+// When DBSIZE goes above 9500, we immediately start evicting the oldest articles to prevent database fill errors.
+export const MAX_REDIS_KEYS_THRESHOLD = 9500;
 
 export default redis;

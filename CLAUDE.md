@@ -41,7 +41,7 @@ npm run contact-worker:deploy       # Deploy Cloudflare contact form worker (man
 | Rule | Detail |
 |---|---|
 | **Runtime** | Always `export const runtime = 'edge'` on API routes |
-| **Redis TTL** | Every `redis.set()` / `setWithCompression()` call must include `{ ex: N }`. Draft keys use `setDraft(..., { ttlSeconds: N })`. |
+| **Redis TTL** | Transient keys (rate limits, active generation states) must include `{ ex: N }`. Published articles and live lists store permanently (no TTL). |
 | **No hardcoded secrets** | All secrets come from `process.env.*`. Never put a token/password in source code. |
 | **Images** | External hostnames must be added to `next.config.ts` `remotePatterns` |
 | **CSP** | Defined in `lib/csp.ts`, applied in `middleware.ts`. Never inline CSP strings. Static pre-rendered routes (like `/admin`) must omit the nonce to prevent blocking static inline scripts. |
@@ -91,9 +91,9 @@ Arabia Khaleej delegates heavy article generation to an external Python agent. D
                       /admin/review (polls every 5s)
                       • Review / Edit markdown
                       • Publish → translateMarkdown EN→AR
-                                  setWithCompression insights:article:{slug}  TTL: 30d
-                                  prepend to insights:list:en + insights:list:ar  TTL: 30d
-                      • Delete  → cascades draft + live + both list caches
+                                   setWithCompression insights:article:{slug}  (No TTL - Permanent)
+                                   prepend to insights:list:en + insights:list:ar  (No TTL - Permanent)
+                       • Delete  → cascades draft + live + both list caches
 ```
 
 ### Article Status State Machine
@@ -184,16 +184,16 @@ DASHBOARD_CALLBACK_URL=        # Full override for agent callback URL
 | Key | TTL | Content |
 |---|---|---|
 | `article:{topic}` | Varies (see status table) | Draft queue entry |
-| `insights:article:{slug}` | 30 days | Full bilingual article |
-| `insights:list:en` | 30 days | EN article listing (max 1000) |
-| `insights:list:ar` | 30 days | AR article listing (max 1000) |
+| `insights:article:{slug}` | None (Indefinite) | Full bilingual article |
+| `insights:list:en` | None (Indefinite) | EN article listing (max 3000) |
+| `insights:list:ar` | None (Indefinite) | AR article listing (max 3000) |
 
 ---
 
 ## 🚫 Never Do
 
 - **No Node.js-only packages** in edge routes (no `fs`, no `net`, no TCP Redis clients).
-- **No `redis.set()` without TTL** — use `{ ex: N }` or `{ ttlSeconds: N }` on `setDraft`.
+- **No `redis.set()` without TTL for transient data** — rate limits and dispatch drafts must use `{ ex: N }` or `{ ttlSeconds: N }` to prevent database clutter. (Published articles and active draft feeds are stored permanently).
 - **No hardcoded secrets** — all tokens/passwords must come from `process.env.*`.
 - **No hardcoded CSP strings** — always use `lib/csp.ts`.
 - **No nonces in CSP on static pre-rendered routes** — dynamic nonces on static routes block build-time inline hydration scripts, causing solid black blank page crashes.

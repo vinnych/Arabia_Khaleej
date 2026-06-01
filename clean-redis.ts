@@ -27,7 +27,8 @@ async function cleanList(lang: 'en' | 'ar') {
       delete item.content;
       return item;
     });
-    await setWithCompression(key, cleanedList, { ex: 2592000 });
+    // Why no TTL: Cleaned published and draft feeds are saved without an expiration to prevent automated eviction
+    await setWithCompression(key, cleanedList);
     console.log(`Cleaned and saved ${key}`);
   }
 }

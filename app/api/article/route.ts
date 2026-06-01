@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { draftDb } from '@/lib/draftsDb';
 import { toSlug } from '@/lib/utils';
-import { redis, getWithCompression, setWithCompression } from '@/lib/redis';
+import { redis, getWithCompression, setWithCompression, MAX_PUBLISHED_ARTICLES, MAX_REDIS_KEYS_THRESHOLD } from '@/lib/redis';
 import { translateMarkdown } from '@/lib/translate';
 
 export const runtime = 'edge';
@@ -109,7 +109,8 @@ export async function DELETE(req: Request) {
         if (currentList && Array.isArray(currentList)) {
           const updatedList = currentList.filter((item: any) => item.slug !== slug);
           if (updatedList.length !== currentList.length) {
-            await setWithCompression(listKey, updatedList, { ex: 2592000 });
+            // Why no TTL: Published lists are stored indefinitely to prevent loss of content feed index
+            await setWithCompression(listKey, updatedList);
             console.log(`[admin] Successfully removed article from listing: "${listKey}"`);
           }
         }
@@ -215,7 +216,8 @@ export async function PUT(req: Request) {
 
         try {
           // 1. Commit full bilingual document (insights:article:${slug})
-          await setWithCompression(`insights:article:${slug}`, liveArticle, { ex: 2592000 });
+          // Why no TTL: Published articles persist permanently in Redis for infinite digital archiving
+          await setWithCompression(`insights:article:${slug}`, liveArticle);
 
           // 2. Pre-normalize copies and prepend to English and Arabic main feeds
           const liveEn = normalizeArticle(liveArticle, 'en');
@@ -227,13 +229,54 @@ export async function PUT(req: Request) {
 
           const listKeyEn = `insights:list:en`;
           const currentListEn = await getWithCompression<any[]>(listKeyEn) ?? [];
-          const updatedListEn = [liveEn, ...currentListEn.filter((item: any) => item.slug !== slug)].slice(0, 1000);
-          await setWithCompression(listKeyEn, updatedListEn, { ex: 2592000 });
+          const filteredListEn = currentListEn.filter((item: any) => item.slug !== slug);
+          let updatedListEn = [liveEn, ...filteredListEn];
+          
+          // Dynamic Cache Eviction: 
+          // 1. Check current database key count size.
+          // 2. If close to Upstash Free Tier limit (9500 keys) or feed length exceeds generous cap (3000), 
+          //    evict the oldest articles to free up storage space.
+          const currentDbSize = await redis.dbsize().catch(() => 0);
+          const needsEvictionEn = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD || updatedListEn.length > MAX_PUBLISHED_ARTICLES;
+
+          if (needsEvictionEn) {
+            // If the database is full, evict a batch of 10 oldest articles to create a safe buffer
+            const targetSize = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD
+              ? Math.max(10, updatedListEn.length - 10)
+              : MAX_PUBLISHED_ARTICLES;
+
+            const evicted = updatedListEn.slice(targetSize);
+            for (const item of evicted) {
+              await redis.del(`insights:article:${item.slug}`).catch(() => {});
+              console.log(`[eviction] Evicted oldest English article from Redis: "${item.slug}" (DB Size: ${currentDbSize} keys)`);
+            }
+            updatedListEn = updatedListEn.slice(0, targetSize);
+          }
+          // Why no TTL: Live listing feeds persist indefinitely for long-term SEO preservation
+          await setWithCompression(listKeyEn, updatedListEn);
 
           const listKeyAr = `insights:list:ar`;
           const currentListAr = await getWithCompression<any[]>(listKeyAr) ?? [];
-          const updatedListAr = [liveAr, ...currentListAr.filter((item: any) => item.slug !== slug)].slice(0, 1000);
-          await setWithCompression(listKeyAr, updatedListAr, { ex: 2592000 });
+          const filteredListAr = currentListAr.filter((item: any) => item.slug !== slug);
+          let updatedListAr = [liveAr, ...filteredListAr];
+          
+          // Dynamic Cache Eviction: Apply identical safety checks for the Arabic feed
+          const needsEvictionAr = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD || updatedListAr.length > MAX_PUBLISHED_ARTICLES;
+
+          if (needsEvictionAr) {
+            const targetSize = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD
+              ? Math.max(10, updatedListAr.length - 10)
+              : MAX_PUBLISHED_ARTICLES;
+
+            const evicted = updatedListAr.slice(targetSize);
+            for (const item of evicted) {
+              await redis.del(`insights:article:${item.slug}`).catch(() => {});
+              console.log(`[eviction] Evicted oldest Arabic article from Redis: "${item.slug}" (DB Size: ${currentDbSize} keys)`);
+            }
+            updatedListAr = updatedListAr.slice(0, targetSize);
+          }
+          // Why no TTL: Live listing feeds persist indefinitely for long-term SEO preservation
+          await setWithCompression(listKeyAr, updatedListAr);
         } finally {
           await redis.del(lockKey);
         }
