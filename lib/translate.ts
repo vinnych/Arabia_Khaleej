@@ -127,9 +127,12 @@ export async function translateMarkdown(markdown: string, source: string = 'en',
 
   // Step 4: Restore the original code blocks from placeholders
   // Why: Seamlessly stitches the unmodified code blocks back into the translated article.
+  // Google Translate often lowercases placeholders, adds spaces inside brackets, or alters underscores
+  // (e.g., returning `[code_block_0]` or `[CODE _ BLOCK _ 0]`). A case-insensitive, space-flexible
+  // regex ensures we reliably locate and replace all placeholders.
   for (let i = 0; i < codeBlocks.length; i++) {
-    const placeholder = `[CODE_BLOCK_${i}]`;
-    finalMarkdown = finalMarkdown.replace(placeholder, codeBlocks[i]);
+    const regex = new RegExp(`\\[\\s*CODE\\s*[_\\s]\\s*BLOCK\\s*[_\\s]\\s*${i}\\s*\\]`, 'gi');
+    finalMarkdown = finalMarkdown.replace(regex, codeBlocks[i]);
   }
 
   return finalMarkdown;

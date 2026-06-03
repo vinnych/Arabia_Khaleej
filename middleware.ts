@@ -23,9 +23,10 @@ export default function middleware(request: NextRequest) {
 
   const isAdminPage = pathname.startsWith('/admin');
 
-  // Redirect from .pages.dev and www.arabiakhaleej.com to the main domain for SEO consistency
+  // Redirect from .pages.dev to the main domain for SEO consistency
   // This ensures only the canonical domain appears in search results and avoids redirect chains.
-  if (hostname.endsWith('.pages.dev') || hostname === 'www.arabiakhaleej.com') {
+  // Note: www.arabiakhaleej.com is handled natively by Next.js redirects inside next.config.ts.
+  if (hostname.endsWith('.pages.dev')) {
     let targetPathname = pathname;
     if (!isAdminPage) {
       const locales = ['en', 'ar'];

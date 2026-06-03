@@ -1,23 +1,29 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-const envFile = fs.readFileSync(path.resolve(process.cwd(), '.env.local'), 'utf-8');
-envFile.split('\n').forEach(line => {
-  const match = line.match(/^([^=]+)="(.*)"$/) || line.match(/^([^=]+)=(.*)$/);
-  if (match) {
-    process.env[match[1]] = match[2].replace(/\r$/, '');
-  }
-});
-
-// Important: import redis *after* environment variables are set
-const { redis, getWithCompression, setWithCompression } = require('./lib/redis.ts');
+// Load environment variables before dynamic imports
+try {
+  const envFile = fs.readFileSync(path.resolve(process.cwd(), '.env.local'), 'utf-8');
+  envFile.split('\n').forEach(line => {
+    const match = line.match(/^([^=]+)="(.*)"$/) || line.match(/^([^=]+)=(.*)$/);
+    if (match) {
+      process.env[match[1]] = match[2].replace(/\r$/, '');
+    }
+  });
+} catch (err) {
+  console.warn('Could not read .env.local file. Relying on system environment variables.');
+}
 
 async function cleanList(lang: 'en' | 'ar') {
+  // Why dynamic import: Environment variables must be parsed and loaded into process.env 
+  // before the Redis module resolves its configuration, otherwise it defaults to memory backend.
+  const { getWithCompression, setWithCompression } = await import('./lib/redis');
+
   const listKey = `insights:list:${lang}`;
   const draftsKey = `insights:drafts:${lang}`;
   for (const key of [listKey, draftsKey]) {
     console.log(`Cleaning ${key}...`);
-    const currentList = await getWithCompression(key);
+    const currentList = await getWithCompression<any[]>(key);
     if (!currentList || !Array.isArray(currentList)) {
       console.log(`No items found in ${key}`);
       continue;
@@ -40,4 +46,7 @@ async function run() {
   process.exit(0);
 }
 
-run();
+run().catch(err => {
+  console.error('Cleanup failed:', err);
+  process.exit(1);
+});

@@ -1,15 +1,11 @@
 // Webhook Callback for Render LangGraph Agent
 // WHY: This endpoint receives the finished article from the external Python agent running on Render.
-// It securely stores the generated article directly into Upstash Redis so it appears instantly 
+// It securely stores the generated article via draftDb so it appears instantly 
 // in the existing Arabia Khaleej human verification dashboard (/admin/review).
 import { NextRequest, NextResponse } from 'next/server';
 import { getWithCompression, setWithCompression } from '@/lib/redis';
 import { translateMarkdown } from '@/lib/translate';
-
-const CACHE_TIMES = {
-  // Legacy baseline, incoming drafts persist indefinitely until admin action
-  INSIGHTS_ARCHIVE: 2592000, // 30 days
-};
+import { draftDb } from '@/lib/draftsDb';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -48,6 +44,7 @@ export async function POST(request: NextRequest) {
     // Construct the bilingual article object
     // Why: Storing both languages under a single document avoids data synchronization drift.
     const draftArticle = {
+      topic,
       slug,
       title: {
         en: topic,
@@ -62,29 +59,30 @@ export async function POST(request: NextRequest) {
         en: article,
         ar: articleAr,
       },
-      wordCount: word_count,
-      language: 'en', // Base source language is English
+      word_count: word_count,
+      timestamp: Date.now()
     };
 
-    // Save the detailed bilingual article body to Redis
-    const draftKey = `insights:draft:article:${slug}`;
-    // Why no TTL: Draft articles persist indefinitely so that the editorial board never loses drafted articles before review
-    await setWithCompression(draftKey, draftArticle);
+    // Save the detailed bilingual article body via draftDb (handles D1 and Redis automatically)
+    await draftDb.setDraft(topic, draftArticle);
 
-    // Update the master queue list so it appears in the dashboard UI
-    // Why: Save to both english drafts queue so they are visible under one main review tab.
-    const listKey = `insights:drafts:en`;
-    const currentDrafts = await getWithCompression<any[]>(listKey) ?? [];
-    
-    // Check if it already exists to avoid duplicates
-    const exists = currentDrafts.find((d: any) => d.slug === slug);
-    if (!exists) {
-      // Why no TTL: Active draft listings persist indefinitely until explicitly published or rejected
-      await setWithCompression(listKey, [{ slug, title: topic, status: 'pending' }, ...currentDrafts]);
+    // If D1 is not active (we are in Redis mode), we also write legacy keys for backward-compatibility
+    if (!draftDb.isD1Active()) {
+      const draftKey = `insights:draft:article:${slug}`;
+      await setWithCompression(draftKey, draftArticle);
+
+      const listKey = `insights:drafts:en`;
+      const currentDrafts = await getWithCompression<any[]>(listKey) ?? [];
+      
+      // Check if it already exists to avoid duplicates
+      const exists = currentDrafts.find((d: any) => d.slug === slug);
+      if (!exists) {
+        await setWithCompression(listKey, [{ slug, title: topic, status: 'pending' }, ...currentDrafts]);
+      }
     }
 
     console.log(`[webhook] Successfully saved unified bilingual draft for slug: "${slug}"`);
-    return NextResponse.json({ success: true, message: 'Bilingual draft successfully saved to dashboard' });
+    return NextResponse.json({ success: true, message: 'Bilingual draft successfully saved to database' });
   } catch (error: any) {
     console.error('Callback Webhook Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

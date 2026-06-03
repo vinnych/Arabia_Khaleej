@@ -15,89 +15,165 @@ export interface SetDraftOptions {
 }
 
 export const draftDb = {
+  // Helper to determine if Cloudflare D1 is bound and active
+  isD1Active(): boolean {
+    return typeof process !== 'undefined' && !!(process.env as any).DB;
+  },
+
   async getDraft(topic: string) {
-    // Why standard fetch instead of Redis TCP: Cloudflare Pages / Workers do not support TCP connections out-of-the-box
-    // without specialized configurations. The Upstash REST API is highly optimized for serverless environments.
-    // Why encodeURIComponent: setDraft uses encodeURIComponent when writing keys.
-    // getDraft must use the same encoding so topics with spaces or special chars
-    // (e.g. "Dubai Real Estate" → "Dubai%20Real%20Estate") resolve to the same key.
-    const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/get/article:${encodeURIComponent(topic)}`, {
-      headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
+    if (this.isD1Active()) {
+      try {
+        const db = (process.env as any).DB;
+        const row = await db.prepare("SELECT * FROM drafts WHERE topic = ?").bind(topic).first();
+        if (!row) return null;
+        return {
+          topic: row.topic,
+          status: row.status,
+          word_count: row.word_count,
+          content: row.content,
+          image_url: row.image_url,
+          error: row.error,
+          description: row.description,
+          tags: row.tags ? JSON.parse(row.tags) : [],
+          timestamp: row.timestamp
+        };
+      } catch (err) {
+        console.error('Failed to get draft from D1:', topic, err);
+        return null;
+      }
+    }
+
+    // Upstash Redis Fallback
+    const key = `article:${topic}`;
+    const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(["GET", key]),
       cache: 'no-store'
     });
     const data = await res.json();
     if (!data.result) return null;
 
     try {
-      // First parse: decodes the top-level string returned from the Upstash REST endpoint
       let parsed = JSON.parse(data.result);
-      
-      // Self-healing check: if the data was stored as a double-serialized string (a known bug
-      // where JSON.stringify was called twice), parsed will still be a string. We parse it once more
-      // to extract the actual Article object, ensuring backward compatibility with existing Redis keys.
       if (typeof parsed === 'string') {
         parsed = JSON.parse(parsed);
       }
       return parsed;
     } catch (err) {
-      // Log parsing errors without crashing the entire dashboard rendering flow
-      console.error('Failed to parse draft for topic:', topic, err);
+      console.error('Failed to parse Redis draft:', topic, err);
       return null;
     }
   },
 
   async setDraft(topic: string, value: any, options?: SetDraftOptions) {
-    // Why single JSON.stringify: Previously, JSON.stringify(JSON.stringify(value)) double-serialized the data,
-    // which caused data to be stored as an escaped string rather than a clean JSON structure in Redis.
-    // Switching to standard single-stringification ensures proper data formatting and optimal storage space.
+    if (this.isD1Active()) {
+      try {
+        const db = (process.env as any).DB;
+        const sql = `
+          INSERT INTO drafts (topic, status, word_count, content, image_url, error, description, tags, timestamp)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(topic) DO UPDATE SET
+            status=excluded.status,
+            word_count=excluded.word_count,
+            content=excluded.content,
+            image_url=excluded.image_url,
+            error=excluded.error,
+            description=excluded.description,
+            tags=excluded.tags,
+            timestamp=excluded.timestamp
+        `;
+        await db.prepare(sql).bind(
+          topic,
+          value.status,
+          value.word_count !== undefined ? value.word_count : null,
+          value.content !== undefined ? value.content : null,
+          value.image_url !== undefined ? value.image_url : null,
+          value.error !== undefined ? value.error : null,
+          value.description !== undefined ? value.description : null,
+          JSON.stringify(value.tags || []),
+          value.timestamp || Date.now()
+        ).run();
+        return;
+      } catch (err) {
+        console.error('Failed to set draft in D1:', topic, err);
+      }
+    }
+
+    // Upstash Redis Fallback
+    const key = `article:${topic}`;
     const body = JSON.stringify(value);
+    const command = options?.ttlSeconds
+      ? ["SETEX", key, options.ttlSeconds.toString(), body]
+      : ["SET", key, body];
 
-    // Why conditional setex vs set:
-    // Upstash REST API exposes two distinct commands:
-    //   /set/{key}           → sets the key without expiry (persists until explicitly deleted)
-    //   /setex/{key}/{ttl}   → sets the key with an expiry in seconds (auto-cleaned by Redis)
-    // Using /setex for transient statuses ('generating', 'error') prevents orphaned keys
-    // from accumulating; using plain /set for 'pending_review' ensures admin-approved
-    // articles are not silently deleted before the editorial team publishes them.
-    const url = options?.ttlSeconds
-      ? `${process.env.UPSTASH_REDIS_REST_URL}/setex/article:${encodeURIComponent(topic)}/${options.ttlSeconds}`
-      : `${process.env.UPSTASH_REDIS_REST_URL}/set/article:${encodeURIComponent(topic)}`;
-
-    await fetch(url, {
+    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/`, {
       method: 'POST',
       headers: { 
         Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      body
+      body: JSON.stringify(command)
     });
   },
 
   async delDraft(topic: string) {
-    // Why encodeURIComponent: Must match the encoded key that setDraft wrote.
-    // Without this, deleting a topic like "Dubai Real Estate" targets the wrong Redis key
-    // and the draft stays stuck in the dashboard forever.
-    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/del/article:${encodeURIComponent(topic)}`, {
-      headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` }
+    if (this.isD1Active()) {
+      try {
+        const db = (process.env as any).DB;
+        await db.prepare("DELETE FROM drafts WHERE topic = ?").bind(topic).run();
+        return;
+      } catch (err) {
+        console.error('Failed to delete draft from D1:', topic, err);
+      }
+    }
+
+    // Upstash Redis Fallback
+    const key = `article:${topic}`;
+    await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(["DEL", key])
     });
   },
 
   async updateDraftIfExist(topic: string, value: any): Promise<boolean> {
-    // Why NO encodeURIComponent here: 
-    // Unlike get/set/del which pass the key in the URL path (which Upstash auto-decodes),
-    // this command passes the key in a JSON body array for the EVAL command.
-    // Upstash does NOT decode JSON body elements. If we encode here, Redis will look for the 
-    // literal key "article:Tour%20UAE%202026" instead of "article:Tour UAE 2026", causing a miss.
+    if (this.isD1Active()) {
+      try {
+        const db = (process.env as any).DB;
+        const sql = `
+          UPDATE drafts SET 
+            status = ?, word_count = ?, content = ?, image_url = ?, error = ?, description = ?, tags = ?, timestamp = ?
+          WHERE topic = ? AND status = 'generating'
+        `;
+        const result = await db.prepare(sql).bind(
+          value.status,
+          value.word_count !== undefined ? value.word_count : null,
+          value.content !== undefined ? value.content : null,
+          value.image_url !== undefined ? value.image_url : null,
+          value.error !== undefined ? value.error : null,
+          value.description !== undefined ? value.description : null,
+          JSON.stringify(value.tags || []),
+          value.timestamp || Date.now(),
+          topic
+        ).run();
+        
+        return result.success && result.meta?.changes === 1;
+      } catch (err) {
+        console.error('Failed to update draft in D1:', topic, err);
+        return false;
+      }
+    }
+
+    // Upstash Redis Fallback
     const key = `article:${topic}`;
     const body = JSON.stringify(value);
-    //   1. The key EXISTS (admin didn't delete the draft while it was generating).
-    //   2. The stored JSON contains '"status":"generating"' (the draft hasn't already been
-    //      received and written to pending_review by a previous callback attempt).
-    // Why string.find instead of JSON parsing inside Lua:
-    //   Redis Lua has limited JSON support. Using string.find on the raw stored value to
-    //   check for the status substring is simple, zero-dependency, and 100% reliable
-    //   since we always serialize the status as a JSON string key.
-    // This guarantees that a second tenacity retry can never overwrite admin edits.
     const script = `
       local val = redis.call('GET', KEYS[1])
       if val == false then return 0 end
@@ -114,15 +190,37 @@ export const draftDb = {
         Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      // Upstash REST syntax: ["COMMAND", "ARG1", "ARG2", ...]
       body: JSON.stringify(["EVAL", script, "1", key, body])
     });
 
     const data = await res.json();
-    return data.result === 1; // 1 if updated, 0 if deleted or already processed
+    return data.result === 1;
   },
 
   async getAllDrafts() {
+    if (this.isD1Active()) {
+      try {
+        const db = (process.env as any).DB;
+        const { results } = await db.prepare("SELECT * FROM drafts ORDER BY timestamp DESC").all();
+        if (!results || !Array.isArray(results)) return [];
+        return results.map((row: any) => ({
+          topic: row.topic,
+          status: row.status,
+          word_count: row.word_count,
+          content: row.content,
+          image_url: row.image_url,
+          error: row.error,
+          description: row.description,
+          tags: row.tags ? JSON.parse(row.tags) : [],
+          timestamp: row.timestamp
+        }));
+      } catch (err) {
+        console.error('Failed to fetch drafts list from D1:', err);
+        return [];
+      }
+    }
+
+    // Upstash Redis Fallback
     const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/keys/article:*`, {
       headers: { Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}` },
       cache: 'no-store'
@@ -132,18 +230,12 @@ export const draftDb = {
     
     if (keys.length === 0) return [];
 
-    // Why MGET instead of Promise.all(keys.map(...getDraft)):
-    // Cloudflare Workers have a hard limit of 50 subrequests per invocation.
-    // If we have 50 drafts, Promise.all triggers 50 concurrent fetch requests, 
-    // immediately crashing the worker with "Too many subrequests by single Worker invocation".
-    // MGET fetches all keys in a single network request, reducing subrequests from (1 + N) to exactly 2.
     const resMget = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/`, {
       method: 'POST',
       headers: { 
         Authorization: `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN}`,
         'Content-Type': 'application/json'
       },
-      // Upstash REST syntax: ["COMMAND", "ARG1", "ARG2", ...]
       body: JSON.stringify(["MGET", ...keys]),
       cache: 'no-store'
     });
@@ -155,7 +247,6 @@ export const draftDb = {
       if (!val) return null;
       try {
         let parsed = JSON.parse(val);
-        // Self-healing check for double-serialized strings (backward compatibility)
         if (typeof parsed === 'string') {
           parsed = JSON.parse(parsed);
         }
@@ -165,7 +256,6 @@ export const draftDb = {
       }
     });
     
-    // Filter out empty results and sort by timestamp descending
     return drafts
       .filter(Boolean)
       .sort((a: any, b: any) => (b.timestamp || 0) - (a.timestamp || 0));

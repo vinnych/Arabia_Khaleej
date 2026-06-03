@@ -1,0 +1,16 @@
+# Arabia Khaleej — Wrangler Pages configuration
+# Why this file is used instead of others:
+# 1. Configures bindings (like D1 Database) directly in source control, allowing wrangler commands
+#    to run locally and remotely without missing database definition contexts.
+# 2. Maps the D1 database 'arabiakhaleej-db' to the environment binding 'DB' (which the edge code expects).
+# 3. Enables next-on-pages builds to deploy cleanly with all variables bound automatically.
+
+name = "arabiakhaleej"
+pages_build_output_dir = ".vercel/output"
+compatibility_date = "2025-02-04"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "arabiakhaleej-db"
+database_id = "258ef468-a2f0-4628-bb04-4d782a7d4d24"

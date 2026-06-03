@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { triggerAgentGeneration } from '@/lib/agentHelper';
 
 export const runtime = 'edge';
@@ -38,14 +38,19 @@ export async function POST(req: Request) {
     }
     const topic = body.topic.trim();
     
-    // Use the shared helper to trigger agent and save initial draft state
-    try {
-      await triggerAgentGeneration(topic);
-    } catch (agentErr: any) {
-      return NextResponse.json({ error: agentErr.message || 'Agent rejected request' }, { status: 500 });
-    }
+    // Why unstable_after: Next.js 15 after() executes the agent trigger asynchronously
+    // after the response has been sent, preventing Cloudflare Edge Runtime 25-second timeouts
+    // when waking up a cold Render Python agent.
+    after(async () => {
+      try {
+        await triggerAgentGeneration(topic);
+        console.log(`[generate] Asynchronously triggered agent for topic: "${topic}"`);
+      } catch (agentErr: any) {
+        console.error(`[generate] Background agent trigger failed for topic "${topic}":`, agentErr.message || agentErr);
+      }
+    });
 
-    return NextResponse.json({ message: 'Generation started', topic });
+    return NextResponse.json({ message: 'Generation started', topic }, { status: 202 });
   } catch (err: any) {
     console.error('[generate] Unhandled error during generation dispatch:', err.message || err);
     return NextResponse.json(

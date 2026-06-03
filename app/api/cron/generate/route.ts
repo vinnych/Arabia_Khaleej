@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, after } from 'next/server';
 import { triggerAgentGeneration } from '@/lib/agentHelper';
 import { XMLParser } from 'fast-xml-parser';
 import { getUnifiedInsights } from '@/lib/insights';
@@ -214,14 +214,21 @@ export async function GET(req: Request) {
 
     console.log(`[cron] Fetched trending topic: "${rawHeadline}" (Pool size: ${targetPool.length})`);
 
-    // 5. Trigger the generation
-    await triggerAgentGeneration(rawHeadline);
+    // 5. Trigger the generation asynchronously in after()
+    after(async () => {
+      try {
+        await triggerAgentGeneration(rawHeadline);
+        console.log(`[cron] Asynchronously triggered agent for topic: "${rawHeadline}"`);
+      } catch (agentErr: any) {
+        console.error(`[cron] Background agent trigger failed for topic "${rawHeadline}":`, agentErr.message || agentErr);
+      }
+    });
 
     return NextResponse.json({ 
       success: true, 
       message: 'Automated generation triggered successfully.',
       topic: rawHeadline
-    });
+    }, { status: 202 });
 
   } catch (err: any) {
     console.error('[cron] Automated generation dispatch failed:', err.message || err);

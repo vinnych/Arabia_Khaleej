@@ -6,7 +6,7 @@
  * avoids regenerating the same content. The 5-minute max-age balances freshness with
  * cost efficiency - users see new articles within a minute of publication.
  */
-import { redis, getWithCompression } from './redis';
+import { redis, getWithCompression, setWithCompression, MAX_PUBLISHED_ARTICLES, MAX_REDIS_KEYS_THRESHOLD } from './redis';
 
 export interface InsightItem {
   id: string;
@@ -120,20 +120,20 @@ export function normalizeArticle(item: any, lang: 'en' | 'ar'): InsightItem {
 export interface IInsightRepository {
   getRawInsights(lang: 'en' | 'ar'): Promise<InsightItem[]>;
   getRawArticle(slug: string): Promise<InsightItem | null>;
+  saveArticle(article: any): Promise<void>;
+  deleteArticle(slug: string): Promise<void>;
 }
 
 /**
  * Concrete implementation of the Repository using Redis (Single Responsibility Principle - SRP)
- * Why this particular is used: This class has one, and only one, reason to change: when the mechanism or structure of 
- * fetching data from Upstash/Redis cache changes. It is completely isolated from validation and sorting.
+ * Why this particular is used: Handles reading and writing to Upstash Redis cache including compression
+ * and the free-tier FIFO eviction rules, completely decoupled from controllers.
  */
 export class RedisInsightRepository implements IInsightRepository {
   async getRawInsights(lang: 'en' | 'ar'): Promise<InsightItem[]> {
     try {
       const stored = await getWithCompression<InsightItem[]>(`insights:list:${lang}`);
       if (stored && Array.isArray(stored)) {
-        // Why mapping normalization is used: Automatically flattens any bilingual 
-        // objects into standard strings for the requested language.
         return stored.map(item => normalizeArticle(item, lang));
       }
     } catch (e) {
@@ -149,6 +149,252 @@ export class RedisInsightRepository implements IInsightRepository {
       return null;
     }
   }
+
+  async saveArticle(article: any): Promise<void> {
+    const slug = article.slug;
+    
+    // 1. Commit full bilingual document
+    await setWithCompression(`insights:article:${slug}`, article);
+
+    // 2. Pre-normalize copies and prepend to English and Arabic main feeds
+    const liveEn = normalizeArticle(article, 'en');
+    const liveAr = normalizeArticle(article, 'ar');
+
+    delete (liveEn as any).content;
+    delete (liveAr as any).content;
+
+    // Concurrency lock to prevent simultaneous updates from overlapping
+    const lockKey = `lock:insights:list`;
+    const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+    if (!lock) {
+      throw new Error('System is busy updating the feed. Please try again.');
+    }
+
+    try {
+      const listKeyEn = `insights:list:en`;
+      const currentListEn = await getWithCompression<any[]>(listKeyEn) ?? [];
+      const filteredListEn = currentListEn.filter((item: any) => item.slug !== slug);
+      let updatedListEn = [liveEn, ...filteredListEn];
+      
+      const currentDbSize = await redis.dbsize().catch(() => 0);
+      const needsEvictionEn = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD || updatedListEn.length > MAX_PUBLISHED_ARTICLES;
+
+      if (needsEvictionEn) {
+        const targetSize = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD
+          ? Math.max(10, updatedListEn.length - 10)
+          : MAX_PUBLISHED_ARTICLES;
+
+        const evicted = updatedListEn.slice(targetSize);
+        for (const item of evicted) {
+          await redis.del(`insights:article:${item.slug}`).catch(() => {});
+          console.log(`[eviction] Evicted oldest English article from Redis: "${item.slug}" (DB Size: ${currentDbSize} keys)`);
+        }
+        updatedListEn = updatedListEn.slice(0, targetSize);
+      }
+      await setWithCompression(listKeyEn, updatedListEn);
+
+      const listKeyAr = `insights:list:ar`;
+      const currentListAr = await getWithCompression<any[]>(listKeyAr) ?? [];
+      const filteredListAr = currentListAr.filter((item: any) => item.slug !== slug);
+      let updatedListAr = [liveAr, ...filteredListAr];
+      
+      const needsEvictionAr = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD || updatedListAr.length > MAX_PUBLISHED_ARTICLES;
+
+      if (needsEvictionAr) {
+        const targetSize = currentDbSize >= MAX_REDIS_KEYS_THRESHOLD
+          ? Math.max(10, updatedListAr.length - 10)
+          : MAX_PUBLISHED_ARTICLES;
+
+        const evicted = updatedListAr.slice(targetSize);
+        for (const item of evicted) {
+          await redis.del(`insights:article:${item.slug}`).catch(() => {});
+          console.log(`[eviction] Evicted oldest Arabic article from Redis: "${item.slug}" (DB Size: ${currentDbSize} keys)`);
+        }
+        updatedListAr = updatedListAr.slice(0, targetSize);
+      }
+      await setWithCompression(listKeyAr, updatedListAr);
+    } finally {
+      await redis.del(lockKey);
+    }
+  }
+
+  async deleteArticle(slug: string): Promise<void> {
+    const lockKey = `lock:insights:list`;
+    const lock = await redis.set(lockKey, '1', { nx: true, ex: 15 });
+    if (!lock) {
+      throw new Error('System is busy updating the feed. Please try again.');
+    }
+
+    try {
+      const articleKey = `insights:article:${slug}`;
+      await redis.del(articleKey);
+
+      for (const lang of ['en', 'ar']) {
+        const listKey = `insights:list:${lang}`;
+        const currentList = await getWithCompression<any[]>(listKey);
+        if (currentList && Array.isArray(currentList)) {
+          const updatedList = currentList.filter((item: any) => item.slug !== slug);
+          if (updatedList.length !== currentList.length) {
+            await setWithCompression(listKey, updatedList);
+          }
+        }
+      }
+    } finally {
+      await redis.del(lockKey);
+    }
+  }
+}
+
+/**
+ * Concrete D1 Insight Repository using Cloudflare D1 SQL bindings
+ * Why this particular is used: Handles Edge-native SQLite queries, preventing Redis eviction and scale limitations.
+ */
+export class D1InsightRepository implements IInsightRepository {
+  private getDb() {
+    const db = (process.env as any).DB;
+    if (!db) {
+      throw new Error("D1 database binding 'DB' is not configured.");
+    }
+    return db;
+  }
+
+  async getRawInsights(lang: 'en' | 'ar'): Promise<InsightItem[]> {
+    try {
+      const db = this.getDb();
+      const { results } = await db.prepare("SELECT * FROM articles ORDER BY pubDate DESC LIMIT 1000").all();
+      if (!results || !Array.isArray(results)) return [];
+
+      return results.map((row: any) => {
+        const bilingualArticle = {
+          id: row.id,
+          slug: row.slug,
+          title: { en: row.title_en, ar: row.title_ar },
+          description: { en: row.description_en, ar: row.description_ar },
+          link: `/insights/${row.slug}`,
+          pubDate: row.pubDate,
+          source: row.source,
+          category: row.category,
+          language: 'regional',
+          image: row.image,
+          tags: row.tags ? JSON.parse(row.tags) : [],
+          author: {
+            id: row.author_id,
+            name: { en: row.author_name_en, ar: row.author_name_ar },
+            role: { en: row.author_role_en, ar: row.author_role_ar },
+          },
+          content: { en: row.content_en, ar: row.content_ar },
+          wordCount: row.wordCount,
+          status: 'published'
+        };
+        return normalizeArticle(bilingualArticle, lang);
+      });
+    } catch (e) {
+      console.error("Failed to fetch insights from D1 Database:", e);
+      return [];
+    }
+  }
+
+  async getRawArticle(slug: string): Promise<InsightItem | null> {
+    try {
+      const db = this.getDb();
+      const row = await db.prepare("SELECT * FROM articles WHERE slug = ?").bind(slug).first();
+      if (!row) return null;
+
+      return {
+        id: row.id,
+        slug: row.slug,
+        title: { en: row.title_en, ar: row.title_ar },
+        description: { en: row.description_en, ar: row.description_ar },
+        link: `/insights/${row.slug}`,
+        pubDate: row.pubDate,
+        source: row.source,
+        category: row.category,
+        language: 'regional',
+        image: row.image,
+        tags: row.tags ? JSON.parse(row.tags) : [],
+        author: {
+          id: row.author_id,
+          name: { en: row.author_name_en, ar: row.author_name_ar },
+          role: { en: row.author_role_en, ar: row.author_role_ar },
+        },
+        content: { en: row.content_en, ar: row.content_ar },
+        wordCount: row.wordCount,
+        status: 'published'
+      } as any;
+    } catch (e) {
+      console.error(`Failed to fetch article slug '${slug}' from D1 Database:`, e);
+      return null;
+    }
+  }
+
+  async saveArticle(article: any): Promise<void> {
+    const db = this.getDb();
+    const sql = `
+      INSERT INTO articles (
+        id, slug, title_en, title_ar, description_en, description_ar, 
+        pubDate, source, category, image, tags, 
+        author_id, author_name_en, author_name_ar, author_role_en, author_role_ar, 
+        content_en, content_ar, wordCount
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(slug) DO UPDATE SET
+        title_en=excluded.title_en,
+        title_ar=excluded.title_ar,
+        description_en=excluded.description_en,
+        description_ar=excluded.description_ar,
+        pubDate=excluded.pubDate,
+        source=excluded.source,
+        category=excluded.category,
+        image=excluded.image,
+        tags=excluded.tags,
+        author_id=excluded.author_id,
+        author_name_en=excluded.author_name_en,
+        author_name_ar=excluded.author_name_ar,
+        author_role_en=excluded.author_role_en,
+        author_role_ar=excluded.author_role_ar,
+        content_en=excluded.content_en,
+        content_ar=excluded.content_ar,
+        wordCount=excluded.wordCount
+    `;
+
+    await db.prepare(sql).bind(
+      article.id,
+      article.slug,
+      article.title.en,
+      article.title.ar,
+      article.description.en,
+      article.description.ar,
+      article.pubDate,
+      article.source,
+      article.category,
+      article.image || null,
+      JSON.stringify(article.tags || []),
+      article.author?.id || null,
+      article.author?.name?.en || null,
+      article.author?.name?.ar || null,
+      article.author?.role?.en || null,
+      article.author?.role?.ar || null,
+      article.content.en,
+      article.content.ar,
+      article.wordCount || 0
+    ).run();
+  }
+
+  async deleteArticle(slug: string): Promise<void> {
+    const db = this.getDb();
+    await db.prepare("DELETE FROM articles WHERE slug = ?").bind(slug).run();
+  }
+}
+
+/**
+ * Factory to resolve the active insight repository.
+ * Why this particular is used: Dynamically detects Cloudflare D1 environment binding 'DB', 
+ * defaulting to the Redis implementation if not configured.
+ */
+export function getInsightRepository(): IInsightRepository {
+  if (typeof process !== 'undefined' && (process.env as any).DB) {
+    return new D1InsightRepository();
+  }
+  return new RedisInsightRepository();
 }
 
 /**
@@ -300,7 +546,7 @@ export async function getUnifiedInsights(options: {
 }): Promise<InsightItem[]> {
   const { lang, category, limit = 100 } = options;
 
-  const repository = new RedisInsightRepository();
+  const repository = getInsightRepository();
   const validator = new StandardInsightValidator();
   
   const processors: IInsightProcessor[] = [
@@ -323,7 +569,7 @@ export async function getUnifiedInsights(options: {
  * Why this particular is used: Preserves exact signature. Delegates slug resolving to InsightService.
  */
 export async function getArticleBySlug(slug: string, lang: 'en' | 'ar'): Promise<InsightItem | null> {
-  const repository = new RedisInsightRepository();
+  const repository = getInsightRepository();
   const validator = new StandardInsightValidator();
   
   const service = new InsightService(repository, validator, [

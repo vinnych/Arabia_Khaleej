@@ -70,6 +70,25 @@ describe("translateMarkdown", () => {
     expect(result).toContain("انتهى.");
   });
 
+  it("restores code blocks successfully even if Google Translate modifies the casing or spacing of the placeholder", async () => {
+    // Why: We mock the translation API returning the placeholder with lowercase and extra spaces.
+    // The engine must still successfully identify it and restore the original code block.
+    global.fetch = jest.fn().mockImplementation(async () => {
+      return {
+        ok: true,
+        json: async () => [[ ["مرحبا بك\n[code _ block _ 0]\nنهاية", "original"] ]],
+      };
+    });
+
+    const markdownInput = "Welcome\n```javascript\nconst x = 42;\n```\nEnd";
+    const result = await translateMarkdown(markdownInput, "en", "ar");
+
+    expect(result).toContain("```javascript\nconst x = 42;\n```");
+    expect(result).toContain("مرحبا بك");
+    expect(result).toContain("نهاية");
+    expect(result).not.toContain("[code _ block _ 0]");
+  });
+
   it("splits large texts exceeding limits into multiple chunks and translates them sequentially", async () => {
     // Why: Setup lines to test chunk grouping. Each line will be added. 
     // We create 60 lines to trigger the >50 lines limit in translateMarkdown.

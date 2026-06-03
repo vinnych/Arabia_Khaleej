@@ -5,7 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 // WHY: We import standard Lucide React icons to upgrade raw HTML elements 
 // (such as closing cross marks and emoji tags) into high-fidelity premium visual assets.
 // Added check, edit, eye, and column icons for the premium Markdown editor toolbar.
-import { X, Globe, Sparkles, Lock, KeyRound, ShieldAlert, LogOut, Check, Edit2, Eye, Columns } from "lucide-react";
+import { X, Globe, Sparkles, Lock, KeyRound, ShieldAlert, LogOut, Check, Edit2, Eye, Columns, RefreshCw } from "lucide-react";
 import styles from './admin.module.css';
 
 // WHY: We import ReactMarkdown and remarkGfm to support rich HTML previewing of generated draft files.
@@ -117,6 +117,47 @@ export default function Dashboard() {
   // or engaging in a side-by-side editing grid (Split Screen) on large displays, greatly enhancing editing productivity.
   const [viewMode, setViewMode] = useState<'edit' | 'preview' | 'split'>('edit');
 
+  const lastActiveRef = useRef(Date.now());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const lastRefreshTimeRef = useRef(0);
+
+  useEffect(() => {
+    const updateActivity = () => {
+      lastActiveRef.current = Date.now();
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('mousemove', updateActivity);
+      window.addEventListener('keydown', updateActivity);
+      window.addEventListener('click', updateActivity);
+      window.addEventListener('scroll', updateActivity);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('mousemove', updateActivity);
+        window.removeEventListener('keydown', updateActivity);
+        window.removeEventListener('click', updateActivity);
+        window.removeEventListener('scroll', updateActivity);
+      }
+    };
+  }, []);
+
+  const handleManualRefresh = async () => {
+    const now = Date.now();
+    if (now - lastRefreshTimeRef.current < 2000) {
+      addToast('Please wait a moment before refreshing again.', 'info');
+      return;
+    }
+    if (!secret) return;
+    setIsRefreshing(true);
+    lastRefreshTimeRef.current = now;
+    lastActiveRef.current = now; // reset idle
+    const success = await fetchArticles(secret, activeTab);
+    if (success) {
+      addToast('Data refreshed successfully.', 'success');
+    }
+    setIsRefreshing(false);
+  };
+
   const modalRef = useRef<HTMLDialogElement>(null);
   const secretRef = useRef('');
   const activeTabRef = useRef<'drafts' | 'published'>('drafts');
@@ -202,10 +243,11 @@ export default function Dashboard() {
       }
 
       const interval = setInterval(() => {
-        if (document.visibilityState === 'visible' && secretRef.current) {
+        const isIdle = Date.now() - lastActiveRef.current > 5 * 60 * 1000;
+        if (document.visibilityState === 'visible' && secretRef.current && !isIdle) {
           fetchArticles(secretRef.current, activeTabRef.current);
         }
-      }, 5000);
+      }, 120000); // 2 minutes
       return () => clearInterval(interval);
     }
   }, []);
@@ -569,11 +611,22 @@ export default function Dashboard() {
           <h1>Arabia Khaleej AI Admin</h1>
           <div className={styles.status}>System Status: <span className={styles.online}>Online</span></div>
         </div>
-        {/* WHY: Logout lock action in header to allow clearing active localStorage sessions easily. */}
-        <button className={styles.lockBtn} onClick={handleLock}>
-          <LogOut size={12} />
-          Lock Console
-        </button>
+        <div className="flex gap-2 items-center">
+          <button 
+            className={styles.lockBtn} 
+            onClick={handleManualRefresh} 
+            disabled={isRefreshing}
+            style={isRefreshing ? { opacity: 0.7 } : undefined}
+          >
+            <RefreshCw size={12} className={isRefreshing ? "animate-spin" : ""} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+          {/* WHY: Logout lock action in header to allow clearing active localStorage sessions easily. */}
+          <button className={styles.lockBtn} onClick={handleLock}>
+            <LogOut size={12} />
+            Lock Console
+          </button>
+        </div>
       </header>
 
       <div className={styles.topicCard}>
