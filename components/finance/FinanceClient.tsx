@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { Coins, TrendingUp, TrendingDown, ArrowLeftRight, Globe } from "lucide-react";
 import Link from "next/link";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 
 export default function FinanceClient() {
   const [rates, setRates] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
@@ -99,7 +99,7 @@ export default function FinanceClient() {
 
       {/* Back to Home */}
       <div className="mt-20">
-        <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
+        <Link href={getLocalizedHref("/", language)} className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
           {isRTL ? 'الرئيسية ←' : '← Home'}
         </Link>
       </div>

@@ -51,17 +51,139 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
   
   // 1. Static Base Routes
+  // Why: Adding alternates.languages to static routes ensures search engines discover and link
+  // the translated pages (e.g. /en/... and /ar/...) correctly, matching our subpath routing scheme.
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/en/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
-    { url: `${SITE_URL}/en/insights`, lastModified: new Date(), changeFrequency: 'always', priority: 0.9 },
-    { url: `${SITE_URL}/en/prayer`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-    { url: `${SITE_URL}/en/currency-exchange`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
-    { url: `${SITE_URL}/en/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${SITE_URL}/en/privacy`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/en/terms`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/en/disclaimer`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/en/transparency`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/en/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
+    {
+      url: `${SITE_URL}/en`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1.0,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en`,
+          'x-default': `${SITE_URL}/en`,
+          'ar': `${SITE_URL}/ar`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/insights`,
+      lastModified: new Date(),
+      changeFrequency: 'always',
+      priority: 0.9,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/insights`,
+          'x-default': `${SITE_URL}/en/insights`,
+          'ar': `${SITE_URL}/ar/insights`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/prayer`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/prayer`,
+          'x-default': `${SITE_URL}/en/prayer`,
+          'ar': `${SITE_URL}/ar/prayer`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/currency-exchange`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/currency-exchange`,
+          'x-default': `${SITE_URL}/en/currency-exchange`,
+          'ar': `${SITE_URL}/ar/currency-exchange`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/about`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/about`,
+          'x-default': `${SITE_URL}/en/about`,
+          'ar': `${SITE_URL}/ar/about`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/privacy`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/privacy`,
+          'x-default': `${SITE_URL}/en/privacy`,
+          'ar': `${SITE_URL}/ar/privacy`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/terms`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/terms`,
+          'x-default': `${SITE_URL}/en/terms`,
+          'ar': `${SITE_URL}/ar/terms`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/disclaimer`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/disclaimer`,
+          'x-default': `${SITE_URL}/en/disclaimer`,
+          'ar': `${SITE_URL}/ar/disclaimer`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/transparency`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/transparency`,
+          'x-default': `${SITE_URL}/en/transparency`,
+          'ar': `${SITE_URL}/ar/transparency`,
+        }
+      }
+    },
+    {
+      url: `${SITE_URL}/en/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.3,
+      alternates: {
+        languages: {
+          'en': `${SITE_URL}/en/contact`,
+          'x-default': `${SITE_URL}/en/contact`,
+          'ar': `${SITE_URL}/ar/contact`,
+        }
+      }
+    },
   ];
 
   // 2. Prayer Times (Country-level)

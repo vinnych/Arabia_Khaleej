@@ -6,7 +6,7 @@ import Link from "next/link";
 import { GCC_COUNTRIES } from "@/lib/countries";
 import HijriCalendar from "@/components/prayer/HijriCalendar";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 import { getGeolocation } from "@/lib/api";
 import { Breadcrumbs } from "@/lib/seo";
 import MobileFAB from "@/components/layout/MobileFAB";
@@ -172,14 +172,14 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
   };
 
   const breadcrumbItems = [
-    { name: t('home'), href: "/" },
-    { name: t('prayerTimes'), href: "/prayer" }
+    { name: t('home'), href: getLocalizedHref("/", language) },
+    { name: t('prayerTimes'), href: getLocalizedHref("/prayer", language) }
   ];
 
   if (selectedCity.slug && !selectedCity.isAuto) {
     breadcrumbItems.push({ 
       name: getTranslatedCountryName(selectedCity.slug, selectedCity.country), 
-      href: `/prayer/${selectedCity.slug}` 
+      href: getLocalizedHref(`/prayer/${selectedCity.slug}`, language) 
     });
   }
 
@@ -230,7 +230,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
           {GCC_COUNTRIES.map((country) => (
             <Link
               key={country.slug}
-              href={`/prayer/${country.slug}`}
+              href={getLocalizedHref(`/prayer/${country.slug}`, language)}
               className={`text-[9px] uppercase font-black tracking-[0.15em] px-5 py-2.5 rounded-full border transition-all ${
                 selectedCity.slug === country.slug && !selectedCity.isAuto
                   ? "bg-brand-gold text-brand-obsidian border-brand-gold shadow-lg scale-105"
@@ -343,7 +343,7 @@ export default function PrayerClient({ initialCity }: PrayerClientProps) {
 
       {/* Back to Home */}
       <div className="mt-16 flex items-center justify-center">
-        <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all min-h-[44px] flex items-center justify-center px-4">
+        <Link href={getLocalizedHref("/", language)} className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all min-h-[44px] flex items-center justify-center px-4">
           {isRTL ? `← ${t('home')}` : `← ${t('home')}`}
         </Link>
       </div>

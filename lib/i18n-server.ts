@@ -1,4 +1,4 @@
-﻿import { cookies } from 'next/headers';
+import { cookies } from 'next/headers';
 import { translations, Language } from './i18n-data';
 
 export async function getServerLanguage(): Promise<Language> {
@@ -7,9 +7,12 @@ export async function getServerLanguage(): Promise<Language> {
   return (locale === 'ar' || locale === 'en') ? locale as Language : 'en';
 }
 
-export async function getT() {
-  const lang = await getServerLanguage();
+// Why: Overloading getT with an optional lang parameter allows us to pass route locale (resolved from dynamic params)
+// directly, bypassing the cookie check. This prevents search engine crawlers (which do not send cookies)
+// from always defaulting to English translations on Arabic routes.
+export async function getT(lang?: Language) {
+  const resolvedLang = lang || await getServerLanguage();
   return (key: string): string => {
-    return translations[key]?.[lang] || key;
+    return translations[key]?.[resolvedLang] || key;
   };
 }

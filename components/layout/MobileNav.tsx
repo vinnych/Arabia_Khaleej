@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 import { Home, Sparkles, TrendingUp, Clock, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function MobileNav() {
   const pathname = usePathname();
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
 
   const navItems = [
     {
@@ -48,13 +48,15 @@ export default function MobileNav() {
       {/* WHY: We refactored to a completely flat, symmetric mobile bar. By removing the heavy, floating offset primary button and visual gold gradient shadows, we achieve an elegant, balanced editorial navigation standard that aligns with high-end news portals (e.g. Bloomberg). */}
       <div className="relative flex justify-around items-center h-16 px-4 pb-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          // Why: Get the localized URL to support the active route state and link directly to localized content
+          const localizedHref = getLocalizedHref(item.href, language);
+          const isActive = pathname === localizedHref;
           const Icon = item.icon;
           
           return (
             <Link
               key={item.href}
-              href={item.href}
+              href={localizedHref}
               style={{ touchAction: 'manipulation' }}
               className={cn(
                 "flex flex-col items-center justify-center transition-all duration-300 relative select-none h-12 w-12",

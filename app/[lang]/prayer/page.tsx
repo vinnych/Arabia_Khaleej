@@ -8,8 +8,9 @@ import {
   FAQSchema,
 } from "@/components/seo/StructuredData";
 import StructuredData from "@/components/seo/StructuredData";
-export async function generateMetadata() {
-  const lang = await getServerLanguage();
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
   
   return pageMeta({
     title: `Prayer Times GCC — Qatar, UAE, Saudi Arabia, Kuwait, Oman, Bahrain | ${SITE_NAME}`,
@@ -38,8 +39,10 @@ export async function generateMetadata() {
 
 
 
-export default async function PrayerPage() {
-  const t = await getT();
+export default async function PrayerPage({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  const t = await getT(lang);
   const breadcrumbItems = [
     { name: t('home'), item: "/" },
     { name: t('prayerTimes'), item: "/prayer" },

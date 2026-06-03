@@ -1,6 +1,6 @@
 "use client";
 
-import { useLanguage, translations } from "@/lib/i18n";
+import { useLanguage, translations, getLocalizedHref } from "@/lib/i18n";
 import { useEffect } from "react";
 import Link from "next/link";
 import MobileNav from "./MobileNav";
@@ -36,11 +36,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <footer className="w-full py-12 border-t border-brand-gold/5 bg-card/25 backdrop-blur-sm">
         <div className="w-full flex flex-col items-center gap-6">
           <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
-            <Link href="/about" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('about')}</Link>
-            <Link href="/privacy" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('privacy')}</Link>
-            <Link href="/terms" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('terms')}</Link>
-            <Link href="/disclaimer" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('disclaimer')}</Link>
-            <Link href="/contact" className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('contact')}</Link>
+            {/* Why: Prepend language to internal links so crawlers discover direct URLs without redirects */}
+            <Link href={getLocalizedHref("/about", language)} className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('about')}</Link>
+            <Link href={getLocalizedHref("/privacy", language)} className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('privacy')}</Link>
+            <Link href={getLocalizedHref("/terms", language)} className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('terms')}</Link>
+            <Link href={getLocalizedHref("/disclaimer", language)} className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('disclaimer')}</Link>
+            <Link href={getLocalizedHref("/contact", language)} className="text-xs font-bold uppercase tracking-[0.2em] text-foreground/50 hover:text-brand-gold transition-colors">{t('contact')}</Link>
           </div>
           <p className="text-xs text-foreground/50 font-medium uppercase tracking-[0.3em] text-center">
             © {new Date().getFullYear()} {t('siteName')}. {t('passionProject')}

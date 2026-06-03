@@ -16,13 +16,20 @@ const amiri = Amiri({ weight: ["400", "700"], subsets: ["arabic"], variable: "--
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 
-export const metadata = pageMeta({
-  title: "Arabia Khaleej — The GCC Standard",
-  titleAr: "عربية خليج — المعيار الخليجي",
-  description: SITE_DESCRIPTION,
-  descriptionAr: "المرجع النهائي لتجربة خليجية متميزة.",
-  path: "/",
-});
+// Why: Converting static metadata to generateMetadata ensures that the root layout's canonical and alternate lang 
+// tags are dynamically generated based on the active locale parameter ('[lang]') resolved at request time.
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  return pageMeta({
+    title: "Arabia Khaleej — The GCC Standard",
+    titleAr: "عربية خليج — المعيار الخليجي",
+    description: SITE_DESCRIPTION,
+    descriptionAr: "المرجع النهائي لتجربة خليجية متميزة.",
+    path: "/",
+    lang,
+  });
+}
 
 export const viewport = {
   width: 'device-width',

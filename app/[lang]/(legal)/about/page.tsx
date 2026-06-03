@@ -4,20 +4,27 @@ import AboutClient from "./AboutClient";
 import { BreadcrumbSchema, WebPageSchema } from "@/components/seo/StructuredData";
 import StructuredData from "@/components/seo/StructuredData";
 
-export const metadata = pageMeta({
-  title: "About Arabia Khaleej | The GCC Standard",
-  titleAr: "حول عربية خليج | المعيار الخليجي",
-  description:
-    "Arabia Khaleej is a premier independent digital platform for the Gulf Cooperation Council — providing prayer times, currency exchange rates, and country guides across Qatar, UAE, Saudi Arabia, Kuwait, Oman, and Bahrain.",
-  descriptionAr:
-    "عربية خليج منصة رقمية متميزة ومستقلة لدول مجلس التعاون الخليجي — توفر مواقيت الصلاة وأسعار الصرف وأدلة الدول في قطر والإمارات والسعودية والكويت وعمان والبحرين.",
-  path: "/about",
-});
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  return pageMeta({
+    title: "About Arabia Khaleej | The GCC Standard",
+    titleAr: "حول عربية خليج | المعيار الخليجي",
+    description:
+      "Arabia Khaleej is a premier independent digital platform for the Gulf Cooperation Council — providing prayer times, currency exchange rates, and country guides across Qatar, UAE, Saudi Arabia, Kuwait, Oman, and Bahrain.",
+    descriptionAr:
+      "عربية خليج منصة رقمية متميزة ومستقلة لدول مجلس التعاون الخليجي — توفر مواقيت الصلاة وأسعار الصرف وأدلة الدول في قطر والإمارات والسعودية والكويت وعمان والبحرين.",
+    path: "/about",
+    lang,
+  });
+}
 
 
 
-export default async function Page() {
-  const t = await getT();
+export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  const t = await getT(lang);
   const breadcrumbItems = [
     { name: t('home'), item: "/" },
     { name: t('about'), item: "/about" },

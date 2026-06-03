@@ -21,15 +21,28 @@ export default function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Redirect from .pages.dev to the main domain for SEO consistency
-  // This ensures only the canonical domain appears in search results
-  if (hostname.endsWith('.pages.dev')) {
-    const destination = new URL(`https://arabiakhaleej.com${pathname}`);
+  const isAdminPage = pathname.startsWith('/admin');
+
+  // Redirect from .pages.dev and www.arabiakhaleej.com to the main domain for SEO consistency
+  // This ensures only the canonical domain appears in search results and avoids redirect chains.
+  if (hostname.endsWith('.pages.dev') || hostname === 'www.arabiakhaleej.com') {
+    let targetPathname = pathname;
+    if (!isAdminPage) {
+      const locales = ['en', 'ar'];
+      const pathnameHasLocale = locales.some(
+        (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
+      );
+      if (!pathnameHasLocale) {
+        // Retrieve language preference from cookies or default to English
+        const cookieLang = request.cookies.get('NEXT_LOCALE')?.value;
+        const locale = cookieLang === 'ar' ? 'ar' : 'en';
+        targetPathname = `/${locale}${pathname === '/' ? '' : pathname}`;
+      }
+    }
+    const destination = new URL(`https://arabiakhaleej.com${targetPathname}`);
     destination.search = searchParams.toString();
     return NextResponse.redirect(destination.toString(), 301);
   }
-
-  const isAdminPage = pathname.startsWith('/admin');
 
   // If there's a legacy lang query param, redirect to the new subpath structure
   if (searchParams.has('lang') && !isAdminPage) {

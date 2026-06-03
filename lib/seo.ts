@@ -39,6 +39,10 @@ interface PageMetaOptions {
     placename?: string;
   };
   lang?: "en" | "ar";
+  robots?: {
+    index: boolean;
+    follow: boolean;
+  };
 }
 
 export function pageMeta({
@@ -56,6 +60,7 @@ export function pageMeta({
   dateModified,
   geo,
   lang = "en",
+  robots,
 }: PageMetaOptions): Metadata {
   const og = ogTitle ?? (lang === "ar" && titleAr ? titleAr : title);
   const ogDesc = ogDescription ?? (lang === "ar" && descriptionAr ? descriptionAr : description);
@@ -106,7 +111,7 @@ export function pageMeta({
         "x-default": canonicalEn,
       },
     },
-    robots: {
+    robots: robots ?? {
       index: true,
       follow: true,
     },

@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, TrendingUp, Newspaper, Mail, ArrowRight } from "lucide-react";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 import PrayerLite from "@/components/prayer/PrayerLite";
 import { getDeterministicFallback } from "@/lib/fallbacks";
 import { InsightItem } from "@/lib/insights";
@@ -23,6 +23,8 @@ function FeaturedInsightCard({
   formatDateSafe: (d: string | undefined) => string;
   t: (key: string) => string;
 }) {
+  // Why: Get active language from hook for prefixing local links
+  const { language } = useLanguage();
   // Per-card error flag: when the external news image 404s, fall back to deterministic Unsplash image.
   const [imgError, setImgError] = useState(false);
 
@@ -40,7 +42,7 @@ function FeaturedInsightCard({
   return (
     <Link
       key={insight.slug}
-      href={`/insights/${insight.slug}`}
+      href={getLocalizedHref(`/insights/${insight.slug}`, language)}
       /* Why standard static hover classes are used instead of mouse coordinates:
          To keep the UI extremely simple, compact, and highly performant on all devices (including mobile touchscreens).
          A clean border color shift and low-profile background tint transition provides excellent visual feedback with zero client-side script overhead. */
@@ -110,12 +112,14 @@ function QuickNavLinkCard({
   link: typeof NAV_LINKS[number];
   t: (key: string) => string;
 }) {
+  // Why: Get active language from hook for prefixing local links
+  const { language } = useLanguage();
   const Icon = link.icon;
 
   return (
     <Link
       key={link.href}
-      href={link.href}
+      href={getLocalizedHref(link.href, language)}
       /* Why standard static hover classes are used:
          To maintain a simple, compact, and beautiful dark interface, pure CSS transitions are the absolute best choice.
          They load instantly and offer perfect visual feedback with zero client-side React rerenders. */
@@ -161,7 +165,7 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
 
   const formatDateSafe = (dateString: string | undefined) => {
     if (!dateString) return 'Recent';
@@ -219,7 +223,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         {/* WHY: Replaced rounded bubbly capsule styles and moving glowing gradients with clean, classic rounded-lg geometry and solid brand borders. */}
         <div className="animate-fade-up flex flex-col sm:flex-row gap-4 mb-16" style={{ animationDelay: "200ms" }}>
           <Link
-            href="/insights"
+            href={getLocalizedHref("/insights", language)}
             className="bg-brand-gold hover:bg-brand-gold/90 text-brand-obsidian px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2.5 transition-all duration-200 active:scale-[0.98]"
           >
             <Newspaper size={16} />
@@ -227,7 +231,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
             <ArrowRight size={14} />
           </Link>
           <Link
-            href="/prayer"
+            href={getLocalizedHref("/prayer", language)}
             className="glass px-8 py-3 rounded-lg font-bold text-sm text-foreground flex items-center gap-2.5 hover:border-white/15 transition-all duration-200 active:scale-[0.98]"
           >
             <Clock size={16} className="text-brand-gold" />
@@ -266,7 +270,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
               <h2 className="text-4xl font-display font-bold text-foreground tracking-tighter">{t('regionalGuides')}</h2>
               <div className="w-16 h-1 bg-brand-gold" />
             </div>
-            <Link href="/countries" className="text-xs font-bold text-brand-gold hover:opacity-80 flex items-center gap-2 uppercase tracking-[0.2em] border-b border-brand-gold/20 pb-1">
+            <Link href={getLocalizedHref("/countries", language)} className="text-xs font-bold text-brand-gold hover:opacity-80 flex items-center gap-2 uppercase tracking-[0.2em] border-b border-brand-gold/20 pb-1">
               {t('viewAllCountries')} <ArrowRight size={14} />
             </Link>
           </div>
@@ -275,7 +279,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
             {GCC_COUNTRIES.map((country) => (
               <Link
                 key={country.id}
-                href={`/countries/${country.id}`}
+                href={getLocalizedHref(`/countries/${country.id}`, language)}
                 /* WHY: Replaced bubbly rounding and heavy grid offsets with sleek rounded-xl boundaries and low-profile opacity transitions. */
                 className="group relative h-60 rounded-xl overflow-hidden border border-white/5 hover:opacity-95 transition-opacity duration-300"
               >
@@ -306,7 +310,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
                 <p className="text-[10px] text-brand-gold uppercase tracking-[0.3em] font-black mb-3">{t('regionalIntelligence')}</p>
                 <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground tracking-tighter">{t('featuredInsights')}</h2>
               </div>
-              <Link href="/insights" className="bg-brand-gold hover:bg-brand-gold/90 text-brand-obsidian px-6 py-3 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-colors duration-200">
+              <Link href={getLocalizedHref("/insights", language)} className="bg-brand-gold hover:bg-brand-gold/90 text-brand-obsidian px-6 py-3 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-colors duration-200">
                 {t('openTerminal')}
               </Link>
             </div>
@@ -333,7 +337,7 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
       {/* ── FOOTER STRIP ── */}
       <footer className="w-full border-t border-border/10 py-16 px-4 flex flex-col items-center gap-6 z-10">
         <Link
-          href="/transparency"
+          href={getLocalizedHref("/transparency", language)}
           className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.5em] hover:text-brand-gold transition-all duration-300"
         >
           {t('transparencyNotice')}

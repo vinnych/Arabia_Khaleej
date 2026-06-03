@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 // WHY: Settings2 removed (unused import kept previously), Zap added for live badge
 import { ArrowDownUp, Search, Star, Clock, TrendingUp, ChevronDown, X, RefreshCw, Globe, Copy, Check, Share2, Zap } from "lucide-react";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 import Link from "next/link";
 import { Breadcrumbs } from "@/lib/seo";
 
@@ -216,8 +216,8 @@ export default function CurrencyExchangeClient() {
   }
 
   const breadcrumbItems = [
-    { name: t("home"), href: "/" },
-    { name: t("currencyExchange"), href: "/currency-exchange" },
+    { name: t("home"), href: getLocalizedHref("/", language) },
+    { name: t("currencyExchange"), href: getLocalizedHref("/currency-exchange", language) },
   ];
 
   const renderPicker = (
@@ -762,7 +762,7 @@ export default function CurrencyExchangeClient() {
         {/* WHY different arrows: in RTL layouts (Arabic), "back" means going right
             not left, so the arrow should face right (→). The original used ← for
             both branches, making the Arabic experience visually incorrect. */}
-        <Link href="/" className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
+        <Link href={getLocalizedHref("/", language)} className="text-[11px] font-bold uppercase tracking-[0.4em] text-accent hover:tracking-[0.6em] transition-all">
           {isRTL ? `${t('home')} →` : `← ${t('home')}`}
         </Link>
       </div>

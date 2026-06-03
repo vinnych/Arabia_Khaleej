@@ -32,9 +32,11 @@ const COUNTRY_META: Record<
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ country: string }>;
+  params: Promise<{ lang: string; country: string }>;
 }) {
-  const { country: countrySlug } = await params;
+  const resolvedParams = await params;
+  const { country: countrySlug } = resolvedParams;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
   const country = getCountryBySlug(countrySlug);
   if (!country) return {};
 
@@ -46,6 +48,7 @@ export async function generateMetadata({
     description: `Accurate daily prayer times for ${country.capital}, ${country.name}. Fajr, Sunrise, Dhuhr, Asr, Maghrib and Isha schedules calculated using the Umm Al-Qura University method. Includes Hijri calendar.`,
     descriptionAr: `مواقيت الصلاة اليومية الدقيقة لـ ${meta.capitalAr}، ${meta.nameAr}. جداول الفجر والشروق والظهر والعصر والمغرب والعشاء. تشمل التقويم الهجري.`,
     path: `/prayer/${country.slug}`,
+    lang,
     keywords: [
       `prayer times ${country.name}`,
       `salat times ${country.capital}`,
@@ -77,13 +80,15 @@ export async function generateMetadata({
 export default async function CountryPrayerPage({
   params,
 }: {
-  params: Promise<{ country: string }>;
+  params: Promise<{ lang: string; country: string }>;
 }) {
-  const { country: countrySlug } = await params;
+  const resolvedParams = await params;
+  const { country: countrySlug } = resolvedParams;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
   const country = getCountryBySlug(countrySlug);
   if (!country) notFound();
 
-  const t = await getT();
+  const t = await getT(lang);
   const meta = COUNTRY_META[countrySlug] ?? { nameAr: country.name, capitalAr: country.capital, code: "QA" };
 
   /** Mapping of country slugs to i18n translation keys for breadcrumb display */

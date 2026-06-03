@@ -3,7 +3,7 @@
 // Country-specific client component
 
 
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 import { notFound, useParams } from "next/navigation";
 import { Globe, Users, Landmark, Coins, Rocket, ShieldCheck } from "lucide-react";
 import Link from "next/link";
@@ -178,7 +178,7 @@ const COUNTRY_DATA: Record<string, any> = {
 
 export default function CountryClient() {
   const { slug } = useParams();
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
 
   const data = COUNTRY_DATA[slug as string];
 
@@ -194,9 +194,9 @@ export default function CountryClient() {
   ];
 
   const breadcrumbItems = [
-    { name: t('home'), href: "/" },
-    { name: t('countries'), href: "/#countries" },
-    { name: t(data.nameKey), href: `/countries/${slug}` }
+    { name: t('home'), href: getLocalizedHref("/", language) },
+    { name: t('countries'), href: getLocalizedHref("/#countries", language) },
+    { name: t(data.nameKey), href: getLocalizedHref(`/countries/${slug}`, language) }
   ];
 
   return (
@@ -303,7 +303,7 @@ export default function CountryClient() {
           </p>
           
           <Link 
-            href="/transparency"
+            href={getLocalizedHref("/transparency", language)}
             className="group inline-flex items-center gap-3 px-8 py-3 rounded-full border border-brand-gold/20 hover:border-brand-gold/50 transition-all text-[10px] font-black uppercase tracking-[0.3em] text-accent hover:bg-brand-gold/5"
           >
             {t('viewDetails')} <Globe size={14} className="group-hover:rotate-12 transition-transform" />

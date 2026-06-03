@@ -9,7 +9,7 @@ import {
 import { getT } from "@/lib/i18n-server";
 
 type Props = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ lang: string; slug: string }>;
 };
 
 const COUNTRY_INFO: Record<
@@ -116,8 +116,10 @@ const COUNTRY_INFO: Record<
 };
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params;
-  const t = await getT();
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  const t = await getT(lang);
   const info = COUNTRY_INFO[slug] ?? COUNTRY_INFO["qatar"];
   
   const countryName = t(
@@ -145,13 +147,16 @@ export async function generateMetadata({ params }: Props) {
     description: `${t('guideDesc')}: ${countryName}. ${t('capital')}: ${capitalName}. ${t('vision')}: ${t(keyPrefix + 'Vision' as any)}.`,
     path: `/countries/${slug}`,
     type: "article",
+    lang,
   });
 }
 
 export default async function Page({ params }: Props) {
-  const { slug } = await params;
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
   const info = COUNTRY_INFO[slug] ?? COUNTRY_INFO["qatar"];
-  const t = await getT();
+  const t = await getT(lang);
 
   const countryName = t(
     slug === 'saudi-arabia' ? 'saudiArabia' : 

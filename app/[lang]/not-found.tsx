@@ -1,17 +1,24 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Page Not Found | Arabia Khaleej",
-  description: "The page you are looking for could not be found.",
-  other: {
-    "google-adsense-account": "ca-pub-7212871157824722",
-  },
-};
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { getLocalizedHref } from "@/lib/i18n";
 
 export default function NotFound() {
+  const pathname = usePathname();
+  // Why: Since not-found is rendering on unknown paths, we extract the lang prefix from current pathname (e.g. /ar/unknown -> ar)
+  const lang = pathname?.startsWith("/ar") ? "ar" : "en";
+
+  useEffect(() => {
+    document.title = lang === "ar" ? "الصفحة غير موجودة | عربية خليج" : "Page Not Found | Arabia Khaleej";
+  }, [lang]);
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[88vh] text-center px-6 relative overflow-hidden">
+      {/* Why: Crawlers must not index 404 pages, and this HTML tag is respected by all indexers */}
+      <meta name="robots" content="noindex, nofollow" />
+      
       {/* Ambient glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-brand-gold/5 blur-[120px] rounded-full -z-10 pointer-events-none" />
 
@@ -26,26 +33,28 @@ export default function NotFound() {
       {/* Message */}
       <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 fill-mode-both">
         <h1 className="text-2xl sm:text-3xl font-black tracking-tight mb-3">
-          Page Not Found
+          {lang === "ar" ? "الصفحة غير موجودة" : "Page Not Found"}
         </h1>
         <p className="text-sm font-light opacity-50 max-w-xs mx-auto leading-relaxed mb-10">
-          The page you&apos;re looking for may have moved or no longer exists.
+          {lang === "ar" 
+            ? "الصفحة التي تبحث عنها قد تكون نقلت أو لم تعد موجودة." 
+            : "The page you're looking for may have moved or no longer exists."}
         </p>
       </div>
 
       {/* Actions */}
       <div className="flex flex-wrap gap-3 justify-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-both">
         <Link
-          href="/"
+          href={getLocalizedHref("/", lang)}
           className="gold-gradient text-brand-obsidian font-bold text-[11px] uppercase tracking-[0.2em] px-8 py-3 rounded-full hover:shadow-[0_0_24px_rgba(212,175,55,0.35)] transition-all duration-300 active:scale-95"
         >
-          Return Home
+          {lang === "ar" ? "العودة للرئيسية" : "Return Home"}
         </Link>
         <Link
-          href="/about"
+          href={getLocalizedHref("/about", lang)}
           className="glass border border-brand-gold/20 hover:border-brand-gold/50 text-[11px] font-bold uppercase tracking-[0.2em] px-8 py-3 rounded-full transition-all duration-300 active:scale-95"
         >
-          About
+          {lang === "ar" ? "من نحن" : "About"}
         </Link>
       </div>
 

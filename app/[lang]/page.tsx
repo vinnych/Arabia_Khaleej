@@ -10,8 +10,9 @@ import { getServerLanguage, getT } from "@/lib/i18n-server";
 import { getUnifiedInsights } from "@/lib/insights";
 
 
-export async function generateMetadata() {
-  const lang = await getServerLanguage();
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
   
   return pageMeta({
     title: "Arabia Khaleej | The GCC Standard — Regional Intelligence Portal",
@@ -32,9 +33,10 @@ export async function generateMetadata() {
   });
 }
 
-export default async function Home() {
-  const t = await getT();
-  const lang = await getServerLanguage();
+export default async function Home({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  const t = await getT(lang);
   const insights = await getUnifiedInsights({ lang, limit: 4 });
   
   const faqQuestions = [

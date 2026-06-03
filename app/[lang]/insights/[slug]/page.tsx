@@ -13,12 +13,14 @@ export async function generateMetadata({
   params, 
   searchParams 
 }: { 
-  params: Promise<{ slug: string }>,
+  params: Promise<{ lang: string; slug: string }>,
   searchParams: Promise<{ lang?: string }>
 }) {
   const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
   const slug = resolvedParams.slug;
-  const lang = resolvedSearch.lang === 'ar' ? 'ar' : 'en';
+  // Why: Check resolvedParams.lang first (from route subpath /[lang]/insights/[slug])
+  // to correctly set page metadata language and canonical url for SEO crawlers.
+  const lang = resolvedParams.lang === 'ar' || resolvedSearch.lang === 'ar' ? 'ar' : 'en';
   
   const article = await getArticleBySlug(slug, lang);
   
@@ -60,11 +62,13 @@ export default async function InsightArticlePage({
   params,
   searchParams
 }: { 
-  params: Promise<{ slug: string }>,
+  params: Promise<{ lang: string; slug: string }>,
   searchParams: Promise<{ lang?: string }>
 }) {
   const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
-  const lang = resolvedSearch.lang === 'ar' ? 'ar' : 'en';
+  // Why: Retrieve the locale from the dynamic route parameter (resolvedParams.lang)
+  // to avoid falling back to English when Googlebot crawls /ar paths.
+  const lang = resolvedParams.lang === 'ar' || resolvedSearch.lang === 'ar' ? 'ar' : 'en';
   const article = await getArticleBySlug(resolvedParams.slug, lang);
 
   if (!article) {

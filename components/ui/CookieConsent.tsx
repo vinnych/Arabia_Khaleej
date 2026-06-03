@@ -59,7 +59,7 @@ export default function CookieConsent() {
                 - UX: It updates the URL and switches components dynamically without a full document load.
                 - Compatibility: Resolves the Next.js/ESLint "no-html-link-for-pages" warning that prevents builds.
               */}
-              <Link href="/privacy" className="ml-1 text-brand-gold hover:underline">
+              <Link href={`/${language}/privacy`} className="ml-1 text-brand-gold hover:underline">
                 {language === 'ar' ? 'اعرف أكثر' : 'Learn more'}
               </Link>
 

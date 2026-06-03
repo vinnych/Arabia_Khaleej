@@ -2,13 +2,13 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 
 export default function JoinClient() {
   const [inviteStatus, setInviteStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const emailRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
 
   async function handleInvite(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -112,7 +112,7 @@ export default function JoinClient() {
 
       {/* Back to Home */}
       <div className="mt-16 animate-reveal delay-1000">
-        <Link href="/" className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.5em] text-brand-gold hover:text-brand-accent transition-all">
+        <Link href={getLocalizedHref("/", language)} className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.5em] text-brand-gold hover:text-brand-accent transition-all">
           <span className={`transition-transform duration-300 ${isRTL ? 'group-hover:translate-x-2' : 'group-hover:-translate-x-2'}`}>
             {isRTL ? `← ${t('returnHome')}` : `← ${t('returnHome')}`}
           </span>

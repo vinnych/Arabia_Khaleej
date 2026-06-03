@@ -3,27 +3,34 @@ import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
 import CurrencyExchangeClient from "@/components/finance/CurrencyExchangeClient";
 import { WebPageSchema, DatasetSchema, BreadcrumbSchema } from "@/components/seo/StructuredData";
 
-export const metadata = pageMeta({
-  title: "Currency Exchange — Live GCC & World Currency Converter",
-  titleAr: "تحويل العملات — محوّل العملات الخليجية والعالمية المباشر",
-  description:
-    "Convert between 40+ currencies with live exchange rates. GCC currencies (AED, SAR, QAR, KWD, OMR, BHD), major pairs (USD, EUR, GBP), and Asian currencies. Real-time rates updated every 30 minutes.",
-  descriptionAr:
-    "حوّل بين أكثر من 40 عملة بأسعار صرف مباشرة. عملات الخليج (درهم إماراتي، ريال سعودي، ريال قطري، دينار كويتي، ريال عماني، دينار بحريني) والعملات الرئيسية والعملات الآسيوية.",
-  path: "/currency-exchange",
-  keywords: [
-    "currency exchange", "currency converter", "GCC exchange rates",
-    "AED to USD", "SAR to USD", "QAR to USD", "KWD to USD",
-    "live exchange rates", "money converter", "forex rates GCC",
-    "تحويل العملات", "أسعار الصرف", "محول عملات",
-    "سعر الدولار", "سعر الريال", "سعر الدرهم",
-  ],
-});
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  return pageMeta({
+    title: "Currency Exchange — Live GCC & World Currency Converter",
+    titleAr: "تحويل العملات — محوّل العملات الخليجية والعالمية المباشر",
+    description:
+      "Convert between 40+ currencies with live exchange rates. GCC currencies (AED, SAR, QAR, KWD, OMR, BHD), major pairs (USD, EUR, GBP), and Asian currencies. Real-time rates updated every 30 minutes.",
+    descriptionAr:
+      "حوّل بين أكثر من 40 عملة بأسعار صرف مباشرة. عملات الخليج (درهم إماراتي، ريال سعودي، ريال قطري، دينار كويتي، ريال عماني، دينار بحريني) والعملات الرئيسية والعملات الآسيوية.",
+    path: "/currency-exchange",
+    lang,
+    keywords: [
+      "currency exchange", "currency converter", "GCC exchange rates",
+      "AED to USD", "SAR to USD", "QAR to USD", "KWD to USD",
+      "live exchange rates", "money converter", "forex rates GCC",
+      "تحويل العملات", "أسعار الصرف", "محول عملات",
+      "سعر الدولار", "سعر الريال", "سعر الدرهم",
+    ],
+  });
+}
 
 
 
-export default async function CurrencyExchangePage() {
-  const t = await getT();
+export default async function CurrencyExchangePage({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  const t = await getT(lang);
   const breadcrumbItems = [
     { name: t("home"), item: "/" },
     { name: t("currencyExchange"), item: "/currency-exchange" },

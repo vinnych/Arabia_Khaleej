@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { InsightItem } from "@/lib/insights";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 // Elegant icons chosen for maximum visual polish and semantic clarity.
 // Languages, RefreshCw, BookOpen, BarChart2 were removed along with the Perspective (AR) translation mode.
 import { Calendar, ChevronLeft, Share2, Clock, Tag, Quote } from "lucide-react";
@@ -188,7 +188,7 @@ export default function InsightArticleClient({
     const shareData = {
       title: article.title,
       text: article.description.substring(0, 100) + "...",
-      url: `${window.location.origin}/insights/${article.slug}`,
+      url: `${window.location.origin}${getLocalizedHref(`/insights/${article.slug}`, language)}`,
     };
     try {
       if (navigator.share) {
@@ -234,7 +234,7 @@ export default function InsightArticleClient({
       {/* ── Navigation ───────────────────────────────────────────────────── */}
       {/* WHY: Tighter vertical flow (mb-6 instead of mb-12) eliminates visual void. Group-hover translate-x on ChevronLeft creates an organic micro-interaction. */}
       <Link
-        href="/insights"
+        href={getLocalizedHref("/insights", language)}
         className="hidden md:inline-flex items-center gap-2 text-foreground/40 hover:text-accent transition-all duration-300 mb-6 group"
       >
         <ChevronLeft 

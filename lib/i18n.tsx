@@ -30,6 +30,7 @@ export function LanguageProvider({
 
     setLanguageState(lang);
     localStorage.setItem('language', lang);
+    // Why: Set NEXT_LOCALE cookie so subsequent Server Component renders and requests are aligned on Cloudflare.
     document.cookie = `NEXT_LOCALE=${lang}; path=/; max-age=31536000; SameSite=Lax; ${window.location.protocol === 'https:' ? 'Secure' : ''}`;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
@@ -71,4 +72,29 @@ export const useLanguage = () => {
   return context;
 };
 
-
+/**
+ * Normalizes and prefixes an internal route path with the active language code.
+ * Why: Ensures that client-side links point directly to the localized path,
+ * avoiding redirect hops and ensuring Googlebot discovers canonical localized URLs.
+ */
+export function getLocalizedHref(path: string, lang: Language): string {
+  // Why: Avoid prefixing external protocols (HTTP/HTTPS), mailto, or telephone links.
+  if (path.startsWith('http') || path.startsWith('mailto:') || path.startsWith('tel:')) {
+    return path;
+  }
+  
+  // Normalize leading slash to ensure we have a valid relative path.
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  
+  // Why: Root path / points to /${lang} (e.g. /en or /ar).
+  if (cleanPath === '/') {
+    return `/${lang}`;
+  }
+  
+  // Why: Prevent double-prefixing if the path already starts with /en/ or /ar/ or is exactly /en or /ar.
+  if (cleanPath.startsWith('/en/') || cleanPath === '/en' || cleanPath.startsWith('/ar/') || cleanPath === '/ar') {
+    return cleanPath;
+  }
+  
+  return `/${lang}${cleanPath}`;
+}

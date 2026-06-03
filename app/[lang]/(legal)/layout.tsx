@@ -1,6 +1,16 @@
 import Link from "next/link";
+import { getLocalizedHref } from "@/lib/i18n";
 
-export default function LegalLayout({ children }: { children: React.ReactNode }) {
+export default async function LegalLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ lang: string }>;
+}) {
+  const resolvedParams = await params;
+  const lang = resolvedParams?.lang === 'ar' ? 'ar' : 'en';
+
   return (
     <div className="min-h-screen relative overflow-x-hidden">
       {/* Ambient background glows */}
@@ -10,7 +20,7 @@ export default function LegalLayout({ children }: { children: React.ReactNode })
       {/* Top navigation breadcrumb */}
       <nav className="px-6 sm:px-12 pt-10 pb-0">
         <Link
-          href="/"
+          href={getLocalizedHref("/", lang)}
           className="inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[0.3em] text-accent hover:text-brand-gold transition-all duration-300 group"
         >
           <span className="w-5 h-[1.5px] bg-brand-gold/40 group-hover:bg-brand-gold transition-all duration-300 group-hover:w-8" />

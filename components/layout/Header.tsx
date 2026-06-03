@@ -3,7 +3,7 @@
 import Link from "next/link";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from "@/lib/i18n";
 import { usePathname } from "next/navigation";
 
 const NAV = [
@@ -13,7 +13,7 @@ const NAV = [
 ];
 
 export default function Header() {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language } = useLanguage();
   const pathname = usePathname();
 
   return (
@@ -23,8 +23,9 @@ export default function Header() {
       <div className={`flex items-center justify-between w-full max-w-7xl mx-auto`}>
 
         {/* Logo */}
+        {/* Why: Prepend active language prefix to the logo link to prevent crawlers from triggering 301 redirects */}
         <Link
-          href="/"
+          href={getLocalizedHref("/", language)}
           aria-label={t('home')}
           className={`flex flex-col ${isRTL ? 'items-end' : 'items-start'} hover:opacity-70 transition-all duration-300 min-w-0 group`}
         >
@@ -39,11 +40,13 @@ export default function Header() {
         {/* Desktop Nav */}
         <nav className="hidden lg:flex items-center gap-2">
           {NAV.map((item) => {
-            const isActive = pathname.startsWith(item.href);
+            // Why: Check if the pathname exactly matches or starts with the localized href to support language routing
+            const localizedHref = getLocalizedHref(item.href, language);
+            const isActive = pathname === localizedHref || (item.href !== '/' && pathname.startsWith(localizedHref));
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={localizedHref}
                 /* WHY: Transitioning from heavy capsule outlines (which compete with action buttons) to a relative block with an absolute bottom gradient underline maintains a premium, minimal route marker. */
                 className={`relative px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-300
                   ${isActive

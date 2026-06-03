@@ -12,12 +12,14 @@ export async function generateMetadata({
   params, 
   searchParams 
 }: { 
-  params: Promise<{ slug: string }>,
+  params: Promise<{ lang: string; slug: string }>,
   searchParams: Promise<{ preview?: string; lang?: string }>
 }) {
   const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
   const slug = resolvedParams.slug;
-  const lang = resolvedSearch.lang === 'ar' ? 'ar' : 'en';
+  // Why: Check resolvedParams.lang first (from route subpath /[lang]/preview/[slug])
+  // to correctly set page metadata language and canonical url.
+  const lang = resolvedParams.lang === 'ar' || resolvedSearch.lang === 'ar' ? 'ar' : 'en';
   
   // For preview, we want to use the same logic as the regular article page
   const article = await getArticleBySlug(slug, lang);
@@ -36,6 +38,10 @@ export async function generateMetadata({
       image: article.image,
       type: 'article',
       lang,
+      robots: {
+        index: false,
+        follow: false,
+      },
       datePublished: article.pubDate,
       keywords: [
         article.source, 
@@ -53,6 +59,10 @@ export async function generateMetadata({
     description: "Preview of article before publishing.",
     path: `/preview/${slug}`,
     lang,
+    robots: {
+      index: false,
+      follow: false,
+    },
   });
 }
 
@@ -60,11 +70,13 @@ export default async function PreviewArticlePage({
   params,
   searchParams
 }: { 
-  params: Promise<{ slug: string }>,
+  params: Promise<{ lang: string; slug: string }>,
   searchParams: Promise<{ preview?: string; lang?: string }>
 }) {
   const [resolvedParams, resolvedSearch] = await Promise.all([params, searchParams]);
-  const lang = resolvedSearch.lang === 'ar' ? 'ar' : 'en';
+  // Why: Retrieve language preference directly from the dynamic route parameter (resolvedParams.lang)
+  // to avoid falling back to English when Googlebot crawls /ar paths.
+  const lang = resolvedParams.lang === 'ar' || resolvedSearch.lang === 'ar' ? 'ar' : 'en';
   const article = await getArticleBySlug(resolvedParams.slug, lang);
 
   if (!article) {

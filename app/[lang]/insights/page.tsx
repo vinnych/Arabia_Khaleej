@@ -2,16 +2,21 @@ import { pageMeta } from "@/lib/seo";
 import StructuredData from "@/components/seo/StructuredData";
 import InsightsClient from "@/components/insights/InsightsClient";
 
-export const metadata = pageMeta({
-  title: "Insights | Official GCC Editorials & Deep Dives",
-  titleAr: "رؤى | افتتاحيات وتحليلات خليجية رسمية",
-  description: "Original editorial insights, expert deep dives, and exclusive high-fidelity updates from Arabia Khaleej.",
-  descriptionAr: "رؤى تحريرية أصلية، تحليلات خبراء، وتحديثات حصرية عالية الدقة من عربية خليج.",
-  path: "/insights",
-  keywords: ["Middle East editorials", "Arabia Khaleej original", "GCC economy deep dive"],
-});
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  return pageMeta({
+    title: "Insights | Official GCC Editorials & Deep Dives",
+    titleAr: "رؤى | افتتاحيات وتحليلات خليجية رسمية",
+    description: "Original editorial insights, expert deep dives, and exclusive high-fidelity updates from Arabia Khaleej.",
+    descriptionAr: "رؤى تحريرية أصلية، تحليلات خبراء، وتحديثات حصرية عالية الدقة من عربية خليج.",
+    path: "/insights",
+    lang,
+    keywords: ["Middle East editorials", "Arabia Khaleej original", "GCC economy deep dive"],
+  });
+}
 
-export default function InsightsPage() {
+export default async function InsightsPage({ params }: { params: Promise<{ lang: string }> }) {
   return (
     <div className="pt-20">
       <StructuredData 

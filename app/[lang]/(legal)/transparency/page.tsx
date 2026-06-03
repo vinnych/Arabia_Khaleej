@@ -6,17 +6,22 @@ import TransparencyClient from "./TransparencyClient";
 
 import { getT } from "@/lib/i18n-server";
 
-export async function generateMetadata() {
-  const t = await getT();
+export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  const t = await getT(lang);
   return pageMeta({
     title: `${t('transparency')} | ${SITE_NAME}`,
     description: t('transparencyDesc'),
     path: "/transparency",
+    lang,
   });
 }
 
-export default async function Page() {
-  const t = await getT();
+export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
+  const resolvedParams = await params;
+  const lang = resolvedParams.lang === 'ar' ? 'ar' : 'en';
+  const t = await getT(lang);
   const breadcrumbItems = [
     { name: t('home'), item: "/" },
     { name: t('transparency'), item: "/transparency" },
