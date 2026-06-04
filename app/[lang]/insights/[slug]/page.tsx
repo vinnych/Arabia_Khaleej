@@ -79,7 +79,7 @@ export default async function InsightArticlePage({
   const moreInsights = await getUnifiedInsights({ lang, limit: 6 });
   const filteredMoreInsights = moreInsights.filter((n: InsightItem) => n.slug !== resolvedParams.slug).slice(0, 4);
 
-  const t = await getT();
+  const t = await getT(lang);
   const breadcrumbs = [
     { name: t('home'), item: "/" },
     { name: t('insights'), item: "/insights" },

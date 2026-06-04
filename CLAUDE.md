@@ -9,9 +9,9 @@
 Next.js 15 (App Router) fully optimized for **Cloudflare Pages + Cloudflare Workers**.
 
 - **Runtime**: Every API route must declare `export const runtime = 'edge'`. No Node.js-only packages.
-- **Database**: No permanent DB. Upstash Redis (Free) via REST API is the persistence layer (transient cache + draft queue + permanent articles with a 9,500 keys FIFO eviction policy).
-- **AI / Article Generation**: Fully delegated to an external Python agent on Render. The Next.js app never calls LLMs directly.
-- **Bilingual**: All editorial content is stored bilingually `{ en: string, ar: string }` in Redis and normalized at read-time.
+- **Database**: Cloudflare D1 (SQLite at the Edge) is the primary relational database. If the D1 binding (`process.env.DB`) is not configured, the platform automatically falls back to Upstash Redis (transient cache + draft queue + permanent articles with a 9,500 keys FIFO eviction policy).
+- **AI / Article Generation**: Fully delegated to an external Python agent on Render. Triggered asynchronously using Next.js 15 `after()` background execution to prevent Cloudflare 25s execution timeouts.
+- **Bilingual**: All editorial content is stored bilingually `{ en: string, ar: string }` in D1/Redis and normalized at read-time.
 - **i18n Routing**: Native Next.js App Router subpath routing (e.g., `/en/insights`). All internal `<Link>` components and sitemap entries must use the locale prefix.
 
 ---
@@ -23,16 +23,12 @@ npm run dev                         # Local dev server
 npm run build                       # Production build
 npm run lint                        # ESLint
 npm test                            # Jest unit tests
-npm run automation-worker:deploy    # Deploy daily cron + keep-alive worker (manual — NOT via GitHub)
-npm run contact-worker:deploy       # Deploy Cloudflare contact form worker (manual — NOT via GitHub)
+npm run db:clean                    # Cleanup dead Redis listings/drafts
+npm run automation-worker:deploy    # Deploy daily cron + keep-alive worker
+npm run contact-worker:deploy       # Deploy Cloudflare contact form worker
 ```
 
 > **Deployment**: Cloudflare Pages auto-deploys from GitHub on every push to `main`. Workers are NOT auto-deployed — run the commands above after any `worker/` change.
->
-> **After every `automation-worker:deploy`** you must re-set the Worker secret or the cron returns 401:
-> ```bash
-> npx wrangler secret put CRON_SECRET --config worker/wrangler-automation.toml
-> ```
 
 ---
 
@@ -41,14 +37,16 @@ npm run contact-worker:deploy       # Deploy Cloudflare contact form worker (man
 | Rule | Detail |
 |---|---|
 | **Runtime** | Always `export const runtime = 'edge'` on API routes |
-| **Redis TTL** | Transient keys (rate limits, active generation states) must include `{ ex: N }`. Published articles and live lists store permanently (no TTL). |
+| **D1 / DB Fallback** | Use `getInsightRepository()` to obtain the active repository (D1 or Redis). |
+| **Redis REST POSTs** | Never pass keys in REST URL paths (e.g. `/get/key`). Always send POST requests to `/` with `["GET", key]` body arrays to prevent injection. |
 | **No hardcoded secrets** | All secrets come from `process.env.*`. Never put a token/password in source code. |
 | **Images** | External hostnames must be added to `next.config.ts` `remotePatterns` |
-| **CSP** | Defined in `lib/csp.ts`, applied in `middleware.ts`. Never inline CSP strings. Static pre-rendered routes (like `/admin`) must omit the nonce to prevent blocking static inline scripts. |
+| **CSP** | Defined in `lib/csp.ts`, applied in `middleware.ts`. Never inline CSP strings. Static routes (like `/admin`) omit the nonce to prevent blocking hydration scripts. |
 | **Naming** | camelCase vars/fns · PascalCase components |
-| **Types** | Always use TypeScript types. Avoid `any`. |
+| **Types** | Always use TypeScript types. Avoid `any` unless casting raw database rows. |
 | **Errors** | No silent catch blocks. Always `console.error(...)` with context. |
 | **Comments** | Add `// Why: ...` comments explaining non-obvious decisions. |
+
 ---
 
 ## 🧪 Testing Standards
@@ -56,19 +54,15 @@ npm run contact-worker:deploy       # Deploy Cloudflare contact form worker (man
 We maintain a Jest unit test suite covering core edge engines, utilities, and read-side pipeline services.
 
 - **Test Files Location**: Always put test files in `lib/__tests__/` with the suffix `.test.ts`.
-- **Mocking External Services**: Never make real network requests in unit tests. Mock `global.fetch` and any cache services (like `lib/redis.ts` and `getWithCompression`) so that tests run instantly and offline.
+- **Mocking External Services**: Mock `global.fetch` and D1 database objects in unit tests so that tests run instantly and offline.
 - **Run Tests**: Execute `npm test` before submitting changes. All tests must pass successfully.
 
 ---
 
 ## 🤖 Article Editorial Workflow
 
-Arabia Khaleej delegates heavy article generation to an external Python agent. Drafts go through a mandatory human-in-the-loop review before publication.
-
-### Trigger → Publish Pipeline
-
 ```
-[Cron: daily-automation.js every 30min]  [Admin: /admin/review manual input]
+[Cron: daily-automation.js every 60min]  [Admin: /admin/review manual input]
                     │                                   │
                     ▼                                   ▼
          GET /api/cron/generate              POST /api/generate
@@ -76,73 +70,22 @@ Arabia Khaleej delegates heavy article generation to an external Python agent. D
           picks random UAE headline)
                     └──────────────┬──────────────────┘
                                    ▼
-                          lib/agentHelper.ts
-                          • article:{topic} → status: generating  TTL: 7d
-                          • buildCallbackUrl() from WEBHOOK_SECRET env var
-                          • POST → Render agent /v1/generate
-                                   │ (async callback)
-                                   ▼
-                          POST /api/webhook
-                          • Validates WEBHOOK_SECRET
-                          • Saves content, tags, image_url
-                          • article:{topic} → status: pending_review  (no TTL)
-                                   │
-                                   ▼
-                      /admin/review (polls every 5s)
-                      • Review / Edit markdown
-                      • Publish → translateMarkdown EN→AR
-                                   setWithCompression insights:article:{slug}  (No TTL - Permanent)
-                                   prepend to insights:list:en + insights:list:ar  (No TTL - Permanent)
-                       • Delete  → cascades draft + live + both list caches
-```
-
-### Article Status State Machine
-
-| Status | TTL | Set By |
-|---|---|---|
-| `generating` | 7 days | `agentHelper.ts` on dispatch |
-| `error` | 2 days | `agentHelper.ts` on agent HTTP failure |
-| `pending_review` | None | `webhook/route.ts` on agent callback |
-| `published` | N/A | `article/route.ts` PUT action |
-
-### Active API Routes
-
-| Route | Method | Auth | Purpose |
-|---|---|---|---|
-| `POST /api/generate` | POST | `ADMIN_SECRET` / `CRON_SECRET` Bearer header | Manual generation trigger |
-| `GET /api/cron/generate` | GET | `CRON_SECRET` Bearer header | Automated trending-topic generation |
-| `POST /api/webhook` | POST | `WEBHOOK_SECRET` Bearer header | Agent callback receiver |
-| `/api/article` | GET/PUT/DELETE | `ADMIN_SECRET` Bearer header | Draft CRUD |
-| `/api/admin/workflows` | GET/POST | `ADMIN_SECRET` Bearer header | Published articles management |
-
----
-
-## 📁 Critical File Map
-
-```
-lib/
-  agentHelper.ts      — Shared generation trigger: writes draft, calls Render agent
-  draftsDb.ts         — Edge-compatible Upstash REST draft storage (with TTL support)
-  redis.ts            — Redis client + compression helpers (setWithCompression / getWithCompression)
-  insights.ts         — SOLID read-side: Repository → Validator → Processor pipeline
-  translate.ts        — Google Translate wrapper for EN→AR content translation
-  csp.ts              — CSP directive builder
-  seo.ts              — Metadata, sitemap, structured data helpers
-  i18n.tsx            — Bilingual context + hooks
-
-app/api/
-  generate/route.ts         — Manual admin generation endpoint
-  cron/generate/route.ts    — Automated cron generation (RSS → topic → agent)
-  webhook/route.ts          — Agent callback receiver
-  article/route.ts          — Core draft management + publish logic
-  admin/workflows/route.ts  — Published article management
-
-worker/
-  daily-automation.js       — Cloudflare Worker: 14min keep-alive ping + 30min generation cron
-  worker.js                 — Cloudflare Worker: Contact form email handler
-
-app/admin/review/page.tsx   — Admin dashboard (polls every 5s; drafts + published tabs)
-middleware.ts               — CSP insertion, i18n locale subpath routing, www→non-www redirect
+                           lib/agentHelper.ts
+                           • writes draft to database (status: generating)
+                           • dispatches request in background using next.js 15 after()
+                           • POST → Render agent /v1/generate
+                                    │ (async callback)
+                                    ▼
+                           POST /api/webhook
+                           • Validates WEBHOOK_SECRET
+                           • Saves content, tags, description, status: pending_review
+                                    │
+                                    ▼
+                       /admin/review (polls every 2m when active; manual Refresh)
+                       • Review / Edit markdown
+                       • Publish → translates EN→AR via resilient translateMarkdown
+                                   saves live bilingual article to D1 (or Redis fallback)
+                       • Delete  → cascades draft + live details + listings
 ```
 
 ---
@@ -150,65 +93,41 @@ middleware.ts               — CSP insertion, i18n locale subpath routing, www�
 ## 🔑 Required Environment Variables
 
 ```env
-# Upstash Redis
+# Upstash Redis (Fallback cache & queue)
 UPSTASH_REDIS_REST_URL=        # Redis connection URL
 UPSTASH_REDIS_REST_TOKEN=      # Redis auth token
+
+# Cloudflare D1 (Primary Database)
+# Configured via Pages Dashboard binding named 'DB'
 
 # Auth
 ADMIN_SECRET=                  # Admin panel + /api/article
 CRON_SECRET=                   # Cloudflare Automation Worker
-WEBHOOK_SECRET=                # Python agent callback (/api/webhook) — can equal ADMIN_SECRET
+WEBHOOK_SECRET=                # Python agent callback (/api/webhook)
 
 # Site
 NEXT_PUBLIC_SITE_URL=          # Full site URL (e.g. https://arabiakhaleej.com)
-                               # REQUIRED — used by agentHelper.ts to build callback URL
 NEXT_PUBLIC_ADSENSE_ID=        # AdSense publisher ID
 NEXT_PUBLIC_SITE_VERIFICATION= # Google Search Console token
 CONTACT_WORKER_URL=            # Cloudflare contact form worker URL
 
-# Imagery
-PEXELS_API_KEY=                # Primary image source
-
 # RSS Proxy Configuration
-RSS2JSON_API_KEY=              # API key for rss2json.com (prevents "429 Too Many Requests" on shared IP ranges)
-
-# Optional overrides
-AGENT_URL=                     # Python agent base URL (default: Render)
-DASHBOARD_CALLBACK_URL=        # Full override for agent callback URL
+RSS2JSON_API_KEY=              # API key for rss2json.com proxy
 ```
-
----
-
-## 🔑 Redis Key Schema
-
-| Key | TTL | Content |
-|---|---|---|
-| `article:{topic}` | Varies (see status table) | Draft queue entry |
-| `insights:article:{slug}` | None (Indefinite) | Full bilingual article |
-| `insights:list:en` | None (Indefinite) | EN article listing (max 3000) |
-| `insights:list:ar` | None (Indefinite) | AR article listing (max 3000) |
-
-### 🧹 Cache Eviction Policy
-- **Thresholds**: Eviction triggers when DB size >= `9,500` keys (Upstash Free Tier limit is 10,000) or feed capacity exceeds `3,000` articles.
-- **Action**: Evicts a batch of 10 oldest articles by deleting their details key (`insights:article:{slug}`) and slicing them off listing arrays to prevent database fullness errors.
 
 ---
 
 ## 🚫 Never Do
 
-- **No Node.js-only packages** in edge routes (no `fs`, no `net`, no TCP Redis clients).
-- **No `redis.set()` without TTL for transient data** — rate limits and dispatch drafts must use `{ ex: N }` or `{ ttlSeconds: N }` to prevent database clutter. (Published articles and active draft feeds are stored permanently).
+- **No URL-path key injection** in REST Redis calls — always use POST request body commands.
+- **No 5-second polling** — keep polling at 2 minutes, visibility-gated, with an active idle-timer and manual refresh button.
+- **No Node.js-only packages** in edge routes (no `fs`, no `net`).
 - **No hardcoded secrets** — all tokens/passwords must come from `process.env.*`.
-- **No hardcoded CSP strings** — always use `lib/csp.ts`.
-- **No nonces in CSP on static pre-rendered routes** — dynamic nonces on static routes block build-time inline hydration scripts, causing solid black blank page crashes.
-- **No middleware i18n routing for static files** — always bypass static files and metadata assets (like `.webmanifest`, `.xml`, `.txt`) directly via `NextResponse.next()` to prevent `404` redirects.
+- **No nonces in CSP on static pre-rendered routes** — dynamic nonces on static routes block build-time inline hydration scripts, causing blank page crashes.
+- **No middleware i18n routing for static files** — always bypass static files and metadata assets.
 - **No silent catch blocks** — always log with `console.error('[context] message', err)`.
 - **No `any` types** — use proper TypeScript types.
-- **Do not rename `middleware.ts`** — Cloudflare/Next.js resolves it by exact filename.
-- **No auto-publish** — all AI articles must go through human review in `/admin/review`.
-- **Do not forget `wrangler secret put CRON_SECRET`** after every automation worker deploy — without it every cron call returns 401 and generation silently stops.
-- **No URL query parameters for secret authentication** — always validate credentials via HTTP `Authorization: Bearer` header tokens to prevent leaking secrets in logs or browser histories.
-- **No multiple concurrent subrequests in Cloudflare Workers** — when querying listings or drafts, always use `MGET` or bulk fetch commands instead of `Promise.all(keys.map(...))` to prevent exceeding Cloudflare's strict 50-subrequest limit.
+- **No multiple concurrent subrequests in Cloudflare Workers** — when querying listings, always use `MGET` or bulk SQL commands.
 
 ---
 

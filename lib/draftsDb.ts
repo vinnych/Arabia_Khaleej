@@ -2,6 +2,8 @@
 // Why: Cloudflare Pages/Workers do not support standard Node.js TCP connections out of the box without special bindings. 
 // Using the Upstash REST API via standard `fetch` is the official and most reliable way to connect to Redis on the edge.
 
+import { toSlug } from './utils';
+
 /**
  * Options for setDraft.
  * ttlSeconds: if set, the Redis key will auto-expire after this many seconds.
@@ -20,25 +22,53 @@ export const draftDb = {
     return typeof process !== 'undefined' && !!(process.env as any).DB;
   },
 
-  async getDraft(topic: string) {
+  async getDraft(topicOrSlug: string) {
     if (this.isD1Active()) {
       try {
         const db = (process.env as any).DB;
-        const row = await db.prepare("SELECT * FROM drafts WHERE topic = ?").bind(topic).first();
+        // 1. Try lookup by exact topic name
+        let row = await db.prepare("SELECT * FROM drafts WHERE topic = ?").bind(topicOrSlug).first();
+        if (!row) {
+          // 2. Fallback: Search all drafts by matching slug
+          const { results } = await db.prepare("SELECT * FROM drafts").all();
+          if (results) {
+            const targetSlug = toSlug(topicOrSlug);
+            const found = results.find((r: any) => {
+              const entrySlug = r.slug || toSlug(r.topic || '');
+              return entrySlug === targetSlug;
+            });
+            if (found) row = found;
+          }
+        }
         if (!row) return null;
+
+        let parsedContent = row.content;
+        if (row.content) {
+          try {
+            parsedContent = JSON.parse(row.content);
+          } catch (e) {}
+        }
+
+        let parsedDesc = row.description;
+        if (row.description) {
+          try {
+            parsedDesc = JSON.parse(row.description);
+          } catch (e) {}
+        }
+
         return {
           topic: row.topic,
           status: row.status,
           word_count: row.word_count,
-          content: row.content,
+          content: parsedContent,
           image_url: row.image_url,
           error: row.error,
-          description: row.description,
+          description: parsedDesc,
           tags: row.tags ? JSON.parse(row.tags) : [],
           timestamp: row.timestamp
         };
       } catch (err) {
-        console.error('Failed to get draft from D1:', topic, err);
+        console.error('Failed to get draft from D1:', topicOrSlug, err);
         return null;
       }
     }
@@ -86,14 +116,23 @@ export const draftDb = {
             tags=excluded.tags,
             timestamp=excluded.timestamp
         `;
+        
+        const contentStr = value.content && typeof value.content === 'object'
+          ? JSON.stringify(value.content)
+          : (value.content !== undefined ? value.content : null);
+
+        const descriptionStr = value.description && typeof value.description === 'object'
+          ? JSON.stringify(value.description)
+          : (value.description !== undefined ? value.description : null);
+
         await db.prepare(sql).bind(
           topic,
           value.status,
           value.word_count !== undefined ? value.word_count : null,
-          value.content !== undefined ? value.content : null,
+          contentStr,
           value.image_url !== undefined ? value.image_url : null,
           value.error !== undefined ? value.error : null,
-          value.description !== undefined ? value.description : null,
+          descriptionStr,
           JSON.stringify(value.tags || []),
           value.timestamp || Date.now()
         ).run();
@@ -203,17 +242,33 @@ export const draftDb = {
         const db = (process.env as any).DB;
         const { results } = await db.prepare("SELECT * FROM drafts ORDER BY timestamp DESC").all();
         if (!results || !Array.isArray(results)) return [];
-        return results.map((row: any) => ({
-          topic: row.topic,
-          status: row.status,
-          word_count: row.word_count,
-          content: row.content,
-          image_url: row.image_url,
-          error: row.error,
-          description: row.description,
-          tags: row.tags ? JSON.parse(row.tags) : [],
-          timestamp: row.timestamp
-        }));
+        return results.map((row: any) => {
+          let parsedContent = row.content;
+          if (row.content) {
+            try {
+              parsedContent = JSON.parse(row.content);
+            } catch (e) {}
+          }
+
+          let parsedDesc = row.description;
+          if (row.description) {
+            try {
+              parsedDesc = JSON.parse(row.description);
+            } catch (e) {}
+          }
+
+          return {
+            topic: row.topic,
+            status: row.status,
+            word_count: row.word_count,
+            content: parsedContent,
+            image_url: row.image_url,
+            error: row.error,
+            description: parsedDesc,
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            timestamp: row.timestamp
+          };
+        });
       } catch (err) {
         console.error('Failed to fetch drafts list from D1:', err);
         return [];

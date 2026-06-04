@@ -73,7 +73,7 @@ async function compress(data: string): Promise<string> {
 
 export async function getWithCompression<T>(key: string): Promise<T | null> {
   try {
-    const raw = await _redisDirect!.get(key);
+    const raw = await getRedisDirect().get(key);
     if (!raw) return null;
     if (typeof raw === 'string' && raw.startsWith('compressed:')) {
       return JSON.parse(await decompress(raw)) as T;
@@ -93,12 +93,12 @@ export async function setWithCompression(
   try {
     const json = JSON.stringify(value);
     if (json.length > 1024) {
-      return await _redisDirect!.set(key, await compress(json), options);
+      return await getRedisDirect().set(key, await compress(json), options);
     }
-    return await _redisDirect!.set(key, json, options);
+    return await getRedisDirect().set(key, json, options);
   } catch (e) {
     console.error(`[redis-node] Set Error [${key}]:`, e);
-    return await _redisDirect!.set(key, value, options);
+    return await getRedisDirect().set(key, value, options);
   }
 }
 
@@ -131,29 +131,31 @@ export async function rateLimit(
   windowSeconds: number = 60,
   route = 'global'
 ) {
-  const r = _redisDirect ?? getStandaloneRedisNode();
+  const r = getRedisDirect();
   const key = `ratelimit:${route}:${ip}`;
   const current = await r.incr(key);
   if (current === 1) await r.expire(key, windowSeconds);
   return { success: current <= limit, current, limit };
 }
 
-// Initialize redis connection synchronously at module load time.
-// We assign to both _redisDirect and _rawRedis to ensure getWithCompression
-// and other functions have immediate access without waiting for async init.
-const conn = getStandaloneRedisNode();
-_redisDirect = conn;
-_rawRedis = conn;
+function getRedisDirect() {
+  if (!_redisDirect) {
+    _redisDirect = getStandaloneRedisNode();
+  }
+  return _redisDirect;
+}
 
 const _fns: StandaloneNode = {
-  redis: conn, // Expose connection instance so redis proxy proxy-routes properly in lib/redis.ts.
+  get redis() {
+    return getRedisDirect();
+  },
   getStandaloneRedis: getStandaloneRedisNode,
   getWithCompression,
   setWithCompression,
   compressValue,
   decompressValue,
   rateLimit,
-};
+} as any;
 
 // Execute named self-patching to inject these Node.js helpers into the core edge-safe Redis module.
 _patchRedisModule(_fns);

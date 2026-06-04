@@ -22,7 +22,19 @@ export async function POST(request: NextRequest) {
 
   try {
     const payload = await request.json();
-    const { topic, status, article, word_count, language = 'en' } = payload;
+    const {
+      topic,
+      status,
+      article,
+      word_count,
+      language = 'en',
+      titleAr: payloadTitleAr,
+      title_ar: payloadTitleAr2,
+      articleAr: payloadArticleAr,
+      article_ar: payloadArticleAr2,
+      contentAr: payloadContentAr,
+      content_ar: payloadContentAr2
+    } = payload;
 
     if (!topic || !article) {
       return NextResponse.json({ error: 'Missing topic or article content' }, { status: 400 });
@@ -34,12 +46,23 @@ export async function POST(request: NextRequest) {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
 
-    console.log(`[webhook] Starting automated Edge-native translation to Arabic for topic: "${topic}"`);
+    // Resolve pre-translated content or fallback to edge-based translation
+    let titleAr = payloadTitleAr || payloadTitleAr2;
+    let articleAr = payloadArticleAr || payloadArticleAr2 || payloadContentAr || payloadContentAr2;
 
-    // Perform high-fidelity automated translation of both topic and article body
-    // Why: Translating at write-time shields users from page load latency, making the website blazing fast.
-    const titleAr = await translateMarkdown(topic, 'en', 'ar');
-    const articleAr = await translateMarkdown(article, 'en', 'ar');
+    if (!titleAr) {
+      console.log(`[webhook] No pre-translated title provided. Starting automated Edge-native translation for: "${topic}"`);
+      titleAr = await translateMarkdown(topic, 'en', 'ar');
+    } else {
+      console.log(`[webhook] Using pre-translated title for: "${topic}"`);
+    }
+
+    if (!articleAr) {
+      console.log(`[webhook] No pre-translated content provided. Starting automated Edge-native translation for: "${topic}"`);
+      articleAr = await translateMarkdown(article, 'en', 'ar');
+    } else {
+      console.log(`[webhook] Using pre-translated content for: "${topic}"`);
+    }
 
     // Construct the bilingual article object
     // Why: Storing both languages under a single document avoids data synchronization drift.

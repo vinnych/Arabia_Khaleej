@@ -50,7 +50,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
     <>
       <BreadcrumbSchema items={breadcrumbItems} />
       <StructuredData type="Service" data={serviceData} />
-      <TransparencyClient />
+      <TransparencyClient lang={lang} />
     </>
   );
 }

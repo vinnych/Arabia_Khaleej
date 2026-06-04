@@ -123,18 +123,37 @@ export async function PUT(req: Request) {
         
         let title = topic;
         if (draft.content) {
-          const match = draft.content.match(/^#\s+(.+)$/m);
-          if (match && match[1]) {
-            title = match[1].trim();
+          if (typeof draft.content === 'string') {
+            const match = draft.content.match(/^#\s+(.+)$/m);
+            if (match && match[1]) {
+              title = match[1].trim();
+            }
+          } else if (draft.content.en) {
+            const match = draft.content.en.match(/^#\s+(.+)$/m);
+            if (match && match[1]) {
+              title = match[1].trim();
+            }
           }
         }
 
         console.log(`[admin] Publishing manually generated draft: "${topic}". Starting automated translations.`);
 
-        // Translate manual draft dynamically on publication
-        // This is done BEFORE acquiring the lock to keep the critical section extremely short (<50ms).
-        const titleAr = await translateMarkdown(title, 'en', 'ar');
-        const contentAr = await translateMarkdown(draft.content || '', 'en', 'ar');
+        // Resolve titleAr and contentAr (use existing draft translations if bilingual, fallback to dynamic translate)
+        let titleAr = '';
+        let contentAr = '';
+        let contentEn = '';
+
+        if (draft.content && typeof draft.content === 'object') {
+          titleAr = (draft.title && typeof draft.title === 'object' && draft.title.ar)
+            ? draft.title.ar
+            : await translateMarkdown(title, 'en', 'ar');
+          contentAr = draft.content.ar || '';
+          contentEn = draft.content.en || '';
+        } else {
+          titleAr = await translateMarkdown(title, 'en', 'ar');
+          contentAr = await translateMarkdown(draft.content || '', 'en', 'ar');
+          contentEn = draft.content || '';
+        }
 
         const author = {
           id: "arabia-khaleej-editorial",
@@ -155,8 +174,8 @@ export async function PUT(req: Request) {
             // Slicing raw markdown often captures headers (# Title) or image tags (![](...)) 
             // which corrupt the SEO <meta description> shown in Google search results.
             // draft.description is already clean plain text, optimised for SEO.
-            en: draft.description || (draft.content ? draft.content.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : topic),
-            ar: contentAr ? contentAr.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : titleAr,
+            en: (draft.description && typeof draft.description === 'object' ? draft.description.en : draft.description) || (contentEn ? contentEn.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : topic),
+            ar: (draft.description && typeof draft.description === 'object' ? draft.description.ar : null) || (contentAr ? contentAr.substring(0, 160).replace(/[#*_`]/g, '').trim() + '...' : titleAr),
           },
           link: `/insights/${slug}`,
           pubDate: new Date().toISOString(),
@@ -173,12 +192,12 @@ export async function PUT(req: Request) {
             ? draft.tags
             : ["gcc", "intelligence"],
           content: {
-            en: draft.content || "",
+            en: contentEn,
             ar: contentAr,
           },
           status: "published",
           author: author,
-          wordCount: draft.content ? draft.content.split(/\s+/).length : 0
+          wordCount: contentEn ? contentEn.split(/\s+/).length : 0
         };
 
         // Save the article details and list index references via Repository

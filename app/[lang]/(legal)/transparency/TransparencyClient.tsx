@@ -1,8 +1,7 @@
-import { getT, getServerLanguage } from "@/lib/i18n-server";
+import { getT } from "@/lib/i18n-server";
 
-export default async function TransparencyClient() {
-  const t = await getT();
-  const lang = await getServerLanguage();
+export default async function TransparencyClient({ lang }: { lang: 'en' | 'ar' }) {
+  const t = await getT(lang);
   const isRTL = lang === 'ar';
 
   return (
