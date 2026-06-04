@@ -74,7 +74,7 @@ export const draftDb = {
     }
 
     // Upstash Redis Fallback
-    const key = `article:${topic}`;
+    const key = `article:${topicOrSlug}`;
     const res = await fetch(`${process.env.UPSTASH_REDIS_REST_URL}/`, {
       method: 'POST',
       headers: {
@@ -94,7 +94,7 @@ export const draftDb = {
       }
       return parsed;
     } catch (err) {
-      console.error('Failed to parse Redis draft:', topic, err);
+      console.error('Failed to parse Redis draft:', topicOrSlug, err);
       return null;
     }
   },
