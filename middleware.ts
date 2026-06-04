@@ -26,7 +26,11 @@ export default function middleware(request: NextRequest) {
   // Redirect from .pages.dev to the main domain for SEO consistency
   // This ensures only the canonical domain appears in search results and avoids redirect chains.
   // Note: www.arabiakhaleej.com is handled natively by Next.js redirects inside next.config.ts.
-  if (hostname.endsWith('.pages.dev')) {
+  const isPagesDev = hostname.endsWith('.pages.dev');
+  const isPreviewDeployment = isPagesDev && hostname.split('.').length > 3;
+  const disableRedirect = process.env.DISABLE_CANONICAL_REDIRECT === 'true';
+
+  if (isPagesDev && !isPreviewDeployment && !disableRedirect) {
     let targetPathname = pathname;
     if (!isAdminPage) {
       const locales = ['en', 'ar'];

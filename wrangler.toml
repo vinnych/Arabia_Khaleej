@@ -5,7 +5,7 @@
 # 2. Maps the D1 database 'arabiakhaleej-db' to the environment binding 'DB' (which the edge code expects).
 # 3. Enables next-on-pages builds to deploy cleanly with all variables bound automatically.
 
-name = "arabiakhaleej"
+name = "arabia-khaleej"
 pages_build_output_dir = ".vercel/output"
 compatibility_date = "2025-02-04"
 compatibility_flags = ["nodejs_compat"]
