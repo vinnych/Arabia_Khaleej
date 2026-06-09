@@ -7,7 +7,9 @@ import { getWithCompression, setWithCompression } from '@/lib/redis';
 import { translateMarkdown } from '@/lib/translate';
 import { draftDb } from '@/lib/draftsDb';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
@@ -111,3 +113,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

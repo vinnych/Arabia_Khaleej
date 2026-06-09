@@ -13,7 +13,12 @@ export const legal: Translations = {
     en: "Arabia Khaleej is a professional independent regional reference — not a government portal, law firm, or advisory service.", 
     ar: "عربية خليج هي منصة استخبارات إقليمية مستقلة احترافية - وليست بوابة حكومية أو مكتب محاماة أو خدمة استشارية." 
   },
-  transparencyNotice: { en: "Transparency & Ethical Content Notice", ar: "إشعار الشفافية والمحتوى الأخلاقي" },
+  // Why legalTransparencyNotice instead of transparencyNotice:
+  // common.ts already defines transparencyNotice as "Transparency Notice".
+  // legal.ts had a MORE SPECIFIC value: "Transparency & Ethical Content Notice".
+  // Keeping both under the same key causes silent overwrite (last spread wins).
+  // Renamed to legalTransparencyNotice so both values can coexist.
+  legalTransparencyNotice: { en: "Transparency & Ethical Content Notice", ar: "إشعار الشفافية والمحتوى الأخلاقي" },
   transparencyPageBody: { 
     en: "Arabia Khaleej is a professional regional intelligence reference. We aggregate, simplify, and surface authoritative information from official sources.", 
     ar: "عربية خليج هي مرجع استخبارات إقليمي احترافي. نحن نجمع ونبسط ونظهر المعلومات الموثوقة من المصادر الرسمية." 
@@ -67,7 +72,10 @@ ppSection6Title: { en: "Policy Changes", ar: "تغييرات السياسة" },
     // causing raw keys (e.g. 'tosSection1Title') to render on the legal pages.
     // Adding them in English and Arabic completes the bilingual platform layout.
     
-    legal: { en: "Legal", ar: "قانوني" },
+    // Why legal key removed here:
+    // common.ts is the canonical source for the `legal` navigation label {en:"Legal", ar:"قانوني"}.
+    // Having it in legal.ts too caused an esbuild duplicate-key warning and silent overwrite.
+    // Since both had the same value, removing from legal.ts has zero visible impact.
     termsConditions: { en: "Terms & Conditions", ar: "الشروط والأحكام" },
     termsDesc: { en: "Plain-language terms for an honest platform. Read on — it is shorter than you expect.", ar: "شروط لغة مبسطة لمنصة صادقة. اقرأها - إنها أقصر مما تتوقع." },
     lastReviewed: { en: "Last Reviewed", ar: "آخر مراجعة" },

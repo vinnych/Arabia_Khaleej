@@ -248,19 +248,34 @@ export class RedisInsightRepository implements IInsightRepository {
 /**
  * Concrete D1 Insight Repository using Cloudflare D1 SQL bindings
  * Why this particular is used: Handles Edge-native SQLite queries, preventing Redis eviction and scale limitations.
+ * 
+ * Why getCloudflareContext() instead of process.env.DB:
+ * On Cloudflare Workers (used by @opennextjs/cloudflare), bindings like D1 are exposed
+ * on the `env` object, NOT on process.env. process.env only contains string environment
+ * variables set in wrangler.toml or the dashboard. D1, KV, R2, etc. are Worker bindings
+ * that are injected into the Worker's `env` parameter at runtime by the Cloudflare runtime.
+ * getCloudflareContext() is the OpenNext-provided helper to access this env from anywhere
+ * in the Next.js server context (Server Components, Route Handlers, etc.).
  */
 export class D1InsightRepository implements IInsightRepository {
-  private getDb() {
-    const db = (process.env as any).DB;
-    if (!db) {
-      throw new Error("D1 database binding 'DB' is not configured.");
+  private async getDb() {
+    try {
+      // Dynamic import to avoid bundling issues in non-Cloudflare environments
+      const { getCloudflareContext } = await import('@opennextjs/cloudflare');
+      const { env } = await getCloudflareContext({ async: true });
+      const db = (env as any).DB;
+      if (!db) {
+        throw new Error("D1 database binding 'DB' is not configured in wrangler.toml.");
+      }
+      return db;
+    } catch (e: any) {
+      throw new Error(`Failed to access Cloudflare context: ${e.message}`);
     }
-    return db;
   }
 
   async getRawInsights(lang: 'en' | 'ar'): Promise<InsightItem[]> {
     try {
-      const db = this.getDb();
+      const db = await this.getDb();
       const { results } = await db.prepare("SELECT * FROM articles ORDER BY pubDate DESC LIMIT 1000").all();
       if (!results || !Array.isArray(results)) return [];
 
@@ -296,7 +311,7 @@ export class D1InsightRepository implements IInsightRepository {
 
   async getRawArticle(slug: string): Promise<InsightItem | null> {
     try {
-      const db = this.getDb();
+      const db = await this.getDb();
       const row = await db.prepare("SELECT * FROM articles WHERE slug = ?").bind(slug).first();
       if (!row) return null;
 
@@ -328,7 +343,7 @@ export class D1InsightRepository implements IInsightRepository {
   }
 
   async saveArticle(article: any): Promise<void> {
-    const db = this.getDb();
+    const db = await this.getDb();
     const sql = `
       INSERT INTO articles (
         id, slug, title_en, title_ar, description_en, description_ar, 
@@ -380,18 +395,31 @@ export class D1InsightRepository implements IInsightRepository {
   }
 
   async deleteArticle(slug: string): Promise<void> {
-    const db = this.getDb();
+    const db = await this.getDb();
     await db.prepare("DELETE FROM articles WHERE slug = ?").bind(slug).run();
   }
 }
 
 /**
  * Factory to resolve the active insight repository.
- * Why this particular is used: Dynamically detects Cloudflare D1 environment binding 'DB', 
- * defaulting to the Redis implementation if not configured.
+ * Why this particular is used: Dynamically detects whether we're running in a Cloudflare
+ * Workers context (where D1 binding 'DB' exists in the Cloudflare env) and uses D1;
+ * falls back to the Redis implementation for local development or non-Cloudflare deploys.
+ * 
+ * Why we check CLOUDFLARE_WORKER environment variable instead of process.env.DB:
+ * D1 bindings are NOT accessible on process.env. They live on the Cloudflare runtime `env`
+ * object. However, we need a synchronous factory here. We use the presence of the 
+ * CLOUDFLARE_WORKER flag (set by OpenNext at build time) to determine whether D1 is available.
+ * If running locally without this flag, we fall back to Redis.
  */
 export function getInsightRepository(): IInsightRepository {
-  if (typeof process !== 'undefined' && (process.env as any).DB) {
+  // CLOUDFLARE_WORKER is set in the OpenNext build environment, signalling we're in a Worker.
+  // In local dev (npm run dev), this flag is absent, so we use Redis instead.
+  const isCloudflareWorker = 
+    process.env.CLOUDFLARE_WORKER === 'true' ||
+    (typeof globalThis !== 'undefined' && !!(globalThis as any).__CLOUDFLARE_WORKER__);
+  
+  if (isCloudflareWorker) {
     return new D1InsightRepository();
   }
   return new RedisInsightRepository();

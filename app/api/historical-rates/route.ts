@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { OPEN_ER_API_BASE } from '@/lib/constants/api';
 
 // Edge runtime for Cloudflare Pages compatibility
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 // Cache aggressively — historical daily data only changes once per day
 // We use 12 hours as a conservative window to catch mid-day rate updates
@@ -141,3 +143,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

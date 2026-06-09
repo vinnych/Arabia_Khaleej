@@ -9,7 +9,9 @@ import { draftDb } from '@/lib/draftsDb';
 import { toSlug } from '@/lib/utils';
 import { getWithCompression, setWithCompression, redis } from '@/lib/redis';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 

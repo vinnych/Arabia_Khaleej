@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/seo';
 
-export const runtime = 'edge';
+// NOTE: runtime='edge' removed for OpenNext/Cloudflare Workers compatibility.
+// All routes run in nodejs_compat Workers runtime - edge declaration not needed.
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -23,3 +24,4 @@ export default function robots(): MetadataRoute.Robots {
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
+

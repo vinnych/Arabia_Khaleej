@@ -4,7 +4,9 @@ import { toSlug } from '@/lib/utils';
 import { translateMarkdown } from '@/lib/translate';
 import { getInsightRepository } from '@/lib/insights';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 export const dynamic = 'force-dynamic';
 
 function getAdminSecret(): string | null {
@@ -219,4 +221,5 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
 

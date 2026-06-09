@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 import path from "path";
+// Why initOpenNextCloudflareForDev is imported:
+// @opennextjs/cloudflare requires this hook during local development to simulate the
+// Cloudflare Workers runtime (including env bindings, CF-* headers, etc.) in the
+// Next.js dev server. This ensures getCloudflareContext() works in Server Components
+// during 'npm run dev' exactly as it would in production on Workers.
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();
 
 // Why target-aware Webpack resolver alias is used instead of other alternatives:
 // - Other alternatives like loader transformations or modifying ioredis usages directly can be complex, error-prone,

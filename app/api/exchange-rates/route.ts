@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { OPEN_ER_API_BASE } from '@/lib/constants/api';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 // Popular world currencies with metadata
 const CURRENCY_META: Record<string, { name: string; nameAr: string; symbol: string; flag: string; region: string }> = {
@@ -82,5 +84,6 @@ export async function GET() {
     return NextResponse.json({ status: 'error', message: 'Failed to fetch exchange rates' }, { status: 500 });
   }
 }
+
 
 

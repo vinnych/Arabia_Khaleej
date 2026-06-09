@@ -7,7 +7,9 @@
 import { NextResponse } from 'next/server';
 import { getUnifiedInsights, getArticleBySlug } from '@/lib/insights';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'force-no-store';
 
@@ -45,5 +47,6 @@ export async function GET(request: Request) {
     });
   }
 }
+
 
 

@@ -35,7 +35,8 @@ import { SITE_URL } from '@/lib/seo';
 import { getAllInsightSlugs } from '@/lib/insights';
 
 export const revalidate = 3600; // Cache for 1 hour
-export const runtime = 'edge';
+// NOTE: runtime='edge' removed for OpenNext/Cloudflare Workers compatibility.
+// All routes run in nodejs_compat Workers runtime - edge declaration not needed.
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Country codes for prayer times routes - matches GCC countries
@@ -288,3 +289,4 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return allRoutes;
 }
+

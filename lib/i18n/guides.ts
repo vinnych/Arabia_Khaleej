@@ -63,9 +63,13 @@ export const guides: Translations = {
   megaProj: { en: "Giga-Projects", ar: "المشاريع العملاقة" },
   saudiMegaContent: { en: "Central to Vision 2030 are unprecedented giga-projects like NEOM, a $500 billion futuristic city, the Red Sea Project for sustainable luxury tourism, and Qiddiya, a massive entertainment and sports capital.", ar: "من الأمور المركزية في رؤية 2030 المشاريع العملاقة غير المسبوقة مثل نيوم، وهي مدينة مستقبلية بقيمة 500 مليار دولار، ومشروع البحر الأحمر للسياحة الفاخرة المستدامة، والقدية، وهي عاصمة ضخمة للترفيه والرياضة." },
 
-  // Transparency Notice
-  transparencyNotice: { en: "Transparency Notice", ar: "إشعار الشفافية" },
-  transparencyBody: { en: "We believe the region deserves intelligence it can trust. Every data point, methodology, and editorial decision is disclosed openly.", ar: "نحن نؤمن بأن المنطقة تستحق استخبارات يمكن الوثوق بها. يتم الكشف عن كل نقطة بيانات ومنهجية وقرار تحريري بشكل مفتوح." },
+  // Transparency Notice (link to the transparency page from guide pages)
+  // Why removed here and kept in common.ts:
+  // transparencyNotice and transparencyBody were duplicate keys across common.ts, guides.ts,
+  // and legal.ts. In JavaScript object spreads, the last definition wins (legal.ts wins).
+  // Esbuild emits [WARNING] Duplicate key errors for this. The canonical transparency
+  // descriptions live in common.ts, and page-specific legal text lives in legal.ts.
+  // Guides pages should use the common.ts versions via the unified translations object.
   viewDetails: { en: "View Details", ar: "عرض التفاصيل" },
 
   // UAE specifics

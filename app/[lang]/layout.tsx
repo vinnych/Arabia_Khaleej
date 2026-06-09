@@ -37,7 +37,8 @@ export const viewport = {
   viewportFit: 'cover',
 };
 
-export const runtime = 'edge';
+// NOTE: runtime='edge' removed for OpenNext/Cloudflare Workers compatibility.
+// All routes run in nodejs_compat Workers runtime - edge declaration not needed.
 
 export default async function RootLayout({ children, params }: { children: React.ReactNode, params: Promise<{ lang: string }> }) {
   const headList = await headers();

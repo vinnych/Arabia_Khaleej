@@ -1,14 +1,23 @@
-# Arabia Khaleej — Wrangler Pages configuration
-# Why this file is used instead of others:
-# 1. Configures bindings (like D1 Database) directly in source control, allowing wrangler commands
-#    to run locally and remotely without missing database definition contexts.
-# 2. Maps the D1 database 'arabiakhaleej-db' to the environment binding 'DB' (which the edge code expects).
-# 3. Enables next-on-pages builds to deploy cleanly with all variables bound automatically.
+# Arabia Khaleej — Wrangler Workers configuration (OpenNext adapter)
+# Why this file changed from next-on-pages to @opennextjs/cloudflare:
+# 1. @cloudflare/next-on-pages is deprecated and broken with Next.js 15.4+.
+#    It targets Cloudflare Pages' Edge Runtime which has significant API limitations.
+# 2. @opennextjs/cloudflare targets Cloudflare Workers with nodejs_compat, giving us
+#    full Node.js API access (crypto, streams, etc.) and proper D1 binding support.
+# 3. The output directory changes from .vercel/output → .open-next/worker.js,
+#    which is a native Cloudflare Worker script instead of a Pages Functions bundle.
 
 name = "arabia-khaleej"
-pages_build_output_dir = ".vercel/output"
-compatibility_date = "2025-02-04"
+main = ".open-next/worker.js"
+compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
+
+# Why assets instead of pages_build_output_dir:
+# Workers use the assets binding to serve static files from the .open-next/assets directory,
+# whereas Pages used a pages_build_output_dir pointing at the Vercel output format.
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
 
 [[d1_databases]]
 binding = "DB"

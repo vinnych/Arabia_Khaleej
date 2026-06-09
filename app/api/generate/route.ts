@@ -1,7 +1,9 @@
 import { NextResponse, after } from 'next/server';
 import { triggerAgentGeneration } from '@/lib/agentHelper';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 export async function POST(req: Request) {
   try {
@@ -59,3 +61,4 @@ export async function POST(req: Request) {
     );
   }
 }
+

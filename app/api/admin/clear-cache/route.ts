@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 export async function GET(req: Request) {
   try {
@@ -35,3 +37,4 @@ export async function GET(req: Request) {
     return new NextResponse('Internal Error: ' + (err.message || 'Unknown Error'), { status: 500 });
   }
 }
+

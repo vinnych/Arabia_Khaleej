@@ -5,7 +5,9 @@ import { getUnifiedInsights } from '@/lib/insights';
 import { draftDb } from '@/lib/draftsDb';
 import { GOOGLE_NEWS_RSS_URL } from '@/lib/constants/api';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 // Disable caching for this route so it fetches fresh RSS data each time
 export const dynamic = 'force-dynamic';
@@ -238,3 +240,4 @@ export async function GET(req: Request) {
     );
   }
 }
+

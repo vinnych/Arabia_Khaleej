@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { ALADHAN_API_BASE } from '@/lib/constants/api';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -21,4 +23,5 @@ export async function GET(request: Request) {
     return NextResponse.json({ status: 'error', message: 'Failed to fetch Hijri data' }, { status: 500 });
   }
 }
+
 

@@ -3,7 +3,9 @@ import { draftDb } from '@/lib/draftsDb';
 import { z } from 'zod';
 import { sanitizeAgentMarkdown } from '@/lib/agentHelper';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 // Define strict schema for incoming Python agent payload.
 // Why Zod schema validation: We must not blindly trust external agent payloads.
@@ -103,3 +105,4 @@ export async function POST(req: Request) {
     return new NextResponse('Internal Server Error: ' + (err.message || 'Unknown Error'), { status: 500 });
   }
 }
+

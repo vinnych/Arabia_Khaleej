@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getCSPHeader } from './lib/csp';
 
+// Why NO runtime export here:
+// Next.js middleware (middleware.ts) ALWAYS runs on the Edge Runtime by default.
+// The `export const runtime` declaration is for page/route segments only, NOT middleware.
+// Adding `runtime = 'edge'` to middleware.ts causes Next.js to misinterpret it as a
+// page route and throw: "Page /middleware provided runtime 'edge'... use experimental-edge".
+// OpenNext's cloudflare-edge wrapper in open-next.config.ts handles the middleware bundling
+// correctly without needing an explicit runtime export.
 export default function middleware(request: NextRequest) {
   // Generate a cryptographically secure nonce for CSP script-src
   // Using crypto.randomUUID() ensures unique nonces per request, preventing XSS

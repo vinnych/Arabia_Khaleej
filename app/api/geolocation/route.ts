@@ -3,7 +3,9 @@ import { rateLimit } from '@/lib/redis';
 import { SSRF_DENYLIST } from '@/lib/utils';
 import { FREEIPAPI_URL } from '@/lib/constants/api';
 
-export const runtime = 'edge';
+// NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
+// run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
+// and incompatible with @opennextjs/cloudflare (which requires edge routes in separate functions).
 
 export async function GET(req: NextRequest) {
   // Use Cloudflare's connecting IP or fallback to x-forwarded-for
