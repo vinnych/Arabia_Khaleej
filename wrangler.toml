@@ -23,3 +23,9 @@ binding = "ASSETS"
 binding = "DB"
 database_name = "arabiakhaleej-db"
 database_id = "258ef468-a2f0-4628-bb04-4d782a7d4d24"
+
+[vars]
+CONTACT_WORKER_URL = "https://arabiakhaleej-contact.asishchilakapati.workers.dev"
+NEXT_PUBLIC_SITE_URL = "https://arabiakhaleej.com"
+NEXT_PUBLIC_ADSENSE_ID = "ca-pub-7212871157824722"
+NEXT_PUBLIC_SITE_VERIFICATION = "61758f95d085e67d"

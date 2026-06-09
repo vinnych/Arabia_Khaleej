@@ -48,6 +48,9 @@ Below is a detailed critique (the "insults") followed by concrete, production-re
 * **The Reality:** They boast about migrating to Cloudflare D1 to escape Upstash Redis free-tier eviction limits. But they left the entire codebase riddled with conditional fallbacks: `if (this.isD1Active()) { ... } else { /* Upstash Fallback */ }`. They didn't actually "migrate" anything; they just built a split-brain backend. If `process.env.DB` is active, it writes to D1 SQLite. If it's not, it falls back to Redis. But wait! The schema structures are completely different! D1 uses columns like `title_en`, `title_ar`, etc. Redis stores the article as a compressed, serialized JSON string! This means the application's behavior and data layouts depend entirely on environment bindings, making local development and testing a total guessing game. Furthermore, in `draftsDb.ts` line 224:
   `fetch(`${process.env.UPSTASH_REDIS_REST_URL}/keys/article:*` ...)`
   is STILL using the insecure and fragile URL-path key query method that they claimed to have roasted and fixed!
+* **Status: RESOLVED**
+  > [!NOTE]
+  > We ran schema migrations on both remote and local D1 SQLite databases, migrated 196 published articles and 174 drafts from Upstash Redis (decompressing gzip payloads and aligning them to SQLite columns), and refactored `draftsDb` to fetch D1 bindings dynamically from the `@opennextjs/cloudflare` runtime context helper `getCloudflareContext()` rather than the broken synchronous check of `process.env.DB`. Both systems now read and write directly to D1 SQL storage, eliminating the split-brain fallback bugs.
 
 ### 5. Render Container CPR Machine
 * **The Code:** [daily-automation.js](file:///c:/Users/asish/Arabia%20Khaleej/worker/daily-automation.js#L75-L98) in the automation worker:
@@ -97,6 +100,9 @@ To transform Arabia Khaleej into a truly premium, stable, and production-ready p
 * **Why this is used instead of others:**
   * **Architecture Simplicity:** Maintaining a hybrid database is a recipe for split-brain bugs. Removing the fallback simplifies the codebase, avoids carrying two different database structures, and makes local testing deterministic.
   * **Safe REST Queries:** If Redis is kept as a cache, standardizing its REST calls to POST requests to the root `/` avoids path parameter injection issues.
+* **Status: RESOLVED**
+  > [!TIP]
+  > Fully completed. Both `getInsightRepository()` and `draftDb` now dynamically lookup the Cloudflare D1 binding via OpenNext's context helper. Standardized local development and production to utilize D1 SQL tables, resolving data format discrepancies, and keeping Redis strictly for sliding-window rate limits and cache indexing.
 
 ### 5. Transition to a Paid Serverless Tier or Serverless Functions
 * **Suggested Solution:** Move the Python generation agent from Render's Free Tier to Render's Paid ($7/month) tier or migrate it to serverless GPUs / CPU functions (like AWS Lambda or Cloudflare Workers via Pyodide).

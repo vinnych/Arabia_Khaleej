@@ -7,7 +7,7 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 
 ## 💎 Project Essence
 - **AI Editorial Pipeline**: Expert-curated long-form regional analysis (1500+ words) powered by an external Python agent, with mandatory human review before publication.
-- **Relational Database Storage**: Durable relational storage via **Cloudflare D1** (SQLite at the Edge) with automatic fallback to **Upstash Redis** if D1 is not configured.
+- **Relational Database Storage**: Durable relational storage via **Cloudflare D1** (SQLite at the Edge) with data resolved dynamically from the `@opennextjs/cloudflare` runtime context.
 - **Real-time Utility**: Precision prayer times via Adhan API and live GCC market indicators.
 - **Bilingual**: Full English ↔ Arabic support across editorial content, UI, and metadata.
 - **Glassmorphic UI**: A premium, responsive interface built with Next.js 15.
@@ -19,12 +19,12 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 | Layer | Technology |
 | :--- | :--- |
 | **Framework** | Next.js 15 (App Router) + TypeScript |
-| **Runtime** | Cloudflare Pages (Edge Runtime — all API routes) |
+| **Runtime** | Cloudflare Workers (nodejs_compat runtime) |
 | **AI Engine** | External Python agent on Render (LLM generation) |
-| **Persistence** | **Cloudflare D1** (Edge SQL) with **Upstash Redis** (REST API) fallback |
+| **Persistence** | **Cloudflare D1** (Edge SQL) with **Upstash Redis** (REST API Cache) |
 | **Imagery** | Pexels API + geometric fallback |
 | **Styling** | Vanilla CSS + Tailwind CSS |
-| **Infrastructure** | Cloudflare Pages + Cloudflare Workers |
+| **Infrastructure** | Cloudflare Workers + Cloudflare Assets |
 | **i18n** | Next.js App Router subpath routing (`/[lang]/`) + Custom `lib/i18n.tsx` |
 
 ---
@@ -109,7 +109,7 @@ CONTACT_WORKER_URL=            # Cloudflare contact form worker URL
 
 ## ☁️ Cloudflare D1 Setup & Deployment
 
-To enable durable relational SQL storage on your Cloudflare Pages production deployment:
+To enable durable relational SQL storage on your Cloudflare Workers production deployment:
 
 ### 1. Create D1 Database
 Create the database via Wrangler:
@@ -118,17 +118,27 @@ npx wrangler d1 create arabiakhaleej-db
 ```
 
 ### 2. Configure wrangler.toml
-A `wrangler.toml` at the project root maps the D1 instance to the runtime:
+A `wrangler.toml` at the project root maps the D1 instance, static assets, and environment variables to the runtime:
 ```toml
-name = "arabiakhaleej"
-pages_build_output_dir = ".vercel/output"
-compatibility_date = "2025-02-04"
+name = "arabia-khaleej"
+main = ".open-next/worker.js"
+compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
+[assets]
+directory = ".open-next/assets"
+binding = "ASSETS"
+
 [[d1_databases]]
-binding = "DB" # Binding name expected by code
+binding = "DB"
 database_name = "arabiakhaleej-db"
-database_id = "<YOUR_DATABASE_ID>"
+database_id = "258ef468-a2f0-4628-bb04-4d782a7d4d24"
+
+[vars]
+CONTACT_WORKER_URL = "https://arabiakhaleej-contact.asishchilakapati.workers.dev"
+NEXT_PUBLIC_SITE_URL = "https://arabiakhaleej.com"
+NEXT_PUBLIC_ADSENSE_ID = "ca-pub-7212871157824722"
+NEXT_PUBLIC_SITE_VERIFICATION = "61758f95d085e67d"
 ```
 
 ### 3. Initialize SQL Schemas
@@ -141,7 +151,7 @@ npx wrangler d1 execute arabiakhaleej-db --local --file=lib/schema.sql
 npx wrangler d1 execute arabiakhaleej-db --remote --file=lib/schema.sql
 ```
 
-*Note: In your Cloudflare Pages Dashboard under Settings → Functions, ensure you add a D1 Database Binding mapping variable name `DB` to your D1 database.*
+*Note: Ensure private secrets are uploaded to Cloudflare using `npx wrangler secret put KEY`.*
 
 ---
 

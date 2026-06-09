@@ -1,6 +1,6 @@
 # 🧠 Arabia Khaleej — System Reverse Engineering & Architecture Deep-Dive
 
-This document provides a comprehensive, step-by-step technical breakdown of **Arabia Khaleej**, a bilingual (English & Arabic) regional intelligence portal optimized for high-performance serverless edge deployment using **Next.js 15 (App Router)**, **Cloudflare Pages**, **Cloudflare D1**, **Cloudflare Workers**, and **Upstash Redis**.
+This document provides a comprehensive, step-by-step technical breakdown of **Arabia Khaleej**, a bilingual (English & Arabic) regional intelligence portal optimized for high-performance serverless edge deployment using **Next.js 15 (App Router)**, **Cloudflare Workers (nodejs_compat)**, **Cloudflare D1 (SQLite)**, and **Upstash Redis (Cache / Limit)**.
 
 ---
 
@@ -29,25 +29,24 @@ graph TD
     NextApp -- "3. Trigger Async Run (after)" --> PythonAgent
     PythonAgent -- "4. Webhook Response (Zod)" --> NextApp
     NextApp -- "5. Store Draft" --> D1DB
-    NextApp -. "5. Fallback Draft" .-> Upstash
     
     Admin[Admin Panel /admin/review] -- "6. Trigger Publish (PUT)" --> NextApp
     NextApp -- "7. Translate EN -> AR" --> GoogleTrans
     NextApp -- "8. Store Live Article" --> D1DB
-    NextApp -. "8. Fallback Live & Lists" .-> Upstash
+    NextApp -- "9. Cache feeds & articles" --> Upstash
 ```
 
 ### Why this architecture was chosen:
-1. **Serverless Edge (Cloudflare Pages)**: Executing routes at the edge keeps response times sub-millisecond globally, particularly in the GCC region, without maintaining expensive Virtual Machines.
+1. **Serverless Edge (Cloudflare Workers)**: Executing routes at the edge keeps response times sub-millisecond globally, particularly in the GCC region, without maintaining expensive Virtual Machines.
 2. **Cloudflare D1 (SQLite at the Edge)**: Cloudflare D1 provides native, zero-latency SQL storage right inside the Edge runtime, resolving key limits and volatile eviction policies.
-3. **Upstash REST Redis Fallback**: If D1 is not configured, Upstash’s REST HTTP API permits stateless query resolution over HTTPS, serving as an automatic database fallback.
+3. **Upstash REST Redis Cache**: Upstash Redis is used strictly as a fast cache layer for hot articles and feed listings, as well as tracking sliding-window rate limits.
 4. **External Render Python Agent**: Running heavy AI and LangChain scripts directly inside Vercel or Cloudflare Edge functions is impossible due to execution size limits and CPU instruction timeouts. Delegating to a dedicated Python instance on Render handles heavy operations. Next.js 15's `after()` handles triggers asynchronously, avoiding blocking timeouts.
 
 ---
 
-## 🛢️ 2. Database Schema (D1 SQL) & Redis Fallback
+## 🛢️ 2. Database Schema (D1 SQL) & Redis Cache
 
-Arabia Khaleej supports dual-mode persistence: native SQL query execution via Cloudflare D1 or Key-Value document storage via Upstash Redis.
+Arabia Khaleej utilizes Cloudflare D1 as its primary relational store.
 
 ### D1 SQLite Table Structures
 
@@ -93,17 +92,16 @@ CREATE TABLE drafts (
 );
 ```
 
-### Redis Key Schema (Fallback Mode)
-If D1 is not configured, Upstash Redis acts as the database:
+### Redis Key Schema (Cache & Rate Limits)
+Upstash Redis acts purely as a transient cache layer and rate limiter:
 
 | Key Template | Type | TTL / Retention | Purpose |
 |---|---|---|---|
-| `article:{topic}` | String (JSON) | Varies (7d generating, 2d error) | Staging draft queue entry |
-| `insights:article:{slug}` | String (GZipped JSON) | Indefinite (Permanent) | Full bilingual published article content |
-| `insights:list:en` | List (GZipped JSON) | Indefinite (Permanent) | Ordered list of English summaries |
-| `insights:list:ar` | List (GZipped JSON) | Indefinite (Permanent) | Ordered list of Arabic summaries |
+| `insights:article:{slug}` | String (GZipped JSON) | Indefinite (Permanent Cache) | Cache of full bilingual published article content |
+| `insights:list:en` | List (GZipped JSON) | Indefinite (Permanent Cache) | Cache of ordered English feed summaries |
+| `insights:list:ar` | List (GZipped JSON) | Indefinite (Permanent Cache) | Cache of ordered Arabic feed summaries |
 | `ratelimit:{route}:{ip}` | Integer | 60s to 3600s | Sliding window rate limiting count |
-| `lock:insights:list` | String | 15s | Mutex lock for feed updates |
+| `lock:insights:list` | String | 15s | Mutex lock for cache feed updates |
 
 ---
 
