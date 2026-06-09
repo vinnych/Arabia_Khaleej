@@ -17,15 +17,27 @@ export interface SetDraftOptions {
 }
 
 export const draftDb = {
+  // Helper to get the D1 database binding from OpenNext context
+  async getDb() {
+    try {
+      const { getCloudflareContext } = await import('@opennextjs/cloudflare');
+      const { env } = await getCloudflareContext({ async: true });
+      return (env as any).DB || null;
+    } catch {
+      return null;
+    }
+  },
+
   // Helper to determine if Cloudflare D1 is bound and active
-  isD1Active(): boolean {
-    return typeof process !== 'undefined' && !!(process.env as any).DB;
+  async isD1Active(): Promise<boolean> {
+    const db = await this.getDb();
+    return !!db;
   },
 
   async getDraft(topicOrSlug: string) {
-    if (this.isD1Active()) {
+    const db = await this.getDb();
+    if (db) {
       try {
-        const db = (process.env as any).DB;
         // 1. Try lookup by exact topic name
         let row = await db.prepare("SELECT * FROM drafts WHERE topic = ?").bind(topicOrSlug).first();
         if (!row) {
@@ -100,9 +112,9 @@ export const draftDb = {
   },
 
   async setDraft(topic: string, value: any, options?: SetDraftOptions) {
-    if (this.isD1Active()) {
+    const db = await this.getDb();
+    if (db) {
       try {
-        const db = (process.env as any).DB;
         const sql = `
           INSERT INTO drafts (topic, status, word_count, content, image_url, error, description, tags, timestamp)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -160,9 +172,9 @@ export const draftDb = {
   },
 
   async delDraft(topic: string) {
-    if (this.isD1Active()) {
+    const db = await this.getDb();
+    if (db) {
       try {
-        const db = (process.env as any).DB;
         await db.prepare("DELETE FROM drafts WHERE topic = ?").bind(topic).run();
         return;
       } catch (err) {
@@ -183,9 +195,9 @@ export const draftDb = {
   },
 
   async updateDraftIfExist(topic: string, value: any): Promise<boolean> {
-    if (this.isD1Active()) {
+    const db = await this.getDb();
+    if (db) {
       try {
-        const db = (process.env as any).DB;
         const sql = `
           UPDATE drafts SET 
             status = ?, word_count = ?, content = ?, image_url = ?, error = ?, description = ?, tags = ?, timestamp = ?
@@ -237,9 +249,9 @@ export const draftDb = {
   },
 
   async getAllDrafts() {
-    if (this.isD1Active()) {
+    const db = await this.getDb();
+    if (db) {
       try {
-        const db = (process.env as any).DB;
         const { results } = await db.prepare("SELECT * FROM drafts ORDER BY timestamp DESC").all();
         if (!results || !Array.isArray(results)) return [];
         return results.map((row: any) => {

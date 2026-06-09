@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     await draftDb.setDraft(topic, draftArticle);
 
     // If D1 is not active (we are in Redis mode), we also write legacy keys for backward-compatibility
-    if (!draftDb.isD1Active()) {
+    if (!await draftDb.isD1Active()) {
       const draftKey = `insights:draft:article:${slug}`;
       await setWithCompression(draftKey, draftArticle);
 

@@ -40,6 +40,21 @@ class MockInsightRepository implements IInsightRepository {
   async getRawArticle(slug: string): Promise<InsightItem | null> {
     return this.mockArticles[slug] || null;
   }
+
+  async saveArticle(article: any): Promise<void> {
+    this.mockArticles[article.slug] = article;
+    const index = this.mockInsightsList.findIndex(item => item.slug === article.slug);
+    if (index > -1) {
+      this.mockInsightsList[index] = article;
+    } else {
+      this.mockInsightsList.push(article);
+    }
+  }
+
+  async deleteArticle(slug: string): Promise<void> {
+    delete this.mockArticles[slug];
+    this.mockInsightsList = this.mockInsightsList.filter(item => item.slug !== slug);
+  }
 }
 
 describe("StandardInsightValidator", () => {
