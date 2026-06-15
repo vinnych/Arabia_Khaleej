@@ -69,33 +69,49 @@ export async function triggerAgentGeneration(topic: string, db?: any) {
     timestamp: Date.now()
   }, { ttlSeconds: 60 * 60 * 24 * 7 }, db); // 7 days
 
-  // Forward the request to the Python generation agent
-  const res = await fetch(`${AGENT_URL}/v1/generate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      topic,
-      callback_url: callbackUrl
-    }),
-    // Why AbortSignal.timeout: Since this is an async dispatch, the agent should respond with HTTP 200/202 instantly.
-    // Setting a 15-second timeout prevents the Edge route from hanging if the agent's server experiences high latency or locking.
-    signal: AbortSignal.timeout(15_000)
-  });
+  try {
+    // Forward the request to the Python generation agent
+    // Why 60-second timeout: Waking up a cold Render container can take 30-50 seconds.
+    // While daily-automation.js uses a pre-flight wake-up ping, manual triggers from the
+    // dashboard call this route directly. Increasing the timeout to 60 seconds inside the
+    // non-blocking background microtask allows the cold container to boot up successfully.
+    const res = await fetch(`${AGENT_URL}/v1/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic,
+        callback_url: callbackUrl
+      }),
+      signal: AbortSignal.timeout(60_000)
+    });
 
-  if (!res.ok) {
-    // Why self-healing state: If the Python agent rejects our request, we immediately update
-    // the status of the topic in Redis to 'error' to avoid leaving the dashboard in a perpetual 'generating' state.
-    console.error(`[generate] External article agent rejected generation for: "${topic}". Status: ${res.status}`);
-    // Keep errored drafts for 2 days so admins can investigate, then auto-clean.
-    // Why 2 days instead of 7: error drafts have no useful content to review or publish;
-    // shorter TTL avoids dashboard clutter from stale failures.
-    await draftDb.setDraft(topic, { 
-      topic, 
-      status: 'error', 
-      error: `Agent rejected with status: ${res.status}`, 
-      timestamp: Date.now() 
-    }, { ttlSeconds: 60 * 60 * 24 * 2 }); // 2 days
-    throw new Error(`Agent rejected request with status: ${res.status}`);
+    if (!res.ok) {
+      // Why self-healing state: If the Python agent rejects our request, we immediately update
+      // the status of the topic in Redis to 'error' to avoid leaving the dashboard in a perpetual 'generating' state.
+      console.error(`[generate] External article agent rejected generation for: "${topic}". Status: ${res.status}`);
+      // Keep errored drafts for 2 days so admins can investigate, then auto-clean.
+      // Why 2 days instead of 7: error drafts have no useful content to review or publish;
+      // shorter TTL avoids dashboard clutter from stale failures.
+      await draftDb.setDraft(topic, { 
+        topic, 
+        status: 'error', 
+        error: `Agent rejected with status: ${res.status}`, 
+        timestamp: Date.now() 
+      }, { ttlSeconds: 60 * 60 * 24 * 2 }, db); // 2 days
+      throw new Error(`Agent rejected request with status: ${res.status}`);
+    }
+  } catch (err: any) {
+    // Why catch connection and timeout errors: If fetch throws a TypeError (e.g. network down) 
+    // or a DOMException (timeout), the error occurs before checking res.ok. Catching it here
+    // ensures the draft is marked as 'error' in D1/Redis rather than getting stuck in 'generating' forever.
+    console.error(`[generate] Failed to trigger external agent for topic "${topic}":`, err.message || err);
+    await draftDb.setDraft(topic, {
+      topic,
+      status: 'error',
+      error: `Failed to trigger agent: ${err.message || err}`,
+      timestamp: Date.now()
+    }, { ttlSeconds: 60 * 60 * 24 * 2 }, db); // 2 days
+    throw err;
   }
 }
 
