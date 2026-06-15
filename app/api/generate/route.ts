@@ -1,5 +1,6 @@
 import { NextResponse, after } from 'next/server';
 import { triggerAgentGeneration } from '@/lib/services/agentHelper';
+import { draftDb } from '@/lib/database/draftsDb';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
@@ -40,12 +41,15 @@ export async function POST(req: Request) {
     }
     const topic = body.topic.trim();
     
+    // Get DB context during active request (before context is lost in after())
+    const db = await draftDb.getDb();
+    
     // Why unstable_after: Next.js 15 after() executes the agent trigger asynchronously
     // after the response has been sent, preventing Cloudflare Edge Runtime 25-second timeouts
     // when waking up a cold Render Python agent.
     after(async () => {
       try {
-        await triggerAgentGeneration(topic);
+        await triggerAgentGeneration(topic, db);
         console.log(`[generate] Asynchronously triggered agent for topic: "${topic}"`);
       } catch (agentErr: any) {
         console.error(`[generate] Background agent trigger failed for topic "${topic}":`, agentErr.message || agentErr);

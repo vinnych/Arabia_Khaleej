@@ -56,7 +56,7 @@ function buildCallbackUrl(): string {
  * 
  * @param topic The trending or manually inputted topic to generate an article for.
  */
-export async function triggerAgentGeneration(topic: string) {
+export async function triggerAgentGeneration(topic: string, db?: any) {
   // Build the callback URL dynamically (throws if secrets are not configured)
   const callbackUrl = buildCallbackUrl();
 
@@ -67,7 +67,7 @@ export async function triggerAgentGeneration(topic: string) {
     topic,
     status: 'generating',
     timestamp: Date.now()
-  }, { ttlSeconds: 60 * 60 * 24 * 7 }); // 7 days
+  }, { ttlSeconds: 60 * 60 * 24 * 7 }, db); // 7 days
 
   // Forward the request to the Python generation agent
   const res = await fetch(`${AGENT_URL}/v1/generate`, {

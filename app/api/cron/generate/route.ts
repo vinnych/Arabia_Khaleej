@@ -214,12 +214,13 @@ export async function GET(req: Request) {
     // Pick a random headline from the un-generated pool
     const rawHeadline = targetPool[Math.floor(Math.random() * targetPool.length)];
 
-    console.log(`[cron] Fetched trending topic: "${rawHeadline}" (Pool size: ${targetPool.length})`);
+    // Get DB context during active request (before context is lost in after())
+    const db = await draftDb.getDb();
 
     // 5. Trigger the generation asynchronously in after()
     after(async () => {
       try {
-        await triggerAgentGeneration(rawHeadline);
+        await triggerAgentGeneration(rawHeadline, db);
         console.log(`[cron] Asynchronously triggered agent for topic: "${rawHeadline}"`);
       } catch (agentErr: any) {
         console.error(`[cron] Background agent trigger failed for topic "${rawHeadline}":`, agentErr.message || agentErr);

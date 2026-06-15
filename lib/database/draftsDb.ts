@@ -112,8 +112,8 @@ export const draftDb = {
     }
   },
 
-  async setDraft(topic: string, value: any, options?: SetDraftOptions) {
-    const db = await this.getDb();
+  async setDraft(topic: string, value: any, options?: SetDraftOptions, dbOverride?: any) {
+    const db = dbOverride || await this.getDb();
     if (db) {
       try {
         const sql = `
