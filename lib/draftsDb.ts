@@ -77,7 +77,8 @@ export const draftDb = {
           error: row.error,
           description: parsedDesc,
           tags: row.tags ? JSON.parse(row.tags) : [],
-          timestamp: row.timestamp
+          timestamp: row.timestamp,
+          qualityScore: row.quality_score || 6
         };
       } catch (err) {
         console.error('Failed to get draft from D1:', topicOrSlug, err);
@@ -116,8 +117,8 @@ export const draftDb = {
     if (db) {
       try {
         const sql = `
-          INSERT INTO drafts (topic, status, word_count, content, image_url, error, description, tags, timestamp)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          INSERT INTO drafts (topic, status, word_count, content, image_url, error, description, tags, timestamp, quality_score)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON CONFLICT(topic) DO UPDATE SET
             status=excluded.status,
             word_count=excluded.word_count,
@@ -126,7 +127,8 @@ export const draftDb = {
             error=excluded.error,
             description=excluded.description,
             tags=excluded.tags,
-            timestamp=excluded.timestamp
+            timestamp=excluded.timestamp,
+            quality_score=excluded.quality_score
         `;
         
         const contentStr = value.content && typeof value.content === 'object'
@@ -146,7 +148,8 @@ export const draftDb = {
           value.error !== undefined ? value.error : null,
           descriptionStr,
           JSON.stringify(value.tags || []),
-          value.timestamp || Date.now()
+          value.timestamp || Date.now(),
+          value.qualityScore !== undefined ? value.qualityScore : 6
         ).run();
         return;
       } catch (err) {
@@ -200,7 +203,7 @@ export const draftDb = {
       try {
         const sql = `
           UPDATE drafts SET 
-            status = ?, word_count = ?, content = ?, image_url = ?, error = ?, description = ?, tags = ?, timestamp = ?
+            status = ?, word_count = ?, content = ?, image_url = ?, error = ?, description = ?, tags = ?, timestamp = ?, quality_score = ?
           WHERE topic = ? AND status = 'generating'
         `;
         const result = await db.prepare(sql).bind(
@@ -212,6 +215,7 @@ export const draftDb = {
           value.description !== undefined ? value.description : null,
           JSON.stringify(value.tags || []),
           value.timestamp || Date.now(),
+          value.qualityScore !== undefined ? value.qualityScore : 6,
           topic
         ).run();
         
@@ -278,7 +282,8 @@ export const draftDb = {
             error: row.error,
             description: parsedDesc,
             tags: row.tags ? JSON.parse(row.tags) : [],
-            timestamp: row.timestamp
+            timestamp: row.timestamp,
+            qualityScore: row.quality_score || 6
           };
         });
       } catch (err) {

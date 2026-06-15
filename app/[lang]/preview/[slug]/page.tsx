@@ -174,7 +174,7 @@ export default async function PreviewArticlePage({
       {(article.title.toLowerCase().includes('review') || article.tags?.includes('review')) && (
         <ReviewSchema 
           itemReviewed={{ name: article.title.replace(/review/i, '').trim() }}
-          reviewRating={5} // Default to 5 for premium insights
+          reviewRating={article.qualityScore || 6}
           author={richAuthor.name}
           datePublished={article.pubDate}
           reviewBody={article.description}

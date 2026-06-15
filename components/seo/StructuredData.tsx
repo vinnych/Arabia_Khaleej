@@ -277,7 +277,7 @@ export function ReviewSchema({
     reviewRating: {
       "@type": "Rating",
       ratingValue: reviewRating,
-      bestRating: 5,
+      bestRating: 10,
       worstRating: 1
     },
     author: {

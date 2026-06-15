@@ -294,6 +294,15 @@ export default function InsightArticleClient({
                 </span>
               </>
             )}
+            {article.qualityScore && (
+              <>
+                <span className="opacity-40">•</span>
+                <span className="px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest bg-brand-gold/10 text-brand-gold border border-brand-gold/20 shadow-[0_0_12px_rgba(212,175,55,0.15)] flex items-center gap-1.5 hover:scale-[1.04] transition-transform duration-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse" />
+                  Quality: {article.qualityScore}/10
+                </span>
+              </>
+            )}
           </div>
 
           {/* Title — size adapts to content profile */}

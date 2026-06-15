@@ -64,6 +64,7 @@ interface Article {
   lang?: string;   // 'en' | 'ar' – set for insights-store articles
   title?: string;  // already-extracted title from insights-store articles
   description?: string;
+  qualityScore?: number;
 }
 
 const getBadgeClass = (status: string, styles: any) => {
@@ -686,7 +687,10 @@ export default function Dashboard() {
               )}
               <div className={styles.cardContent}>
                 <h3>{art.title || art.topic}</h3>
-                <p className={styles.meta}>Words: {art.word_count || art.wordCount || 0}</p>
+                <p className={styles.meta}>
+                  Words: {art.word_count || art.wordCount || 0}
+                  {art.qualityScore !== undefined && ` • Score: ${art.qualityScore}/10`}
+                </p>
                 <div className={styles.actions}>
                   <button
                     className={styles.btnView}

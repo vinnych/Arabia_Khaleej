@@ -72,7 +72,8 @@ CREATE TABLE articles (
     author_role_ar TEXT,
     content_en TEXT NOT NULL,
     content_ar TEXT NOT NULL,
-    wordCount INTEGER NOT NULL DEFAULT 0
+    wordCount INTEGER NOT NULL DEFAULT 0,
+    qualityScore INTEGER NOT NULL DEFAULT 6
 );
 ```
 
@@ -88,7 +89,8 @@ CREATE TABLE drafts (
     error TEXT,
     description TEXT,
     tags TEXT, -- JSON array
-    timestamp INTEGER NOT NULL
+    timestamp INTEGER NOT NULL,
+    quality_score INTEGER NOT NULL DEFAULT 6
 );
 ```
 

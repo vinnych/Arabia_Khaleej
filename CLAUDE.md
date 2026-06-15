@@ -25,6 +25,7 @@ npm run cf:deploy                   # Build Next.js app and deploy to Cloudflare
 npm run lint                        # ESLint
 npm test                            # Jest unit tests
 npm run db:clean                    # Cleanup dead Redis listings/drafts
+npm run db:wipe                     # Completely reset local/remote D1 tables and Redis keys
 npm run automation-worker:deploy    # Deploy daily cron + keep-alive worker
 npm run contact-worker:deploy       # Deploy Cloudflare contact form worker
 ```

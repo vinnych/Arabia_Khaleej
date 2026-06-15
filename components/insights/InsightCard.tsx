@@ -81,6 +81,12 @@ export default function InsightCard({ item, language, isRTL, t }: InsightCardPro
             <div className="w-1.5 h-1.5 rounded-full bg-brand-gold" />
             {t('analystPerspective')}
           </div>
+          {item.qualityScore && (
+            <div className="px-2.5 py-1 rounded glass border-brand-gold/25 text-brand-gold text-[8px] font-black uppercase tracking-[0.15em] flex items-center gap-1.5 shadow-[0_0_10px_rgba(212,175,55,0.2)]">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-gold animate-pulse" />
+              Score: {item.qualityScore}/10
+            </div>
+          )}
         </div>
       </div>
 

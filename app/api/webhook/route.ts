@@ -26,6 +26,7 @@ const WebhookPayloadSchema = z.object({
   // with no SEO description. Now it is stored in Redis and used during the publish flow.
   description: z.string().optional().default(''),
   tags: z.array(z.string()).optional().default([]),
+  quality_score: z.preprocess((val) => parseInt(String(val), 10) || 6, z.number().min(1).max(10)).optional().default(6),
 });
 
 export async function POST(req: Request) {
@@ -83,6 +84,7 @@ export async function POST(req: Request) {
       // The Python agent extracts a clean 1-2 sentence description from the article body.
       description: payload.description,
       tags: payload.tags,
+      qualityScore: payload.quality_score,
       timestamp: Date.now()
     };
 

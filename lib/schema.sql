@@ -20,7 +20,8 @@ CREATE TABLE IF NOT EXISTS articles (
     author_role_ar TEXT,
     content_en TEXT NOT NULL,
     content_ar TEXT NOT NULL,
-    wordCount INTEGER NOT NULL DEFAULT 0
+    wordCount INTEGER NOT NULL DEFAULT 0,
+    qualityScore INTEGER NOT NULL DEFAULT 6
 );
 
 CREATE TABLE IF NOT EXISTS drafts (
@@ -32,7 +33,8 @@ CREATE TABLE IF NOT EXISTS drafts (
     error TEXT,
     description TEXT,
     tags TEXT, -- JSON array of tags
-    timestamp INTEGER NOT NULL
+    timestamp INTEGER NOT NULL,
+    quality_score INTEGER NOT NULL DEFAULT 6
 );
 
 -- Indexing for high-performance slug queries and list sorting

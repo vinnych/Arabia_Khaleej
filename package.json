@@ -15,7 +15,8 @@
     "pages:build": "npm run cf:build",
     "automation-worker:deploy": "wrangler deploy worker/daily-automation.js --config worker/wrangler-automation.toml",
     "contact-worker:deploy": "wrangler deploy worker/worker.js --config worker/wrangler.jsonc",
-    "db:clean": "tsx clean-redis.ts"
+    "db:clean": "tsx clean-redis.ts",
+    "db:wipe": "tsx wipe-articles.ts"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.6",

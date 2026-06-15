@@ -299,6 +299,7 @@ export class D1InsightRepository implements IInsightRepository {
           },
           content: { en: row.content_en, ar: row.content_ar },
           wordCount: row.wordCount,
+          qualityScore: row.qualityScore || 6,
           status: 'published'
         };
         return normalizeArticle(bilingualArticle, lang);
@@ -334,6 +335,7 @@ export class D1InsightRepository implements IInsightRepository {
         },
         content: { en: row.content_en, ar: row.content_ar },
         wordCount: row.wordCount,
+        qualityScore: row.qualityScore || 6,
         status: 'published'
       } as any;
     } catch (e) {
@@ -349,8 +351,8 @@ export class D1InsightRepository implements IInsightRepository {
         id, slug, title_en, title_ar, description_en, description_ar, 
         pubDate, source, category, image, tags, 
         author_id, author_name_en, author_name_ar, author_role_en, author_role_ar, 
-        content_en, content_ar, wordCount
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        content_en, content_ar, wordCount, qualityScore
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(slug) DO UPDATE SET
         title_en=excluded.title_en,
         title_ar=excluded.title_ar,
@@ -368,7 +370,8 @@ export class D1InsightRepository implements IInsightRepository {
         author_role_ar=excluded.author_role_ar,
         content_en=excluded.content_en,
         content_ar=excluded.content_ar,
-        wordCount=excluded.wordCount
+        wordCount=excluded.wordCount,
+        qualityScore=excluded.qualityScore
     `;
 
     await db.prepare(sql).bind(
@@ -390,7 +393,8 @@ export class D1InsightRepository implements IInsightRepository {
       article.author?.role?.ar || null,
       article.content.en,
       article.content.ar,
-      article.wordCount || 0
+      article.wordCount || 0,
+      article.qualityScore !== undefined ? article.qualityScore : 6
     ).run();
   }
 

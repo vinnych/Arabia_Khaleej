@@ -142,6 +142,16 @@ export default async function InsightArticlePage({
         language={article.language === 'ar' ? 'ar' : 'en'}
       />
 
+      {/* Review Schema for search engines (premium quality rated out of 10) */}
+      <ReviewSchema 
+        itemReviewed={{ name: article.title }}
+        reviewRating={article.qualityScore || 6}
+        author={richAuthor.name}
+        datePublished={article.pubDate}
+        reviewBody={article.description}
+        url={canonicalUrl}
+      />
+
       {/* Supplemental Rich Results based on content type */}
       {(() => {
         if ((article.title.toLowerCase().includes('how to') || article.content?.toLowerCase().includes('step-by-step')) && article.content) {

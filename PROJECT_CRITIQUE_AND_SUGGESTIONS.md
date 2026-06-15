@@ -113,3 +113,10 @@ To transform Arabia Khaleej into a truly premium, stable, and production-ready p
 * **Suggested Solution:** Refactor [redis-node.ts](file:///c:/Users/asish%5CArabia%20Khaleej/lib/redis-node.ts) to export a getter function that initializes the `ioredis` client on first call, rather than at module load time.
 * **Why this is used instead of others:**
   * **Clean Testing/Builds:** Prevents Next.js building or Jest tests from spawning dangling TCP connections to localhost, preventing connection spam.
+
+### 7. The Phantom Quality Score & Ghost SEO Ratings (The 1/10 Rating Trap)
+* **The Code:** [StructuredData.tsx](file:///c:/Users/asish/Arabia%20Khaleej/components/seo/StructuredData.tsx), [preview/[slug]/page.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/preview/%5Bslug%5D/page.tsx), and [insights/[slug]/page.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/insights/%5Bslug%5D/page.tsx).
+* **The Reality:** The interfaces boasted about a `qualityScore` property, but it was completely missing from the D1 SQLite database schema (defaulting all loaded article scores to `undefined` or 0/10). Furthermore, the developers only rendered the Google `ReviewSchema` on the *preview* page (which search engines are explicitly banned from crawling) while completely omitting it on the live canonical article page, rendering it useless for SEO Rich Snippet stars. Finally, the rating scale was hardcoded to a 5-star cap while data mappings were unstructured.
+* **Status: RESOLVED**
+  > [!TIP]
+  > We migrated the D1 SQL database schema to add `qualityScore` and `quality_score` columns, refactored data repositories to fetch and save ratings, updated the webhook API route to parse quality ratings, re-scaled the `ReviewSchema` to a `10`-point baseline, rendered it on indexable live page routes, and added gold-accented rating badges bilingually across the frontend card listings, live articles, and admin dashboards. We also introduced `npm run db:wipe` to easily purge the database and caches.

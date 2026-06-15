@@ -151,6 +151,16 @@ npx wrangler d1 execute arabiakhaleej-db --local --file=lib/schema.sql
 npx wrangler d1 execute arabiakhaleej-db --remote --file=lib/schema.sql
 ```
 
+### 4. Complete Database & Cache Reset
+To completely purge all drafts and published articles from D1 SQLite tables, reset listings, and clear associated Redis cache keys, run:
+```bash
+# Wipe local developer D1 database
+npm run db:wipe
+
+# Wipe production remote Cloudflare D1 database and Redis keys
+npm run db:wipe -- --remote
+```
+
 *Note: Ensure private secrets are uploaded to Cloudflare using `npx wrangler secret put KEY`.*
 
 ---
