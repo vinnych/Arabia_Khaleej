@@ -16,7 +16,8 @@
     "automation-worker:deploy": "wrangler deploy worker/daily-automation.js --config worker/wrangler-automation.toml",
     "contact-worker:deploy": "wrangler deploy worker/worker.js --config worker/wrangler.jsonc",
     "db:clean": "tsx scripts/clean-redis.ts",
-    "db:wipe": "tsx scripts/wipe-articles.ts"
+    "db:wipe": "tsx scripts/wipe-articles.ts",
+    "db:bulk-generate": "tsx scripts/trigger-bulk-generation.ts"
   },
   "dependencies": {
     "@next/third-parties": "^16.2.6",
