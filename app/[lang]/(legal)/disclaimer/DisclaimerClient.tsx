@@ -1,6 +1,6 @@
 "use client";
 
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 
 export default function DisclaimerPage() {
   const { t, isRTL } = useLanguage();

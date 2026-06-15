@@ -1,5 +1,5 @@
 import { NextResponse, after } from 'next/server';
-import { triggerAgentGeneration } from '@/lib/agentHelper';
+import { triggerAgentGeneration } from '@/lib/services/agentHelper';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

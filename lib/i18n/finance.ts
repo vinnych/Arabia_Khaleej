@@ -1,4 +1,4 @@
-import { Translations } from "../i18n-data";
+import { Translations } from "./i18n-data";
 
 export const finance: Translations = {
   marketSummary: { en: "Comprehensive real-time GCC currency intelligence. We track major currency dynamics across the Gulf Cooperation Council, including all regional currencies pegged to the USD, alongside high-fidelity global conversions.", ar: "استخبارات شاملة للعملات الخليجية في الوقت الفعلي. نحن نتتبع ديناميكيات العملات الرئيسية عبر دول مجلس التعاون الخليجي، بما في ذلك جميع العملات الإقليمية المرتبطة بالدولار الأمريكي، إلى جانب تحويلات عالمية عالية الدقة." },

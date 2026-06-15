@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { draftDb } from '@/lib/draftsDb';
+import { draftDb } from '@/lib/database/draftsDb';
 import { z } from 'zod';
-import { sanitizeAgentMarkdown } from '@/lib/agentHelper';
+import { sanitizeAgentMarkdown } from '@/lib/services/agentHelper';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

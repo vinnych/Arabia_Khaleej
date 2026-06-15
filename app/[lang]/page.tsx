@@ -1,13 +1,13 @@
-import { pageMeta, SITE_DESCRIPTION, SITE_DESCRIPTION_AR } from "@/lib/seo";
+import { pageMeta, SITE_DESCRIPTION, SITE_DESCRIPTION_AR } from '@/lib/seo/seo';
 import {
   DatasetSchema,
   WebPageSchema,
   FAQSchema,
 } from "@/components/seo/StructuredData";
 import HomeClient from "@/components/home/HomeClient";
-import { getServerLanguage, getT } from "@/lib/i18n-server";
+import { getServerLanguage, getT } from '@/lib/i18n/i18n-server';
 
-import { getUnifiedInsights } from "@/lib/insights";
+import { getUnifiedInsights } from '@/lib/database/insights';
 
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {

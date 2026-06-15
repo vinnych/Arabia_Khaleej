@@ -1,10 +1,10 @@
-import { pageMeta } from "@/lib/seo";
+import { pageMeta } from '@/lib/seo/seo';
 import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 import StructuredData from "@/components/seo/StructuredData";
-import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { SITE_NAME, SITE_URL } from '@/lib/seo/seo';
 import TransparencyClient from "./TransparencyClient";
 
-import { getT } from "@/lib/i18n-server";
+import { getT } from '@/lib/i18n/i18n-server';
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;

@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "next-themes";
 import { ReactNode } from "react";
-import { LanguageProvider, Language } from "@/lib/i18n";
+import { LanguageProvider, Language } from '@/lib/i18n/i18n';
 
 export function Providers({ children, initialLanguage, nonce }: { children: ReactNode, initialLanguage?: Language, nonce?: string }) {
   return (

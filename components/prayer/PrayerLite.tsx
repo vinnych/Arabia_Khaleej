@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
 
-import { useLanguage } from "@/lib/i18n";
-import { getGeolocation } from "@/lib/api";
+import { useLanguage } from '@/lib/i18n/i18n';
+import { getGeolocation } from '@/lib/services/api';
 
 export default function PrayerLite() {
   const { t, isRTL } = useLanguage();

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { X, Calendar as CalendarIcon, Clock } from "lucide-react";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 
 interface HijriDate {
   gregorian: string;

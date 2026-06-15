@@ -1,5 +1,5 @@
-import { getT } from "@/lib/i18n-server";
-import { pageMeta } from "@/lib/seo";
+import { getT } from '@/lib/i18n/i18n-server';
+import { pageMeta } from '@/lib/seo/seo';
 import DisclaimerClient from "./DisclaimerClient";
 import { BreadcrumbSchema } from "@/components/seo/StructuredData";
 

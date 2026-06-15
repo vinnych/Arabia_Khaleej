@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ALADHAN_API_BASE } from '@/lib/constants/api';
+import { ALADHAN_API_BASE } from '@/lib/services/constants';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

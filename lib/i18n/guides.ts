@@ -1,4 +1,4 @@
-import { Translations } from "../i18n-data";
+import { Translations } from "./i18n-data";
 
 export const guides: Translations = {
   regionalGuides: { en: "Regional Guides", ar: "أدلة إقليمية" },

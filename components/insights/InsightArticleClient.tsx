@@ -1,19 +1,19 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { InsightItem } from "@/lib/insights";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { InsightItem } from '@/lib/database/insights';
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 // Elegant icons chosen for maximum visual polish and semantic clarity.
 // Languages, RefreshCw, BookOpen, BarChart2 were removed along with the Perspective (AR) translation mode.
 import { Calendar, ChevronLeft, Share2, Clock, Tag, Quote } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { getDeterministicFallback } from "@/lib/fallbacks";
+import { getDeterministicFallback } from '@/lib/services/fallbacks';
 import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { getAuthorById } from "@/lib/authors";
+import { getAuthorById } from '@/lib/core/authors';
 
 // ─── Content analysis helpers ────────────────────────────────────────────────
 

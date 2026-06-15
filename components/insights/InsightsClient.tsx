@@ -2,14 +2,14 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { RefreshCw } from "lucide-react";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 import Link from "next/link";
 import Image from "next/image";
-import { getDeterministicFallback } from "@/lib/fallbacks";
+import { getDeterministicFallback } from '@/lib/services/fallbacks';
 import MobileFAB from "@/components/layout/MobileFAB";
 import InsightCard from "./InsightCard";
 
-import { InsightItem } from "@/lib/insights";
+import { InsightItem } from '@/lib/database/insights';
 
 export default function InsightsClient() {
    const { t, isRTL, language } = useLanguage();

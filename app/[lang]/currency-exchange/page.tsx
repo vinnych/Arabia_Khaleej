@@ -1,5 +1,5 @@
-import { getT } from "@/lib/i18n-server";
-import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
+import { getT } from '@/lib/i18n/i18n-server';
+import { pageMeta, SITE_NAME, SITE_NAME_AR } from '@/lib/seo/seo';
 import CurrencyExchangeClient from "@/components/finance/CurrencyExchangeClient";
 import { WebPageSchema, DatasetSchema, BreadcrumbSchema } from "@/components/seo/StructuredData";
 

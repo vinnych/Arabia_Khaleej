@@ -1,4 +1,4 @@
-import { pageMeta } from "@/lib/seo";
+import { pageMeta } from '@/lib/seo/seo';
 import StructuredData from "@/components/seo/StructuredData";
 import InsightsClient from "@/components/insights/InsightsClient";
 

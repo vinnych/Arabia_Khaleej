@@ -1,4 +1,4 @@
-import { pageMeta, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { pageMeta, SITE_NAME, SITE_URL } from '@/lib/seo/seo';
 import JoinClient from "@/components/join/JoinClient";
 import {
   BreadcrumbSchema,
@@ -6,7 +6,7 @@ import {
   ContactPageSchema,
 } from "@/components/seo/StructuredData";
 import StructuredData from "@/components/seo/StructuredData";
-import { getT } from "@/lib/i18n-server";
+import { getT } from '@/lib/i18n/i18n-server';
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }) {
   const resolvedParams = await params;

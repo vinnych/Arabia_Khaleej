@@ -1,6 +1,6 @@
 "use client";
 
-import { useLanguage, translations, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, translations, getLocalizedHref } from '@/lib/i18n/i18n';
 import { useEffect } from "react";
 import Link from "next/link";
 import MobileNav from "./MobileNav";

@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
 import Link from "next/link";
-import { GCC_COUNTRIES } from "@/lib/countries";
+import { GCC_COUNTRIES } from '@/lib/core/countries';
 import HijriCalendar from "@/components/prayer/HijriCalendar";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
-import { getGeolocation } from "@/lib/api";
-import { Breadcrumbs } from "@/lib/seo";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
+import { getGeolocation } from '@/lib/services/api';
+import { Breadcrumbs } from '@/lib/seo/seo';
 import MobileFAB from "@/components/layout/MobileFAB";
 import { useRouter, usePathname } from "next/navigation";
 import { ChevronLeft } from "lucide-react";

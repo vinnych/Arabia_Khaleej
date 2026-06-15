@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart3, Users, TrendingUp, CheckCircle2, ChevronRight, ChevronLeft } from "lucide-react";
 

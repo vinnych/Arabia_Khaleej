@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { getLocalizedHref } from "@/lib/i18n";
+import { getLocalizedHref } from '@/lib/i18n/i18n';
 
 export default function NotFound() {
   const pathname = usePathname();

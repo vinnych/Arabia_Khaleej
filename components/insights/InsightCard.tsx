@@ -4,9 +4,9 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink, Share2, CheckCircle2 } from "lucide-react";
-import { getDeterministicFallback } from "@/lib/fallbacks";
+import { getDeterministicFallback } from '@/lib/services/fallbacks';
 
-import { InsightItem } from "@/lib/insights";
+import { InsightItem } from '@/lib/database/insights';
 
 interface InsightCardProps {
   item: InsightItem;

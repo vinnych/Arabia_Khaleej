@@ -1,6 +1,6 @@
 "use client";
 
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 import { Languages } from "lucide-react";
 
 export default function LanguageSwitcher() {

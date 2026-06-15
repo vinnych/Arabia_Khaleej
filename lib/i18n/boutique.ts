@@ -1,4 +1,4 @@
-import { Translations } from "../i18n-data";
+import { Translations } from "./i18n-data";
 
 /**
  * Boutique & Institutional Enquiries Translations

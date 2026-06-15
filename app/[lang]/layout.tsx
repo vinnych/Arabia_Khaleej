@@ -6,9 +6,9 @@ import ClientLayout from "@/components/layout/ClientLayout";
 import Script from "next/script";
 import { headers } from "next/headers";
 import Header from "@/components/layout/Header";
-import { pageMeta, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
+import { pageMeta, SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo/seo';
 import { OrganizationSchema, WebSiteSchema } from "@/components/seo/StructuredData";
-import { Language } from "@/lib/i18n";
+import { Language } from '@/lib/i18n/i18n';
 import CookieConsent from "@/components/ui/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });

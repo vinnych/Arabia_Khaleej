@@ -1,10 +1,10 @@
-import { pageMeta } from "@/lib/seo";
+import { pageMeta } from '@/lib/seo/seo';
 import { InsightArticleSchema, BreadcrumbSchema, WebPageSchema, HowToSchema, ReviewSchema, FAQSchema } from "@/components/seo/StructuredData";
 import InsightArticleClient from "@/components/insights/InsightArticleClient";
 import { notFound } from "next/navigation";
-import { getArticleBySlug, getUnifiedInsights, InsightItem } from "@/lib/insights";
-import { getT } from "@/lib/i18n-server";
-import { getAuthorById, EDITORIAL_AUTHORS } from "@/lib/authors";
+import { getArticleBySlug, getUnifiedInsights, InsightItem } from '@/lib/database/insights';
+import { getT } from '@/lib/i18n/i18n-server';
+import { getAuthorById, EDITORIAL_AUTHORS } from '@/lib/core/authors';
 
 export const dynamic = 'force-dynamic';
 

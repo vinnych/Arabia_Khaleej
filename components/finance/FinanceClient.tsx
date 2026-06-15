@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Coins, TrendingUp, TrendingDown, ArrowLeftRight, Globe } from "lucide-react";
 import Link from "next/link";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 
 export default function FinanceClient() {
   const [rates, setRates] = useState<any>(null);

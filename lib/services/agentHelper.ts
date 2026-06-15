@@ -1,4 +1,4 @@
-import { draftDb } from '@/lib/draftsDb';
+import { draftDb } from '@/lib/database/draftsDb';
 
 const AGENT_URL = process.env.AGENT_URL || 'https://article-agent-zk00.onrender.com';
 

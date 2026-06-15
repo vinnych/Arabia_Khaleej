@@ -5,7 +5,7 @@
  * The InsightsClient auto-refreshes every minute when autoRefresh is enabled.
  */
 import { NextResponse } from 'next/server';
-import { getUnifiedInsights, getArticleBySlug } from '@/lib/insights';
+import { getUnifiedInsights, getArticleBySlug } from '@/lib/database/insights';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

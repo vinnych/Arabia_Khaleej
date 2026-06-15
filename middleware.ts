@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getCSPHeader } from './lib/csp';
+import { getCSPHeader } from './lib/seo/csp';
 
 // Why NO runtime export here:
 // Next.js middleware (middleware.ts) ALWAYS runs on the Edge Runtime by default.

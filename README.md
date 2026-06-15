@@ -25,7 +25,7 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 | **Imagery** | Pexels API + geometric fallback |
 | **Styling** | Vanilla CSS + Tailwind CSS |
 | **Infrastructure** | Cloudflare Workers + Cloudflare Assets |
-| **i18n** | Next.js App Router subpath routing (`/[lang]/`) + Custom `lib/i18n.tsx` |
+| **i18n** | Next.js App Router subpath routing (`/[lang]/`) + Custom `lib/i18n/i18n.tsx` |
 
 ---
 
@@ -46,7 +46,7 @@ Arabia Khaleej delegates heavy article generation to an external Python agent ho
        │
        └──────────────┬────────────────────┘
                       ▼
-             lib/agentHelper.ts
+             lib/services/agentHelper.ts
              • Writes draft to D1 (or Redis fallback)
              • Dispatches POST to agent via next.js 15 after() in background
                       │
@@ -145,10 +145,10 @@ NEXT_PUBLIC_SITE_VERIFICATION = "61758f95d085e67d"
 Run migrations locally and remotely:
 ```bash
 # Local D1 SQLite
-npx wrangler d1 execute arabiakhaleej-db --local --file=lib/schema.sql
+npx wrangler d1 execute arabiakhaleej-db --local --file=lib/database/schema.sql
 
 # Production Cloudflare D1
-npx wrangler d1 execute arabiakhaleej-db --remote --file=lib/schema.sql
+npx wrangler d1 execute arabiakhaleej-db --remote --file=lib/database/schema.sql
 ```
 
 ### 4. Complete Database & Cache Reset

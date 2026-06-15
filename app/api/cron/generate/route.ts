@@ -1,9 +1,9 @@
 import { NextResponse, after } from 'next/server';
-import { triggerAgentGeneration } from '@/lib/agentHelper';
+import { triggerAgentGeneration } from '@/lib/services/agentHelper';
 import { XMLParser } from 'fast-xml-parser';
-import { getUnifiedInsights } from '@/lib/insights';
-import { draftDb } from '@/lib/draftsDb';
-import { GOOGLE_NEWS_RSS_URL } from '@/lib/constants/api';
+import { getUnifiedInsights } from '@/lib/database/insights';
+import { draftDb } from '@/lib/database/draftsDb';
+import { GOOGLE_NEWS_RSS_URL } from '@/lib/services/constants';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

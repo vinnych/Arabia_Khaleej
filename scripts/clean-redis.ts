@@ -17,7 +17,7 @@ try {
 async function cleanList(lang: 'en' | 'ar') {
   // Why dynamic import: Environment variables must be parsed and loaded into process.env 
   // before the Redis module resolves its configuration, otherwise it defaults to memory backend.
-  const { getWithCompression, setWithCompression } = await import('./lib/redis');
+  const { getWithCompression, setWithCompression } = await import('../lib/database/redis');
 
   const listKey = `insights:list:${lang}`;
   const draftsKey = `insights:drafts:${lang}`;

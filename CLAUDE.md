@@ -43,7 +43,7 @@ npm run contact-worker:deploy       # Deploy Cloudflare contact form worker
 | **Redis REST POSTs** | Never pass keys in REST URL paths (e.g. `/get/key`). Always send POST requests to `/` with `["GET", key]` body arrays to prevent injection. |
 | **Secrets & Variables** | Put public configuration in `wrangler.toml` `[vars]`. Keep private credentials in `.dev.vars` (local) and push to Cloudflare via `npx wrangler secret put KEY` (production). |
 | **Images** | External hostnames must be added to `next.config.ts` `remotePatterns` |
-| **CSP** | Defined in `lib/csp.ts`, applied in `middleware.ts`. Never inline CSP strings. Static routes (like `/admin`) omit the nonce to prevent blocking hydration scripts. |
+| **CSP** | Defined in `lib/seo/csp.ts`, applied in `middleware.ts`. Never inline CSP strings. Static routes (like `/admin`) omit the nonce to prevent blocking hydration scripts. |
 | **Naming** | camelCase vars/fns · PascalCase components |
 | **Types** | Always use TypeScript types. Avoid `any` unless casting raw database rows. |
 | **Errors** | No silent catch blocks. Always `console.error(...)` with context. |
@@ -55,7 +55,7 @@ npm run contact-worker:deploy       # Deploy Cloudflare contact form worker
 
 We maintain a Jest unit test suite covering core edge engines, utilities, and read-side pipeline services.
 
-- **Test Files Location**: Always put test files in `lib/__tests__/` with the suffix `.test.ts`.
+- **Test Files Location**: Colocate test files within their module folders under `lib/<domain>/__tests__/` with the suffix `.test.ts`.
 - **Mocking External Services**: Mock `global.fetch` and D1 database objects in unit tests so that tests run instantly and offline.
 - **Run Tests**: Execute `npm test` before submitting changes. All tests must pass successfully.
 
@@ -72,7 +72,7 @@ We maintain a Jest unit test suite covering core edge engines, utilities, and re
           picks random UAE headline)
                     └──────────────┬──────────────────┘
                                    ▼
-                           lib/agentHelper.ts
+                           lib/services/agentHelper.ts
                            • writes draft to D1 (status: generating)
                            • dispatches request in background using next.js 15 after()
                            • POST → Render agent /v1/generate

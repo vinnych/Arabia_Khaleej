@@ -3,11 +3,11 @@
 // It is fully refactored to support the Unified Bilingual Document Model and dynamic
 // D1 / Upstash Redis database storage routing.
 import { NextRequest, NextResponse } from 'next/server';
-import { translateMarkdown } from '@/lib/translate';
-import { getInsightRepository, getUnifiedInsights } from '@/lib/insights';
-import { draftDb } from '@/lib/draftsDb';
-import { toSlug } from '@/lib/utils';
-import { getWithCompression, setWithCompression, redis } from '@/lib/redis';
+import { translateMarkdown } from '@/lib/i18n/translate';
+import { getInsightRepository, getUnifiedInsights } from '@/lib/database/insights';
+import { draftDb } from '@/lib/database/draftsDb';
+import { toSlug } from '@/lib/core/utils';
+import { getWithCompression, setWithCompression, redis } from '@/lib/database/redis';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 import { Home, Sparkles, TrendingUp, Clock, UserPlus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/core/utils';
 
 export default function MobileNav() {
   const pathname = usePathname();

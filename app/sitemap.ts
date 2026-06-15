@@ -31,8 +31,8 @@
  * @requires lib/seo.SITE_URL              — canonical base URL for all entries
  */
 import { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/seo';
-import { getAllInsightSlugs } from '@/lib/insights';
+import { SITE_URL } from '@/lib/seo/seo';
+import { getAllInsightSlugs } from '@/lib/database/insights';
 
 export const revalidate = 3600; // Cache for 1 hour
 // NOTE: runtime='edge' removed for OpenNext/Cloudflare Workers compatibility.

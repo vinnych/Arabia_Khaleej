@@ -1,5 +1,5 @@
-import { getT } from "@/lib/i18n-server";
-import { pageMeta, SITE_URL } from "@/lib/seo";
+import { getT } from '@/lib/i18n/i18n-server';
+import { pageMeta, SITE_URL } from '@/lib/seo/seo';
 import PrivacyClient from "./PrivacyClient";
 import StructuredData from "@/components/seo/StructuredData";
 import { BreadcrumbSchema } from "@/components/seo/StructuredData";

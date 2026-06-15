@@ -1,5 +1,5 @@
 import Script from "next/script";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from '@/lib/seo/seo';
 
 interface StructuredDataProps {
   type: string;

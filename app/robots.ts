@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { SITE_URL } from '@/lib/seo';
+import { SITE_URL } from '@/lib/seo/seo';
 
 // NOTE: runtime='edge' removed for OpenNext/Cloudflare Workers compatibility.
 // All routes run in nodejs_compat Workers runtime - edge declaration not needed.

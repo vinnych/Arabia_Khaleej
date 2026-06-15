@@ -1,6 +1,6 @@
 "use client";
 
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 import { useState } from "react";
 import { Send, CheckCircle, Mail, MapPin, Globe } from "lucide-react";
 

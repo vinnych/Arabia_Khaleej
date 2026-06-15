@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 
 interface BreadcrumbItem {
   name: string;

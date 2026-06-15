@@ -4,10 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, TrendingUp, Newspaper, Mail, ArrowRight } from "lucide-react";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 import PrayerLite from "@/components/prayer/PrayerLite";
-import { getDeterministicFallback } from "@/lib/fallbacks";
-import { InsightItem } from "@/lib/insights";
+import { getDeterministicFallback } from '@/lib/services/fallbacks';
+import { InsightItem } from '@/lib/database/insights';
 
 // ─── WHY A SEPARATE SUB-COMPONENT ────────────────────────────────────────────
 // Each featured insight card needs its OWN imgError state. If we kept the map

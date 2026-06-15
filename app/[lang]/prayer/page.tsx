@@ -1,5 +1,5 @@
-import { getServerLanguage, getT } from "@/lib/i18n-server";
-import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
+import { getServerLanguage, getT } from '@/lib/i18n/i18n-server';
+import { pageMeta, SITE_NAME, SITE_NAME_AR } from '@/lib/seo/seo';
 import PrayerClient from "@/components/prayer/PrayerClient";
 import {
   BreadcrumbSchema,

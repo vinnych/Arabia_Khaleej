@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLocalizedHref } from "@/lib/i18n";
+import { getLocalizedHref } from '@/lib/i18n/i18n';
 
 export default async function LegalLayout({
   children,

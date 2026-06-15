@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { rateLimit } from '@/lib/redis';
-import { SSRF_DENYLIST } from '@/lib/utils';
-import { FREEIPAPI_URL } from '@/lib/constants/api';
+import { rateLimit } from '@/lib/database/redis';
+import { SSRF_DENYLIST } from '@/lib/core/utils';
+import { FREEIPAPI_URL } from '@/lib/services/constants';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

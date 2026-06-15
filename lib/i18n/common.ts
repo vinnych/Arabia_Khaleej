@@ -1,4 +1,4 @@
-import { Translations } from "../i18n-data";
+import { Translations } from "./i18n-data";
 
 export const common: Translations = {
   siteName: { en: "Arabia Khaleej", ar: "عربية خليج" },

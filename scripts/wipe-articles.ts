@@ -38,7 +38,7 @@ async function run() {
   try {
     console.log('[Redis] Connecting to cache layer...');
     // Why dynamic import: Enforces env load completion before Redis instantiates connection endpoints
-    const { redis } = await import('./lib/redis');
+    const { redis } = await import('../lib/database/redis');
 
     const feedKeys = [
       'insights:list:en',

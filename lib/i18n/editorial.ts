@@ -9,7 +9,7 @@
  *   - The AI disclosure card on `/transparency`
  */
 
-import { Translations } from "../i18n-data";
+import { Translations } from "./i18n-data";
 
 export const editorial: Translations = {
 

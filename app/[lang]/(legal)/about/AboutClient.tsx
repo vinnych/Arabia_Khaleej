@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useLanguage } from "@/lib/i18n";
-import { EDITORIAL_AUTHORS } from "@/lib/authors";
+import { useLanguage } from '@/lib/i18n/i18n';
+import { EDITORIAL_AUTHORS } from '@/lib/core/authors';
 
 export default function AboutPage() {
   const { t, isRTL } = useLanguage();

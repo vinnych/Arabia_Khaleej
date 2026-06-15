@@ -1,4 +1,4 @@
-import { pageMeta, SITE_NAME, SITE_NAME_AR } from "@/lib/seo";
+import { pageMeta, SITE_NAME, SITE_NAME_AR } from '@/lib/seo/seo';
 import PrayerClient from "@/components/prayer/PrayerClient";
 import {
   BreadcrumbSchema,
@@ -8,9 +8,9 @@ import {
   PrayerServiceSchema,
   FAQSchema,
 } from "@/components/seo/StructuredData";
-import { GCC_COUNTRIES, getCountryBySlug } from "@/lib/countries";
+import { GCC_COUNTRIES, getCountryBySlug } from '@/lib/core/countries';
 import { notFound } from "next/navigation";
-import { getT } from "@/lib/i18n-server";
+import { getT } from '@/lib/i18n/i18n-server';
 
 export function generateStaticParams() {
   return GCC_COUNTRIES.map((country) => ({ country: country.slug }));

@@ -1,4 +1,4 @@
-import { pageMeta, SITE_NAME } from "@/lib/seo";
+import { pageMeta, SITE_NAME } from '@/lib/seo/seo';
 import CountryClient from "./Client";
 import {
   BreadcrumbSchema,
@@ -6,7 +6,7 @@ import {
   DatasetSchema,
   WebPageSchema,
 } from "@/components/seo/StructuredData";
-import { getT } from "@/lib/i18n-server";
+import { getT } from '@/lib/i18n/i18n-server';
 
 type Props = {
   params: Promise<{ lang: string; slug: string }>;

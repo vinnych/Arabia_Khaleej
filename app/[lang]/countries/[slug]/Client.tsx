@@ -3,12 +3,12 @@
 // Country-specific client component
 
 
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 import { notFound, useParams } from "next/navigation";
 import { Globe, Users, Landmark, Coins, Rocket, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { SITE_URL, SITE_NAME, Breadcrumbs } from "@/lib/seo";
+import { SITE_URL, SITE_NAME, Breadcrumbs } from '@/lib/seo/seo';
 
 
 const COUNTRY_DATA: Record<string, any> = {

@@ -3,9 +3,9 @@
 // It securely stores the generated article via draftDb so it appears instantly 
 // in the existing Arabia Khaleej human verification dashboard (/admin/review).
 import { NextRequest, NextResponse } from 'next/server';
-import { getWithCompression, setWithCompression } from '@/lib/redis';
-import { translateMarkdown } from '@/lib/translate';
-import { draftDb } from '@/lib/draftsDb';
+import { getWithCompression, setWithCompression } from '@/lib/database/redis';
+import { translateMarkdown } from '@/lib/i18n/translate';
+import { draftDb } from '@/lib/database/draftsDb';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary

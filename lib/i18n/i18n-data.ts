@@ -2,13 +2,13 @@
  * Arabia Khaleej Unified Translation Dictionary
  * Refactored into modular domains for maintainability.
  */
-import { common } from "./i18n/common";
-import { finance } from "./i18n/finance";
-import { prayer } from "./i18n/prayer";
-import { editorial } from "./i18n/editorial";
-import { guides } from "./i18n/guides";
-import { legal } from "./i18n/legal";
-import { boutique } from "./i18n/boutique";
+import { common } from "./common";
+import { finance } from "./finance";
+import { prayer } from "./prayer";
+import { editorial } from "./editorial";
+import { guides } from "./guides";
+import { legal } from "./legal";
+import { boutique } from "./boutique";
 
 export type Language = 'en' | 'ar';
 

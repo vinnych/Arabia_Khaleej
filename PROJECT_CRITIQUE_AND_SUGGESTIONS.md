@@ -19,7 +19,7 @@ Below is a detailed critique (the "insults") followed by concrete, production-re
     ```typescript
     const t = await getT();
     ```
-* **The Reality:** The developers went to the trouble of writing a detailed warning comment in [i18n-server.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/i18n-server.ts#L10-L12) explaining that they must pass `lang` to `getT` so search engine crawlers (which don't send cookies) don't get forced to default to English. And then, in three separate core pages, they literally forgot to pass `lang`!
+* **The Reality:** The developers went to the trouble of writing a detailed warning comment in [i18n-server.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/i18n/i18n-server.ts#L10-L12) explaining that they must pass `lang` to `getT` so search engine crawlers (which don't send cookies) don't get forced to default to English. And then, in three separate core pages, they literally forgot to pass `lang`!
 * **The Consequences:**
   * Googlebot crawls `/ar/insights/some-slug` and receives the English translation for general interface terms because no `NEXT_LOCALE` cookie is present.
   * Calling `getServerLanguage()` in `TransparencyClient` calls Next.js's `cookies()`. Since this page doesn't have `force-dynamic` but does read cookies, Next.js is forced to opt out of static generation (SSG) for this page. They turned what should be a perfectly static About/Transparency legal page into a dynamic, cookie-reading, database-querying, slow-loading edge route.
@@ -41,7 +41,7 @@ Below is a detailed critique (the "insults") followed by concrete, production-re
 * **The Reality:** The `workflows` route handler handles the `approve` action by calling `draftDb.getDraft(slug)`. But drafts are stored in the database keyed by their raw `topic` name (e.g., `"Dubai Real Estate Boom"`), while the review dashboard passes `slug` (e.g., `"dubai-real-estate-boom"`). Since a slugified name will never match the raw topic primary key, this call will always return `null`, resulting in a `404 Draft article not found`. The only reason they haven't noticed this is because the admin dashboard UI actually calls `/api/article` instead of `/api/admin/workflows` for publishing drafts, making this entire code block dead, broken garbage.
 
 ### 4. The "D1 Hybrid" Security Theater
-* **The Code:** [draftsDb.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/draftsDb.ts#L224) and [insights.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/insights.ts#L393):
+* **The Code:** [draftsDb.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/draftsDb.ts#L224) and [insights.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/insights.ts#L393):
   ```typescript
   fetch(`${process.env.UPSTASH_REDIS_REST_URL}/keys/article:*`, { ... })
   ```
@@ -63,12 +63,12 @@ Below is a detailed critique (the "insults") followed by concrete, production-re
 * **The Reality:** Waking up a sleeping container via a cron worker, sleeping for 3 seconds, and praying that the Python WSGI server has booted is not "automation"—it's a digital cardiopulmonary resuscitation machine for a container that is too cheap to pay $7/month for a hobby instance.
 
 ### 6. The Silent Node-Side Connection Polluters
-* **The Code:** [redis-node.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/redis-node.ts#L144-L146):
+* **The Code:** [redis-node.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/redis-node.ts#L144-L146):
   ```typescript
   const conn = getStandaloneRedisNode();
   _redisDirect = conn;
   ```
-* **The Reality:** In `redis-node.ts`, they initialize the standalone `ioredis` client immediately when the module is loaded. This means any Node.js environment importing `lib/redis` (like running `npm run db:clean` or even linting/testing suites that trace the modules) will instantly spin up a connection to `process.env.REDIS_URL || 'redis://localhost:6379'`. If a local Redis is not running, it prints spammy connection errors.
+* **The Reality:** In `redis-node.ts`, they initialize the standalone `ioredis` client immediately when the module is loaded. This means any Node.js environment importing `lib/database/redis` (like running `npm run db:clean` or even linting/testing suites that trace the modules) will instantly spin up a connection to `process.env.REDIS_URL || 'redis://localhost:6379'`. If a local Redis is not running, it prints spammy connection errors.
 
 ---
 
@@ -77,7 +77,7 @@ Below is a detailed critique (the "insults") followed by concrete, production-re
 To transform Arabia Khaleej into a truly premium, stable, and production-ready platform, the following changes are suggested. Here is why each particular solution is recommended over others:
 
 ### 1. Fix the i18n dynamic-rendering leak & crawler language defaults
-* **Suggested Solution:** Refactor [TransparencyClient.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/%28legal%29/transparency/TransparencyClient.tsx) to accept `lang` as a prop from its parent Server Component. Pass `lang` to [getT()](file:///c:/Users/asish/Arabia%20Khaleej/lib/i18n-server.ts#L13) in [insights/[slug]/page.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/insights/%5Bslug%5D/page.tsx) and [preview/[slug]/page.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/preview/%5Bslug%5D/page.tsx).
+* **Suggested Solution:** Refactor [TransparencyClient.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/%28legal%29/transparency/TransparencyClient.tsx) to accept `lang` as a prop from its parent Server Component. Pass `lang` to [getT()](file:///c:/Users/asish/Arabia%20Khaleej/lib/i18n/i18n-server.ts#L13) in [insights/[slug]/page.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/insights/%5Bslug%5D/page.tsx) and [preview/[slug]/page.tsx](file:///c:/Users/asish/Arabia%20Khaleej/app/%5Blang%5D/preview/%5Bslug%5D/page.tsx).
 * **Why this is used instead of others:**
   * **Static Site Generation (SSG) Compatibility:** Passing `lang` as a prop avoids calling `cookies()` (via `getServerLanguage()`) during page render. Next.js can now statically pre-render these pages at build time. If we used alternative middleware headers or client-side storage queries, we would still lose SSG or force client hydration delays.
   * **Crawler Fidelity:** Passing `lang` directly to `getT(lang)` guarantees that search engine bots receive localized translation strings rather than falling back to English because they don't support browser cookies.
@@ -110,7 +110,7 @@ To transform Arabia Khaleej into a truly premium, stable, and production-ready p
   * **Real Automation:** Paying $7/month is infinitely better than maintaining a 60-second wake-up ping hack in Cloudflare Workers. It eliminates cold-start latencies and deletes the fragile wake-up loops.
 
 ### 6. Lazy-Initialize standalone Redis
-* **Suggested Solution:** Refactor [redis-node.ts](file:///c:/Users/asish%5CArabia%20Khaleej/lib/redis-node.ts) to export a getter function that initializes the `ioredis` client on first call, rather than at module load time.
+* **Suggested Solution:** Refactor [redis-node.ts](file:///c:/Users/asish%5CArabia%20Khaleej/lib/database/redis-node.ts) to export a getter function that initializes the `ioredis` client on first call, rather than at module load time.
 * **Why this is used instead of others:**
   * **Clean Testing/Builds:** Prevents Next.js building or Jest tests from spawning dangling TCP connections to localhost, preventing connection spam.
 

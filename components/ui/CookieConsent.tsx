@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useLanguage } from "@/lib/i18n";
+import { useLanguage } from '@/lib/i18n/i18n';
 import { X, ShieldCheck } from "lucide-react";
 // Next.js Link component is imported to allow client-side client-side navigation
 // which is significantly faster and smoother than full-page reloads using native <a> tags.

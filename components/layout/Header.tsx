@@ -3,7 +3,7 @@
 import Link from "next/link";
 import LanguageSwitcher from "@/components/ui/LanguageSwitcher";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 import { usePathname } from "next/navigation";
 
 const NAV = [

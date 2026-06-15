@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 
 export default function JoinClient() {
   const [inviteStatus, setInviteStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");

@@ -2,7 +2,7 @@
 // Why: Cloudflare Pages/Workers do not support standard Node.js TCP connections out of the box without special bindings. 
 // Using the Upstash REST API via standard `fetch` is the official and most reliable way to connect to Redis on the edge.
 
-import { toSlug } from './utils';
+import { toSlug } from '../core/utils';
 
 /**
  * Options for setDraft.

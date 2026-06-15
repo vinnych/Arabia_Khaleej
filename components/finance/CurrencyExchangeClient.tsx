@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 // WHY: Settings2 removed (unused import kept previously), Zap added for live badge
 import { ArrowDownUp, Search, Star, Clock, TrendingUp, ChevronDown, X, RefreshCw, Globe, Copy, Check, Share2, Zap } from "lucide-react";
-import { useLanguage, getLocalizedHref } from "@/lib/i18n";
+import { useLanguage, getLocalizedHref } from '@/lib/i18n/i18n';
 import Link from "next/link";
-import { Breadcrumbs } from "@/lib/seo";
+import { Breadcrumbs } from '@/lib/seo/seo';
 
 interface Currency {
   code: string; name: string; nameAr: string; symbol: string; flag: string; region: string; rate: number;

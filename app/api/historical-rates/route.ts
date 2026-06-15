@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { OPEN_ER_API_BASE } from '@/lib/constants/api';
+import { OPEN_ER_API_BASE } from '@/lib/services/constants';
 
 // Edge runtime for Cloudflare Pages compatibility
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
