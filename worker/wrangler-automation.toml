@@ -3,13 +3,13 @@ main = "daily-automation.js"
 compatibility_date = "2025-02-04"
 
 # Single cron schedule:
-#   0 */3 * * *  — fires once every 3 hours (at minute 0) → triggers article generation.
-#   Why once every 3 hours: Conserves API quota and database writes while keeping feed fresh.
+#   0 * * * *  — fires once every hour (at minute 0) → triggers article generation.
+#   Why once every hour: Keeps the feed extremely fresh with new content.
 #
 # IMPORTANT: After deploying, set the CRON_SECRET worker secret:
 #   npx wrangler secret put CRON_SECRET --config worker/wrangler-automation.toml
 [triggers]
-crons = ["0 */3 * * *"]
+crons = ["0 * * * *"]
 
 # Observability: logs enabled, traces disabled (saves quota on free tier)
 [observability]

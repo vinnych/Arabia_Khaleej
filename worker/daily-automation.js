@@ -2,17 +2,17 @@
  * Arabia Khaleej — Cloudflare Automation Worker
  *
  * Responsibilities:
- *   1. Once every 3 hours → Call /api/cron/generate to trigger one article generation.
+ *   1. Once every hour → Call /api/cron/generate to trigger one article generation.
  *   
- *   WHY ONCE EVERY 3 HOURS:
- *   The cron schedule triggers every 3 hours (0 *\/3 * * *) to conserve API quotas and
- *   database writes while keeping the feed fresh. Since the Render free-tier container
- *   spins down after 15 minutes of inactivity, it will be cold when this cron triggers.
- *   Our pre-flight wake-up ping is essential here to wake the Render container first.
+ *   WHY ONCE EVERY HOUR:
+ *   The cron schedule triggers every hour (0 * * * *) to keep the feed extremely fresh.
+ *   Since the Render free-tier container spins down after 15 minutes of inactivity,
+ *   it will be cold when this cron triggers. Our pre-flight wake-up ping is essential
+ *   here to wake the Render container first.
  *
  * Why we check event.cron string matching:
  *   Cloudflare delivers the normalized cron expression to `event.cron`. Since we only
- *   have a single cron trigger "0 *\/3 * * *" registered in wrangler-automation.toml,
+ *   have a single cron trigger "0 * * * *" registered in wrangler-automation.toml,
  *   we check if event.cron matches this exactly to confirm a generation tick.
  *
  * Why we run the pre-flight ping first:
@@ -53,8 +53,8 @@ export default {
 
     // Route logic based on the cron expression that triggered the event.
     // Cloudflare normalizes the cron string to remove extra whitespace.
-    // We check for "0 */3 * * *" since the cron schedule triggers once every 3 hours.
-    const isGenerationTick = event.cron === "0 */3 * * *";
+    // We check for "0 * * * *" since the cron schedule triggers once every hour.
+    const isGenerationTick = event.cron === "0 * * * *";
 
     if (isGenerationTick) {
       // ── Generation Trigger ───────────────────
