@@ -1,10 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { translations, Language } from './i18n-data';
+import { translations, Language, getLocalizedHref } from './i18n-data';
 
 export type { Language };
-export { translations };
+export { translations, getLocalizedHref };
 
 interface LanguageContextType {
   language: Language;
@@ -72,29 +72,3 @@ export const useLanguage = () => {
   return context;
 };
 
-/**
- * Normalizes and prefixes an internal route path with the active language code.
- * Why: Ensures that client-side links point directly to the localized path,
- * avoiding redirect hops and ensuring Googlebot discovers canonical localized URLs.
- */
-export function getLocalizedHref(path: string, lang: Language): string {
-  // Why: Avoid prefixing external protocols (HTTP/HTTPS), mailto, or telephone links.
-  if (path.startsWith('http') || path.startsWith('mailto:') || path.startsWith('tel:')) {
-    return path;
-  }
-  
-  // Normalize leading slash to ensure we have a valid relative path.
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  
-  // Why: Root path / points to /${lang} (e.g. /en or /ar).
-  if (cleanPath === '/') {
-    return `/${lang}`;
-  }
-  
-  // Why: Prevent double-prefixing if the path already starts with /en/ or /ar/ or is exactly /en or /ar.
-  if (cleanPath.startsWith('/en/') || cleanPath === '/en' || cleanPath.startsWith('/ar/') || cleanPath === '/ar') {
-    return cleanPath;
-  }
-  
-  return `/${lang}${cleanPath}`;
-}

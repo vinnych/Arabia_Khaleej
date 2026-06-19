@@ -33,3 +33,31 @@ export const translations: Translations = {
   homeSchemaDesc: { en: "The definitive independent reference for the Gulf Cooperation Council.", ar: "المرجع المستقل النهائي لدول مجلس التعاون الخليجي." },
   homeDatasetName: { en: "Arabia Khaleej GCC Regional Intelligence", ar: "عربية خليج الاستخبارات الإقليمية الخليجية" },
 };
+
+/**
+ * Normalizes and prefixes an internal route path with the active language code.
+ * Why: Ensures that client-side links point directly to the localized path,
+ * avoiding redirect hops and ensuring Googlebot discovers canonical localized URLs.
+ */
+export function getLocalizedHref(path: string, lang: Language): string {
+  // Why: Avoid prefixing external protocols (HTTP/HTTPS), mailto, or telephone links.
+  if (path.startsWith('http') || path.startsWith('mailto:') || path.startsWith('tel:')) {
+    return path;
+  }
+  
+  // Normalize leading slash to ensure we have a valid relative path.
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  
+  // Why: Root path / points to /${lang} (e.g. /en or /ar).
+  if (cleanPath === '/') {
+    return `/${lang}`;
+  }
+  
+  // Why: Prevent double-prefixing if the path already starts with /en/ or /ar/ or is exactly /en or /ar.
+  if (cleanPath.startsWith('/en/') || cleanPath === '/en' || cleanPath.startsWith('/ar/') || cleanPath === '/ar') {
+    return cleanPath;
+  }
+  
+  return `/${lang}${cleanPath}`;
+}
+
