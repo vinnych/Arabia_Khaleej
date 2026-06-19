@@ -20,18 +20,6 @@ export interface Author {
 export const EDITORIAL_AUTHORS: Author[] = [
   {
     // WHY: Managing Editor at index 0 as default author for E-E-A-T quality compliance
-    id: "zaid-al-harbi",
-    name: "Zaid Al-Harbi",
-    nameAr: "زيد الحربي",
-    role: "Managing Editor & Senior GCC Analyst",
-    roleAr: "رئيس التحرير وكبير محللي مجلس التعاون الخليجي",
-    bio: "Zaid Al-Harbi is the Managing Editor of Arabia Khaleej. With over a decade of experience analyzing Middle East sovereign markets, GCC economic transitions, and regional policies, Zaid oversees all editorial integrity and regional intelligence briefs.",
-    bioAr: "زيد الحربي هو مدير تحرير عربية خليج. مع أكثر من عقد من الخبرة في تحليل أسواق الشرق الأوسط السيادية، والتحولات الاقتصادية لدول مجلس التعاون الخليجي، والسياسات الإقليمية، يشرف زيد على النزاهة التحريرية وموجزات الاستخبارات الإقليمية.",
-    image: "/images/authors/zaid-alharbi.png",
-    social: ["https://linkedin.com/in/zaid-alharbi"],
-  },
-  {
-    // WHY: Policy Analyst at index 1 to prevent array out of bounds crash in fallback routines (e.g. EDITORIAL_AUTHORS[1])
     id: "layla-mansour",
     name: "Layla Mansour",
     nameAr: "ليلى منصور",
@@ -43,7 +31,7 @@ export const EDITORIAL_AUTHORS: Author[] = [
     social: ["https://linkedin.com/in/layla-mansour"],
   },
   {
-    // WHY: Institutional fallback persona representing the overall Arabia Khaleej Board
+    // WHY: Institutional fallback persona representing the overall Arabia Khaleej Board at index 1 for fallback routines
     id: "arabia-khaleej-editorial",
     name: "Arabia Khaleej Editorial Team",
     nameAr: "هيئة تحرير عربية خليج",

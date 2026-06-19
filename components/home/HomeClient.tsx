@@ -80,8 +80,8 @@ function FeaturedInsightCard({
               {/* WHY: Author avatar mapped by ID to local static images. Width/height = container size (32px). */}
               <Image
                 src={
-                  insight.author?.id === 'layla-mansour' ? '/images/authors/layla-mansour.png' :
-                  '/images/authors/zaid-alharbi.png'
+                  insight.author?.id === 'arabia-khaleej-editorial' ? '/images/editorial-team.png' :
+                  '/images/authors/layla-mansour.png'
                 }
                 alt={insight.author?.name || t('siteName')}
                 width={32}

@@ -100,7 +100,9 @@ export default async function PreviewArticlePage({
   const getRichAuthor = (article: InsightItem) => {
     // 1. Try to use the author metadata from the article object (if set by the worker)
     if (article.author?.id) {
-      const matched = getAuthorById(article.author.id);
+      // Map legacy Zaid to Layla
+      const authorId = (article.author.id === "zaid-alharbi" || article.author.id === "zaid-al-harbi") ? "layla-mansour" : article.author.id;
+      const matched = getAuthorById(authorId);
       if (matched) {
         return {
           name: lang === 'ar' ? matched.nameAr : matched.name,
@@ -115,7 +117,7 @@ export default async function PreviewArticlePage({
     // 2. Legacy fallback based on source strings
     const source = article.source || "";
     if (source.includes('Editorial') || source.includes('Editorial Leadership') || source.includes('Arabia Khaleej')) {
-      const defaultAuthor = EDITORIAL_AUTHORS[0]; // Zaid Al-Harbi
+      const defaultAuthor = EDITORIAL_AUTHORS[0]; // Layla Mansour
       return {
         name: lang === 'ar' ? defaultAuthor.nameAr : defaultAuthor.name,
         role: lang === 'ar' ? defaultAuthor.roleAr : defaultAuthor.role,
@@ -124,8 +126,8 @@ export default async function PreviewArticlePage({
       };
     }
 
-    // 3. Absolute fallback
-    const fallbackAuthor = EDITORIAL_AUTHORS[1]; // Layla Mansour
+    // 3. Absolute fallback (Editorial Board)
+    const fallbackAuthor = EDITORIAL_AUTHORS[1];
     return {
       name: lang === 'ar' ? fallbackAuthor.nameAr : fallbackAuthor.name,
       role: lang === 'ar' ? fallbackAuthor.roleAr : fallbackAuthor.role,

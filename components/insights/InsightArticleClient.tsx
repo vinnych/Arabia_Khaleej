@@ -159,8 +159,8 @@ export default function InsightArticleClient({
   // WHY: Query the rich author object for biography rendering to support high-end E-E-A-T presentation
   const fullAuthor = useMemo(() => {
     if (!article.author?.id) return null;
-    // Normalize variant database IDs (e.g. zaid-alharbi vs zaid-al-harbi)
-    const nid = article.author.id === "zaid-alharbi" ? "zaid-al-harbi" : article.author.id;
+    // Normalize and map legacy Zaid IDs to Layla Mansour
+    const nid = (article.author.id === "zaid-alharbi" || article.author.id === "zaid-al-harbi") ? "layla-mansour" : article.author.id;
     return getAuthorById(nid);
   }, [article.author?.id]);
 
@@ -324,7 +324,7 @@ export default function InsightArticleClient({
             <div className="flex items-center gap-4">
               <div className="relative w-12 h-12 rounded-full overflow-hidden border border-brand-gold/30 shrink-0">
                 <Image
-                  src={fullAuthor?.image || "/authors/zaid.png"}
+                  src={fullAuthor?.image || "/images/authors/layla-mansour.png"}
                   alt={article.author?.name || article.source}
                   fill
                   className="object-cover"
