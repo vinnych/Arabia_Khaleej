@@ -15,7 +15,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }, [language, isRTL]);
 
   return (
-    <div className={isRTL ? "font-serif-ar" : ""}>
+    <div className={`flex flex-col min-h-screen ${isRTL ? "font-serif-ar" : ""}`}>
       <AnimatePresence mode="wait">
         <motion.main
           key={language}
@@ -32,8 +32,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <MobileNav />
 
       {/* Why: We replaced hardcoded bg-brand-obsidian/20 with bg-card/25 in the footer to ensure that
-               the footer container blends dynamically with the primary card theme in both daylight and night mode. */}
-      <footer className="w-full py-12 border-t border-brand-gold/5 bg-card/25 backdrop-blur-sm">
+               the footer container blends dynamically with the primary card theme in both daylight and night mode.
+               Added relative z-10 and adjusted mobile padding to clear the fixed MobileNav and prevent links being covered. */}
+      <footer className="w-full pt-12 pb-32 md:py-12 border-t border-brand-gold/5 bg-card/25 backdrop-blur-sm relative z-10">
         <div className="w-full flex flex-col items-center gap-6">
           <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
             {/* Why: Prepend language to internal links so crawlers discover direct URLs without redirects */}
