@@ -78,6 +78,15 @@ const getBadgeClass = (status: string, styles: any) => {
   }
 };
 
+const getArticleTitle = (title: any, topic: string): string => {
+  if (!title) return topic;
+  if (typeof title === 'string') return title;
+  if (typeof title === 'object') {
+    return title.en || title.ar || topic;
+  }
+  return topic;
+};
+
 export default function Dashboard() {
   const [topic, setTopic] = useState('');
   const [articles, setArticles] = useState<Article[]>([]);
@@ -335,7 +344,7 @@ export default function Dashboard() {
   const deleteArticle = async (art: Article) => {
     // WHY: Replaced standard blocking browser confirm() with an elegant React portal modal confirmation.
     setConfirmAction({
-      message: `Are you sure you want to permanently delete the article "${art.title || art.topic}"?`,
+      message: `Are you sure you want to permanently delete the article "${getArticleTitle(art.title, art.topic)}"?`,
       onConfirm: async () => {
         const key = art.slug ? `${art.slug}-${art.lang}` : art.topic;
         setProcessingTopic(key);
@@ -693,7 +702,7 @@ export default function Dashboard() {
                  </div>
               )}
               <div className={styles.cardContent}>
-                <h3>{art.title || art.topic}</h3>
+                <h3>{getArticleTitle(art.title, art.topic)}</h3>
                 <p className={styles.meta}>
                   Words: {art.word_count || art.wordCount || 0}
                   {art.qualityScore !== undefined && ` • Score: ${art.qualityScore}/10`}
@@ -740,7 +749,7 @@ export default function Dashboard() {
           <div>
             {/* WHY: Replaced inline style block with high-fidelity CSS class structure */}
             <div className={styles.modalHeader}>
-              <h2 className={styles.modalHeaderTitle}>{selectedArticle.title || selectedArticle.topic}</h2>
+              <h2 className={styles.modalHeaderTitle}>{getArticleTitle(selectedArticle.title, selectedArticle.topic)}</h2>
               {/* WHY: Replaced raw, thick &times; string with a beautiful Lucide X icon inside a padded rounded button */}
               <button 
                 onClick={() => modalRef.current?.close()} 
