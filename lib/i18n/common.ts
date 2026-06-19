@@ -11,7 +11,7 @@ export const common: Translations = {
   terms: { en: "Terms", ar: "الشروط" },
   disclaimer: { en: "Disclaimer", ar: "إخلاء المسؤولية" },
   contactTitle: { en: "Contact Us", ar: "اتصل بنا" },
-  contactDesc: { en: "For formal editorial, compliance, or institutional enquiries, please use our professional contact channel. We do not accept advertising or sponsored content.", ar: "للاستفسارات التحريرية أو الامتثال أو المؤسسية الرسمية، يرجى استخدام قناة الاتصال المهنية لدينا. لا نقبل الإعلانات أو المحتوى المدعوم." },
+  contactDesc: { en: "For formal editorial, compliance, or institutional enquiries, please use our professional contact channel. We do accept advertising and sponsorships.", ar: "للاستفسارات التحريرية أو الامتثال أو المؤسسية الرسمية، يرجى استخدام قناة الاتصال المهنية لدينا. نحن نقبل الإعلانات والرعاية." },
   legal: { en: "Legal", ar: "قانوني" },
   email: { en: "Email", ar: "البريد الإلكتروني" },
   status: { en: "Status", ar: "الحالة" },
