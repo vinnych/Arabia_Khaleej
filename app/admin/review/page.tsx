@@ -436,13 +436,20 @@ export default function Dashboard() {
         });
       } else {
         // Draft queue update
+        const isBilingual = selectedArticle.content && typeof selectedArticle.content === 'object';
         res = await fetch(`/api/article`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${secret}`
           },
-          body: JSON.stringify({ topic: selectedArticle.topic, action: 'edit', content: editContent }),
+          body: JSON.stringify({ 
+            topic: selectedArticle.topic, 
+            action: 'edit', 
+            content: editContent,
+            contentEn: editContent,
+            contentAr: isBilingual ? editContentAr : undefined
+          }),
         });
       }
 
@@ -493,7 +500,7 @@ export default function Dashboard() {
     } else {
       // Draft queue article
       setEditContent(typeof art.content === 'string' ? art.content : (art.content?.en || ''));
-      setEditContentAr('');
+      setEditContentAr(typeof art.content === 'string' ? '' : (art.content?.ar || ''));
       modalRef.current?.showModal();
     }
   };
@@ -743,7 +750,7 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {selectedArticle.slug && (
+            {(selectedArticle.slug || (selectedArticle.content && typeof selectedArticle.content === 'object')) && (
               <div className="flex gap-2 my-4">
                 {/* WHY: Added Lucide Globe icon to language switch buttons and updated colors to use Arabia Khaleej gold brand palette */}
                 <button 

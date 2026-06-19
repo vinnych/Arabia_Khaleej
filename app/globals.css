@@ -81,8 +81,8 @@
     --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.8);
 
     /* Dynamic background gradients for dark mode */
-    --bg-gradient-1: hsla(250, 60%, 15%, 0.15);
-    --bg-gradient-2: hsla(45, 70%, 10%, 0.1);
+    --bg-gradient-1: hsla(250, 60%, 20%, 0.25);
+    --bg-gradient-2: hsla(45, 70%, 15%, 0.18);
   }
 
   * {
@@ -180,6 +180,28 @@
 
   .animate-fade-up {
     animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes marquee-rtl {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(50%); }
+  }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+
+  [dir="rtl"] .animate-marquee {
+    animation: marquee-rtl 30s linear infinite;
+  }
+
+  .animate-marquee:hover {
+    animation-play-state: paused;
   }
 
   /* ── Article body typography ─────────────────────────────────────────── */

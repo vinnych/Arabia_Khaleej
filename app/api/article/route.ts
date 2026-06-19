@@ -205,8 +205,23 @@ export async function PUT(req: Request) {
         // Save the article details and list index references via Repository
         const repository = getInsightRepository();
         await repository.saveArticle(liveArticle);
-      } else if (action === 'edit' && content) {
-        draft.content = content;
+      } else if (action === 'edit') {
+        const { contentEn, contentAr, titleEn, titleAr } = body;
+        if (contentEn || contentAr) {
+          draft.content = {
+            en: contentEn || content || '',
+            ar: contentAr || ''
+          };
+        } else if (content) {
+          draft.content = content;
+        }
+        
+        if (titleEn || titleAr) {
+          draft.title = {
+            en: titleEn || topic,
+            ar: titleAr || ''
+          };
+        }
       }
       await draftDb.setDraft(topic, draft);
       console.log(`[admin] Updated manual draft for "${topic}" | Action: "${action}"`);

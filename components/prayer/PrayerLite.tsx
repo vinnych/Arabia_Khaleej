@@ -6,19 +6,27 @@ import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
 import { useLanguage } from '@/lib/i18n/i18n';
 import { getGeolocation } from '@/lib/services/api';
 
-export default function PrayerLite() {
+interface PrayerData {
+  next: { name: string; time: string };
+  locationName: string;
+}
+
+export default function PrayerLite({ initialData }: { initialData?: PrayerData }) {
   const { t, isRTL } = useLanguage();
   const [state, setState] = useState<{
     next: { name: string; time: string } | null;
     locationName: string;
     mounted: boolean;
   }>({
-    next: null,
-    locationName: t('dubai'),
-    mounted: false,
+    next: initialData?.next || null,
+    locationName: initialData?.locationName || t('dubai'),
+    mounted: !!initialData,
   });
 
   useEffect(() => {
+    // If the server already pre-calculated coordinates and prayer times, we bypass client-side checks
+    if (initialData) return;
+
     let isMounted = true;
 
     function calculate(lat: number, lng: number, name: string = t('yourLocation')) {
@@ -74,7 +82,7 @@ export default function PrayerLite() {
     fetchIPLocation();
 
     return () => { isMounted = false; };
-  }, [t]);
+  }, [t, initialData]);
 
   if (!state.mounted || !state.next) return (
     <div className="h-9 w-40 bg-brand-gold/5 animate-pulse rounded-full border border-brand-gold/10" />

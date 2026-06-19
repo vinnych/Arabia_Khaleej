@@ -147,15 +147,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Draft article not found' }, { status: 404 });
       }
 
-      const topicName = article.topic || article.title?.en || slug;
+      const titleEn = typeof article.title === 'string' ? article.title : (article.title?.en || '');
+      const topicName = article.topic || titleEn || slug;
 
       // Translate manual draft modifications on publication if the admin adjusted them
       if (title !== undefined) {
         if (typeof article.title === 'string') {
           article.title = { en: title, ar: await translateMarkdown(title, 'en', 'ar') };
         } else {
-          article.title.en = title;
-          article.title.ar = await translateMarkdown(title, 'en', 'ar');
+          article.title = {
+            en: title,
+            ar: await translateMarkdown(title, 'en', 'ar')
+          };
         }
       }
       
@@ -163,8 +166,10 @@ export async function POST(request: NextRequest) {
         if (typeof article.content === 'string') {
           article.content = { en: content, ar: await translateMarkdown(content, 'en', 'ar') };
         } else {
-          article.content.en = content;
-          article.content.ar = await translateMarkdown(content, 'en', 'ar');
+          article.content = {
+            en: content,
+            ar: await translateMarkdown(content, 'en', 'ar')
+          };
         }
       }
 
@@ -249,7 +254,8 @@ export async function POST(request: NextRequest) {
       }
 
       if (article) {
-        const topicName = article.topic || article.title?.en || slug;
+        const titleEn = typeof article.title === 'string' ? article.title : (article.title?.en || '');
+        const topicName = article.topic || titleEn || slug;
         await draftDb.delDraft(topicName);
       }
 

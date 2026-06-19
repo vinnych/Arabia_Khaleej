@@ -162,9 +162,18 @@ const GCC_COUNTRIES = [
 
 interface HomeClientProps {
   initialInsights?: InsightItem[];
+  initialRates?: Record<string, number>;
+  initialPrayerData?: {
+    next: { name: string; time: string };
+    locationName: string;
+  };
 }
 
-export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
+export default function HomeClient({ 
+  initialInsights = [],
+  initialRates,
+  initialPrayerData
+}: HomeClientProps) {
   const { t, isRTL, language } = useLanguage();
 
   const formatDateSafe = (dateString: string | undefined) => {
@@ -175,10 +184,83 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
   };
 
   return (
-    <div className={`flex flex-col items-center min-h-[100dvh] relative ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
+    <div className={`flex flex-col items-center min-h-[100dvh] relative w-full ${isRTL ? 'font-serif-ar' : 'font-sans'}`}>
       
       {/* ── BACKGROUND ORCHESTRATION ── */}
       {/* WHY: Completely stripped the absolute floating gradient blurs to maintain a solid, clean, dark-obsidian background. */}
+
+      {/* ── LIVE FINANCIAL TICKER ── */}
+      {initialRates && (
+        <div className="w-full overflow-hidden border-b border-white/5 bg-brand-obsidian/30 backdrop-blur-md py-2.5 z-20 relative">
+          <div className="flex animate-marquee">
+            {/* Render twice for seamless infinite scrolling loop */}
+            {[0, 1].map((index) => (
+              <div key={index} className="flex items-center gap-10 px-5 whitespace-nowrap">
+                {/* AED */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇦🇪</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'درهم إماراتي' : 'AED'}</span>
+                  <span className="font-mono text-brand-gold">{(initialRates.AED || 3.6725).toFixed(4)}</span>
+                  <span className="text-[9px] text-green-500 font-bold bg-green-500/10 px-1 py-0.5 rounded">PEGGED</span>
+                </div>
+                {/* SAR */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇸🇦</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'ريال سعودي' : 'SAR'}</span>
+                  <span className="font-mono text-brand-gold">{(initialRates.SAR || 3.7500).toFixed(4)}</span>
+                  <span className="text-[9px] text-green-500 font-bold bg-green-500/10 px-1 py-0.5 rounded">PEGGED</span>
+                </div>
+                {/* QAR */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇶🇦</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'ريال قطري' : 'QAR'}</span>
+                  <span className="font-mono text-brand-gold">{(initialRates.QAR || 3.6400).toFixed(4)}</span>
+                  <span className="text-[9px] text-green-500 font-bold bg-green-500/10 px-1 py-0.5 rounded">PEGGED</span>
+                </div>
+                {/* KWD */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇰🇼</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'دينار كويتي' : 'KWD'}</span>
+                  <span className="font-mono text-brand-gold">{(initialRates.KWD || 0.3070).toFixed(4)}</span>
+                  <span className="text-[9px] text-green-500 font-bold bg-green-500/10 px-1 py-0.5 rounded">PEGGED</span>
+                </div>
+                {/* OMR */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇴🇲</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'ريال عماني' : 'OMR'}</span>
+                  <span className="font-mono text-brand-gold">{(initialRates.OMR || 0.3840).toFixed(4)}</span>
+                  <span className="text-[9px] text-green-500 font-bold bg-green-500/10 px-1 py-0.5 rounded">PEGGED</span>
+                </div>
+                {/* BHD */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇧🇭</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'دينار بحريني' : 'BHD'}</span>
+                  <span className="font-mono text-brand-gold">{(initialRates.BHD || 0.3760).toFixed(4)}</span>
+                  <span className="text-[9px] text-green-500 font-bold bg-green-500/10 px-1 py-0.5 rounded">PEGGED</span>
+                </div>
+                {/* EUR */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇪🇺</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'يورو' : 'EUR'}</span>
+                  <span className="font-mono text-foreground/80">{(initialRates.EUR || 0.9215).toFixed(4)}</span>
+                </div>
+                {/* GBP */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇬🇧</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'جنيه إسترليني' : 'GBP'}</span>
+                  <span className="font-mono text-foreground/80">{(initialRates.GBP || 0.7912).toFixed(4)}</span>
+                </div>
+                {/* JPY */}
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-sm">🇯🇵</span>
+                  <span className="font-bold text-foreground">{isRTL ? 'ين ياباني' : 'JPY'}</span>
+                  <span className="font-mono text-foreground/80">{(initialRates.JPY || 155.45).toFixed(2)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── HERO ── */}
       {/* Why: We reduced bottom padding from pb-24 to pb-12 to tighten the layout and prevent a giant gap
@@ -224,25 +306,18 @@ export default function HomeClient({ initialInsights = [] }: HomeClientProps) {
         <div className="animate-fade-up flex flex-col sm:flex-row gap-4 mb-16" style={{ animationDelay: "200ms" }}>
           <Link
             href={getLocalizedHref("/insights", language)}
-            className="bg-brand-gold hover:bg-brand-gold/90 text-brand-obsidian px-8 py-3 rounded-lg font-bold text-sm flex items-center gap-2.5 transition-all duration-200 active:scale-[0.98]"
+            className="bg-brand-gold hover:bg-brand-gold/90 text-brand-obsidian px-10 py-3.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2.5 transition-all duration-200 active:scale-[0.98]"
           >
             <Newspaper size={16} />
             {t('pressTerminal')}
-            <ArrowRight size={14} />
-          </Link>
-          <Link
-            href={getLocalizedHref("/prayer", language)}
-            className="glass px-8 py-3 rounded-lg font-bold text-sm text-foreground flex items-center gap-2.5 hover:border-white/15 transition-all duration-200 active:scale-[0.98]"
-          >
-            <Clock size={16} className="text-brand-gold" />
-            {t('prayerTimes')}
+            <ArrowRight size={14} className={isRTL ? "rotate-180" : ""} />
           </Link>
         </div>
 
         {/* Prayer Strip Refinement */}
         {/* WHY: Shifted rounding standard from large round 2rem to minimal rounded-xl to keep layout structures crisp. */}
         <div className="animate-fade-up w-full max-w-3xl glass p-1 rounded-xl" style={{ animationDelay: "300ms" }}>
-          <PrayerLite />
+          <PrayerLite initialData={initialPrayerData} />
         </div>
       </section>
 

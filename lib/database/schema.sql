@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS drafts (
     topic TEXT PRIMARY KEY,
     status TEXT NOT NULL,
     word_count INTEGER,
+    title TEXT,
     content TEXT,
     image_url TEXT,
     error TEXT,

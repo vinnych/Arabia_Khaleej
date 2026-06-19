@@ -9,7 +9,7 @@ Arabia Khaleej is a state-of-the-art digital ecosystem providing high-fidelity e
 - **AI Editorial Pipeline**: Expert-curated long-form regional analysis (1500+ words) powered by an external Python agent, with mandatory human review before publication.
 - **Relational Database Storage**: Durable relational storage via **Cloudflare D1** (SQLite at the Edge) with data resolved dynamically from the `@opennextjs/cloudflare` runtime context.
 - **Real-time Utility**: Precision prayer times via Adhan API and live GCC market indicators.
-- **Bilingual**: Full English ↔ Arabic support across editorial content, UI, and metadata.
+- **Bilingual**: Full English ↔ Arabic support across editorial content (including drafts), UI, and metadata.
 - **Glassmorphic UI**: A premium, responsive interface built with Next.js 15.
 
 ---
@@ -53,12 +53,13 @@ Arabia Khaleej delegates heavy article generation to an external Python agent ho
                       ▼ (async callback)
              POST /api/webhook
              • Validates WEBHOOK_SECRET
-             • Saves draft status: pending_review
+             • Saves bilingual payload, falls back to Edge translate if needed
                       │
                       ▼
            /admin/review  (polls every 2m when active; manual Refresh)
-           • Review / Edit markdown content bilingually
-           • Publish → translates EN→AR, saves live article to D1 (or Redis)
+           • Review / Edit draft content bilingually (English & Arabic)
+           • Publish → directly saves live article from pre-translated content
+                       (falls back to translateMarkdown for legacy drafts)
            • Delete  → cascades: deletes draft + live article + references
 ```
 
@@ -76,6 +77,17 @@ Arabia Khaleej delegates heavy article generation to an external Python agent ho
 | `/api/article` | DELETE | `ADMIN_SECRET` Bearer header | Cascade-delete draft + live + lists |
 | `/api/admin/workflows` | GET | `ADMIN_SECRET` Bearer header | List published articles or fetch single bilingual body |
 | `/api/admin/workflows` | POST | `ADMIN_SECRET` Bearer header | Approve, update live edits, or delete live articles |
+
+---
+
+## 📂 Codebase Directory Organization
+
+To decouple responsibilities and maintain strict SOLID design principles, the core business code is organized into a clean layered architecture:
+
+* **Types ([lib/types/](file:///c:/Users/asish/Arabia%20Khaleej/lib/types))**: Centralizes all TypeScript schemas (e.g., `insight.ts`, `draft.ts`), removing data models from database driver files.
+* **Repositories ([lib/database/repositories/](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/repositories))**: Encapsulates database storage drivers (SQLite D1 and Redis REST) behind repository interfaces (`IInsightRepository`, `IDraftRepository`), simplifying local testing.
+* **Services ([lib/services/](file:///c:/Users/asish/Arabia%20Khaleej/lib/services))**: Houses validation rules (`StandardInsightValidator`), filtering/sorting processors (`DeduplicateProcessor`), and coordinate services (`InsightService`).
+* **Facades ([lib/database/insights.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/insights.ts), [lib/database/draftsDb.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/draftsDb.ts))**: Act as entry points that re-export symbols, preventing compilations breaking on legacy page imports.
 
 ---
 
@@ -149,6 +161,15 @@ npx wrangler d1 execute arabiakhaleej-db --local --file=lib/database/schema.sql
 
 # Production Cloudflare D1
 npx wrangler d1 execute arabiakhaleej-db --remote --file=lib/database/schema.sql
+```
+
+*Note: If upgrading an existing drafts database table to support bilingual fields, run this migration command to add the `title` column:*
+```bash
+# Local
+npx wrangler d1 execute arabiakhaleej-db --local --command "ALTER TABLE drafts ADD COLUMN title TEXT;"
+
+# Remote Production
+npx wrangler d1 execute arabiakhaleej-db --remote --command "ALTER TABLE drafts ADD COLUMN title TEXT;"
 ```
 
 ### 4. Complete Database & Cache Reset

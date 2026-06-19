@@ -6,12 +6,12 @@ import {
   SortByDateDescendingProcessor,
   CategoryFilterProcessor,
   InsightService,
-  IInsightRepository,
-  InsightItem,
   getUnifiedInsights,
   getArticleBySlug,
   getAllInsightSlugs,
-} from "../insights";
+} from "../../services/insightService";
+import { IInsightRepository } from "../repositories/insightRepository";
+import { InsightItem } from "../../types/insight";
 import { getWithCompression } from "../redis";
 
 // Why we mock the Redis module: Prevents real network hits to Upstash Redis REST endpoints

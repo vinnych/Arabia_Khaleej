@@ -10,8 +10,13 @@ Next.js 15 (App Router) fully optimized for **Cloudflare Workers (nodejs_compat)
 
 - **Runtime**: Runs natively on the Node.js-compatible Workers runtime (`nodejs_compat`). No need for `export const runtime = 'edge'`.
 - **Database**: Cloudflare D1 (SQLite at the Edge) is the primary database. The database bindings (`DB`) are resolved dynamically at runtime from the `@opennextjs/cloudflare` context (e.g., in `D1InsightRepository` and `draftDb`). Upstash Redis is retained purely as a caching and rate-limiting layer.
+- **Layered Code Organization**:
+  - `lib/types/`: Shared TypeScript data schemas (e.g., [insight.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/types/insight.ts), [draft.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/types/draft.ts)).
+  - `lib/database/repositories/`: Storage adapters matching repository interface contracts (e.g., [insightRepository.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/repositories/insightRepository.ts), [draftRepository.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/repositories/draftRepository.ts)).
+  - `lib/services/`: Validation, pipeline processors, and business workflows (e.g., [insightService.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/services/insightService.ts)).
+  - Entry-point facades (e.g., [insights.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/insights.ts), [draftsDb.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/draftsDb.ts)) maintain backward compatibility.
 - **AI / Article Generation**: Fully delegated to an external Python agent on Render. Triggered asynchronously using Next.js 15 `after()` background execution to prevent Cloudflare 25s execution timeouts.
-- **Bilingual**: All editorial content is stored bilingually `{ en: string, ar: string }` in D1 and normalized at read-time.
+- **Bilingual**: All editorial content (including drafts) can be stored bilingually `{ en: string, ar: string }` in D1 and normalized at read-time.
 - **i18n Routing**: Native Next.js App Router subpath routing (e.g., `/en/insights`). All internal `<Link>` components and sitemap entries must use the locale prefix.
 
 ---
@@ -80,13 +85,13 @@ We maintain a Jest unit test suite covering core edge engines, utilities, and re
                                     ▼
                            POST /api/webhook
                            • Validates WEBHOOK_SECRET
-                           • Saves content, tags, description, status: pending_review
+                           • Saves bilingual payload, falls back to Edge translate if needed
                                     │
                                     ▼
                        /admin/review (polls every 2m when active; manual Refresh)
-                       • Review / Edit markdown
-                       • Publish → translates EN→AR via resilient translateMarkdown
-                                   saves live bilingual article to D1
+                       • Review / Edit markdown bilingually (English & Arabic)
+                       • Publish → directly saves live article from pre-translated content
+                                   (falls back to translateMarkdown for legacy drafts)
                        • Delete  → cascades draft + live details + listings
 ```
 

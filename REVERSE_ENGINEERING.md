@@ -27,13 +27,13 @@ graph TD
     CFWorker -- "1. Hourly Ping + Cron GET" --> NextApp
     NextApp -- "2. Parse RSS Feeds" --> GoogleNews
     NextApp -- "3. Trigger Async Run (after)" --> PythonAgent
-    PythonAgent -- "4. Webhook Response (Zod)" --> NextApp
-    NextApp -- "5. Store Draft" --> D1DB
+    PythonAgent -- "4. Bilingual Webhook Callback" --> NextApp
+    NextApp -- "5. Store Bilingual Draft" --> D1DB
     
-    Admin[Admin Panel /admin/review] -- "6. Trigger Publish (PUT)" --> NextApp
-    NextApp -- "7. Translate EN -> AR" --> GoogleTrans
-    NextApp -- "8. Store Live Article" --> D1DB
-    NextApp -- "9. Cache feeds & articles" --> Upstash
+    Admin[Admin Panel /admin/review] -- "6. Review / Edit / Publish" --> NextApp
+    NextApp -.->|Fallback translation| GoogleTrans
+    NextApp -- "7. Store Live Bilingual Article" --> D1DB
+    NextApp -- "8. Cache feeds & articles" --> Upstash
 ```
 
 ### Why this architecture was chosen:
@@ -84,10 +84,11 @@ CREATE TABLE drafts (
     topic TEXT PRIMARY KEY,
     status TEXT NOT NULL,
     word_count INTEGER,
-    content TEXT,
+    title TEXT, -- JSON object {en, ar} or string
+    content TEXT, -- JSON object {en, ar} or string
     image_url TEXT,
     error TEXT,
-    description TEXT,
+    description TEXT, -- JSON object {en, ar} or string
     tags TEXT, -- JSON array
     timestamp INTEGER NOT NULL,
     quality_score INTEGER NOT NULL DEFAULT 6
@@ -120,18 +121,30 @@ Upstash Redis acts purely as a transient cache layer and rate limiter:
 
 ### Flow B: Webhook Callback Processing
 
-1. **Callback Payload**: Render agent completes compilation and sends POST webhook with results.
-2. **Zod Validation**: Validates payload schema.
-3. **Atomic Update**: Performs an idempotent update check (in SQL or Redis EVAL Lua) to guarantee updates only apply if the draft's current status is `'generating'`, shielding user-made edits from late retries.
+1. **Callback Payload**: Render agent completes compilation and sends POST webhook with bilingual results (`titleAr`, `articleAr`, `descriptionAr`).
+2. **Zod Validation**: Validates payload schema, supporting both flat and bilingual structures.
+3. **Bilingual Parsing & Fallbacks**: Resolves translations directly from the agent. If translations are missing, it falls back to Edge-native translation (`translateMarkdown`) to ensure continuity.
+4. **Atomic Update**: Performs an idempotent update check to guarantee updates only apply if the draft's current status is `'generating'`, shielding user-made edits from late retries.
 
 ---
 
 ### Flow C: Admin Editing & Publication
 
-1. **Manual Edit**: Admin edits article content bilingually from the `/admin/review` panel (supporting Write, Preview, and Split Screen render views).
-2. **Bilingual Translation**: Calls `translateMarkdown` utilizing space-insensitive regex to protect code block tokens from being corrupted by translation engines.
-3. **Save live**: Commits full bilingual record to the SQL database (or Redis list indexes under a mutex lock).
-4. **Dynamic Polling**: Dashboard checks database status at a 2-minute interval with tab-visibility and 5-minute idle tracking, or executes immediate fetches via the header **Refresh** button.
+1. **Manual Edit**: Admin reviews and edits both English and Arabic content of drafts bilingually from the `/admin/review` panel (supporting Write, Preview, and Split Screen render views).
+2. **Save Draft**: Saves bilingual manual edits back to the drafts table.
+3. **Publish (Zero-Latency)**: Publishes the draft by moving pre-translated content directly to live articles, completely bypassing slow publish-time translation APIs and avoiding 504 Edge Gateway timeouts.
+4: **Dynamic Polling**: Dashboard checks database status at a 2-minute interval with tab-visibility and 5-minute idle tracking, or executes immediate fetches via the header **Refresh** button.
+
+---
+
+## 📂 4. Layered Directory Hierarchy
+
+To keep execution scopes clean, the core project enforces distinct physical folder boundaries:
+
+* **Domain Types ([lib/types/](file:///c:/Users/asish/Arabia%20Khaleej/lib/types))**: Houses domain definitions (`insight.ts`, `draft.ts`) so edge routes don't import database libraries.
+* **Storage Repositories ([lib/database/repositories/](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/repositories))**: Abstracted SQL/Redis adapters (`insightRepository.ts`, `draftRepository.ts`) conforming to repository interfaces.
+* **Service Orchestration ([lib/services/](file:///c:/Users/asish/Arabia%20Khaleej/lib/services))**: Orchestrates validation filters, date sorting, category querying, and page-level facades (`insightService.ts`).
+* **Facades ([lib/database/insights.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/insights.ts), [lib/database/draftsDb.ts](file:///c:/Users/asish/Arabia%20Khaleej/lib/database/draftsDb.ts))**: Act as entry points to retain backward compatibility with old Next.js App Router route paths.
 
 ---
 

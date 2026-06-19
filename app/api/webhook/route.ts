@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { draftDb } from '@/lib/database/draftsDb';
 import { z } from 'zod';
 import { sanitizeAgentMarkdown } from '@/lib/services/agentHelper';
+import { translateMarkdown } from '@/lib/i18n/translate';
 
 // NOTE: runtime declaration removed - on Cloudflare Workers with nodejs_compat all routes
 // run in the Node.js-compatible Workers runtime, making 'edge' declaration both unnecessary
@@ -19,6 +20,17 @@ const WebhookPayloadSchema = z.object({
   status: z.enum(['success', 'error', 'discarded']),
   error: z.string().optional().default(''),
   article: z.string().optional().default(''),
+  
+  // Bilingual optional fields from the Python agent
+  titleAr: z.string().optional(),
+  title_ar: z.string().optional(),
+  articleAr: z.string().optional(),
+  article_ar: z.string().optional(),
+  contentAr: z.string().optional(),
+  content_ar: z.string().optional(),
+  descriptionAr: z.string().optional(),
+  description_ar: z.string().optional(),
+
   word_count: z.preprocess((val) => parseInt(String(val), 10) || 0, z.number().min(0)),
   image_url: z.string().optional().default(''),
   // Why description is included: The Python agent generates a clean meta description from the
@@ -73,16 +85,54 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Discarded callback acknowledged. Draft will auto-expire.' });
     }
 
+    // Resolve pre-translated content or fallback to edge-based translation
+    let titleAr = payload.titleAr || payload.title_ar;
+    let articleAr = payload.articleAr || payload.article_ar || payload.contentAr || payload.content_ar;
+    let descriptionAr = payload.descriptionAr || payload.description_ar;
+
+    if (payload.status === 'success') {
+      if (!titleAr) {
+        console.log(`[webhook] No pre-translated title provided. Starting Edge-native translation for: "${payload.topic}"`);
+        titleAr = await translateMarkdown(payload.topic, 'en', 'ar').catch(err => {
+          console.error('[webhook] Fallback title translation failed:', err);
+          return '';
+        });
+      }
+      if (!articleAr && payload.article) {
+        console.log(`[webhook] No pre-translated content provided. Starting Edge-native translation.`);
+        articleAr = await translateMarkdown(payload.article, 'en', 'ar').catch(err => {
+          console.error('[webhook] Fallback content translation failed:', err);
+          return '';
+        });
+      }
+      if (!descriptionAr && payload.description) {
+        console.log(`[webhook] No pre-translated description provided. Starting Edge-native translation.`);
+        descriptionAr = await translateMarkdown(payload.description, 'en', 'ar').catch(err => {
+          console.error('[webhook] Fallback description translation failed:', err);
+          return '';
+        });
+      }
+    }
+
+    const titleVal = titleAr ? { en: payload.topic, ar: titleAr } : payload.topic;
+    const contentVal = articleAr 
+      ? { en: sanitizeAgentMarkdown(payload.article), ar: sanitizeAgentMarkdown(articleAr) }
+      : sanitizeAgentMarkdown(payload.article);
+    const descriptionVal = descriptionAr
+      ? { en: payload.description, ar: descriptionAr }
+      : payload.description;
+
     const data = {
       topic: payload.topic,
       status: payload.status === 'success' ? 'pending_review' : 'error',
       error: payload.error,
-      content: sanitizeAgentMarkdown(payload.article),
+      title: titleVal,
+      content: contentVal,
       word_count: payload.word_count,
       image_url: payload.image_url,
       // Why description is saved here: Required for SEO meta tags at publish time.
       // The Python agent extracts a clean 1-2 sentence description from the article body.
-      description: payload.description,
+      description: descriptionVal,
       tags: payload.tags,
       qualityScore: payload.quality_score,
       timestamp: Date.now()
